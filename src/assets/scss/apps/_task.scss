@@ -1,0 +1,79 @@
+.gu-mirror {
+  position: fixed !important;
+  margin: 0 !important;
+  z-index: 9999 !important;
+  opacity: 0.8;
+  filter: alpha(opacity=80);
+}
+.gu-hide {
+  display: none !important;
+}
+.gu-unselectable {
+  //Instead of the line below you could use @include user-select($select)
+  user-select: none !important;
+}
+.gu-transit {
+  opacity: 0.2;
+  filter: alpha(opacity=20);
+}
+.taskbar {
+  .checked {
+    border: 3px solid #dda500 !important;
+  }
+
+  .box {
+    padding-bottom: 7px;
+    .task-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: green;
+    }
+    .task-desc {
+      font-size: 1.1em;
+      color: #555;
+    }
+    .task-deadline {
+      margin-top: 5px;
+      margin-right: 5px;
+      font-size: 0.8em;
+      color: #555;
+    }
+  }
+  .done div.box {
+    pointer-events: none;
+    .tasks {
+      color: #fff !important;
+    }
+  }
+  .avatar-image {
+    display: inline-block;
+    position: relative;
+  }
+  .task-header {
+    text-align: center;
+    font-size: 25px;
+    padding: 20px;
+    color: #6b6a6a;
+  }
+  .card-footer {
+    background: #fff !important;
+    border-radius: 0px 0px 10px 10px;
+    .progress {
+      height: 5px;
+    }
+  }
+}
+
+.pad {
+  padding-left: 0;
+  padding-right: 0;
+  display: flex;
+}
+
+.move {
+  text-align: center;
+  background: #eee;
+  .btn {
+    margin-bottom: 20px;
+  }
+}

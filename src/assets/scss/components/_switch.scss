@@ -1,0 +1,40 @@
+﻿/*
+ *  Document   : _switch.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file switch button style classes
+ */
+.switch {
+  label {
+    font-weight: normal;
+    font-size: 13px;
+
+    .lever {
+      margin: 0 14px;
+    }
+
+    input[type="checkbox"] {
+      &:checked {
+        @each $key, $val in $colors {
+          &:not(:disabled) {
+            ~ .lever.switch-col-#{$key} {
+              &:active {
+                &:after {
+                  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.4),
+                    0 0 0 15px rgba($val, 0.1);
+                }
+              }
+            }
+          }
+
+          + .lever.switch-col-#{$key} {
+            background-color: rgba($val, 0.5);
+
+            &:after {
+              background-color: $val;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+﻿/*
+ *  Document   : _todo.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for todo style classes
+ */
+.to-do-list {
+  padding-left: 0;
+  margin-top: -10px;
+  font-size: 12px;
+  min-height: 311px;
+  float: left;
+  width: 100%;
+  li {
+    padding: 15px 0px 5px 0px;
+    border-radius: 3px;
+    position: relative;
+    cursor: move;
+    list-style: none;
+    font-size: 14px;
+    background: #fff;
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.2);
+    p {
+      margin: 0;
+      padding-left: 50px;
+    }
+    .todo-check input[type="checkbox"] {
+      visibility: hidden;
+    }
+  }
+}
+.todo-actionlist {
+  position: absolute;
+  right: 0px;
+  top: 11px;
+  a {
+    height: 24px;
+    width: 24px;
+    display: inline-block;
+    float: left;
+    i {
+      height: 24px;
+      width: 24px;
+      display: inline-block;
+      text-align: center;
+      line-height: 24px;
+      font-size: 16px;
+      color: #ccc;
+    }
+    &:hover i {
+      color: #666;
+    }
+  }
+}
+.line-through {
+  text-decoration: line-through;
+}
+.todo-action-bar {
+  margin-top: 20px;
+}
+.todo-check {
+  width: 20px;
+  position: relative;
+  margin-right: 10px;
+  margin-left: 10px;
+  input[type="checkbox"] {
+    visibility: hidden;
+  }
+  label {
+    cursor: pointer;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 0;
+    left: 0;
+    border-radius: 2px;
+  }
+}
+.todo-done i {
+  font-size: 14px;
+}
+.todo-remove i {
+  font-size: 10px;
+}
+.inbox-small-cells .todo-check input[type="checkbox"] {
+  visibility: hidden;
+}

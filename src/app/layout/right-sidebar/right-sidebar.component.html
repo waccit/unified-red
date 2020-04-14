@@ -1,0 +1,181 @@
+<aside id="rightsidebar" class="right-sidebar" [ngClass]="isOpenSidebar ? 'open' : 'close'">
+    <div class="rightSidebarClose" (click)="toggleRightSidebar()"><i class="nav-hdr-btn ti-close"></i></div>
+    <ul class="nav nav-tabs tab-nav-right" role="tablist">
+        <li role="presentation">
+            <a href="#skins" data-toggle="tab" class="active">SKINS</a>
+        </li>
+        <li role="presentation">
+            <a href="#settings" data-toggle="tab">SETTINGS</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane in active in active stretchLeft" id="skins">
+            <div class="demo-skin"
+                [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
+                [perfectScrollbar]>
+                <div class="rightSetting">
+                    <p>GENERAL SETTINGS</p>
+                    <ul class="setting-list list-unstyled m-t-20">
+                        <li>
+                            <div class="form-check">
+                                <div class="form-check m-l-10">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" checked> Save
+                                        History
+                                        <span class="form-check-sign">
+                                            <span class="check"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <div class="form-check m-l-10">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" checked> Show
+                                        Status
+                                        <span class="form-check-sign">
+                                            <span class="check"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <div class="form-check m-l-10">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" checked> Auto
+                                        Submit Issue
+                                        <span class="form-check-sign">
+                                            <span class="check"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="form-check">
+                                <div class="form-check m-l-10">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="checkbox" value="" checked> Show
+                                        Status To All
+                                        <span class="form-check-sign">
+                                            <span class="check"></span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="rightSetting">
+                    <p>SIDEBAR MENU COLORS</p>
+                    <mat-button-toggle-group class="mt-2" value="light">
+                        <mat-button-toggle (click)="lightSidebarBtnClick()" value="light">Light</mat-button-toggle>
+                        <mat-button-toggle (click)="darkSidebarBtnClick()" value="dark">Dark</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+                <div class="rightSetting">
+                    <p>THEME COLORS</p>
+                    <mat-button-toggle-group class="mt-2" value="light">
+                        <mat-button-toggle (click)="lightThemeBtnClick()" value="light">Light</mat-button-toggle>
+                        <mat-button-toggle (click)="darkThemeBtnClick()" value="dark">Dark</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+                <div class="rightSetting">
+                    <p>SKINS</p>
+                    <ul class="demo-choose-skin choose-theme list-unstyled">
+                        <li data-theme="black" [ngClass]="{'actived': selectedBgColor === 'black'}"
+                            (click)="selectTheme('black')">
+                            <div class="black-theme"></div>
+                        </li>
+                        <li data-theme="white" [ngClass]="{'actived': selectedBgColor === 'white'}"
+                            (click)="selectTheme('white')">
+                            <div class="white-theme white-theme-border"></div>
+                        </li>
+                        <li data-theme="purple" [ngClass]="{'actived': selectedBgColor === 'purple'}"
+                            (click)="selectTheme('purple')">
+                            <div class="purple-theme"></div>
+                        </li>
+                        <li data-theme="blue" [ngClass]="{'actived': selectedBgColor === 'blue'}"
+                            (click)="selectTheme('blue')">
+                            <div class="blue-theme"></div>
+                        </li>
+                        <li data-theme="cyan" [ngClass]="{'actived': selectedBgColor === 'cyan'}"
+                            (click)="selectTheme('cyan')">
+                            <div class="cyan-theme"></div>
+                        </li>
+                        <li data-theme="green" [ngClass]="{'actived': selectedBgColor === 'green'}"
+                            (click)="selectTheme('green')">
+                            <div class="green-theme"></div>
+                        </li>
+                        <li data-theme="orange" [ngClass]="{'actived': selectedBgColor === 'orange'}"
+                            (click)="selectTheme('orange')">
+                            <div class="orange-theme"></div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="rightSetting">
+                    <p>Disk Space</p>
+                    <div class="sidebar-progress">
+                        <div class="progress m-t-20">
+                            <div class="progress-bar l-bg-cyan shadow-style width-per-45" role="progressbar"
+                                aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="progress-description">
+                            <small>26% remaining</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="rightSetting m-b-15">
+                    <p>Server Load</p>
+                    <div class="sidebar-progress">
+                        <div class="progress m-t-20">
+                            <div class="progress-bar l-bg-orange shadow-style width-per-63" role="progressbar"
+                                aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="progress-description">
+                            <small>Highly Loaded</small>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane stretchRight" id="settings">
+            <div class="demo-settings"
+                [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
+                [perfectScrollbar]>
+                <p>GENERAL SETTINGS</p>
+
+                <ul class="setting-list">
+                    <li>
+                        <mat-slide-toggle checked>Report Panel Usage</mat-slide-toggle>
+                    </li>
+                    <li>
+                        <mat-slide-toggle>Email Redirect</mat-slide-toggle>
+                    </li>
+                </ul>
+                <p>SYSTEM SETTINGS</p>
+                <ul class="setting-list">
+                    <li>
+                        <mat-slide-toggle>Notifications</mat-slide-toggle>
+                    </li>
+                    <li>
+                        <mat-slide-toggle checked>Auto Updates</mat-slide-toggle>
+                    </li>
+                </ul>
+                <p>ACCOUNT SETTINGS</p>
+                <ul class="setting-list">
+                    <li>
+                        <mat-slide-toggle>Offline</mat-slide-toggle>
+                    </li>
+                    <li>
+                        <mat-slide-toggle checked>Location Permission</mat-slide-toggle>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</aside>

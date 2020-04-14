@@ -1,0 +1,35 @@
+$colors: ("red": #f44336,
+  "pink": #e91e63,
+  "purple": #9c27b0,
+  "deep-purple": #673ab7,
+  "indigo": #3f51b5,
+  "blue": #2196f3,
+  "light-blue": #03a9f4,
+  "cyan": #00bcd4,
+  "teal": #009688,
+  "green": #4caf50,
+  "light-green": #8bc34a,
+  "lime": #cddc39,
+  "yellow": #ffe821,
+  "amber": #ffc107,
+  "orange": #ff9800,
+  "deep-orange": #ff5722,
+  "brown": #795548,
+  "grey": #9e9e9e,
+  "blue-grey": #607d8b,
+  "black": #000000,
+  "white": #ffffff,
+  "dark-gray": #888888) !default;
+
+$linear-colors: ("green": linear-gradient(135deg, #23bdb8 0%, #43e794 100%),
+  "orange": linear-gradient(135deg, #f48665 0%, #fda23f 100%),
+  "cyan": linear-gradient(135deg, #289cf5, #84c0ec),
+  "red": linear-gradient(to right, #a77ffc 0%, #ff6eac 100%),
+  "purple": linear-gradient(135deg, #9a56ff 0%, #e36cd9 100%),
+  "purple-dark": linear-gradient(45deg, #a52dd8, #e29bf1));
+
+//Fonts Family
+$navbar-font-family: "Poppins",
+sans-serif;
+$sidebar-font-family: "Poppins",
+sans-serif;

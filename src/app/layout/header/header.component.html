@@ -1,0 +1,103 @@
+<nav #navbar class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a href="#" onClick="return false;" class="navbar-toggle collapsed" data-toggle="collapse"
+                data-target="#navbar-collapse" aria-expanded="false"></a>
+            <a href="#" onClick="return false;" class="bars" (click)="mobileMenuSidebarOpen($event,'overlay-open')"></a>
+            <a class="navbar-brand" routerLink="dashboard/main">
+                <img src="assets/images/logo.png" alt="" />
+                <span class="logo-name">Atrio</span>
+            </a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+            <ul class="pull-left collapse-menu-icon">
+                <li>
+                    <button mat-icon-button (click)="callSidemenuCollapse()" class="sidemenu-collapse">
+                        <i class="nav-hdr-btn ti-align-left"></i>
+                    </button>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <!-- Full Screen Button -->
+                <li class="fullscreen">
+                    <button mat-icon-button (click)="callFullscreen()" class=" nav-notification-icons">
+                        <i class="nav-hdr-btn ti-fullscreen"></i>
+                    </button>
+                </li>
+                <!-- #END# Full Screen Button -->
+                <!-- #START# Notifications-->
+                <li class="dropdown">
+                    <button mat-icon-button data-toggle="dropdown" class=" nav-notification-icons">
+                        <i class="nav-hdr-btn ti-bell"></i>
+                        <span class="notify"></span>
+                        <span class="heartbeat"></span>
+                    </button>
+                    <ul class="dropdown-menu pullDown">
+                        <li class="header">NOTIFICATIONS</li>
+                        <li class="body">
+                            <ul class="menu" style="position: relative; max-width: 600px; max-height: 200px;"
+                                [perfectScrollbar]>
+                                <li>
+                                    <a href="#" *ngFor="let notification of notifications" onClick="return false;">
+                                        <span class="table-img msg-user">
+                                            <img src="{{notification.userImg}}" alt="">
+                                        </span>
+                                        <span class="menu-info">
+                                            <span class="menu-title">{{notification.userName}}</span>
+                                            <span class="menu-desc">
+                                                <i class="material-icons">access_time</i> {{notification.time}}
+                                            </span>
+                                            <span class="menu-desc">{{notification.message}}</span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="footer">
+                            <a href="#" onClick="return false;">View All Notifications</a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- #END# Notifications-->
+                <li class="dropdown user_profile">
+                    <a href="#" onClick="return false;" data-toggle="dropdown" role="button"
+                        class="nav-notification-icons">
+                        <img src="assets/images/user.jpg" class="rounded-circle" width="32" height="32" alt="User">
+                    </a>
+                    <ul class="dropdown-menu pullDown">
+                        <li class="body">
+                            <ul class="user_dw_menu">
+                                <li>
+                                    <a href="#" onClick="return false;">
+                                        <mat-icon aria-hidden="false" class="mr-2">person</mat-icon>Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" onClick="return false;">
+                                        <mat-icon aria-hidden="false" class="mr-2">feedback</mat-icon>Feedback
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" onClick="return false;">
+                                        <mat-icon aria-hidden="false" class="mr-2">help</mat-icon>Help
+                                    </a>
+                                </li>
+                                <li>
+                                    <a routerLink="/authentication/signin" onClick="return false;">
+                                        <mat-icon aria-hidden="false" class="mr-2">power_settings_new</mat-icon>Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <!-- #END# Tasks -->
+                <li class="pull-right">
+                    <button mat-icon-button (click)="toggleRightSidebar()" class="nav-notification-icons">
+                        <i class="nav-hdr-btn ti-layout-grid2"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>>

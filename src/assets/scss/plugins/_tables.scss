@@ -1,0 +1,501 @@
+﻿/*
+ *  Document   : _tables.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for tables style classes
+ */
+// ngx-datatables material theme import
+@import "~@swimlane/ngx-datatable/index.css";
+@import "~@swimlane/ngx-datatable/themes/material.scss";
+@import "~@swimlane/ngx-datatable/assets/icons.css";
+
+.table {
+  tbody {
+    tr {
+      td,
+      th {
+        padding: 10px;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+        ul {
+          margin: 0;
+        }
+      }
+    }
+
+    tr.primary {
+      td,
+      th {
+        background-color: #1f91f3;
+        color: #fff;
+      }
+    }
+
+    tr.success {
+      td,
+      th {
+        background-color: #2b982b;
+        color: #fff;
+      }
+    }
+
+    tr.info {
+      td,
+      th {
+        background-color: #00b0e4;
+        color: #fff;
+      }
+    }
+
+    tr.warning {
+      td,
+      th {
+        background-color: #ff9600;
+        color: #fff;
+      }
+    }
+
+    tr.danger {
+      td,
+      th {
+        background-color: #fb483a;
+        color: #fff;
+      }
+    }
+  }
+
+  thead {
+    tr {
+      th {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+    }
+  }
+  .tbl-pdf {
+    color: #f96332;
+    font-size: 16px;
+    cursor: pointer;
+  }
+}
+
+.table-bordered {
+  border-top: 1px solid #eee;
+
+  tbody {
+    tr {
+      td,
+      th {
+        padding: 10px;
+        border: 1px solid #eee;
+      }
+    }
+  }
+
+  thead {
+    tr {
+      th {
+        padding: 10px;
+        border: 1px solid #eee;
+      }
+    }
+  }
+}
+.table-img {
+  img {
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    max-width: none;
+    @include box-shadow(0px 5px 25px 0px rgba(0, 0, 0, 0.2));
+  }
+}
+.btn-tbl-edit {
+  background-color: #919aa3;
+  height: 30px !important;
+  width: 30px !important;
+  margin: 2px !important;
+  line-height: 30px !important;
+  color: #fff;
+  .material-icons {
+    font-size: 16px !important;
+  }
+  &:hover {
+    background-color: #888;
+    color: $white;
+  }
+  &:focus {
+    background-color: #888;
+  }
+}
+.btn-tbl-delete {
+  background-color: #ff944f;
+  height: 30px !important;
+  width: 30px !important;
+  margin: 2px !important;
+  line-height: 30px !important;
+  color: #fff;
+  .material-icons {
+    font-size: 16px !important;
+  }
+  &:hover {
+    background-color: #ff9600;
+    color: $white;
+  }
+  &:focus {
+    background-color: #ff9600;
+  }
+}
+
+.avatar {
+  position: relative;
+  width: 30px;
+  white-space: nowrap;
+  border-radius: 1000px;
+  vertical-align: bottom;
+  display: inline-block;
+  img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border: 0;
+    border-radius: 1000px;
+  }
+}
+.avatar-sm {
+  width: 32px;
+}
+.list-inline {
+  padding-left: 0;
+  list-style: none;
+}
+.list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+.spinner {
+  display: inline-block;
+}
+.spinner-reverse {
+  display: inline-block;
+}
+.order-list li {
+  img {
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 10px 0 rgba(107, 111, 130, 0.3);
+  }
+  + li {
+    margin-left: -14px;
+  }
+  .badge {
+    background: rgba(255, 255, 255, 0.8);
+    color: #6b6f82;
+    margin-bottom: 6px;
+  }
+}
+.buttons-copy {
+  background-color: #666 !important;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2), 0 13px 24px -11px rgba(233, 30, 99, 0.6);
+  color: #fff !important;
+  border-radius: 30px !important;
+  border: 0px !important;
+  height: 30px;
+  width: 60px;
+  cursor: pointer;
+}
+.buttons-excel {
+  background-color: #59bf70 !important;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2), 0 13px 24px -11px rgba(233, 30, 99, 0.6);
+  color: #fff !important;
+  border-radius: 30px !important;
+  border: 0px !important;
+  height: 30px;
+  width: 60px;
+  cursor: pointer;
+}
+.buttons-csv {
+  background-color: #2ab9d0 !important;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2), 0 13px 24px -11px rgba(233, 30, 99, 0.6);
+  color: #fff !important;
+  border-radius: 30px !important;
+  border: 0px !important;
+  height: 30px;
+  width: 60px;
+  cursor: pointer;
+}
+.buttons-pdf {
+  background-color: #e91e63 !important;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2), 0 13px 24px -11px rgba(233, 30, 99, 0.6);
+  color: #fff !important;
+  border-radius: 30px !important;
+  border: 0px !important;
+  height: 30px;
+  width: 60px;
+  cursor: pointer;
+}
+.buttons-print {
+  background-color: #6563ef !important;
+  box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2), 0 13px 24px -11px #6563ef;
+  color: #fff !important;
+  border-radius: 30px !important;
+  border: 0px !important;
+  height: 30px;
+  width: 60px;
+  cursor: pointer;
+}
+
+tr.group,
+tr.group:hover {
+  background-color: #ddd !important;
+}
+.tableBody {
+  font-size: 13px;
+  color: #555;
+  padding: 0px 15px 0px 15px;
+}
+.tbl-checkbox {
+  vertical-align: bottom !important;
+  text-align: center;
+}
+// .table-hover {
+//     tbody {
+//         tr:hover {
+//             img {
+//                 border: 2px solid #ff9800;
+//             }
+//         }
+//     }
+// }
+td.details-control {
+  background: url("../images/details_open.png") no-repeat center center;
+  cursor: pointer;
+}
+tr.shown td.details-control {
+  background: url("../images/details_close.png") no-repeat center center;
+}
+
+// ngx-datatables material theme import
+
+.ngx-datatable.material {
+  background: #fff;
+  border: 1px solid #f5f5f5;
+  box-shadow: none !important;
+  .datatable-footer {
+    .datatable-pager {
+      .pager li a {
+        margin: 5px;
+        .datatable-icon-right,
+        .datatable-icon-skip,
+        .datatable-icon-left,
+        .datatable-icon-prev {
+          line-height: 30px;
+        }
+      }
+      li.active a {
+        background-color: #0d8df3;
+        transition: 0.25s ease;
+        color: #ffffff;
+        box-shadow: 4px 3px 6px 0 rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+.ngx-table-form-select {
+  margin-top: 0px;
+  padding-left: 40px !important;
+}
+.ngx-search {
+  margin: 15px auto !important;
+  width: 30% !important;
+  font-size: 13px !important;
+}
+.ngx-datatable {
+  .datatable-body-cell {
+    display: table !important;
+  }
+  .datatable-body-cell-label {
+    display: table-cell !important;
+    vertical-align: middle !important;
+  }
+  .datatable-header-cell {
+    line-height: 2.4 !important;
+  }
+}
+.ngxTableHeader {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  border-color: #e6e9ed;
+  background-color: #ebebee;
+  min-width: 800px;
+  height: 70px;
+  .header-buttons {
+    position: absolute;
+    right: 15px;
+    list-style: none;
+    top: 20px;
+    li {
+      display: inline-block;
+    }
+    .material-icons {
+      color: #000000;
+      vertical-align: text-bottom;
+    }
+  }
+  .header-buttons-left {
+    position: absolute;
+    list-style: none;
+    li {
+      display: inline-block;
+    }
+
+    .searchbox {
+      position: relative;
+    }
+    ::placeholder {
+      color: rgba(0, 0, 0, 0.54);
+    }
+    .search-icon {
+      position: absolute;
+      top: 10px;
+      padding-left: 10px;
+      color: rgba(0, 0, 0, 0.54);
+    }
+    input.search-field {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.54);
+      border-radius: 25px;
+      border: 0;
+      height: 45px;
+      padding: 8px 8px 8px 50px;
+      width: 250px;
+      background: #ffffff;
+      transition: background 0.2s, width 0.2s;
+      &:hover {
+        background: #fffefe;
+      }
+      &:focus {
+        outline: none;
+        width: 380px;
+        color: #212121;
+        &:hover {
+          background: #f7f7f7;
+        }
+      }
+    }
+  }
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+    color: #5b626b;
+  }
+}
+.mat-table {
+  .mat-header-cell {
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+.ngx-datatable.material {
+  background: #fff;
+  border: 1px solid #f5f5f5;
+  box-shadow: none !important;
+  .datatable-footer {
+    .datatable-pager {
+      .pager li a {
+        margin: 5px;
+        .datatable-icon-right,
+        .datatable-icon-skip,
+        .datatable-icon-left,
+        .datatable-icon-prev {
+          line-height: 30px;
+        }
+      }
+      li.active a {
+        background-color: #0d8df3;
+        transition: 0.25s ease;
+        color: #ffffff;
+        box-shadow: 4px 3px 6px 0 rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}
+.ngx-table-form-select {
+  margin-top: 0px;
+  padding-left: 40px !important;
+}
+.ngx-search {
+  margin: 15px auto !important;
+  width: 30% !important;
+  font-size: 13px !important;
+}
+.ngx-datatable {
+  .datatable-body-cell {
+    display: table !important;
+  }
+  .datatable-body-cell-label {
+    display: table-cell !important;
+    vertical-align: middle !important;
+  }
+  .datatable-header-cell {
+    line-height: 2.4 !important;
+  }
+}
+.materialTableHeader {
+  padding: 10px 20px;
+  -webkit-box-align: center;
+  align-items: center;
+  border-color: #e6e9ed;
+  background-color: #ebebee;
+  height: 70px;
+  min-width: 800px;
+  .header-buttons {
+    position: absolute;
+    right: 0px;
+    padding: 6px 8px 8px 8px;
+    li {
+      display: inline-block;
+    }
+  }
+  .header-buttons-left {
+    position: absolute;
+    list-style: none;
+    padding-top: 3px;
+    li {
+      display: inline-block;
+    }
+
+    .searchbox {
+      position: relative;
+    }
+    ::placeholder {
+      color: rgba(0, 0, 0, 0.54);
+    }
+    .search-icon {
+      position: absolute;
+      top: 10px;
+      padding-left: 10px;
+      color: rgba(0, 0, 0, 0.54);
+    }
+    input.search-field {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.54);
+      border-radius: 25px;
+      border: 0;
+      height: 45px;
+      padding: 8px 8px 8px 50px;
+      width: 250px;
+      background: #ffffff;
+      transition: background 0.2s, width 0.2s;
+      &:hover {
+        background: #fffefe;
+      }
+    }
+  }
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: normal;
+    color: #5b626b;
+  }
+}

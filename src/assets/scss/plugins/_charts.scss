@@ -1,0 +1,287 @@
+﻿/*
+ *  Document   : _charts.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for all charts style classes
+ */
+/* Morris */
+.morris-hover {
+  &.morris-default-style {
+    @include border-radius(0);
+  }
+}
+
+/* Flot */
+.flot-chart {
+  width: 100%;
+  height: 320px;
+}
+
+.panel-switch-btn {
+  position: relative;
+  right: 20px;
+  z-index: 9;
+
+  label {
+    font-weight: bold !important;
+  }
+}
+
+.legendLabel {
+  width: 85px !important;
+  position: relative;
+  left: 3px;
+}
+
+#multiple_axis_chart {
+  .legendLabel {
+    width: 160px !important;
+  }
+}
+
+/* Sparkline */
+.sparkline {
+  text-align: center;
+}
+
+.chart-box {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+.chart-box2 {
+  font-size: 14px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+.chart-note {
+  text-transform: capitalize;
+  display: inline-block;
+  margin-right: 12px;
+  font-size: 14px;
+  .dot {
+    margin-right: 7px;
+  }
+}
+.chart-statis {
+  display: inline-block;
+  margin-right: 35px;
+  .label {
+    display: block;
+    text-transform: capitalize;
+    line-height: 1.2;
+  }
+  .index {
+    font-size: 18px;
+    color: #333;
+    padding-left: 15px;
+  }
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+}
+.dot-black {
+  background: #000000;
+}
+.dot-orange {
+  background: #f96332;
+}
+.chart-box-left {
+  padding-left: 10px;
+}
+.area_chart-style {
+  height: 170px;
+  margin: 30px;
+}
+.chart-shadow2 {
+  -webkit-filter: drop-shadow(0 -6px 4px rgba(106, 141, 247, 0.5));
+  filter: drop-shadow(0 -6px 4px rgba(106, 141, 247, 0.5));
+}
+.chart-shadow {
+  -webkit-filter: drop-shadow(0px 9px 2px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0px 9px 2px rgba(0, 0, 0, 0.3));
+}
+.chartsh {
+  height: 16rem;
+}
+
+// chartjs
+
+.axisData {
+  position: absolute;
+  color: #fff;
+  z-index: 1;
+  text-transform: uppercase;
+  display: flex;
+  width: 100%;
+  bottom: 0;
+  .tick {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    opacity: 0.2;
+    font-size: 11px;
+    text-align: center;
+    line-height: 40px;
+    padding-top: 150px;
+    &:hover {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.2);
+      .value {
+        &.productValue {
+          transform: translateY(0);
+          display: block;
+        }
+        &.serviceValue {
+          transform: translateY(0);
+          display: block;
+          left: 0;
+          top: 80px;
+          color: #000;
+          transition: 0.3s transform;
+        }
+      }
+    }
+    .value {
+      transform: translateY(20px);
+      transition: 0.3s transform;
+      position: absolute;
+      top: 20px;
+      color: #000;
+      border-radius: 2px;
+      width: 100%;
+      line-height: 20px;
+    }
+  }
+}
+.dot-product {
+  background: #f6699c;
+}
+.dot-service {
+  background: #7f55fc;
+}
+
+// ngx-chart
+.chart-legend {
+  header {
+    background: transparent;
+    height: 0px;
+  }
+  .legend-labels {
+    background: transparent !important;
+  }
+}
+.ngx-charts {
+  text {
+    fill: #9aa0ac;
+  }
+}
+
+// Gauge chart
+mwl-gauge {
+  width: 150px;
+  height: 150px;
+  display: block;
+  padding: 10px;
+}
+mwl-gauge > .gauge > .dial {
+  stroke: #d7d7d7;
+  stroke-width: 5;
+  fill: rgba(0, 0, 0, 0);
+}
+mwl-gauge > .gauge > .value {
+  stroke: #4fa1f1;
+  stroke-width: 5;
+  fill: rgba(0, 0, 0, 0);
+}
+mwl-gauge > .gauge > .value-text {
+  fill: #4fa1f1;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 0.8em;
+}
+/* ------- Alternate Style ------- */
+mwl-gauge.two {
+}
+mwl-gauge.two > .gauge > .dial {
+  stroke: #334455;
+  stroke-width: 10;
+}
+mwl-gauge.two > .gauge > .value {
+  stroke: orange;
+  stroke-dasharray: none;
+  stroke-width: 13;
+}
+mwl-gauge.two > .gauge > .value-text {
+  fill: orange;
+}
+/* ------- Alternate Style ------- */
+mwl-gauge.three {
+}
+mwl-gauge.three > .gauge > .dial {
+  stroke: #334455;
+  stroke-width: 2;
+}
+mwl-gauge.three > .gauge > .value {
+  stroke: #c9de3c;
+  stroke-width: 5;
+}
+mwl-gauge.three > .gauge > .value-text {
+  fill: #c9de3c;
+}
+/* ----- Alternate Style ----- */
+mwl-gauge.four > .gauge > .dial {
+  stroke: #334455;
+  stroke-width: 5;
+}
+mwl-gauge.four > .gauge > .value {
+  stroke: #be80ff;
+  stroke-dasharray: none;
+  stroke-width: 5;
+}
+mwl-gauge.four > .gauge > .value-text {
+  fill: #be80ff;
+}
+/* ----- Alternate Style ----- */
+mwl-gauge.five > .gauge > .dial {
+  stroke: #334455;
+  stroke-width: 5;
+}
+mwl-gauge.five > .gauge > .value {
+  stroke: #f8774b;
+  stroke-dasharray: 25 1;
+  stroke-width: 5;
+}
+mwl-gauge.five > .gauge > .value-text {
+  fill: #f8774b;
+  font-size: 0.7em;
+}
+/* ----- Alternate Style ----- */
+mwl-gauge.six > .gauge > .dial {
+  stroke: #334455;
+  fill: #334455;
+  stroke-width: 20;
+}
+mwl-gauge.six > .gauge > .value {
+  stroke: #ff6daf;
+  stroke-width: 20;
+}
+mwl-gauge.six > .gauge > .value-text {
+  fill: #ff6daf;
+  font-size: 0.7em;
+}
+mwl-gauge.seven > .gauge > .dial {
+  stroke: transparent;
+  stroke-width: 5;
+  transform: scale(0.9, 0.9) translate3d(5.5px, 5.5px, 0);
+  fill: rgba(191, 202, 214, 0.42);
+}
+mwl-gauge.seven > .gauge > .value {
+  stroke: #f8774b;
+  stroke-dasharray: none;
+  stroke-width: 5;
+}

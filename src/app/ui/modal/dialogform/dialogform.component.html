@@ -1,0 +1,49 @@
+<div>
+    <h2 mat-dialog-title>Add User</h2>
+    <div>
+        <form [formGroup]="addCusForm" (ngSubmit)="onSubmitClick()">
+            <div class="text-inside">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="First Name" value={{fname}} formControlName="firstname" required>
+                    <mat-error *ngIf="addCusForm.controls.firstname.hasError('required')">
+                        Please enter first name
+                    </mat-error>
+                    <mat-error *ngIf="addCusForm.controls.firstname.hasError('pattern')">
+                        Please enter valid first name
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="text-inside">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="Last Name" value={{lname}} formControlName="lastname" required>
+                    <mat-error *ngIf="addCusForm.controls.lastname.hasError('required')">
+                        Please enter last name
+                    </mat-error>
+                    <mat-error *ngIf="addCusForm.controls.lastname.hasError('pattern')">
+                        Please enter valid last name
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="text-inside">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="Email address" formControlName="email" required>
+                    <mat-error *ngIf="addCusForm.controls.email.hasError('required')">
+                        Please enter email id
+                    </mat-error>
+                    <mat-error *ngIf="addCusForm.controls.email.hasError('email')">
+                        Please enter valid email id
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="text-inside">
+                <mat-form-field class="example-full-width">
+                    <textarea matInput placeholder="Address"></textarea>
+                </mat-form-field>
+            </div>
+            <div class="btn-sec">
+                <button class="mr-3" mat-raised-button color="primary">Save</button>
+                <button type="button" mat-button (click)="closeDialog()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>

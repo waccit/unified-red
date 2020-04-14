@@ -1,0 +1,91 @@
+<div>
+    <!-- Left Sidebar -->
+    <aside id="leftsidebar" class="sidebar" (mouseenter)="mouseHover($event)" (mouseleave)="mouseOut($event)">
+        <!-- Menu -->
+        <div class="menu">
+            <ul class="list"
+                [ngStyle]="{'position' : 'relative', 'max-height' : listMaxHeight+'px', 'max-width' : listMaxWidth+'px'}"
+                [perfectScrollbar]>
+                <li>
+                    <div class="sidebar-profile clearfix">
+                        <div class="profile-img">
+                            <img src="assets/images/usrbig.jpg" alt="profile">
+                        </div>
+                        <div class="profile-info">
+                            <h3>Sarah Deo</h3>
+                            <p>Welcome Admin !</p>
+                        </div>
+                    </div>
+                </li>
+                <!-- First level menu -->
+                <li [class.active]="showMenu === sidebarItem.title" *ngFor="let sidebarItem of sidebarItems"
+                    [routerLinkActive]="sidebarItem.submenu.length != 0 ? '' : 'active'">
+                    <div class="header" *ngIf="sidebarItem.groupTitle === true">{{sidebarItem.title}}</div>
+                    <a [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
+                        *ngIf="!sidebarItem.groupTitle;" [ngClass]="[sidebarItem.class]"
+                        (click)="callMenuToggle($event, sidebarItem.title)">
+                        <i [ngClass]="[sidebarItem.icon]"></i>
+                        <span class="hide-menu">{{sidebarItem.title}}
+                        </span>
+                    </a>
+                    <!-- Second level menu -->
+                    <ul class="ml-menu" *ngIf="sidebarItem.submenu.length > 0">
+                        <li *ngFor="let sidebarSubItem of sidebarItem.submenu"
+                            [class.activeSub]="showSubMenu === sidebarSubItem.title"
+                            [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'">
+                            <a [routerLink]="sidebarSubItem.submenu.length > 0 ? null : [sidebarSubItem.path]"
+                                (click)="callSubMenuToggle(sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
+                                {{sidebarSubItem.title}}
+                            </a>
+                            <!-- Third level menu -->
+                            <ul class="collapse" *ngIf="sidebarSubItem.submenu.length > 0"
+                                [ngClass]="{'in' : showSubMenu === sidebarSubItem.title }">
+                                <li *ngFor="let sidebarSubsubItem of sidebarSubItem.submenu"
+                                    [ngClass]="[sidebarSubsubItem.class]">
+                                    <a [routerLink]="[sidebarSubsubItem.path]">
+                                        {{sidebarSubsubItem.title}}
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <hr>
+                    <div class="leftSideProgress">
+                        <div class="progress-list">
+                            <div class="details m-b-10">
+                                <div class="title">Disk Usage</div>
+                            </div>
+                            <div class="status">
+                                <span>52</span>%
+                            </div>
+                            <div class="progress-s progress">
+                                <div class="progress-bar progress-bar-success width-per-52" role="progressbar"
+                                    aria-valuenow="38" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="leftSideProgress">
+                        <div class="progress-list m-b-10">
+                            <div class="details m-b-10">
+                                <div class="title">Server Load</div>
+                            </div>
+                            <div class="status">
+                                <span>79</span>%
+                            </div>
+                            <div class="progress-s progress">
+                                <div class="progress-bar progress-bar-warning width-per-79" role="progressbar"
+                                    aria-valuenow="38" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- #Menu -->
+    </aside>
+    <!-- #END# Left Sidebar -->
+</div>

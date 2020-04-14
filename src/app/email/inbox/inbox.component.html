@@ -1,0 +1,429 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                <div class="card">
+                    <div class="body">
+                        <div id="mail-nav">
+                            <button type="button" class="btn btn-success waves-effect m-b-15">COMPOSE</button>
+                            <ul class="" id="mail-folders">
+                                <li class="active">
+                                    <a title="Inbox">Inbox
+                                        <span class="pull-right badge bg-orange">6</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;" title="Sent">Sent</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;" title="Draft">Draft</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;" title="Bin">Bin</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;" title="Important">Important</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;" title="Starred">Starred</a>
+                                </li>
+                            </ul>
+                            <h5 class="b-b p-10 text-strong">Labels</h5>
+                            <ul class="" id="mail-labels">
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-red">local_offer</i>Family</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-blue">local_offer</i>Work</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-orange">local_offer</i>Shop</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-cyan">local_offer</i>Themeforest</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-blue-grey">local_offer</i>Google</a>
+                                </li>
+                            </ul>
+                            <h5 class="b-b p-10 text-strong">Online</h5>
+                            <ul class="online-user" id="online-offline">
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-green" title="Online">brightness_1</i>Sachin</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-indigo" title="Off Line">brightness_1</i>John
+                                        Smith
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-orange" title="Away">brightness_1</i>Askay</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-indigo" title="Off Line">brightness_1</i>Dhavan</a>
+                                </li>
+                                <li>
+                                    <a href="javascript:;">
+                                        <i class="material-icons col-indigo" title="Off Line">brightness_1</i>Lee</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+                <div class="card">
+                    <div class="boxs mail_listing">
+                        <div class="inbox-center table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </th>
+                                        <th colspan="3">
+                                            <div class="inbox-header">
+                                                <div class="mail-option no-pad-left">
+                                                    <div class="email-btn-group m-l-15">
+                                                        <button mat-icon-button
+                                                            aria-label="Example icon-button with a heart icon">
+                                                            <mat-icon>keyboard_return</mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button
+                                                            aria-label="Example icon-button with a heart icon">
+                                                            <mat-icon>archive</mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button
+                                                            aria-label="Example icon-button with a heart icon">
+                                                            <mat-icon>error</mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button
+                                                            aria-label="Example icon-button with a heart icon">
+                                                            <mat-icon>delete</mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button
+                                                            aria-label="Example icon-button with a heart icon">
+                                                            <mat-icon>folder</mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button
+                                                            aria-label="Example icon-button with a heart icon">
+                                                            <mat-icon>local_offer</mat-icon>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </th>
+                                        <th class="hidden-xs" colspan="2">
+                                            <div class="pull-right">
+                                                <div class="email-btn-group m-l-15">
+                                                    <button mat-icon-button
+                                                        aria-label="Example icon-button with a heart icon">
+                                                        <mat-icon>navigate_before</mat-icon>
+                                                    </button>
+                                                    <button mat-icon-button
+                                                        aria-label="Example icon-button with a heart icon">
+                                                        <mat-icon>navigate_next</mat-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="unread">
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Nelson Lane</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label l-bg-purple shadow-style m-r-10">Work</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> 12:30 PM </td>
+                                    </tr>
+                                    <tr class="unread">
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons text-warning">star</i>
+                                        </td>
+                                        <td class="hidden-xs">Kerry Mann</td>
+                                        <td class="max-texts">
+                                            <a href="#">Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 13 </td>
+                                    </tr>
+                                    <tr class="unread">
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Adam Peters</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label l-bg-cyan shadow-style m-r-10">Shopping</span>
+                                                Lorem ipsum perspiciatis unde omnis</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 12 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Lula Reese</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label l-bg-orange shadow-style m-r-10">Family</span>
+                                                Lorem ipsum perspiciatis unde omnis</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 12 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Nelson Lane</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label label-info m-r-10">Work</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 12 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons text-warning">star</i>
+                                        </td>
+                                        <td class="hidden-xs">Kerry Mann</td>
+                                        <td class="max-texts">
+                                            <a href="#">Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 11 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Adam Peters</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label l-bg-cyan shadow-style m-r-10">Office</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 11 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Lula Reese</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label label-warning m-r-10">Work</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 11 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Nelson Lane</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label label-info m-r-10">Work</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 10 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons text-warning">star</i>
+                                        </td>
+                                        <td class="hidden-xs">Kerry Mann</td>
+                                        <td class="max-texts">
+                                            <a href="#">Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 10 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Adam Peters</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label l-bg-purple shadow-style m-r-10">Shopping</span>
+                                                Lorem ipsum perspiciatis unde omnis</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 10 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Lula Reese</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label label-warning m-r-10">Work</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 09 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Nelson Lane</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label label-info m-r-10">Work</span>
+                                                Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 09 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons text-warning">star</i>
+                                        </td>
+                                        <td class="hidden-xs">Kerry Mann</td>
+                                        <td class="max-texts">
+                                            <a href="#">Lorem ipsum perspiciatis unde omnis iste natus</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 09 </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="tbl-checkbox">
+                                            <mat-checkbox class="example-margin"></mat-checkbox>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">star_border</i>
+                                        </td>
+                                        <td class="hidden-xs">Adam Peters</td>
+                                        <td class="max-texts">
+                                            <a href="#">
+                                                <span class="label label-success m-r-10">Shopping</span>
+                                                Lorem ipsum perspiciatis unde omnis</a>
+                                        </td>
+                                        <td class="hidden-xs">
+                                            <i class="material-icons">attach_file</i>
+                                        </td>
+                                        <td class="text-right"> May 09 </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-7 ">
+                                <p class="p-15">Showing 1 - 15 of 200</p>
+                            </div>
+                            <div class="col-sm-5 text-right">
+                                <div class="pull-right">
+                                    <div class="email-btn-group m-l-15">
+                                        <button mat-icon-button aria-label="Example icon-button with a heart icon">
+                                            <mat-icon>navigate_before</mat-icon>
+                                        </button>
+                                        <button mat-icon-button aria-label="Example icon-button with a heart icon">
+                                            <mat-icon>navigate_next</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

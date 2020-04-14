@@ -1,0 +1,195 @@
+/*
+ *  Document   : _pricing.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for pricing page style classes
+ */
+//colors
+$white: #fff;
+$color_orange: #ffa442;
+$color_blue: #4b64ff;
+$color_red: #ff4b4b;
+$color_green: #40c952;
+
+.pricingTable {
+  text-align: center;
+  background: $white;
+  margin: 0 -10px;
+  box-shadow: 0 0 10px #ababab;
+  padding-bottom: 40px;
+  border-radius: 10px;
+  color: #cad0de;
+  transform: scale(1);
+  transition: all 0.5s ease 0s;
+  &:hover {
+    transform: scale(1.05);
+    z-index: 1;
+    .pricingTable-header {
+      background: #ff9624;
+      i {
+        color: $white;
+      }
+    }
+    .price-value {
+      color: $white;
+    }
+    .month {
+      color: $white;
+    }
+  }
+  .pricingTable-header {
+    padding: 40px 0;
+    background: #f5f6f9;
+    border-radius: 10px 10px 50% 50%;
+    transition: all 0.5s ease 0s;
+    i {
+      font-size: 50px;
+      color: #858c9a;
+      margin-bottom: 10px;
+      transition: all 0.5s ease 0s;
+    }
+  }
+  .price-value {
+    font-size: 35px;
+    color: #ff9624;
+    transition: all 0.5s ease 0s;
+  }
+  .month {
+    display: block;
+    font-size: 14px;
+    color: #cad0de;
+  }
+  .heading {
+    font-size: 24px;
+    color: #ff9624;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    padding-top: 15px;
+  }
+  &.blue {
+    .price-value {
+      color: $color_blue;
+    }
+    .heading {
+      color: $color_blue;
+    }
+    &:hover .pricingTable-header {
+      background: $color_blue;
+    }
+    .pricingTable-signup a {
+      background: $color_blue;
+      &:hover {
+        box-shadow: 0 0 10px $color_blue;
+      }
+    }
+  }
+  &.red {
+    .price-value {
+      color: $color_red;
+    }
+    .heading {
+      color: $color_red;
+    }
+    &:hover .pricingTable-header {
+      background: $color_red;
+    }
+    .pricingTable-signup a {
+      background: $color_red;
+      &:hover {
+        box-shadow: 0 0 10px $color_red;
+      }
+    }
+  }
+  &.greenColor {
+    .price-value {
+      color: $color_green;
+    }
+    &:hover {
+      .pricingTable-header {
+        background: $color_green;
+      }
+      .price-value {
+        color: $white;
+      }
+    }
+    .pricingTable-signup a {
+      background: $color_green;
+      &:hover {
+        box-shadow: 0 0 10px $color_green;
+      }
+    }
+  }
+  &.blueColor {
+    &:hover {
+      .pricingTable-header {
+        background: $color_blue;
+      }
+      .price-value {
+        color: $white;
+      }
+    }
+    .price-value {
+      color: $color_blue;
+    }
+    .heading {
+      color: $color_blue;
+    }
+    .pricingTable-signup a {
+      background: $color_blue;
+    }
+  }
+  &.redColor {
+    &:hover {
+      .pricingTable-header {
+        background: $color_red;
+      }
+      .price-value {
+        color: $white;
+      }
+    }
+    .price-value {
+      color: $color_red;
+    }
+    .heading {
+      color: $color_red;
+    }
+    .pricingTable-signup a {
+      background: $color_red;
+    }
+  }
+  .pricing-content ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+    li {
+      line-height: 30px;
+      color: #a7a8aa;
+    }
+  }
+  .pricingTable-signup a {
+    display: inline-block;
+    font-size: 15px;
+    color: $white;
+    padding: 10px 35px;
+    border-radius: 20px;
+    background: $color_orange;
+    text-transform: uppercase;
+    transition: all 0.3s ease 0s;
+    &:hover {
+      box-shadow: 0 0 10px $color_orange;
+    }
+  }
+  &.green .heading {
+    color: $color_green;
+  }
+}
+@media screen and(max-width: 990px) {
+  .pricingTable {
+    margin: 0 0 20px 0;
+  }
+}
+.greenColor .heading {
+  font-size: 24px;
+  color: $color_green;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}

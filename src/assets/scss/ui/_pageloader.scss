@@ -1,0 +1,29 @@
+﻿/*
+ *  Document   : _pageloader.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for page loader style classes
+ */
+.page-loader-wrapper {
+  z-index: 99999999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: #eee;
+  overflow: hidden;
+  text-align: center;
+
+  p {
+    font-size: 13px;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #444;
+  }
+
+  .loader {
+    position: relative;
+  }
+}

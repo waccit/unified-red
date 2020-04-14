@@ -1,0 +1,22 @@
+.rightSetting {
+  padding: 20px 25px 0px 25px;
+  p {
+    font-weight: bold;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+    text-align: left;
+  }
+  .mat-button-toggle-checked {
+    background-color: #6e68c1;
+    color: #ffffff !important;
+  }
+  .mat-button-toggle {
+    width: 60px;
+    height: 30px;
+    font-size: 14px;
+  }
+  .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+    line-height: 30px !important;
+  }
+}

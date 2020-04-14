@@ -1,0 +1,23 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="card">
+                    <div class="header">
+                        <h2>
+                            <strong>Events</strong>
+                        </h2>
+                    </div>
+                    <div class="body">
+                        <full-calendar #calendar defaultView="dayGridMonth" [header]="{
+                          left: 'prev,next today',
+                          center: 'title',
+                          right: 'dayGridMonth,dayGridWeek,dayGridDay,listWeek'
+                        }" [plugins]="calendarPlugins" [weekends]="calendarWeekends" [events]="calendarEvents">
+                        </full-calendar>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

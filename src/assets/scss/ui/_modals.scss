@@ -1,0 +1,122 @@
+﻿/*
+ *  Document   : _modals.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for modals style classes
+ */
+.modal {
+  background-color: rgba(238, 238, 238, 0.41);
+  //padding: 100px 0 0;
+  max-height: 100%;
+  width: 100%;
+  .modal-header {
+    border: none;
+    padding: 0px;
+    border-bottom: 1px solid #eee;
+
+    .modal-title {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  }
+
+  .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.31) !important;
+    border: none;
+    padding: 10px;
+
+    .modal-body {
+      color: #777;
+      padding: 15px 25px;
+    }
+  }
+
+  .modal-footer {
+    border: none;
+    background-color: transparent;
+    .btn {
+      margin: 10px;
+    }
+  }
+}
+.editRowModal {
+  .modal-header {
+    padding: 5px;
+    border-radius: 0 0.55rem 0 0;
+    img {
+      float: left;
+      @include border-radius(50%);
+      width: 45px;
+    }
+    .modal-about {
+      float: left;
+      padding-left: 10px;
+    }
+    .modal-with {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .modal-num-messages {
+      color: 434651;
+    }
+  }
+}
+.addContainer {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  .form {
+    display: flex;
+    padding-top: 6px;
+  }
+
+  .mat-form-field {
+    flex-grow: 1;
+  }
+  .modalHeader img {
+    border-radius: 50%;
+  }
+}
+
+.modalHeader {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+  padding: 0px 10px 0px 10px;
+}
+.modal-close-button {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #161d38;
+}
+
+@each $key, $val in $colors {
+  .modal-col-#{$key} {
+    background-color: $val;
+
+    .modal-body,
+    .modal-title {
+      color: #fff !important;
+    }
+
+    .modal-footer {
+      background-color: rgba(0, 0, 0, 0.12);
+
+      .btn-link {
+        color: #fff !important;
+
+        &:hover,
+        &:active,
+        &:focus {
+          background-color: rgba(0, 0, 0, 0.12);
+        }
+      }
+    }
+  }
+}
+.cdk-global-overlay-wrapper,
+.cdk-overlay-container {
+  z-index: 1000 !important;
+}

@@ -1,0 +1,149 @@
+﻿/*
+ *  Document   : _panels.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for panels style classes
+ */
+.panel-group {
+  @each $key, $val in $colors {
+    .panel-col-#{$key} {
+      border: 1px solid $val;
+
+      .panel-title {
+        background-color: $val !important;
+        color: #fff;
+      }
+
+      .panel-body {
+        border-top-color: transparent !important;
+      }
+    }
+  }
+
+  .panel {
+    @include border-radius(0);
+    margin-top: 5px;
+
+    .panel-title {
+      margin-bottom: 0;
+      font-size: 16px;
+      .material-icons {
+        float: left;
+        line-height: 16px;
+        margin-right: 8px;
+      }
+      > a,
+      > small,
+      > .small,
+      > small > a,
+      > .small > a {
+        color: #fff;
+      }
+    }
+
+    .panel-heading {
+      padding: 0;
+      @include border-radius(0);
+
+      a {
+        display: block;
+        padding: 10px 15px;
+
+        &:hover,
+        &:focus,
+        &:active {
+          text-decoration: none;
+        }
+      }
+    }
+
+    .panel-body {
+      color: #555;
+      border-top: 1px solid #ddd;
+      padding: 15px;
+    }
+  }
+
+  .panel-primary {
+    border: none;
+
+    .panel-title {
+      background-color: #f5f5f5;
+      a {
+        color: #757575;
+        font-weight: 400;
+        font-size: 16px;
+      }
+    }
+  }
+
+  .panel-success {
+    border: 1px solid #2b982b;
+
+    .panel-title {
+      background-color: #2b982b;
+      color: #fff;
+    }
+  }
+
+  .panel-warning {
+    border: 1px solid #ff9600;
+
+    .panel-title {
+      background-color: #ff9600;
+      color: #fff;
+    }
+  }
+
+  .panel-danger {
+    border: 1px solid #fb483a;
+
+    .panel-title {
+      background-color: #fb483a;
+      color: #fff;
+    }
+  }
+}
+
+.full-body {
+  @each $key, $val in $colors {
+    .panel-col-#{$key} {
+      .panel-body {
+        border-top-color: #fff !important;
+        background-color: $val;
+        color: #fff;
+      }
+    }
+  }
+
+  .panel-primary {
+    .panel-body {
+      border-top-color: #fff !important;
+      background-color: #7861a9;
+      color: #fff;
+    }
+  }
+
+  .panel-success {
+    .panel-body {
+      border-top-color: #fff !important;
+      background-color: #2b982b;
+      color: #fff;
+    }
+  }
+
+  .panel-warning {
+    .panel-body {
+      border-top-color: #fff !important;
+      background-color: #ff9600;
+      color: #fff;
+    }
+  }
+
+  .panel-danger {
+    .panel-body {
+      border-top-color: #fff !important;
+      background-color: #fb483a;
+      color: #fff;
+    }
+  }
+}

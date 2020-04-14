@@ -1,0 +1,25 @@
+/*
+ *  Document   : _profile.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for profile page style classes
+ */
+.profile-tab-box {
+  background: $white;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+.skill-progress {
+  height: 10px !important;
+}
+.tab-all a {
+  color: #948f8f !important;
+  &.active {
+    background-color: #e91e63 !important;
+    box-shadow: 0 5px 20px 0 rgba(0, 0, 0, 0.2), 0 13px 24px -11px rgba(233, 30, 99, 0.6);
+    color: #ffffff !important;
+    border-radius: 30px;
+    height: 35px;
+  }
+}

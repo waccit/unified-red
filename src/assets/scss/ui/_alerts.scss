@@ -1,0 +1,63 @@
+﻿/*
+ *  Document   : alert.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for alert style classes
+ */
+.alert {
+  @include border-radius(0);
+  @include box-shadow(none);
+  border: none;
+
+  .alert-link {
+    color: #0b4c54;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+}
+.alert-primary {
+  color: #033f80;
+  background-color: #c7e1fc;
+  border-color: #b2d4f8;
+}
+.alert-secondary {
+  color: #363b3f;
+  background-color: #dbdde0;
+  border-color: #d1d3d6;
+}
+
+.alert-success {
+  color: #165c27;
+  background-color: #d0e7d6;
+  border-color: #bfe2c7;
+}
+
+.alert-info {
+  color: #0b4e5a;
+  background-color: #d4f0f5;
+  border-color: #b9dde2;
+}
+.alert-dark {
+  color: #1a1d20;
+  background-color: #d1d1d1;
+  border-color: #bfc2c5;
+}
+.alert-warning {
+  color: #8f6d06;
+  background-color: #faefc9;
+  border-color: #f8e7b4;
+}
+
+.alert-danger {
+  color: #81222c;
+  background-color: #f7d5d8;
+  border-color: #fdccd1;
+}
+
+.alert-dismissible {
+  .close {
+    opacity: 1;
+    color: #545454;
+    border: none;
+    text-shadow: none;
+  }
+}

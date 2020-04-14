@@ -1,0 +1,169 @@
+﻿/*
+ *  Document   : _pagination.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for pagination style classes
+ */
+.pager {
+  padding-left: 0;
+  margin: 20px 0;
+  text-align: center;
+  list-style: none;
+
+  li {
+    display: inline;
+
+    > a {
+      @include border-radius(0);
+      border: none;
+      background-color: transparent;
+      color: #222;
+      font-weight: bold;
+      display: inline-block;
+      padding: 5px 14px;
+    }
+
+    a:focus,
+    a:active {
+      background-color: transparent;
+    }
+  }
+  .previous {
+    > a,
+    > span {
+      float: left;
+    }
+  }
+  .next {
+    > a,
+    > span {
+      float: right;
+    }
+  }
+}
+
+.pagination {
+  margin: 20px 0;
+
+  .disabled {
+    a,
+    a:hover,
+    a:focus,
+    a:active {
+      color: #bbb;
+    }
+  }
+
+  li.active {
+    background-color: transparent !important;
+    a {
+      background-color: #ffc107;
+      border-color: #ffc107;
+      color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  li {
+    @include border-radius(0);
+
+    // a:focus,
+    // a:active {
+    //     background-color: transparent;
+    //     color: #555;
+    // }
+  }
+
+  > li {
+    > a {
+      border: none;
+      font-weight: bold;
+      color: #555;
+      font-size: 14px;
+      margin: 0px 3px;
+      color: gray;
+      margin: 5px;
+      border-radius: 50%;
+      color: gray;
+      min-width: 30px;
+      text-transform: uppercase;
+      padding: 0.5rem 0.75rem;
+      line-height: 1.25;
+    }
+  }
+  > li {
+    > a:hover {
+      font-weight: bold;
+      background-color: transparent;
+      color: #8c8b8b;
+      border-radius: 50%;
+      font-size: 14px;
+    }
+  }
+
+  > li:first-child,
+  > li:last-child {
+    > a {
+      width: auto;
+      height: 32px;
+      @include border-radius(0);
+
+      .material-icons {
+        position: relative;
+        bottom: 0px;
+      }
+    }
+  }
+}
+
+.pagination-sm {
+  > li:first-child,
+  > li:last-child {
+    > a {
+      width: 28px;
+      height: 28px;
+
+      .material-icons {
+        position: relative;
+        top: 4px;
+        left: -6px;
+        font-size: 20px;
+      }
+    }
+  }
+  > li > a,
+  > li > span {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+.pagination-lg {
+  > li:first-child,
+  > li:last-child {
+    > a {
+      width: 44px;
+      height: 44px;
+
+      .material-icons {
+        font-size: 30px;
+        position: relative;
+        top: 0px;
+        left: -10px;
+      }
+    }
+  }
+  > li > a,
+  > li > span {
+    padding: 10px 16px;
+    font-size: 18px;
+  }
+}
+.page-link:focus,
+.page-link:hover {
+  color: #65686b;
+  text-decoration: none;
+  background-color: #e3eaf1;
+  border-color: #e3eaf1;
+  border-radius: 50%;
+}

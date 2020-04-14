@@ -1,0 +1,64 @@
+<div class="limiter">
+  <div class="container-login100">
+    <div class="wrap-login100">
+      <form class="login100-form validate-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <span class="login100-form-title pb-5">
+          Login
+        </span>
+        <div class="row">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline">
+              <mat-label>Username</mat-label>
+              <input matInput formControlName="username" />
+              <mat-icon matSuffix>face</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xl-12col-lg-12 col-md-12 col-sm-12 mb-2">
+            <mat-form-field class="example-full-width" appearance="outline">
+              <mat-label>Password</mat-label>
+              <input matInput type="password" formControlName="password">
+              <mat-icon matSuffix>vpn_key</mat-icon>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="flex-sb-m w-full p-t-15 p-b-20">
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input" type="checkbox" value=""> Remember me
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+            </label>
+          </div>
+          <div>
+            <a class="txt1" routerLink="/authentication/forgot-password">Forgot Password?</a>
+          </div>
+        </div>
+        <div class="container-login100-form-btn">
+          <button class="login100-form-btn" type="submit">
+            Login
+          </button>
+        </div>
+        <div class="text-center p-t-30 p-b-20">
+          <span class="txt3">
+            or <a routerLink="/authentication/signup">
+              sign up
+            </a> using
+          </span>
+        </div>
+        <div class="login100-form-social flex-c-m">
+          <a href="#" class="login100-form-social-item flex-c-m bg1 m-r-5">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="login100-form-social-item flex-c-m bg2 m-r-5">
+            <i class="fab fa-twitter"></i>
+          </a>
+        </div>
+      </form>
+      <div class="login100-more" style="background-image: url('assets/images/pages/bg-01.png');">
+      </div>
+    </div>
+  </div>
+</div>

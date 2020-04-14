@@ -1,0 +1,156 @@
+/*
+ *  Document   : _feed.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for feed style classes
+ */
+.feedBody {
+  border-left: 1px solid #d6d6d6;
+  margin-left: 30px;
+  padding-top: 10px;
+  padding-left: 0px;
+}
+.col-auto {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.feedLblStyle {
+  font-weight: bold;
+  padding: 0px 7px 0px 7px;
+  border-radius: 10px;
+}
+.lblFileStyle {
+  color: red;
+  border: 1px solid red;
+}
+.lblTaskStyle {
+  color: #2ed8b6;
+  border: 1px solid #2ed8b6;
+}
+.lblCommentStyle {
+  color: #4099ff;
+  border: 1px solid #4099ff;
+}
+.lblReplyStyle {
+  color: #f15317;
+  border: 1px solid #f15317;
+}
+.feedBody li {
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 25px;
+}
+.feedBody li .feed-user-img {
+  position: absolute;
+  left: -20px;
+  top: -10px;
+}
+.feedBody li .feed-user-img img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.feedBody li.active-feed .feed-user-img:after {
+  border-color: #2ed8b6;
+}
+.feedBody li .feed-user-img:after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  border: 3px solid transparent;
+  border-radius: 50%;
+}
+.feedBody li h6 {
+  line-height: 1.5;
+  cursor: pointer;
+}
+.text-muted {
+  color: #919aa3 !important;
+  margin-bottom: 10px;
+}
+.img-100 {
+  width: 100px;
+}
+.feedBody li h6 {
+  line-height: 1.5;
+  cursor: pointer;
+}
+.feedBody li.active-feed .feed-user-img:after {
+  border-color: #2ed8b6;
+}
+
+.sl-item {
+  border-left: 1px solid #13b1e0;
+  padding-bottom: 1px;
+  padding-left: 15px;
+  position: relative;
+  &:last-child::after {
+    //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+    border-radius: 100%;
+    bottom: 0;
+    content: "";
+    height: 6px;
+    left: -3px;
+    position: absolute;
+    width: 6px;
+  }
+  .sl-content {
+    i {
+      font-size: 12px;
+    }
+    small {
+      position: relative;
+      top: -4px;
+    }
+    p {
+      padding-bottom: 4px;
+      position: relative;
+    }
+  }
+}
+.sl-item::before {
+  background-color: #13b1e0;
+  border-radius: 100%;
+  content: "";
+  height: 12px;
+  left: -6.5px;
+  position: absolute;
+  top: 0;
+  width: 12px;
+}
+.sl-primary {
+  border-left-color: #2196f3;
+  &:last-child::after {
+    background-color: #2196f3;
+  }
+}
+.sl-primary::before {
+  background-color: #2196f3;
+}
+.sl-danger {
+  border-left-color: #f44336;
+  &:last-child::after {
+    background-color: #f44336;
+  }
+}
+.sl-danger::before {
+  background-color: #f44336;
+}
+.sl-success {
+  border-left-color: #4caf50;
+  &:last-child::after {
+    background-color: #4caf50;
+  }
+}
+.sl-success::before {
+  background-color: #4caf50;
+}
+.sl-warning {
+  border-left-color: #ff5722;
+  &:last-child::after {
+    background-color: #ff5722;
+  }
+}
+.sl-warning::before {
+  background-color: #ff5722;
+}

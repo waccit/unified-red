@@ -1,0 +1,37 @@
+﻿/*
+ *  Document   : _carousel.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for owl carousel style classes
+ */
+
+.owl-btns {
+  text-align: center;
+  [class*="owl-"] {
+    color: #fff;
+    font-size: 14px;
+    margin: 5px;
+    padding: 4px 7px;
+    background: #d6d6d6;
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 3px;
+    &:hover {
+      background: #869791;
+      color: #fff;
+      text-decoration: none;
+    }
+  }
+}
+#dashboard_slide {
+  padding: 6px 10px 0px 0px;
+}
+#dashboard_slide2 {
+  padding: 0px 10px 0px 0px;
+}
+.carousel-content {
+  height: 232px;
+  border-radius: 5px;
+  .slide-heading {
+    font-size: 20px;
+  }
+}

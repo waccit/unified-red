@@ -1,0 +1,61 @@
+<section class="content">
+    <div class="container-fluid">
+        <!-- Google Maps -->
+        <div class="alert alert-warning">
+            You need to get
+            <b>Google Map API Key</b> for display maps with
+            <a href="https://developers.google.com/maps/documentation/javascript/get-api-key" class="alert-link"
+                target="_blank">this link</a> (Also you can find documentation on same page).
+        </div>
+        <!-- Basic Example -->
+        <div class="row clearfix">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="header">
+                        <h2>
+                            <strong>Basic</strong> Example
+                        </h2>
+                        <ul class="header-dropdown m-r--5">
+                            <li class="dropdown">
+                                <a href="#" onClick="return false;" data-toggle="dropdown" role="button"
+                                    aria-haspopup="true" aria-expanded="false">
+                                    <i class="material-icons">more_vert</i>
+                                </a>
+                                <ul class="dropdown-menu pull-right">
+                                    <li>
+                                        <a href="#" onClick="return false;">Action</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" onClick="return false;">Another action</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" onClick="return false;">Something else here</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="body">
+                        <agm-map [latitude]="lat" [longitude]="lng" [zoom]="zoom" [disableDefaultUI]="false"
+                            [zoomControl]="false" (mapClick)="mapClicked($event)">
+                            <agm-marker *ngFor="let m of markers; let i = index"
+                                (markerClick)="clickedMarker(m.label, i)" [latitude]="m.lat" [longitude]="m.lng"
+                                [label]="m.label" [markerDraggable]="m.draggable" (dragEnd)="markerDragEnd(m, $event)">
+
+                                <agm-info-window>
+                                    <strong>InfoWindow content</strong>
+                                </agm-info-window>
+
+                            </agm-marker>
+
+                            <agm-circle [latitude]="lat + 0.3" [longitude]="lng" [radius]="5000" [fillColor]="'red'"
+                                [circleDraggable]="true" [editable]="true">
+                            </agm-circle>
+                        </agm-map>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- #END# Basic Example -->
+    </div>
+</section>

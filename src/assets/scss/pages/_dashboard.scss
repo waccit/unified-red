@@ -1,0 +1,47 @@
+﻿/*
+ *  Document   : _dashboard.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for dashboard page style classes
+ */
+.dashboard-flot-chart {
+  height: 275px;
+}
+
+.dashboard-donut-chart {
+  height: 265px;
+  text-align: center;
+}
+
+.dashboard-line-chart {
+  height: 250px;
+}
+
+.dashboard-stat-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 40px;
+
+  li {
+    padding: 16px 0 0 0;
+
+    small {
+      font-size: 8px;
+    }
+  }
+}
+
+.dashboard-task-infos {
+  .progress {
+    height: 10px;
+    position: relative;
+    top: 6px;
+  }
+}
+.totalEarning {
+  text-align: center;
+  padding: 6px;
+  color: #ff9800;
+}
+.earningProgress .progress {
+  height: 9px;
+}

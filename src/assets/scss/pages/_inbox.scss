@@ -1,0 +1,118 @@
+﻿/*
+ *  Document   : _inbox.scss
+ *  Author     : RedStar Template
+ *  Description: This scss file for email page style classes
+ */
+.p-15 {
+  padding: 15px;
+}
+.p-10 {
+  padding: 10px;
+}
+.b-b {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+.mail_listing {
+  .mail-option {
+    .btn-group {
+      margin-bottom: 5px;
+    }
+  }
+}
+#mail-nav {
+  .btn {
+    min-width: 110px;
+  }
+  #mail-folders {
+    list-style-type: none;
+    padding-left: 0px;
+  }
+  #mail-folders > li {
+    margin: 2px 0;
+    a {
+      &:hover {
+        color: #fff;
+        background-color: #337ab7;
+      }
+    }
+    &.active > a {
+      color: #fff;
+      background-color: #337ab7;
+      &:hover {
+        background-color: #32c0c3;
+      }
+    }
+  }
+  #mail-labels {
+    float: left;
+    width: 100%;
+    list-style-type: none;
+    padding-left: 0px;
+    li {
+      float: left;
+    }
+    .material-icons {
+      font-size: 16px;
+      height: 16px;
+      padding: 2px;
+      float: left;
+    }
+  }
+  #online-offline {
+    list-style-type: none;
+    padding-left: 0px;
+    .material-icons {
+      font-size: 8px;
+      height: 8px;
+      padding: 0px 5px 2px 0;
+    }
+  }
+  #mail-labels,
+  #online-offline {
+    li {
+      a:hover {
+        background-color: #e6e6e6;
+      }
+    }
+  }
+  li {
+    a {
+      color: #212529;
+      padding: 7px 10px;
+      display: block;
+      border-radius: 4px;
+      position: relative;
+      -webkit-transition: all 0.2s ease-out;
+      -moz-transition: all 0.2s ease-out;
+      transition: all 0.2s ease-out;
+    }
+  }
+}
+.composeForm {
+  padding: 25px;
+}
+.inbox-body {
+  padding: 20px;
+}
+.replyBox {
+  border: 1px solid rgba(120, 130, 140, 0.13);
+  padding: 20px;
+}
+.inbox-center .table thead th {
+  vertical-align: middle;
+  padding: 20px;
+}
+.email-btn-group {
+  position: relative;
+  display: -ms-inline-flexbox;
+  display: -webkit-inline-box;
+  display: inline-flex;
+  vertical-align: middle;
+}
+.max-texts {
+  padding: 15px !important;
+  a {
+    color: #212529;
+    padding: 10px 0px 10px 0px;
+  }
+}
