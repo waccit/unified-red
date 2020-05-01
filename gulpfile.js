@@ -1,5 +1,9 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
+var replace = require('gulp-replace');
+var sass = require('gulp-sass');
+var rename = require('gulp-rename');
+var eol = require('gulp-eol');
 var uglify = require('gulp-uglify');
 var uglifycss = require('gulp-uglifycss');
 var autoprefixer = require('gulp-autoprefixer');
@@ -61,8 +65,33 @@ function style(done) {
 	done();
 };
 
+// gridstack
+function gridstack(done) {
+	gulp.src(paths.npm + '/gridstack/dist/gridstack.min.css').pipe(gulp.dest('src/assets/css/'));
+	gulp.src(paths.npm + '/gridstack/dist/gridstack.jQueryUI.min.js').pipe(gulp.dest('src/assets/js/'));
+	gulp.src(paths.npm + '/gridstack/dist/gridstack.min.js').pipe(gulp.dest('src/assets/js/'));
+	gulp.src(paths.npm + '/gridstack/dist/gridstack.min.map').pipe(gulp.dest('src/assets/js/'));
+	gulp.src(paths.npm + '/lodash/lodash.min.js').pipe(gulp.dest('src/assets/js/'));
+	gulp.src(paths.npm + '/gridstack/dist/src/gridstack-extra.scss')
+		.pipe(replace('$gridstack-columns: 12 !default;','$gridstack-columns: 30;'))
+		.pipe(sass({outputStyle: 'compressed'}))
+		.pipe(rename({extname: '.min.css'}))
+		.pipe(gulp.dest('src/assets/css'))
+	done();
+}
+
+// tinycolor2
+function tinycolor2(done) {
+	gulp.src(paths.npm + '/tinycolor2/dist/tinycolor-min.js')
+		.pipe(eol('\n'))
+		.pipe(gulp.dest('src/assets/js/'));
+	done();
+}
+
 gulp.task("scripts", scripts);
 gulp.task("chart", chart);
 gulp.task("style", style);
+gulp.task("gridstack", gridstack);
+gulp.task("tinycolor2", tinycolor2);
 
-gulp.task("default", gulp.series(scripts, chart, style));
+gulp.task("default", gulp.series(scripts, chart, style, gridstack, tinycolor2));
