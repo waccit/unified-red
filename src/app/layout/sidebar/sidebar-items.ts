@@ -11,6 +11,32 @@ export const ROUTES: RouteInfo[] = [
   },
   {
     path: '',
+    title: 'WAC',
+    icon: 'menu-icon ti-star',
+    class: 'menu-toggle',
+    groupTitle: false,
+    submenu: [
+      {
+        path: '/',
+        title: 'uR Demonstration 1',
+        icon: '',
+        class: 'ml-sub-menu',
+        groupTitle: false,
+        submenu: [
+          {
+            path: '/dashboard/demo',
+            title: 'Second Level',
+            icon: '',
+            class: '',
+            groupTitle: false,
+            submenu: []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    path: '',
     title: 'Home',
     icon: 'menu-icon ti-home',
     class: 'menu-toggle',

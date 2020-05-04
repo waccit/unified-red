@@ -3,6 +3,7 @@ import { FullCalendarComponent } from '@fullcalendar/angular';
 import { EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
+import { SocketIoService } from './../../services/socket-io.service';
 import { DynamicScriptLoaderService } from './../../services/dynamic-script-loader.service';
 import {
   ChartComponent,
@@ -102,7 +103,7 @@ export class MainComponent implements OnInit {
     }
   ];
 
-  constructor(private dynamicScriptLoader: DynamicScriptLoaderService) {}
+  constructor(private dynamicScriptLoader: DynamicScriptLoaderService, private socketIo: SocketIoService) {}
 
   // area chart start
   public areaChartOptions = {
@@ -250,8 +251,27 @@ export class MainComponent implements OnInit {
   ];
   // end bar chart
 
+  //Node-RED DEMO UI-TEXT
+  ui_text = "default";
+
   ngOnInit() {
     'use strict';
+    
+    //socketio testing
+    // this.socketIo.connect(function (ui) {
+    //   console.log(ui.site);
+    //   console.log(ui.menu);
+    // }, function () {});
+
+    // // this.socketIo.on('ui-controls', (data) => {
+    // //   console.log("ui-controls data received: ", data);
+    // // })
+
+    // this.socketIo.on('update-value', data => {
+    //   console.log('update-value called!: ', data);
+    //   this.ui_text = data.value;
+    // });
+
     this.chart1();
     this.chart2();
   }
