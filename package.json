@@ -9,7 +9,17 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
+  "contributors": [
+    { "name": "Nick Lee", "email" : "nlee@wasocal.com" },
+    { "name": "Samy Arbid", "email" : "sarbid@wasocal.com" },
+    { "name": "Michael Montalvo", "email" : "mmontalvo@wasocal.com" }
+  ],
   "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/waccit/unified-red.git"
+  },
   "node-red": {
     "version": ">=0.14.0",
     "nodes": {
@@ -17,7 +27,9 @@
       "ui_tab": "nodes/ui_tab.js",
       "ui_subtab": "nodes/ui_subtab.js",
       "ui_group": "nodes/ui_group.js",
-      "ui_text": "nodes/ui_text.js"
+      "ui_text": "nodes/ui_text.js",
+      "ur-pagerduty-config": "nodes/ur-pagerduty-config.js",
+      "ur-pagerduty": "nodes/ur-pagerduty.js"
     }
   },
   "dependencies": {
@@ -91,7 +103,8 @@
     "socket.io-client": "^2.3.0",
     "sweetalert2": "^9.8.2",
     "tslib": "^1.11.0",
-    "zone.js": "~0.10.3"
+    "zone.js": "~0.10.3",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.901.0",
