@@ -1,15 +1,17 @@
-## Setup Unified-RED development environment:
+# Setup Unified-RED development environment:
 
 ## Symlink Node-RED to development folder
 
-`cd ~/.node-red`
-`npm install --save ~/git/unified-red`
+```
+cd ~/.node-red
+npm install --save ~/git/unified-red
+```
 
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-## Old Angular CLI notes:
+# Old Angular CLI notes:
 
 ## Development server
 
