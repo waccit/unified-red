@@ -493,6 +493,7 @@ function init(server, app, log, redSettings) {
         );
       });
     }
+    //TODO: load API module here
   });
 
   log.info("Dashboard version " + urVersion + " started at " + fullPath);
