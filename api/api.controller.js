@@ -16,7 +16,6 @@ const app = require('express').Router();
 
 // function dummy(req, res, next) {
 // }
-
 app.use('/users', require('./users/user.controller'));
 app.use('/hello', require('./hello.controller'));
 
