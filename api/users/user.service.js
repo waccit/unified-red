@@ -15,7 +15,10 @@ module.exports = {
 
 async function authenticate({ username, password }) {
     const user = await User.findOne({ username });
-    if (user && bcrypt.compareSync(password, user.hash)) {
+    if (user && !user.enabled) { 
+        throw "Disabled user account";
+    }
+    else if (user && bcrypt.compareSync(password, user.hash)) {
         const token = jwt.sign({ sub: user.id }, config.secret);
         return {
             ...user.toJSON(),
