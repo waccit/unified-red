@@ -1,6 +1,8 @@
 const app = require('express');
 // const router = express.Router();
 
+module.exports = app;
+
 // routes
 // router.all('/users', require('./users/users.controller'));
 // router.all('/session', require('./session/session.controller'));
@@ -17,4 +19,5 @@ const app = require('express');
 // function dummy(req, res, next) {
 // }
 
-app.use('/users', require('api/users/users.controller'));
+// app.use('/users', require('./users/user.controller'));
+app.use('/hello', require('./hello.controller'));

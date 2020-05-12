@@ -500,7 +500,7 @@ function init(server, app, log, redSettings) {
 
     // Define Unified API
     app.use(jwt());
-    app.use('/api', require('api/api.controller'));
+    app.use('/api', require('./api/api.controller'));
     app.use(errorHandler);
 
   });
