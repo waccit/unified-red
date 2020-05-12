@@ -1,7 +1,5 @@
-const app = require('express');
+const app = require('express').Router();
 // const router = express.Router();
-
-module.exports = app;
 
 // routes
 // router.all('/users', require('./users/users.controller'));
@@ -19,5 +17,7 @@ module.exports = app;
 // function dummy(req, res, next) {
 // }
 
-// app.use('/users', require('./users/user.controller'));
+app.use('/users', require('./users/user.controller'));
 app.use('/hello', require('./hello.controller'));
+
+module.exports = app;

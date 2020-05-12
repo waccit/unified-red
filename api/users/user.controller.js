@@ -1,6 +1,6 @@
 const app = require('express');
 const router = app.Router();
-const userService = require('api/users/user.service');
+const userService = require('./user.service');
 
 // routes
 router.post('/authenticate', authenticate);
