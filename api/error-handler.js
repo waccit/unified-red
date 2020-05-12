@@ -1,3 +1,8 @@
+/*
+Credit to Jason Watmore (https://github.com/cornflourblue) for user management API example.
+Source: https://github.com/cornflourblue/node-mongo-registration-login-api
+*/
+
 module.exports = errorHandler;
 
 function errorHandler(err, req, res, next) {

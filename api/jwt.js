@@ -1,3 +1,8 @@
+/*
+Credit to Jason Watmore (https://github.com/cornflourblue) for user management API example.
+Source: https://github.com/cornflourblue/node-mongo-registration-login-api
+*/
+
 const expressJwt = require('express-jwt');
 const config = require('./config.json');
 const userService = require('./users/user.service');
@@ -10,8 +15,7 @@ function jwt() {
         path: [
             // public routes that don't require authentication
             '/api/users/authenticate',
-            '/api/users/register',
-            '/api/hello'
+            '/api/users/register'
         ]
     });
 }
