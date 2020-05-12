@@ -10,9 +10,18 @@
     "e2e": "ng e2e"
   },
   "contributors": [
-    { "name": "Nick Lee", "email" : "nlee@wasocal.com" },
-    { "name": "Samy Arbid", "email" : "sarbid@wasocal.com" },
-    { "name": "Michael Montalvo", "email" : "mmontalvo@wasocal.com" }
+    {
+      "name": "Nick Lee",
+      "email": "nlee@wasocal.com"
+    },
+    {
+      "name": "Samy Arbid",
+      "email": "sarbid@wasocal.com"
+    },
+    {
+      "name": "Michael Montalvo",
+      "email": "mmontalvo@wasocal.com"
+    }
   ],
   "private": true,
   "license": "Apache-2.0",

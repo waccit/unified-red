@@ -25,6 +25,10 @@ var socketio = require("socket.io");
 var serveStatic = require("serve-static");
 var compression = require("compression");
 
+// Unified API requires
+const jwt = require('./api/jwt');
+const errorHandler = require('./api/error-handler');
+
 var urVersion = require("./package.json").version;
 var baseConfiguration = {};
 var io;
@@ -493,7 +497,12 @@ function init(server, app, log, redSettings) {
         );
       });
     }
-    //TODO: load API module here
+
+    // Define Unified API
+    app.use(jwt());
+    app.use('/api', require('api/api.controller'));
+    app.use(errorHandler);
+
   });
 
   log.info("Dashboard version " + urVersion + " started at " + fullPath);
