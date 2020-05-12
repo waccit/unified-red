@@ -1,3 +1,8 @@
+/*
+Credit to Jason Watmore (https://github.com/cornflourblue) for user management API example.
+Source: https://github.com/cornflourblue/node-mongo-registration-login-api
+*/
+
 const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -15,10 +20,8 @@ module.exports = {
 
 async function authenticate({ username, password }) {
     const user = await User.findOne({ username });
-    if (user && !user.enabled) { 
-        throw "Disabled user account";
-    }
-    else if (user && bcrypt.compareSync(password, user.hash)) {
+    checkValidUser(user);
+    if (user && bcrypt.compareSync(password, user.hash)) {
         const token = jwt.sign({ sub: user.id }, config.secret);
         return {
             ...user.toJSON(),
@@ -45,6 +48,7 @@ async function create(userParam) {
 
     // hash password
     if (userParam.password) {
+        checkStrongPassword(userParam.password);
         user.hash = bcrypt.hashSync(userParam.password, 10);
     }
 
@@ -56,13 +60,14 @@ async function update(id, userParam) {
     const user = await User.findById(id);
 
     // validate
-    if (!user) throw 'User not found';
+    checkValidUser(user);
     if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
 
     // hash password if it was entered
     if (userParam.password) {
+        checkStrongPassword(userParam.password);
         userParam.hash = bcrypt.hashSync(userParam.password, 10);
     }
 
@@ -74,4 +79,37 @@ async function update(id, userParam) {
 
 async function _delete(id) {
     await User.findByIdAndRemove(id);
+}
+
+
+function checkValidUser(user) {
+    if (!user) {
+        throw "User not found";
+    }
+    if (!user.enabled) {
+        throw "Disabled user account";
+    }
+    if (user.expirationDate && user.expirationDate.getTime() < new Date().getTime()) {
+        throw "User account has expired";
+    }
+}
+
+function checkStrongPassword(password) {
+    /*
+     * Password Regular Expression Pattern: 
+     * Source: http://www.mkyong.com/regular-expressions/how-to-validate-password-with-regular-expression/
+     */
+    let minPasswordLength = 8;
+    let passwordPattern = "(" /* Start of group */
+        + "(?=.*[a-z])" /* must contains one lowercase characters */
+        + "(?=.*[A-Z])" /* must contains one uppercase characters */
+        /* must contains one digit or symbol in the list "`~!@#$%^&*()-_=+[]{}\/|;:'\",.<>?" */
+        + "(?=.*[0-9`~\\!@#\\$%\\^&\\*\\(\\)\\-_\\=\\+\\[\\]\\{\\}\\\\/\\|;:'\",\\.\\<\\>\\?])"
+        + "." /* match anything with previous condition checking */
+        + "{" + minPasswordLength + ",}" /* length at least 8 characters */
+        + ")"; /* End of group */
+
+    if (!new RegExp(passwordPattern).test(password)) {
+        throw "Weak password. Password must have a minimum of 8 characters containing a lowercase character, a uppercase character, and a digit or symbol.";
+    }
 }
