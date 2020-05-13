@@ -10,12 +10,13 @@ const userService = require('./users/user.service');
 module.exports = jwt;
 
 function jwt() {
-    const secret = config.secret;
+    const secret = config.jwtsecret;
     return expressJwt({ secret, isRevoked }).unless({
         path: [
             // public routes that don't require authentication
             '/api/users/authenticate',
-            '/api/users/register'
+            '/api/users/register',
+            /\/api\/users\/reset\/.+/i
         ]
     });
 }
