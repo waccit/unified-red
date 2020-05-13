@@ -7,6 +7,7 @@ import {
   RouterEvent
 } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
+import { SocketIoService } from './services/socket-io.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,7 @@ export class AppComponent {
   currentUrl: string;
   showLoadingIndicatior = true;
 
-  constructor(public _router: Router, location: PlatformLocation) {
+  constructor(public _router: Router, location: PlatformLocation, private socketIo: SocketIoService) {
     this._router.events.subscribe((routerEvent: Event) => {
       if (routerEvent instanceof NavigationStart) {
         this.showLoadingIndicatior = true;
@@ -33,5 +34,10 @@ export class AppComponent {
       }
       window.scrollTo(0, 0);
     });
+
+    this.socketIo.connect( ui => {
+      console.log(ui.site);
+      console.log(ui.menu);
+    }, () => {});
   }
 }

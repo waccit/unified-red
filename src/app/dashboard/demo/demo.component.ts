@@ -26,10 +26,10 @@ export class DemoComponent implements OnInit {
   ngOnInit() {
     'use strict';
 
-    this.socketIo.connect( ui => {
-      console.log(ui.site);
-      console.log(ui.menu);
-    }, () => {});
+    // this.socketIo.connect( ui => {
+    //   console.log(ui.site);
+    //   console.log(ui.menu);
+    // }, () => {});
 
     this.socketIo.on('update-value', data => {
       console.log('update-value called: ', data);
