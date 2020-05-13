@@ -15,8 +15,7 @@ router.get('/current', getCurrent);
 router.get('/:id', getById);
 router.put('/:id', update);
 router.delete('/:id', _delete);
-
-router.get('/reset/:username', generateResetToken);
+router.get('/forgot/:username', forgot);
 router.post('/reset/:token', resetPassword);
 
 module.exports = router;
@@ -79,9 +78,9 @@ function _delete(req, res, next) {
 }
 
 // curl test:
-// curl http://localhost:1880/api/users/reset/user
-function generateResetToken(req, res, next) {
-    userService.generateResetToken(req.params.username)
+// curl http://localhost:1880/api/users/forgot/user
+function forgot(req, res, next) {
+    userService.generateResetToken(req, req.params.username)
         .then(() => res.json({}))
         .catch(err => next(err));
 }

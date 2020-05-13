@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require("nodemailer");
+const settings = require(process.cwd() + '/settings.js');
 const User = db.User;
 
 module.exports = {
@@ -90,7 +91,7 @@ async function _delete(id) {
     await User.findByIdAndRemove(id);
 }
 
-async function generateResetToken(username) {
+async function generateResetToken(req, username) {
     const user = await User.findOne({ "username": username });
 
     // generate reset token and save in user
@@ -105,15 +106,20 @@ async function generateResetToken(username) {
         auth: { user: config.smtp.user, pass: config.smtp.password }
     });
 
-    let resetLink = "http://localhost:1880/api/users/reset/" + token;
+    let rootPath = "/ui";
+    if (typeof settings.ui !== "undefined" && typeof settings.ui.path !== "undefined") {
+        rootPath = settings.ui.path.length ? "/" + settings.ui.path : "";
+    }
+
+    let resetLink = req.protocol + "://" + req.get('host') + rootPath + "/#/authentication/reset-password?t=" + token;
     let resetVerbiage = "A password reset has been request for username '" + user.username + 
                         "'. Please click this link to change your password: " + resetLink;
 
     // send email
     let info = await transporter.sendMail({
-        from: '"Unified" <unified@waciot.com>',
-        to: "mmontalvo@wasocal.com, " + user.email,
-        subject: "Password Reset",
+        from: config.smtp.fromAddress,
+        to: user.email,
+        subject: "Password Reset for " + user.username,
         text: resetVerbiage,
         html: resetVerbiage
     });
