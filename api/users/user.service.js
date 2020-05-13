@@ -7,6 +7,8 @@ const config = require('../config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
+const { v4: uuidv4 } = require('uuid');
+const nodemailer = require("nodemailer");
 const User = db.User;
 
 module.exports = {
@@ -15,14 +17,16 @@ module.exports = {
     getById,
     create,
     update,
-    delete: _delete
+    delete: _delete,
+    generateResetToken: generateResetToken,
+    resetPassword: resetPassword
 };
 
 async function authenticate({ username, password }) {
     const user = await User.findOne({ username });
     checkValidUser(user);
     if (user && bcrypt.compareSync(password, user.hash)) {
-        const token = jwt.sign({ sub: user.id }, config.secret);
+        const token = jwt.sign({ sub: user.id }, config.jwtsecret);
         return {
             ...user.toJSON(),
             token
@@ -43,6 +47,7 @@ async function create(userParam) {
     if (await User.findOne({ username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
+    validateEmailAddress(userParam.email);
 
     const user = new User(userParam);
 
@@ -64,6 +69,10 @@ async function update(id, userParam) {
     if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
+    // validate email address if it was entered
+    if (userParam.email) {
+        validateEmailAddress(userParam.email);
+    }
 
     // hash password if it was entered
     if (userParam.password) {
@@ -81,6 +90,44 @@ async function _delete(id) {
     await User.findByIdAndRemove(id);
 }
 
+async function generateResetToken(username) {
+    const user = await User.findOne({ "username": username });
+
+    // generate reset token and save in user
+    let token = uuidv4();
+    update(user.id, { resetToken: token });
+
+    // setup email server
+    let transporter = nodemailer.createTransport({
+        host: config.smtp.host, // TODO: make all smtp settings web based
+        port: config.smtp.port,
+        secure: config.smtp.ssl, // true for 465, false for other ports
+        auth: { user: config.smtp.user, pass: config.smtp.password }
+    });
+
+    let resetLink = "http://localhost:1880/api/users/reset/" + token;
+    let resetVerbiage = "A password reset has been request for username '" + user.username + 
+                        "'. Please click this link to change your password: " + resetLink;
+
+    // send email
+    let info = await transporter.sendMail({
+        from: '"Unified" <unified@waciot.com>',
+        to: "mmontalvo@wasocal.com, " + user.email,
+        subject: "Password Reset",
+        text: resetVerbiage,
+        html: resetVerbiage
+    });
+}
+
+async function resetPassword(token, { password }) { // TODO: need web page to handle new password input
+    // validate token and find user
+    if (!token) throw "Invalid or expired reset token";
+    const user = await User.findOne({ "resetToken": token });
+    if (!user) throw "Invalid or expired reset token";
+
+    // update user password
+    update(user.id, { password: password, resetToken: null });
+}
 
 function checkValidUser(user) {
     if (!user) {
@@ -91,6 +138,12 @@ function checkValidUser(user) {
     }
     if (user.expirationDate && user.expirationDate.getTime() < new Date().getTime()) {
         throw "User account has expired";
+    }
+}
+
+function validateEmailAddress(email) {
+    if (!email || !/^([^@]+)@([^\.]+)\.[a-z]+$/.test(email)) {
+        throw "Invalid email address.";
     }
 }
 

@@ -11,9 +11,11 @@ const schema = new Schema({
     hash: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    email: { type: String, required: true },
     enabled: { type: Boolean, default: true, required: true },
     createdDate: { type: Date, default: Date.now },
-    expirationDate: { type: Date }
+    expirationDate: { type: Date },
+    resetToken: { type: String }
 });
 
 schema.set('toJSON', {
@@ -22,6 +24,7 @@ schema.set('toJSON', {
     transform: function (doc, ret) {
         delete ret._id;
         delete ret.hash;
+        delete ret.resetToken;
     }
 });
 
