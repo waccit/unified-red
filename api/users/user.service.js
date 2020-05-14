@@ -93,6 +93,7 @@ async function _delete(id) {
 
 async function generateResetToken(req, username) {
     const user = await User.findOne({ "username": username });
+    checkValidUser(user);
 
     // generate reset token and save in user
     let token = uuidv4();
