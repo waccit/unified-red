@@ -9,8 +9,8 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require("nodemailer");
-const settings = require(process.cwd() + '/settings.js');
 const User = db.User;
+var _settings;
 
 module.exports = {
     authenticate,
@@ -108,8 +108,8 @@ async function generateResetToken(req, username) {
     });
 
     let rootPath = "/ui";
-    if (typeof settings.ui !== "undefined" && typeof settings.ui.path !== "undefined") {
-        rootPath = settings.ui.path.length ? "/" + settings.ui.path : "";
+    if (typeof settings().ui !== "undefined" && typeof settings().ui.path !== "undefined") {
+        rootPath = settings().ui.path.length ? "/" + settings().ui.path : "";
     }
 
     let resetLink = req.protocol + "://" + req.get('host') + rootPath + "/#/authentication/reset-password?t=" + token;
@@ -172,4 +172,11 @@ function checkStrongPassword(password) {
     if (!new RegExp(passwordPattern).test(password)) {
         throw "Weak password. Password must have a minimum of 8 characters containing a lowercase character, a uppercase character, and a digit or symbol.";
     }
+}
+
+function settings() {
+    if (!_settings) {
+        _settings = require(process.env.RED_SETTINGS_FILE);
+    }
+    return _settings;
 }
