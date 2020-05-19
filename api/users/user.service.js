@@ -19,8 +19,8 @@ module.exports = {
     create,
     update,
     delete: _delete,
-    generateResetToken: generateResetToken,
-    resetPassword: resetPassword
+    generateResetToken,
+    resetPassword
 };
 
 async function authenticate({ username, password }) {
@@ -60,6 +60,7 @@ async function create(userParam) {
 
     // save user
     await user.save();
+    return user;
 }
 
 async function update(id, userParam) {
@@ -85,6 +86,7 @@ async function update(id, userParam) {
     Object.assign(user, userParam);
 
     await user.save();
+    return user;
 }
 
 async function _delete(id) {
@@ -124,6 +126,7 @@ async function generateResetToken(req, username) {
         text: resetVerbiage,
         html: resetVerbiage
     });
+    return true;
 }
 
 async function resetPassword(token, { password }) { // TODO: need web page to handle new password input
@@ -133,7 +136,7 @@ async function resetPassword(token, { password }) { // TODO: need web page to ha
     if (!user) throw "Invalid or expired reset token";
 
     // update user password
-    update(user.id, { password: password, resetToken: null });
+    return update(user.id, { password: password, resetToken: null });
 }
 
 function checkValidUser(user) {
@@ -150,7 +153,7 @@ function checkValidUser(user) {
 
 function validateEmailAddress(email) {
     if (!email || !/^([^@]+)@([^\.]+)\.[a-z]+$/.test(email)) {
-        throw "Invalid email address.";
+        throw "Invalid email address";
     }
 }
 

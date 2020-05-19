@@ -32,7 +32,7 @@ function authenticate(req, res, next) {
 // curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "user", "password": "Password123", "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/register
 function register(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({}))
+        .then(user => res.json(user))
         .catch(err => next(err));
 }
 
@@ -65,7 +65,7 @@ function getById(req, res, next) {
 // curl -X PUT -d '{ "expirationDate": "2020-05-11T21:18:57.008Z" }' -H 'Content-Type: application/json' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/5ebb2e23ef03f345cd1d3b03
 function update(req, res, next) {
     userService.update(req.params.id, req.body)
-        .then(() => res.json({}))
+        .then(user => res.json(user))
         .catch(err => next(err));
 }
 
