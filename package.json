@@ -32,11 +32,11 @@
   "node-red": {
     "version": ">=0.14.0",
     "nodes": {
-      "ui_base": "nodes/ui_base.js",
-      "ui_tab": "nodes/ui_tab.js",
-      "ui_subtab": "nodes/ui_subtab.js",
-      "ui_group": "nodes/ui_group.js",
-      "ui_text": "nodes/ui_text.js",
+      "ur_base": "nodes/ur_base.js",
+      "ur_tab": "nodes/ur_tab.js",
+      "ur_subtab": "nodes/ur_subtab.js",
+      "ur_group": "nodes/ur_group.js",
+      "ur_text": "nodes/ur_text.js",
       "ur-pagerduty-config": "nodes/ur-pagerduty-config.js",
       "ur-pagerduty": "nodes/ur-pagerduty.js"
     }
