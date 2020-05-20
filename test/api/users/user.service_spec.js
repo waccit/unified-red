@@ -87,12 +87,26 @@ describe('userService', function() {
     });
 
     describe('#delete()', function() {
-        it("should delete account", function() {
-            let user = { "firstName": "temp", "lastName": "temp", "username": "temp", "password": "Password123", "email":"temp@temp.com" };
-            userService.create(user).then(user => {
-                userService.getById(user._id).should.eventually.have.property("username", "temp");
-                userService.delete(user._id).should.eventually.be.undefined();
-                userService.getById(user._id).should.eventually.be.null();
+        let userParam = { "firstName": "temp", "lastName": "temp", "username": "temp", "password": "Password123", "email":"temp@temp.com" };
+        it("should delete account (sync)", async function() {
+            let user = await userService.create(userParam);
+            let result = await userService.getById(user._id);
+            result.should.have.property("username", "temp");
+            result = await userService.delete(user._id);
+            should(result).be.undefined();
+            result = await userService.getById(user._id);
+            should(result).be.null();
+        });
+        it("should delete account (async)", function(done) {
+            userService.create(userParam).then(function(user) {
+                userService.getById(user._id).then(function(result) {
+                    result.should.have.property("username", "temp");
+                    userService.delete(user._id).then(function(result) {
+                        should(result).be.undefined();
+                        userService.getById(user._id).should.eventually.be.null();
+                        done();
+                    });
+                });
             });
         });
     });
