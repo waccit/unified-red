@@ -50,5 +50,5 @@ module.exports = function(RED) {
       });
       node.on("close", done);
   }
-  RED.nodes.registerType("ui_text", TextNode);
+  RED.nodes.registerType("ur_text", TextNode);
 };

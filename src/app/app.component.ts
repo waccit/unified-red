@@ -7,6 +7,7 @@ import {
   RouterEvent
 } from '@angular/router';
 import { PlatformLocation } from '@angular/common';
+import { WebSocketService } from './services/web-socket.service';
 
 @Component({
   selector: 'app-root',
@@ -16,8 +17,10 @@ import { PlatformLocation } from '@angular/common';
 export class AppComponent {
   currentUrl: string;
   showLoadingIndicatior = true;
+  sidebarItems: any[] = [];
 
-  constructor(public _router: Router, location: PlatformLocation) {
+  constructor(public _router: Router, location: PlatformLocation, private webSocketService: WebSocketService) {
+    console.log("AppComponent Constructor Called");
     this._router.events.subscribe((routerEvent: Event) => {
       if (routerEvent instanceof NavigationStart) {
         this.showLoadingIndicatior = true;
@@ -32,6 +35,45 @@ export class AppComponent {
         this.showLoadingIndicatior = false;
       }
       window.scrollTo(0, 0);
+    });
+
+    this.webSocketService.listen('ui-controls').subscribe( (data: any) => {
+      this.sidebarItems = [
+        {
+          path: '',
+          title: '-- Main',
+          icon: '',
+          class: 'header',
+          groupTitle: true,
+          submenu: []
+        },
+        {
+          path: '',
+          title: data.menu[0].header,
+          icon: 'menu-icon mdc-' + data.menu[0].icon,
+          class: 'menu-toggle',
+          groupTitle: false,
+          submenu: [
+            {
+              path: '/',
+              title: data.menu[0].items[0].header,
+              icon: '',
+              class: 'ml-sub-menu',
+              groupTitle: false,
+              submenu: [
+                {
+                  path: '/dashboard/demo',
+                  title: data.menu[0].items[0].items[0].header.config.name,
+                  icon: '',
+                  class: '',
+                  groupTitle: false,
+                  submenu: []
+                },
+              ]
+            }
+          ]
+        }
+      ]
     });
   }
 }

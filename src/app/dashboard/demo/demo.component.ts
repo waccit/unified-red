@@ -1,8 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 
-
-import { SocketIoService } from './../../services/socket-io.service';
 import { DynamicScriptLoaderService } from './../../services/dynamic-script-loader.service';
+import { WebSocketService } from '../../services/web-socket.service';
 
 @Component({
   selector: 'app-demo',
@@ -11,7 +10,7 @@ import { DynamicScriptLoaderService } from './../../services/dynamic-script-load
 })
 
 export class DemoComponent implements OnInit {
-  constructor(private dynamicScriptLoader: DynamicScriptLoaderService, private socketIo: SocketIoService) {}
+  constructor(private dynamicScriptLoader: DynamicScriptLoaderService, private webSocketService: WebSocketService) {}
 
   text1: any = {
     id: '',
@@ -26,12 +25,11 @@ export class DemoComponent implements OnInit {
   ngOnInit() {
     'use strict';
 
-    this.socketIo.connect( ui => {
-      console.log(ui.site);
-      console.log(ui.menu);
-    }, () => {});
+    this.webSocketService.listen('ui-controls').subscribe( (data) => {
+      console.log("WebSocketService connect data: ", data);
+    });
 
-    this.socketIo.on('update-value', data => {
+    this.webSocketService.listen('update-value').subscribe( (data: any) => {
       console.log('update-value called: ', data);
       if (data.value.length > 3) {
         if (this.text1.id.length === 0 ) {
