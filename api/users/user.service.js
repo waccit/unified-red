@@ -90,7 +90,7 @@ async function update(id, userParam) {
 }
 
 async function _delete(id) {
-    if (await User.count() === 1) {
+    if (await User.countDocuments() === 1) {
         throw "Unable to delete last user";
     }
     const user = await User.findById(id);
