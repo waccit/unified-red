@@ -1,10 +1,10 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_(x) {
-        return RED._("node-red-dashboard/ui_template:ui_template."+x);
+        return RED._("node-red-dashboard/ur_template:ur_template."+x);
     }
 
-    RED.nodes.registerType('ui_template',{
+    RED.nodes.registerType('ur_template',{
         category: 'unified-red',
         color: 'rgb( 63, 173, 181)',
         defaults: {
@@ -31,7 +31,7 @@
         },
         inputs:1,
         outputs:1,
-        icon: "ui_template.png",
+        icon: "ur_template.png",
         paletteLabel: 'template',
         label: function() { return this.name || 'template'; },
         labelStyle: function() { return this.name?"node_label_italic":""; },
@@ -94,7 +94,7 @@
 
             RED.library.create({
                 url:"uitemplates", // where to get the data from
-                type:"ui_template", // the type of object the library is for
+                type:"ur_template", // the type of object the library is for
                 editor:this.editor, // the field name the main text body goes to
                 mode:"ace/mode/html",
                 fields:['name']
@@ -153,32 +153,32 @@
     });
 </script>
 
-<script type="text/html" data-template-name="ui_template">
+<script type="text/html" data-template-name="ur_template">
     <div class="form-row">
-        <label for="node-input-format"><span data-i18n="ui_template.label.type"></span></label>
+        <label for="node-input-format"><span data-i18n="ur_template.label.type"></span></label>
         <select style="width:76%" id="node-input-templateScope">
-            <option value="local" data-i18n="ui_template.label.local"></option>
-            <option value="global" data-i18n="ui_template.label.global"></option>
+            <option value="local" data-i18n="ur_template.label.local"></option>
+            <option value="global" data-i18n="ur_template.label.global"></option>
         </select>
     </div>
 	<div class="form-row" id="template-row-group">
-        <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ui_template.label.group"></span></label>
+        <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ur_template.label.group"></span></label>
         <input type="text" id="node-input-group">
     </div>
     <div class="form-row" id="template-row-size">
-        <label><i class="fa fa-object-group"></i> <span data-i18n="ui_template.label.size"></span></label>
+        <label><i class="fa fa-object-group"></i> <span data-i18n="ur_template.label.size"></span></label>
         <input type="hidden" id="node-input-width">
         <input type="hidden" id="node-input-height">
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ui_template.label.name"></span></label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_template.label.name"></span></label>
         <div style="display:inline-block; width:calc(100% - 105px)">
             <input type="text" id="node-input-name">
         </div>
     </div>
     <div class="form-row" style="margin-bottom:0px;">
-        <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ui_template.label.template"></span></label>
+        <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ur_template.label.template"></span></label>
         <input type="hidden" id="node-input-format">
         <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right"><i class="fa fa-expand"></i></button>
     </div>
@@ -188,20 +188,20 @@
     <div id="template-pass-store">
         <div class="form-row" style="margin-bottom:0px;">
             <input type="checkbox" id="node-input-fwdInMessages" style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;">
-            <label for="node-input-fwdInMessages" style="width:70%;"> <span data-i18n="ui_template.label.pass-through"></span></label>
+            <label for="node-input-fwdInMessages" style="width:70%;"> <span data-i18n="ur_template.label.pass-through"></span></label>
         </div>
         <div class="form-row" style="margin-bottom:0px;">
             <input type="checkbox" id="node-input-storeOutMessages" style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;">
-            <label for="node-input-storeOutMessages" style="width:70%;"> <span data-i18n="ui_template.label.store-state"></span></label>
+            <label for="node-input-storeOutMessages" style="width:70%;"> <span data-i18n="ur_template.label.store-state"></span></label>
         </div>
         <div class="form-row" style="margin-bottom:0px;">
             <input type="checkbox" id="node-input-resendOnRefresh" style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;">
-            <label for="node-input-resendOnRefresh" style="width:70%;"> <span data-i18n="ui_template.label.resend"></span></label>
+            <label for="node-input-resendOnRefresh" style="width:70%;"> <span data-i18n="ur_template.label.resend"></span></label>
         </div>
     </div>
 </script>
 
-<script type="text/html" data-help-name="ui_template">
+<script type="text/html" data-help-name="ur_template">
     <p>The template widget can contain any valid html and Angular/Angular-Material directives.</p>
     <p>This node can be used to create a dynamic user interface element that changes its appearence
     based on the input message and can send back messages to Node-RED.</p>
