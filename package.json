@@ -107,7 +107,6 @@
     "ngx-mask": "^8.1.7",
     "ngx-material-file-input": "^2.1.0",
     "ngx-perfect-scrollbar": "^9.0.0",
-    "ngx-socket-io": "^3.0.1",
     "node-sass": "^4.13.1",
     "node-waves": "^0.7.6",
     "nodemailer": "^6.4.6",
