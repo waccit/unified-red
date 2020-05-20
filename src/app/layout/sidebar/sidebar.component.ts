@@ -5,9 +5,10 @@ import {
   ElementRef,
   OnInit,
   Renderer2,
-  HostListener
+  HostListener,
+  Input
 } from '@angular/core';
-import { ROUTES } from './sidebar-items';
+// import { ROUTES } from './sidebar-items';
 
 declare const Waves: any;
 @Component({
@@ -16,7 +17,7 @@ declare const Waves: any;
   styleUrls: ['./sidebar.component.sass']
 })
 export class SidebarComponent implements OnInit {
-  public sidebarItems: any[];
+  @Input() sidebarItems: any[];
   showMenu: string = '';
   showSubMenu: string = '';
   public innerHeight: any;
@@ -28,7 +29,7 @@ export class SidebarComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document,
     private renderer: Renderer2,
     public elementRef: ElementRef
-  ) {}
+  ) { }
 
   @HostListener('window:resize', ['$event'])
   windowResizecall(event) {
@@ -62,8 +63,8 @@ export class SidebarComponent implements OnInit {
       this.showSubMenu = element;
     }
   }
+
   ngOnInit() {
-    this.sidebarItems = ROUTES.filter(sidebarItem => sidebarItem);
     this.initLeftSidebar();
     this.bodyTag = this.document.body;
   }

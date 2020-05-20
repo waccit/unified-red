@@ -15,5 +15,5 @@ module.exports = function(RED) {
         if (!this.config.hasOwnProperty("collapse")) { this.config.collapse = false; }
     }
 
-    RED.nodes.registerType("ui_group", GroupNode);
+    RED.nodes.registerType("ur_group", GroupNode);
 };

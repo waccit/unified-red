@@ -8,9 +8,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
-const nodemailer = require("nodemailer");
-const settings = require(process.cwd() + '/settings.js');
+const emailService = require("../email.service");
 const User = db.User;
+var _settings;
 
 module.exports = {
     authenticate,
@@ -19,8 +19,8 @@ module.exports = {
     create,
     update,
     delete: _delete,
-    generateResetToken: generateResetToken,
-    resetPassword: resetPassword
+    generateResetToken,
+    resetPassword
 };
 
 async function authenticate({ username, password }) {
@@ -60,6 +60,7 @@ async function create(userParam) {
 
     // save user
     await user.save();
+    return user;
 }
 
 async function update(id, userParam) {
@@ -85,45 +86,39 @@ async function update(id, userParam) {
     Object.assign(user, userParam);
 
     await user.save();
+    return user;
 }
 
 async function _delete(id) {
+    if (await User.count() === 1) {
+        throw "Unable to delete last user";
+    }
+    const user = await User.findById(id);
+    if (!user) {
+        throw "User not found";
+    }
     await User.findByIdAndRemove(id);
 }
 
-async function generateResetToken(req, username) {
+async function generateResetToken(req, username) { // TODO: decouple from http (req)
     const user = await User.findOne({ "username": username });
     checkValidUser(user);
 
     // generate reset token and save in user
     let token = uuidv4();
-    update(user.id, { resetToken: token });
+    await update(user.id, { resetToken: token });
 
-    // setup email server
-    let transporter = nodemailer.createTransport({
-        host: config.smtp.host, // TODO: make all smtp settings web based
-        port: config.smtp.port,
-        secure: config.smtp.ssl, // true for 465, false for other ports
-        auth: { user: config.smtp.user, pass: config.smtp.password }
-    });
-
+    // build email message
     let rootPath = "/ui";
-    if (typeof settings.ui !== "undefined" && typeof settings.ui.path !== "undefined") {
-        rootPath = settings.ui.path.length ? "/" + settings.ui.path : "";
+    if (typeof settings().ui !== "undefined" && typeof settings().ui.path !== "undefined") {
+        rootPath = settings().ui.path.length ? "/" + settings().ui.path : "";
     }
-
     let resetLink = req.protocol + "://" + req.get('host') + rootPath + "/#/authentication/reset-password?t=" + token;
-    let resetVerbiage = "A password reset has been request for username '" + user.username + 
-                        "'. Please click this link to change your password: " + resetLink;
+    let message = "A password reset has been request for username '" + user.username + 
+                "'. Please click this link to change your password: " + resetLink;
 
-    // send email
-    let info = await transporter.sendMail({
-        from: config.smtp.fromAddress,
-        to: user.email,
-        subject: "Password Reset for " + user.username,
-        text: resetVerbiage,
-        html: resetVerbiage
-    });
+    await emailService.send(user.email, "Password Reset for " + user.username, message);
+    return token;
 }
 
 async function resetPassword(token, { password }) { // TODO: need web page to handle new password input
@@ -133,7 +128,7 @@ async function resetPassword(token, { password }) { // TODO: need web page to ha
     if (!user) throw "Invalid or expired reset token";
 
     // update user password
-    update(user.id, { password: password, resetToken: null });
+    return await update(user.id, { password: password, resetToken: null });
 }
 
 function checkValidUser(user) {
@@ -150,7 +145,7 @@ function checkValidUser(user) {
 
 function validateEmailAddress(email) {
     if (!email || !/^([^@]+)@([^\.]+)\.[a-z]+$/.test(email)) {
-        throw "Invalid email address.";
+        throw "Invalid email address";
     }
 }
 
@@ -172,4 +167,16 @@ function checkStrongPassword(password) {
     if (!new RegExp(passwordPattern).test(password)) {
         throw "Weak password. Password must have a minimum of 8 characters containing a lowercase character, a uppercase character, and a digit or symbol.";
     }
+}
+
+function settings() {
+    if (!_settings) {
+        try {
+            _settings = require(process.env.RED_SETTINGS_FILE);
+        }
+        catch (e) {
+            return {};
+        }
+    }
+    return _settings;
 }

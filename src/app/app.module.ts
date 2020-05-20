@@ -5,8 +5,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './layout/header/header.component';
@@ -49,7 +47,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   wheelPropagation: false
 };
 
-const config: SocketIoConfig = { url: 'http://localhost:1880' , options: {path: '/ui/socket.io'} };
 @NgModule({
   declarations: [
     AppComponent,
@@ -88,7 +85,6 @@ const config: SocketIoConfig = { url: 'http://localhost:1880' , options: {path: 
     AgmCoreModule.forRoot({
       apiKey: 'YOUR API KEY'
     }),
-    SocketIoModule.forRoot(config)
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },
