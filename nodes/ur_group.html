@@ -1,14 +1,14 @@
 <script type="text/javascript">
     // convert to i18 text
-    function c_ui_group(x) {
-        return RED._("node-red-uc-dashboard/ui_group:ui_group."+x);
+    function c_ur_group(x) {
+        return RED._("unified-red/ur_group:ur_group."+x);
     }
 
-    RED.nodes.registerType('ui_group',{
+    RED.nodes.registerType('ur_group',{
         category: 'config',
         defaults: {
-            name: {value: c_ui_group("label.default")},
-            subtab: {type:"ui_subtab", required: true },
+            name: {value: c_ur_group("label.default")},
+            subtab: {type:"ur_subtab", required: true },
             order: {value: 0},
             disp: {value: true},
             width: {value: 6},
@@ -39,7 +39,7 @@
             var subtabName = subtabNode ? subtabNode.name : "label.unassigned";
             var tabName = tabNode ? tabNode.name : "label.unassigned";
             
-            return "["+(tabName || c_ui_group("label.tab"))+"] ["+(subtabName||c_ui_group("label.subtab"))+"] " + (this.name || c_ui_group("label.group"));
+            return "["+(tabName || c_ur_group("label.tab"))+"] ["+(subtabName||c_ur_group("label.subtab"))+"] " + (this.name || c_ur_group("label.group"));
         },
         labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function() {
@@ -60,28 +60,28 @@
     });
 </script>
 
-<script type="text/html" data-template-name="ui_group">
+<script type="text/html" data-template-name="ur_group">
     <div class="form-row">
-        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="ui_group.label.name"></span></label>
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_group.label.name"></span></label>
         <input type="text" id="node-config-input-name">
     </div>
     <div class="form-row">
-        <label for="node-config-input-subtab"><i class="fa fa-table"></i> <span data-i18n="ui_group.label.subtab"></span></label>
+        <label for="node-config-input-subtab"><i class="fa fa-table"></i> <span data-i18n="ur_group.label.subtab"></span></label>
         <input type="text" id="node-config-input-subtab">
     </div>
     <div class="form-row">
-        <label for="node-config-input-width"><i class="fa fa-arrows-h"></i> <span data-i18n="ui_group.label.width"></span></label>
+        <label for="node-config-input-width"><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span></label>
         <input type="hidden" id="node-config-input-width">
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
-        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp"> <label style="width:auto" for="node-config-input-disp"><span data-i18n="ui_group.display-name"></span></label>
+        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp"> <label style="width:auto" for="node-config-input-disp"><span data-i18n="ur_group.display-name"></span></label>
     </div>
     <div class="form-row" id="group-collapse-flag">
-        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse"> <label style="width:auto" for="node-config-input-collapse"><span data-i18n="ui_group.collapse-name"></span></label>
+        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse"> <label style="width:auto" for="node-config-input-collapse"><span data-i18n="ur_group.collapse-name"></span></label>
     </div>
 </script>
 
-<script type="text/html" data-help-name="ui_group">
+<script type="text/html" data-help-name="ur_group">
     <p>Group</p>
 </script>
