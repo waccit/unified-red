@@ -9,8 +9,8 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const nodemailer = require("nodemailer");
-const settings = require(process.cwd() + '/settings.js');
 const User = db.User;
+var _settings;
 
 module.exports = {
     authenticate,
@@ -19,8 +19,8 @@ module.exports = {
     create,
     update,
     delete: _delete,
-    generateResetToken: generateResetToken,
-    resetPassword: resetPassword
+    generateResetToken,
+    resetPassword
 };
 
 async function authenticate({ username, password }) {
@@ -60,6 +60,7 @@ async function create(userParam) {
 
     // save user
     await user.save();
+    return user;
 }
 
 async function update(id, userParam) {
@@ -85,6 +86,7 @@ async function update(id, userParam) {
     Object.assign(user, userParam);
 
     await user.save();
+    return user;
 }
 
 async function _delete(id) {
@@ -93,6 +95,7 @@ async function _delete(id) {
 
 async function generateResetToken(req, username) {
     const user = await User.findOne({ "username": username });
+    checkValidUser(user);
 
     // generate reset token and save in user
     let token = uuidv4();
@@ -107,8 +110,8 @@ async function generateResetToken(req, username) {
     });
 
     let rootPath = "/ui";
-    if (typeof settings.ui !== "undefined" && typeof settings.ui.path !== "undefined") {
-        rootPath = settings.ui.path.length ? "/" + settings.ui.path : "";
+    if (typeof settings().ui !== "undefined" && typeof settings().ui.path !== "undefined") {
+        rootPath = settings().ui.path.length ? "/" + settings().ui.path : "";
     }
 
     let resetLink = req.protocol + "://" + req.get('host') + rootPath + "/#/authentication/reset-password?t=" + token;
@@ -123,6 +126,7 @@ async function generateResetToken(req, username) {
         text: resetVerbiage,
         html: resetVerbiage
     });
+    return true;
 }
 
 async function resetPassword(token, { password }) { // TODO: need web page to handle new password input
@@ -132,7 +136,7 @@ async function resetPassword(token, { password }) { // TODO: need web page to ha
     if (!user) throw "Invalid or expired reset token";
 
     // update user password
-    update(user.id, { password: password, resetToken: null });
+    return update(user.id, { password: password, resetToken: null });
 }
 
 function checkValidUser(user) {
@@ -149,7 +153,7 @@ function checkValidUser(user) {
 
 function validateEmailAddress(email) {
     if (!email || !/^([^@]+)@([^\.]+)\.[a-z]+$/.test(email)) {
-        throw "Invalid email address.";
+        throw "Invalid email address";
     }
 }
 
@@ -171,4 +175,11 @@ function checkStrongPassword(password) {
     if (!new RegExp(passwordPattern).test(password)) {
         throw "Weak password. Password must have a minimum of 8 characters containing a lowercase character, a uppercase character, and a digit or symbol.";
     }
+}
+
+function settings() {
+    if (!_settings) {
+        _settings = require(process.env.RED_SETTINGS_FILE);
+    }
+    return _settings;
 }
