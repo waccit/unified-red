@@ -1,0 +1,63 @@
+<section class="content">
+  <div class="container-fluid">
+
+    <div class="row">
+      <div class="col-lg-6 col-sm-6">
+        <div class="info-box7 l-bg-green order-info-box7">
+          <div class="info-box7-block">
+            <h4 class="m-b-20">Node-RED Text1</h4>
+            <h2 class="text-right"><i class="far fa-clock pull-left"></i><span>{{text1.value}}</span></h2>
+            <p class="m-b-0">Incoming timestamp from TextNode ID: {{text1.id}}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6 col-sm-6">
+        <div class="info-box7 l-bg-purple order-info-box7">
+          <div class="info-box7-block">
+            <h4 class="m-b-20">Node-RED Text2</h4>
+            <h2 class="text-right"><i class="fas fa-random pull-left"></i><span>{{text2.value}}</span></h2>
+            <p class="m-b-0">Incoming random numbers from TextNode ID: {{text2.id}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="header">
+            <h2>Node-RED Gauge</h2>
+            <ul class="header-dropdown m-r--5">
+              <li class="dropdown">
+                <a href="#" onClick="return false;" data-toggle="dropdown" role="button" aria-haspopup="true"
+                  aria-expanded="false">
+                  <i class="material-icons">more_vert</i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                  <li>
+                    <a href="#" onClick="return false;">Action</a>
+                  </li>
+                  <li>
+                    <a href="#" onClick="return false;">Another action</a>
+                  </li>
+                  <li>
+                    <a href="#" onClick="return false;">Something else here</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="card-body">
+            <div style="height: 400px">
+              <ngx-charts-gauge [view]="view" [scheme]="colorScheme" [results]="text2.value" [min]="0" [max]="100"
+                [angleSpan]="180" [startAngle]="0" [units]="'alerts'" [bigSegments]="10" [smallSegments]="5" >
+              </ngx-charts-gauge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+  </div>
+</section>

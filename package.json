@@ -37,6 +37,7 @@
       "ui_subtab": "nodes/ui_subtab.js",
       "ui_group": "nodes/ui_group.js",
       "ui_text": "nodes/ui_text.js",
+      "ui_template": "nodes/ui_template.js",
       "ur-pagerduty-config": "nodes/ur-pagerduty-config.js",
       "ur-pagerduty": "nodes/ur-pagerduty.js"
     }
