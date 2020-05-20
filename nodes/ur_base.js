@@ -79,7 +79,7 @@ module.exports = function(RED) {
       }
       ui.addBaseConfig(this.config);
   }
-  RED.nodes.registerType("ui_base", BaseNode);
+  RED.nodes.registerType("ur_base", BaseNode);
 
   RED.library.register("themes");
 
@@ -87,7 +87,7 @@ module.exports = function(RED) {
       res.json(set);
   });
 
-  RED.httpAdmin.get('/ui_base/js/*', function(req, res) {
+  RED.httpAdmin.get('/ur_base/js/*', function(req, res) {
       var filename = path.join(__dirname , '../dist/assets/js', req.params[0]);
       res.sendFile(filename, function (err) {
           if (err) {
@@ -95,13 +95,13 @@ module.exports = function(RED) {
                   node.warn(filename + " not found. Maybe running in dev mode.");
               }
               else {
-                  console.log("ui_base - error:",err);
+                  console.log("ur_base - error:",err);
               }
           }
       });
   });
 
-  RED.httpAdmin.get('/ui_base/css/*', function(req, res) {
+  RED.httpAdmin.get('/ur_base/css/*', function(req, res) {
       var filename = path.join(__dirname , '../dist/assets/css', req.params[0]);
       res.sendFile(filename, function (err) {
           if (err) {
@@ -109,7 +109,7 @@ module.exports = function(RED) {
                   node.warn(filename + " not found. Maybe running in dev mode.");
               }
               else {
-                  console.log("ui_base - error:",err);
+                  console.log("ur_base - error:",err);
               }
           }
       });

@@ -1,5 +1,5 @@
 {
-    "ui_base" : {
+    "ur_base" : {
         "label" : {
             "dashboard" : "dashboard",
             "title" : "Title",
@@ -90,7 +90,7 @@
         },
         "temp" : {
             "allow-theme" : "Node-RED theme everywhere",
-            "no-theme" : "Use Angular theme in ui_template",
+            "no-theme" : "Use Angular theme in ur_template",
             "none" : "Angular theme everywhere"
         }
     }
