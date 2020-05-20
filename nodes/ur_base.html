@@ -227,8 +227,8 @@
 
 
 <!-- Dashboard layout tool -->
-<link rel="stylesheet" href="./ui_base/css/gridstack.min.css">
-<link rel="stylesheet" href="./ui_base/css/gridstack-extra.min.css">
+<link rel="stylesheet" href="./ur_base/css/gridstack.min.css">
+<link rel="stylesheet" href="./ur_base/css/gridstack-extra.min.css">
 <style>
 .grid-stack {
   background-color: #f8f8f8;
@@ -353,15 +353,15 @@ margin-left: 2px;
 
   // convert to i18 text
   function c_(x) {
-      return RED._("unified-red/ui_base:ui_base."+x);
+      return RED._("unified-red/ur_base:ur_base."+x);
   }
 
   // Try to load dist version first
   // then if fails, load non dist version
   // ********* NEED TO FIX BUILD FILE FOR TINYCOLOR2 **************//
-  loadTinyColor('ui_base/js/tinycolor-min.js');
-  // loadTinyColor('ui_base/js/tinycolor-min.js');
-  //loadTinyColor('ui_base/tinycolor2/dist/tinycolor-min.js');
+  loadTinyColor('ur_base/js/tinycolor-min.js');
+  // loadTinyColor('ur_base/js/tinycolor-min.js');
+  //loadTinyColor('ur_base/tinycolor2/dist/tinycolor-min.js');
 
 
   // Dashboard layout tool
@@ -383,9 +383,9 @@ margin-left: 2px;
       });
   };
 
-  loadGsLib('ui_base/js/lodash.min.js', function() {
-      loadGsLib('ui_base/js/gridstack.min.js', function() {
-          loadGsLib('ui_base/js/gridstack.jQueryUI.min.js', null)
+  loadGsLib('ur_base/js/lodash.min.js', function() {
+      loadGsLib('ur_base/js/gridstack.min.js', function() {
+          loadGsLib('ur_base/js/gridstack.jQueryUI.min.js', null)
       });
   });
 
@@ -408,7 +408,7 @@ margin-left: 2px;
       var tab = {};
       // Tab information
       for (var cnt = 0; cnt < nodes.length; cnt++) {
-          if (nodes[cnt].type == "ui_tab" && nodes[cnt].id == tabID) {
+          if (nodes[cnt].type == "ur_tab" && nodes[cnt].id == tabID) {
               tab = {
                   id: nodes[cnt].id,
                   name: nodes[cnt].name,
@@ -421,7 +421,7 @@ margin-left: 2px;
       }
       // Subtab information
       for (var cnt = 0; cnt < nodes.length; cnt++){
-          if (nodes[cnt].type == "ui_subtab" && nodes[cnt].tab == tabID) {
+          if (nodes[cnt].type == "ur_subtab" && nodes[cnt].tab == tabID) {
               var subtab = {
                   id: nodes[cnt].id,
                   name: nodes[cnt].name,
@@ -435,7 +435,7 @@ margin-left: 2px;
       // Group information
       for (var cnt=0; cnt < nodes.length; cnt++) {
           tab.subtabs.forEach(subtab => {
-              if (nodes[cnt].type == "ui_group" && nodes[cnt].subtab == subtab.id) {
+              if (nodes[cnt].type == "ur_group" && nodes[cnt].subtab == subtab.id) {
                   var group = {
                       id: nodes[cnt].id,
                       name: nodes[cnt].name,
@@ -457,7 +457,7 @@ margin-left: 2px;
           
           for (var cnt = 0; cnt < nodes.length; cnt++) {
               var group = groupsIdx[nodes[cnt].group];
-              if (group != null && (/^ui_/.test(nodes[cnt].type) && nodes[cnt].type !== 'ui_link' && nodes[cnt].type !== 'ui_toast' && nodes[cnt].type !== 'ui_ui_control' && nodes[cnt].type !== 'ui_audio' && nodes[cnt].type !== 'ui_base' && nodes[cnt].type !== 'ui_group' && nodes[cnt].type !== 'ui_subtab' && nodes[cnt].type !== 'ui_tab')) {
+              if (group != null && (/^ur_/.test(nodes[cnt].type) && nodes[cnt].type !== 'ur_link' && nodes[cnt].type !== 'ur_toast' && nodes[cnt].type !== 'ur_ui_control' && nodes[cnt].type !== 'ur_audio' && nodes[cnt].type !== 'ur_base' && nodes[cnt].type !== 'ur_group' && nodes[cnt].type !== 'ur_subtab' && nodes[cnt].type !== 'ur_tab')) {
                   var widget = {
                       id: nodes[cnt].id,
                       type: nodes[cnt].type,
@@ -483,7 +483,7 @@ margin-left: 2px;
 
       // Subtab Information
       for (let i = 0; i < nodes.length; i++) {
-          if (nodes[i].type == "ui_subtab" && nodes[i].id == subtabId) {
+          if (nodes[i].type == "ur_subtab" && nodes[i].id == subtabId) {
               subtab = {
                   tabId,
                   id: nodes[i].id,
@@ -498,7 +498,7 @@ margin-left: 2px;
 
       // Group Information
       nodes.forEach(node => {
-          if(node.type == "ui_group" && node.subtab == subtabId) {
+          if(node.type == "ur_group" && node.subtab == subtabId) {
               var group = {
                   id: node.id,
                   name: node.name,
@@ -519,20 +519,20 @@ margin-left: 2px;
 
       var isWidget = (nodeType) => {
           return (
-              nodeType !== 'ui_link'  &&
-              nodeType !== 'ui_toast' &&
-              nodeType !== 'ui_ui_control' &&
-              nodeType !== 'ui_audio' &&
-              nodeType !== 'ui_base' &&
-              nodeType !== 'ui_group' &&
-              nodeType !== 'ui_subtab' &&
-              nodeType !== 'ui_tab'
+              nodeType !== 'ur_link'  &&
+              nodeType !== 'ur_toast' &&
+              nodeType !== 'ur_ui_control' &&
+              nodeType !== 'ur_audio' &&
+              nodeType !== 'ur_base' &&
+              nodeType !== 'ur_group' &&
+              nodeType !== 'ur_subtab' &&
+              nodeType !== 'ur_tab'
           );
       };
 
       nodes.forEach(node => {
           var group = groupIdx[node.group];
-          if (group && (/^ui_/.test(node.type) && isWidget(node.type))) {
+          if (group && (/^ur_/.test(node.type) && isWidget(node.type))) {
               var widget = {
                   id: node.id,
                   type: node.type,
@@ -596,10 +596,10 @@ margin-left: 2px;
                   RED.view.redraw(true);
               } else {
                   // Add a spacer node
-                  if (t_widgets[cnt2].type === 'ui_spacer') {
+                  if (t_widgets[cnt2].type === 'ur_spacer') {
                       var spaceNode = {
-                          _def: RED.nodes.getType("ui_spacer"),
-                          type: "ui_spacer",
+                          _def: RED.nodes.getType("ur_spacer"),
+                          type: "ur_spacer",
                           hasUsers: false,
                           users: [],
                           id: RED.nodes.id(),
@@ -668,10 +668,10 @@ margin-left: 2px;
   //                     RED.view.redraw(true);
   //                 } else {
   //                     // Add a spacer node
-  //                     if (t_widgets[cnt2].type === 'ui_spacer') {
+  //                     if (t_widgets[cnt2].type === 'ur_spacer') {
   //                         var spaceNode = {
-  //                             _def: RED.nodes.getType("ui_spacer"),
-  //                             type: "ui_spacer",
+  //                             _def: RED.nodes.getType("ur_spacer"),
+  //                             type: "ur_spacer",
   //                             hasUsers: false,
   //                             users: [],
   //                             id: RED.nodes.id(),
@@ -812,7 +812,7 @@ margin-left: 2px;
                               width: 1,
                               height: 1,
                               name: 'spacer',
-                              type: 'ui_spacer'
+                              type: 'ur_spacer'
                           });
                           spacerAdded = true;
                       } else {
@@ -854,7 +854,7 @@ margin-left: 2px;
       var redNode = RED.nodes.node(nodeID);
       var height = 1;
 
-      if (redNode.type === 'ui_gauge') {
+      if (redNode.type === 'ur_gauge') {
           if (redNode.gtype === 'gage') {
               height = Math.round(groupWidth/2)+1;
           } else if (redNode.gtype === 'wave') {
@@ -872,24 +872,24 @@ margin-left: 2px;
                   height = Math.round(groupWidth*0.95);
               }
           }
-      } else if (redNode.type === 'ui_chart') {
+      } else if (redNode.type === 'ur_chart') {
           height = Math.floor(groupWidth/2)+1;
-      } else if (redNode.type === 'ui_form') {
+      } else if (redNode.type === 'ur_form') {
           var optNum = redNode.options.length; // Sub widget number
           if (redNode.label) {
               height = optNum + 2; // Label and Button
           } else {
               height = optNum + 1; // Button only
           }
-      } else if (redNode.type === 'ui_lineargauge') {
+      } else if (redNode.type === 'ur_lineargauge') {
           if (redNode.unit && redNode.name) {
               height = 5;
           } else {
               height = 4;
           }
-      } else if (redNode.type === 'ui_list') {
+      } else if (redNode.type === 'ur_list') {
           height = 5;
-      } else if (redNode.type === 'ui_vega') {
+      } else if (redNode.type === 'ur_vega') {
           height = 5;
       }
       return height;
@@ -1123,25 +1123,25 @@ margin-left: 2px;
   // Check dashboard layout tool supported
   //////////////////////////////////////////
   function isLayoutToolSupported(nodeType){
-      if (nodeType !== "ui_spacer" &&
-          nodeType !== "ui_button" &&
-          nodeType !== "ui_dropdown" &&
-          nodeType !== "ui_switch" &&
-          nodeType !== "ui_slider" &&
-          nodeType !== "ui_numeric" &&
-          nodeType !== "ui_text_input" &&
-          nodeType !== "ui_date_picker" &&
-          nodeType !== "ui_coloui_picker" &&
-          nodeType !== "ui_form" &&
-          nodeType !== "ui_text" &&
-          nodeType !== "ui_gauge" &&
-          nodeType !== "ui_chart" &&
-          nodeType !== "ui_template" &&
-          nodeType !== "ui_list" &&
-          nodeType !== "ui_table" &&
-          nodeType !== "ui_lineargauge" &&
-          nodeType !== "ui_my-little-ui-node" &&
-          nodeType !== "ui_vega") {
+      if (nodeType !== "ur_spacer" &&
+          nodeType !== "ur_button" &&
+          nodeType !== "ur_dropdown" &&
+          nodeType !== "ur_switch" &&
+          nodeType !== "ur_slider" &&
+          nodeType !== "ur_numeric" &&
+          nodeType !== "ur_text_input" &&
+          nodeType !== "ur_date_picker" &&
+          nodeType !== "ur_colour_picker" &&
+          nodeType !== "ur_form" &&
+          nodeType !== "ur_text" &&
+          nodeType !== "ur_gauge" &&
+          nodeType !== "ur_chart" &&
+          nodeType !== "ur_template" &&
+          nodeType !== "ur_list" &&
+          nodeType !== "ur_table" &&
+          nodeType !== "ur_lineargauge" &&
+          nodeType !== "ur_my-little-ui-node" &&
+          nodeType !== "ur_vega") {
           return false;
       } else {
           return true;
@@ -1149,7 +1149,7 @@ margin-left: 2px;
   }
 
 
-  RED.nodes.registerType('ui_base',{
+  RED.nodes.registerType('ur_base',{
           category: 'config',
           defaults: {
               name: {},
@@ -1294,10 +1294,10 @@ margin-left: 2px;
                   if (globalDashboardNode === null) {
                       var bases = [];
                       RED.nodes.eachConfig(function(n) {
-                          if (n.type === 'ui_base') { bases.push(n); }
+                          if (n.type === 'ur_base') { bases.push(n); }
                       });
 
-                      // make sure we only have one ui_base node
+                      // make sure we only have one ur_base node
                       // at the moment this will just use our existing one - deleting any new base node and theme
                       // at some point we may want to make this an option to select one or the other.
                       while (bases.length > 1) {
@@ -1382,8 +1382,8 @@ margin-left: 2px;
                           if (noDashboardNode) {
                               globalDashboardNode = {
                                   id: RED.nodes.id(),
-                                  _def: RED.nodes.getType("ui_base"),
-                                  type: "ui_base",
+                                  _def: RED.nodes.getType("ur_base"),
+                                  type: "ur_base",
                                   site: site,
                                   theme: theme,
                                   users: []
@@ -1391,7 +1391,7 @@ margin-left: 2px;
                               RED.nodes.add(globalDashboardNode);
                           }
                           else {
-                              globalDashboardNode["_def"] = RED.nodes.getType("ui_base");
+                              globalDashboardNode["_def"] = RED.nodes.getType("ur_base");
                               globalDashboardNode.site = site;
                               globalDashboardNode.theme = theme;
                               delete globalDashboardNode.name;
@@ -2038,13 +2038,13 @@ margin-left: 2px;
               //Add item button
               $('<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> '+c_("layout.tab")+'</a>')
               .click(function(evt) {
-                  tabContainer.editableList('addItem',{type: 'ui_tab'});
+                  tabContainer.editableList('addItem',{type: 'ur_tab'});
                   evt.preventDefault();
               })
               .appendTo(buttonGroup);
               $('<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> '+c_("layout.link")+'</a>')
               .click(function(evt) {
-                  tabContainer.editableList('addItem',{type: 'ui_link'});
+                  tabContainer.editableList('addItem',{type: 'ur_link'});
                   evt.preventDefault();
               })
               .appendTo(buttonGroup);
@@ -2075,16 +2075,16 @@ margin-left: 2px;
                   // create node if needed
                   if (!item.node) {
                       var defaultItem = {
-                          'ui_tab': {
-                              _def: RED.nodes.getType('ui_tab'),
-                              type: 'ui_tab',
+                          'ur_tab': {
+                              _def: RED.nodes.getType('ur_tab'),
+                              type: 'ur_tab',
                               users: [],
                               icon: 'dashboard',
                               name: 'Tab'
                           },
-                          'ui_link': {
-                              _def: RED.nodes.getType('ui_link'),
-                              type: 'ui_link',
+                          'ur_link': {
+                              _def: RED.nodes.getType('ur_link'),
+                              type: 'ur_link',
                               users: [],
                               icon: 'open_in_browser',
                               name: 'Link',
@@ -2096,7 +2096,7 @@ margin-left: 2px;
                       item.node.order = i+1
                       item.node.name += ' '+item.node.order
                       listElements[item.node.id] = container;
-                      if (item.type === 'ui_tab') {
+                      if (item.type === 'ur_tab') {
                           item.subtabs = [];
                           // item.groups = [];
                       }
@@ -2120,7 +2120,7 @@ margin-left: 2px;
                   // title
                   var titleRow = $('<div>',{class:"nr-db-sb-list-header nr-db-sb-tab-list-header"}).appendTo(container);
                   switch (item.type) {
-                      case 'ui_tab': {
+                      case 'ur_tab': {
                           container.addClass("nr-db-sb-tab-list-item");
                           $('<i class="nr-db-sb-list-handle nr-db-sb-tab-list-handle fa fa-bars"></i>').appendTo(titleRow);
                           var chevron = $('<i class="fa fa-angle-down nr-db-sb-list-chevron">',{style:"width:10px;"}).appendTo(titleRow);
@@ -2132,7 +2132,7 @@ margin-left: 2px;
                           $('<span>',{class:"nr-db-sb-title"+tabhide+tabable}).text(item.node.name||"").appendTo(titleRow);
                           break;
                       }
-                      case 'ui_link': {
+                      case 'ur_link': {
                           $('<i class="nr-db-sb-list-handle fa fa-bars"></i>').appendTo(titleRow);
                           var title = $('<div class="nr-db-sb-link">').appendTo(titleRow);
                           var nameContainer = $('<div class="nr-db-sb-link-name-container">').appendTo(title);
@@ -2144,7 +2144,7 @@ margin-left: 2px;
                   }
                   // buttons
                   var buttonGroup = $('<div>',{class:"nr-db-sb-list-header-button-group"}).appendTo(titleRow);
-                  if (item.type === 'ui_tab') {
+                  if (item.type === 'ur_tab') {
                       var addSubtabButton = $('<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> '+c_("layout.subtab")+'</a>').appendTo(buttonGroup);
                       // var addGroupButton = $('<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> '+c_("layout.group")+'</a>').appendTo(buttonGroup);
                   }
@@ -2156,15 +2156,15 @@ margin-left: 2px;
                   });
 
                   // Dashboard layout tool
-                  // if (item.type === 'ui_tab') {
+                  // if (item.type === 'ur_tab') {
                       
                   // }
 
-                  if (item.type === 'ui_tab') {
+                  if (item.type === 'ur_tab') {
                       // var content = $('<div>',{class:"nr-db-sb-group-list-container"}).appendTo(container);
                       var content = $('<div>', {class: "nr-db-sb-subtab-list-container"}).appendTo(container);
 
-                      // ui_tab subtab chevron
+                      // ur_tab subtab chevron
                       if (listStates.hasOwnProperty(item.node.id) && !listStates[item.node.id]) {
                           content.hide();
                           chevron.css({"transform":"rotate(-90deg)"});
@@ -2176,7 +2176,7 @@ margin-left: 2px;
                       }
                       titleRow.click(titleToggle(item.node.id,content,chevron));
 
-                      // ui_tab subtab list
+                      // ur_tab subtab list
                       var ol = $('<ol>',{class:"nr-db-sb-subtab-list"}).appendTo(content).editableList({
                           sortable:".nr-db-sb-subtab-list-header",
                           addButton: false,
@@ -2186,8 +2186,8 @@ margin-left: 2px;
                               if (!subtab.node) {
                                   subtab.node = {
                                       id: RED.nodes.id(),
-                                      _def: RED.nodes.getType("ui_subtab"),
-                                      type: "ui_subtab",
+                                      _def: RED.nodes.getType("ur_subtab"),
+                                      type: "ur_subtab",
                                       users: [],
                                       tab: item.node.id,
                                       order: i+1,
@@ -2372,7 +2372,7 @@ margin-left: 2px;
                                                       widgets[cnt2].width = groupWidth;
                                                   }
                                                   // Auto support
-                                                  if (widgets[cnt2].auto === true || widgets[cnt2].type === 'ui_form') {
+                                                  if (widgets[cnt2].auto === true || widgets[cnt2].type === 'ur_form') {
                                                       widgets[cnt2].height = getDefaultHeight(widgets[cnt2].id, groupWidth);
                                                   }
                                                   // Calculate coordinates to be placed
@@ -2387,12 +2387,12 @@ margin-left: 2px;
                                               _.each(items, function (node) {
                                                   var minHeight = null;
                                                   var maxHeight = null;
-                                                  // ui_form is fixed to height 2
-                                                  if (node.type === 'ui_form') {
+                                                  // ur_form is fixed to height 2
+                                                  if (node.type === 'ur_form') {
                                                       minHeight = node.height;
                                                       maxHeight = node.height;
                                                   }
-                                                  if (node.type !== 'ui_spacer') {
+                                                  if (node.type !== 'ur_spacer') {
                                                       var dispNode = RED.nodes.node(node.id);
                                                       var dispType = dispNode._def.paletteLabel;
                                                       var dispLabel = dispNode._def.label;
@@ -2475,7 +2475,7 @@ margin-left: 2px;
                                   listStates[subtabNode.id] = true;
                               }
 
-                              // ui_subtab group list
+                              // ur_subtab group list
                               var ol = $('<ol>', {class: "nr-db-sb-group-list"}).appendTo(content).editableList({
                                   sortable: ".nr-db-sb-group-list-header",
                                   addButton: false,
@@ -2485,8 +2485,8 @@ margin-left: 2px;
                                       if (!group.node) {
                                           group.node = {
                                               id: RED.nodes.id(),
-                                              _def: RED.nodes.getType("ui_group"),
-                                              type: "ui_group",
+                                              _def: RED.nodes.getType("ur_group"),
+                                              type: "ur_group",
                                               users: [],
                                               subtab: subtabNode.id,
                                               order: i+1,
@@ -2519,8 +2519,8 @@ margin-left: 2px;
                                       var spacerButton = $('<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> '+c_("layout.spacer")+'</a>').appendTo(buttonGroup);
                                       spacerButton.on('click',function(evt) {
                                           var spaceNode = {
-                                              _def: RED.nodes.getType("ui_spacer"),
-                                              type: "ui_spacer",
+                                              _def: RED.nodes.getType("ur_spacer"),
+                                              type: "ur_spacer",
                                               hasUsers: false,
                                               users: [],
                                               id: RED.nodes.id(),
@@ -2813,7 +2813,7 @@ margin-left: 2px;
               orphanedWidgets.find('a').click(function(event) {
                   var unknownGroups = {};
                   RED.nodes.eachNode(function(node) {
-                      if (/^ui_/.test(node.type) && node.type !== 'ui_link' && node.type !== 'ui_toast' && node.type !== 'ui_ui_control') {
+                      if (/^ur_/.test(node.type) && node.type !== 'ur_link' && node.type !== 'ur_toast' && node.type !== 'ur_ui_control') {
                           if (!RED.nodes.node(node.group)) {
                               var g = node.group || "_BLANK_";
                               unknownGroups[g] = unknownGroups[g] || [];
@@ -2836,8 +2836,8 @@ margin-left: 2px;
                   if (tab === null) {
                       tab = {
                           id: RED.nodes.id(),
-                          _def: RED.nodes.getType("ui_tab"),
-                          type: "ui_tab",
+                          _def: RED.nodes.getType("ur_tab"),
+                          type: "ur_tab",
                           users: [],
                           order: 0,
                           name: "Tab",
@@ -2850,8 +2850,8 @@ margin-left: 2px;
                   if (subtab === null) {
                       subtab = {
                           id: RED.nodes.id(),
-                          _def: RED.nodes.getType("ui_subtab"),
-                          type: "ui_subtab",
+                          _def: RED.nodes.getType("ur_subtab"),
+                          type: "ur_subtab",
                           users: [],
                           tab: tab.id,
                           order: i+1,
@@ -2866,8 +2866,8 @@ margin-left: 2px;
                       if (unknownGroups.hasOwnProperty(groupId)) {
                           var groupNode = {
                               id: RED.nodes.id(),
-                              _def: RED.nodes.getType("ui_group"),
-                              type: "ui_group",
+                              _def: RED.nodes.getType("ur_group"),
+                              type: "ur_group",
                               users: [],
                               subtab: subtab.id,
                               order: i+1,
@@ -2945,7 +2945,7 @@ margin-left: 2px;
                   var unknownGroups = {};
                   var count = 0;
                   RED.nodes.eachNode(function(node) {
-                      if (/^ui_/.test(node.type) && node.type !== 'ui_link' && node.type !== 'ui_toast' && node.type !== 'ui_ui_control' && (node.type === 'ui_template' && node.templateScope !== 'global')) {
+                      if (/^ur_/.test(node.type) && node.type !== 'ur_link' && node.type !== 'ur_toast' && node.type !== 'ur_ui_control' && (node.type === 'ur_template' && node.templateScope !== 'global')) {
                           if (!RED.nodes.node(node.group)) {
                               var g = node.group || "_BLANK_";
                               unknownGroups[g] = unknownGroups[g] || [];
@@ -2985,21 +2985,21 @@ margin-left: 2px;
                   // Find all the tabs, subtabs, and groups
                   RED.nodes.eachConfig(function(node) {
                       switch (node.type) {
-                          case 'ui_tab':
-                          case 'ui_link': {
+                          case 'ur_tab':
+                          case 'ur_link': {
                               tabs[node.id] = node;
                               //tabContainer.editableList('addItem',node);
                               break;
                           }
-                          case 'ui_subtab': {
+                          case 'ur_subtab': {
                               subtabs[node.id] = node;
                               break;
                           }
-                          case 'ui_group': {
+                          case 'ur_group': {
                               groups[node.id] = node;
                               break;
                           }
-                          case 'ui_spacer': {
+                          case 'ur_spacer': {
                               if (groups.hasOwnProperty(node.group)) {
                                   groupElements[node.group] = groupElements[node.group]||[];
                                   groupElements[node.group].push(node);
@@ -3035,12 +3035,12 @@ margin-left: 2px;
                   };
                   // Find all ui widgets - list them by their group id
                   RED.nodes.eachNode(function(node) {
-                      if (/^ui_/.test(node.type)) {
+                      if (/^ur_/.test(node.type)) {
                           if (groups.hasOwnProperty(node.group)) {
                               groupElements[node.group] = groupElements[node.group]||[];
                               groupElements[node.group].push(node);
                           }
-                          else if ((node.type !== 'ui_toast')&&(node.type !== 'ui_ui_control')&&(node.type === 'ui_template' && node.templateScope !== 'global')) {
+                          else if ((node.type !== 'ur_toast')&&(node.type !== 'ur_ui_control')&&(node.type === 'ur_template' && node.templateScope !== 'global')) {
                               unknownGroups++;
                           }
                       }
@@ -3312,12 +3312,12 @@ margin-left: 2px;
               });
 
               editSaveEventHandler = function(node) {
-                  if (/^ui_/.test(node.type)) {
-                      if (node.type === "ui_tab" || node.type === "ui_subtab" || node.type === "ui_group") {
+                  if (/^ur_/.test(node.type)) {
+                      if (node.type === "ur_tab" || node.type === "ur_subtab" || node.type === "ur_group") {
                           if (listElements[node.id]) {
                               // Existing element
                               listElements[node.id].children(".nr-db-sb-list-header").find(".nr-db-sb-title").text(node.name||node.id);
-                              if (node.type === "ui_group") {
+                              if (node.type === "ur_group") {
                                   refresh();
                               }
                               else {
@@ -3327,11 +3327,11 @@ margin-left: 2px;
                                   else { listElements[node.id].children(".nr-db-sb-list-header").find(".nr-db-sb-title").removeClass('nr-db-sb-title-disabled'); }
                               }
                           }
-                          else if (node.type === "ui_tab") {
+                          else if (node.type === "ur_tab") {
                               // Adding a tab
                               tabContainer.editableList('addItem',{node:node,subtabs:[]})
                           }
-                          else if (node.type === "ui_subtab") {
+                          else if (node.type === "ur_subtab") {
                               // Adding a subtab
                               if (tabLists[node.tab]) {
                                   tabLists[node.tab].editableList('addItem', {node: node, groups: []})
@@ -3344,7 +3344,7 @@ margin-left: 2px;
                               }
                           }
                       }
-                      else if (node.type === "ui_link") {
+                      else if (node.type === "ur_link") {
                           if (listElements[node.id]) {
                               var container = listElements[node.id];
                               container.find(".nr-db-sb-link-name").text(node.name||"untitled");
@@ -3389,7 +3389,7 @@ margin-left: 2px;
 
               // Dashboard layout tool
               layoutUpdateEventHandler = function(node) {
-                  if (/^ui_/.test(node.type) && node.type !== 'ui_link' && node.type !== 'ui_toast' && node.type !== 'ui_ui_control' && node.type !== 'ui_audio' && node.type !== 'ui_base' && node.type !== 'ui_group' && node.type !== 'ui_subtab' && node.type !== 'ui_tab') {
+                  if (/^ur_/.test(node.type) && node.type !== 'ur_link' && node.type !== 'ur_toast' && node.type !== 'ur_ui_control' && node.type !== 'ur_audio' && node.type !== 'ur_base' && node.type !== 'ur_group' && node.type !== 'ur_subtab' && node.type !== 'ur_tab') {
                       if (listElements[node.id]) {
                           if (node.group != elementParents[node.id]) {
                               // Moved to a different group
@@ -3419,35 +3419,35 @@ margin-left: 2px;
                   var hasSubtabs = false;
                   var hasGroups = false;
                   pendingAdd.sort(function(A,B) {
-                      hasTabs = hasTabs || A.type === "ui_tab" || B.type === "ui_tab";
-                      hasSubtabs = hasSubtabs || A.type === "ui_subtab" || B.type === "ui_subtab";
-                      hasGroups = hasGroups || A.type === "ui_group" || B.type === "ui_group";
+                      hasTabs = hasTabs || A.type === "ur_tab" || B.type === "ur_tab";
+                      hasSubtabs = hasSubtabs || A.type === "ur_subtab" || B.type === "ur_subtab";
+                      hasGroups = hasGroups || A.type === "ur_group" || B.type === "ur_group";
                       if (A.type === B.type) {
                           return 0;
                       }
-                      if (A.type === "ui_tab") {
+                      if (A.type === "ur_tab") {
                           return -1;
                       }
-                      else if (B.type === "ui_tab") {
+                      else if (B.type === "ur_tab") {
                           return 1;
                       }
-                      else if (A.type === "ui_subtab") {
+                      else if (A.type === "ur_subtab") {
                           return -1;
                       }
-                      else if (B.type === "ui_subtab") {
+                      else if (B.type === "ur_subtab") {
                           return 1;
                       }
-                      else if (A.type === "ui_group") {
+                      else if (A.type === "ur_group") {
                           return -1;
                       }
-                      else if (B.type === "ui_group") {
+                      else if (B.type === "ur_group") {
                           return 1;
                       }
                       return 0
                   });
                   for (var i=0; i<pendingAdd.length; i++) {
                       var node = pendingAdd[i];
-                      if (node.type === "ui_tab") {
+                      if (node.type === "ur_tab") {
                           tabContainer.editableList('addItem',{node:node,subtabs:[]});
                       }
                       else {
@@ -3457,7 +3457,7 @@ margin-left: 2px;
                               pendingAddTimer = setTimeout(handlePendingAdds,50);
                               return;
                           }
-                          if (node.type === "ui_subtab") {
+                          if (node.type === "ur_subtab") {
                               if (tabLists[node.tab]) {
                                   tabLists[node.tab].editableList('addItem', {node:node,groups:[]});
                               }
@@ -3469,7 +3469,7 @@ margin-left: 2px;
                                   pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                   return;
                               }
-                              if (node.type === "ui_group") {
+                              if (node.type === "ur_group") {
                                   if (subtabLists[node.subtab]) {
                                       subtabLists[node.subtab].editableList('addItem',{node:node,widgets:[]});
                                   }
@@ -3495,7 +3495,7 @@ margin-left: 2px;
               }
 
               nodesAddEventHandler = function(node) {
-                  if (/^ui_/.test(node.type) && !listElements[node.id]) {
+                  if (/^ur_/.test(node.type) && !listElements[node.id]) {
                       pendingAdd.push(node);
                       clearTimeout(pendingAddTimer);
                       pendingAddTimer = setTimeout(handlePendingAdds,100);
@@ -3504,20 +3504,20 @@ margin-left: 2px;
               RED.events.on("nodes:add", nodesAddEventHandler);
 
               nodesRemoveEventHandler = function(node) {
-                  if (/^ui_/.test(node.type)) {
-                      if (node.type === "ui_tab" || node.type === "ui_link") {
+                  if (/^ur_/.test(node.type)) {
+                      if (node.type === "ur_tab" || node.type === "ur_link") {
                           if (listElements[node.id]) {
                               tabContainer.editableList('removeItem',listElements[node.id].data('data'));
                               delete tabLists[node.id];
                           }
                       }
-                      else if (node.type === "ui_subtab") {
+                      else if (node.type === "ur_subtab") {
                           if (tabLists[node.tab] && listElements[node.id]) {
                               tabLists[node.tab].editableList('removeItem', listElements[node.id].data('data'));
                           }
                           delete subtabLists[node.id];
                       }
-                      else if (node.type === "ui_group") {
+                      else if (node.type === "ur_group") {
                           if (subtabLists[node.subtab] && listElements[node.id]) {
                               subtabLists[node.subtab].editableList('removeItem',listElements[node.id].data('data'));
                           }
@@ -3808,14 +3808,14 @@ margin-left: 2px;
 })(jQuery);
 </script>
 
-<script type="text/html" data-template-name="ui_base">
+<script type="text/html" data-template-name="ur_base">
   <div class='form-row'>
-      This <i>ui_base</i> node is the main node that all<br/>other dashboard widget nodes communicate to.<br/>
+      This <i>ur_base</i> node is the main node that all<br/>other dashboard widget nodes communicate to.<br/>
       <br/>One instance is required to support the dashboard.<br/>
       <br/>If you have no dashboard you can delete this node.<br/>
       It will be re-created automatically if required.<br/>
   </div>
 </script>
 
-<script type="text/html" data-help-name="ui_base">
+<script type="text/html" data-help-name="ur_base">
 </script>
