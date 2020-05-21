@@ -56,5 +56,5 @@ module.exports = function(RED) {
             }
         });
     }
-    RED.nodes.registerType("ur-pagerduty", PagerDutyNode);
+    RED.nodes.registerType("ur_pagerduty", PagerDutyNode);
 };

@@ -1,9 +1,9 @@
 <script type="text/javascript">
-    RED.nodes.registerType('ur-pagerduty', {
+    RED.nodes.registerType('ur_pagerduty', {
         category: 'unified',
         color: '#FFCC66',
         defaults: {
-            apikey: { type: 'ur-pagerduty-config', required: true },
+            apikey: { type: 'ur_pagerduty_config', required: true },
             name: { value: '', required: true },
             source: { value: '', required: true },
             severity: { value: 'warning' }
@@ -17,7 +17,7 @@
     });
 </script>
 
-<script type="text/html" data-template-name="ur-pagerduty">
+<script type="text/html" data-template-name="ur_pagerduty">
     <div class="form-row">
         <label for="node-input-apikey"><i class="fa fa-key"></i> API Key</label>
         <input type="text" id="node-input-apikey">
@@ -41,5 +41,5 @@
     </div>
 </script>
 
-<script type="text/html" data-help-name="ur-pagerduty">
+<script type="text/html" data-help-name="ur_pagerduty">
 </script>
