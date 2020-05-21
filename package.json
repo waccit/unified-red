@@ -38,8 +38,8 @@
       "ur_group": "nodes/ur_group.js",
       "ur_text": "nodes/ur_text.js",
       "ur_template": "nodes/ur_template.js",
-      "ur-pagerduty-config": "nodes/ur-pagerduty-config.js",
-      "ur-pagerduty": "nodes/ur-pagerduty.js"
+      "ur_pagerduty_config": "nodes/ur_pagerduty_config.js",
+      "ur_pagerduty": "nodes/ur_pagerduty.js"
     }
   },
   "dependencies": {
