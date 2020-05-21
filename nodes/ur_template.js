@@ -6,10 +6,13 @@ module.exports = function(RED) {
         var node = this;
 
         var group = RED.nodes.getNode(config.group);
-        if (!group && config.templateScope !== 'global') { return; }
-        var tab = null;
+        if (!group) { return; }
         var subtab = RED.nodes.getNode(group.config.subtab);
         if (!subtab) { return; }
+        var tab = RED.nodes.getNode(subtab.config.tab);
+        if (!tab) { return; }
+
+
         if (config.templateScope !== 'global') {
             tab = RED.nodes.getNode(group.config.tab);
             if (!tab) { return; }
@@ -34,6 +37,7 @@ module.exports = function(RED) {
             emitOnlyNewValues: false,
             node: node,
             tab: tab,
+            subtab: subtab,
             group: group,
             control: {
                 type: 'template',
