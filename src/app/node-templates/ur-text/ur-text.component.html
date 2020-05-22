@@ -1,7 +1,17 @@
 <div>
     <div class="info-box7 l-bg-green order-info-box7">
-        <div class="info-box7-block">
-        <h3 class="align-center">{{text}}</h3>
+        <div class="info-box7-block align-center">
+            <div class="preloader pl-size-m" *ngIf="!text">
+                <div class="spinner-layer">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <h3>{{text}}</h3>
         </div>
     </div>
 </div>
