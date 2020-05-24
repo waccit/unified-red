@@ -639,7 +639,7 @@ export const ROUTES: RouteInfo[] = [
     groupTitle: false,
     submenu: [
       {
-        path: '/authentication/signin',
+        path: '/authentication/login',
         title: 'Sign In',
         icon: '',
         class: 'ml-menu',
@@ -647,7 +647,7 @@ export const ROUTES: RouteInfo[] = [
         submenu: []
       },
       {
-        path: '/authentication/signup',
+        path: '/authentication/register',
         title: 'Sign Up',
         icon: '',
         class: 'ml-menu',
