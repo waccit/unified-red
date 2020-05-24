@@ -62,9 +62,6 @@ export class SigninComponent implements OnInit {
         }
         this.authenticationService.login(this.f.username.value, this.f.password.value).pipe(first()).subscribe(
             data => {
-                console.log("successful login");
-                console.log(data);
-                console.log("returnUrl: " + this.returnUrl)
                 this.router.navigate([this.returnUrl]);
             },
             error => {
