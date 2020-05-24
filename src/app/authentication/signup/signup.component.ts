@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService, UserService } from '../../services/';
 
+import { MustMatch, PasswordStrengthValidator} from './password.validators';
+
 declare const $: any;
 
 @Component({
@@ -17,6 +19,8 @@ export class SignupComponent implements OnInit {
     returnUrl: string;
     hide = true;
     chide = true;
+    canRegister = false;
+    success = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -37,13 +41,23 @@ export class SignupComponent implements OnInit {
             lastName: ['', Validators.required],
             username: ['', Validators.required],
             email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
-            password: ['', [Validators.required, Validators.minLength(8)]],
-            cpassword: ['', [Validators.required, Validators.minLength(8)]]
+            password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
+            cpassword: ['', [Validators.required]]
+        }, {
+            validator: MustMatch('password', 'cpassword')
         });
 
         // get return url from route parameters or default to '/'
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
+        // check if registration is not allowed
+        this.userService.canRegister().pipe(first()).subscribe(
+            (data:any) => {
+                if (data) {
+                    this.canRegister = data.allowed;
+                }
+            });
+        
         //    [Focus input] * /
         $('.input100').each(function () {
             $(this).on('blur', function () {
@@ -69,8 +83,8 @@ export class SignupComponent implements OnInit {
         }
         this.userService.register(this.registerForm.value).pipe(first()).subscribe(
             data => {
-                // this.alertService.success('Registration successful', true);
-                this.router.navigate(['/authentication/login']);
+                this.success = true;
+                // this.router.navigate(['/authentication/login']);
             },
             error => {
                 console.log(error);
