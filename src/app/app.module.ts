@@ -22,6 +22,8 @@ import {
   PERFECT_SCROLLBAR_CONFIG,
   PerfectScrollbarConfigInterface
 } from 'ngx-perfect-scrollbar';
+import { JwtInterceptor } from './authentication/jwt.interceptor';
+import { ErrorInterceptor } from './authentication/error.interceptor';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,9 +40,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AdvanceTableService } from '../app/tables/advance-table/advance-table.service';
-import { AgmCoreModule } from '@agm/core';
+// import { AgmCoreModule } from '@agm/core';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -82,9 +84,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     MatSlideToggleModule,
     MatMenuModule,
     NgxMaskModule.forRoot(),
-    AgmCoreModule.forRoot({
-      apiKey: 'YOUR API KEY'
-    }),
+    // AgmCoreModule.forRoot({ apiKey: 'YOUR API KEY' }),
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },
@@ -94,7 +94,9 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     },
     DynamicScriptLoaderService,
     RightSidebarService,
-    AdvanceTableService
+    AdvanceTableService,
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
   ],
   entryComponents: [
     SimpleDialogComponent,
