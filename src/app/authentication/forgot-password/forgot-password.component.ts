@@ -54,7 +54,7 @@ export class ForgotPasswordComponent implements OnInit {
     if (this.loginForm.invalid) {
       return;
     } else {
-      this.router.navigate(['/dashboard/main']);
+      this.router.navigate(['/']); // redirect home
     }
   }
 }
