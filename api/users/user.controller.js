@@ -10,6 +10,7 @@ const userService = require('./user.service');
 // routes
 router.post('/authenticate', authenticate);
 router.post('/register', register);
+router.get('/register', canRegister);
 router.get('/', getAll);
 router.get('/current', getCurrent);
 router.get('/:id', getById);
@@ -25,6 +26,14 @@ module.exports = router;
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
         .then(user => user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' }))
+        .catch(err => next(err));
+}
+
+// curl test:
+// curl http://localhost:1880/api/users/register
+function canRegister(req, res, next) {
+    userService.canRegister()
+        .then(x => res.json({ "allowed": x }))
         .catch(err => next(err));
 }
 
