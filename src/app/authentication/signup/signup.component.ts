@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { AuthenticationService, UserService } from '../../services/';
-
+import { AuthenticationService, UserService, SnackbarService } from '../../services/';
 import { MustMatch, PasswordStrengthValidator} from './password.validators';
 
 declare const $: any;
@@ -27,7 +26,8 @@ export class SignupComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private authenticationService: AuthenticationService,
-        private userService: UserService
+        private userService: UserService,
+        private snackbar: SnackbarService
     ) {
         // redirect to home if already logged in
         if (this.authenticationService.currentUserValue) {
@@ -76,7 +76,6 @@ export class SignupComponent implements OnInit {
 
     onSubmit() {
         this.submitted = true;
-
         // stop here if form is invalid
         if (this.registerForm.invalid) {
             return;
@@ -84,13 +83,10 @@ export class SignupComponent implements OnInit {
         this.userService.register(this.registerForm.value).pipe(first()).subscribe(
             data => {
                 this.success = true;
-                // this.router.navigate(['/authentication/login']);
             },
             error => {
                 console.log(error);
-                // this.alertService.error(error);
-                // TODO: toast
-                // this.loading = false;
+                this.snackbar.error(error);
             });
     }
 }
