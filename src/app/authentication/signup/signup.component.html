@@ -48,17 +48,17 @@
                     <mat-error *ngIf="registerForm.get('cpassword').hasError('required')">Confirm Password is required</mat-error>
                     <mat-error *ngIf="registerForm.get('cpassword').hasError('mustMatch')">Passwords must match</mat-error>
                 </mat-form-field>
-                <div class="flex-sb-m w-full p-t-15 p-b-20">
-                    <div><span>Already Registered? <a routerLink="/authentication/login">Login</a></span></div>
-                </div>
                 <div class="container-login100-form-btn">
                     <button class="login100-form-btn" type="submit">Register</button>
                 </div>
+                <div class="flex-sb-m w-full p-t-15 p-b-20">
+                    <span>Already Registered? <a class="txt1" routerLink="/authentication/login">Login</a></span>
+                </div>
             </form>
             <div *ngIf="!canRegister" class="login100-form">
-                <span class="login100-form-title p-b-30">To register a new account please contact your system administrator</span>
+                <div class="login100-form-title p-b-30">To register a new account please contact your system administrator</div>
                 <div class="flex-sb-m w-full p-t-15 p-b-20">
-                    <div><span>Already Registered? <a routerLink="/authentication/login">Login</a></span></div>
+                    <a routerLink="/authentication/login" class="login100-form-btn">Login</a>
                 </div>
             </div>
             <div class="login100-more" style="background-image: url('assets/images/pages/bg-02.png');"></div>
