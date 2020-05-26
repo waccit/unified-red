@@ -7,7 +7,9 @@ import {
   Renderer2,
   HostListener
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { RightSidebarService } from '../../services/rightsidebar.service';
+import { AuthenticationService } from '../../services/';
 
 const document: any = window.document;
 
@@ -21,7 +23,9 @@ export class HeaderComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document,
     private renderer: Renderer2,
     public elementRef: ElementRef,
-    private dataService: RightSidebarService
+    private dataService: RightSidebarService,
+    public router: Router, 
+    private authenticationService: AuthenticationService
   ) {}
 
   notifications: Object[] = [
@@ -155,4 +159,10 @@ export class HeaderComponent implements OnInit {
         .currentStatus._isScalar)
     );
   }
+
+  logout() {
+    this.authenticationService.logout();
+    this.router.navigate(['/authentication/login']);
+  }
+
 }

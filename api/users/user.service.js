@@ -14,6 +14,7 @@ var _settings;
 
 module.exports = {
     authenticate,
+    canRegister,
     getAll,
     getById,
     create,
@@ -33,6 +34,11 @@ async function authenticate({ username, password }) {
             token
         };
     }
+}
+
+async function canRegister() {
+    // allow registration when no users exist
+    return await User.countDocuments() === 0;
 }
 
 async function getAll() {
