@@ -5,6 +5,7 @@ import { DemoComponent } from './dashboard/demo/demo.component';
 import { SigninComponent } from './authentication/signin/signin.component';
 import { SignupComponent } from './authentication/signup/signup.component';
 import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
+import { ProfileComponent } from './users/profile/profile.component';
 
 const routes: Routes = [
     {
@@ -12,6 +13,10 @@ const routes: Routes = [
         component: DemoComponent,
         pathMatch: 'full',
         canActivate: [AuthGuard]
+    },
+    {
+        path: 'users/profile',
+        component: ProfileComponent
     },
     // {
     //     path: 'dashboard',
@@ -25,10 +30,6 @@ const routes: Routes = [
     // {
     //     path: 'dashboard/main',
     //     component: MainComponent
-    // },
-    // { //TODO: remove
-    //     path: 'email',
-    //     loadChildren: () => import('./email/email.module').then(m => m.EmailModule)
     // },
     // { //TODO: review
     //     path: 'apps',
@@ -50,25 +51,17 @@ const routes: Routes = [
     //     path: 'tables',
     //     loadChildren: () => import('./tables/tables.module').then(m => m.TablesModule)
     // },
-    // { //TODO: remove
-    //     path: 'media',
-    //     loadChildren: () => import('./media/media.module').then(m => m.MediaModule)
-    // },
     // { //TODO: review
     //     path: 'charts',
     //     loadChildren: () => import('./charts/charts.module').then(m => m.ChartsModule)
     // },
-    // { //TODO: remove
+    // { //TODO: possibly for audit log
     //     path: 'timeline',
     //     loadChildren: () => import('./timeline/timeline.module').then(m => m.TimelineModule)
     // },
     // { //TODO: review
     //     path: 'icons',
     //     loadChildren: () => import('./icons/icons.module').then(m => m.IconsModule)
-    // },
-    // {
-    //     path: 'authentication',
-    //     loadChildren: () => import('./authentication/authentication.module').then(m => m.AuthenticationModule)
     // },
     {
         path: 'authentication/login',
@@ -82,14 +75,6 @@ const routes: Routes = [
         path: 'authentication/forgot-password',
         component: ForgotPasswordComponent
     },
-    // { //TODO: review
-    //     path: 'extra-pages',
-    //     loadChildren: () => import('./extra-pages/extra-pages.module').then(m => m.ExtraPagesModule)
-    // },
-    // { //TODO: remove
-    //     path: 'maps',
-    //     loadChildren: () => import('./maps/maps.module').then(m => m.MapsModule)
-    // },
 
     // otherwise redirect to home
     { path: '**', redirectTo: '' }
