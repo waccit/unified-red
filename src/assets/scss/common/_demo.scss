@@ -25,90 +25,90 @@
 						
 ***********************************************************************/
 .demo-button-sizes {
-  .btn {
-    margin-bottom: 5px;
-  }
+    .btn {
+        margin-bottom: 5px;
+    }
 }
 
 .icon-button-demo {
-  button {
-    margin-right: 5px;
-    margin-bottom: 12px;
-  }
+    button {
+        margin-right: 5px;
+        margin-bottom: 12px;
+    }
 }
 
 .icon-and-text-button-demo {
-  button {
-    margin-right: 5px;
-    margin-bottom: 12px;
-    width: 16.66666666666667%;
-  }
+    button {
+        margin-right: 5px;
+        margin-bottom: 12px;
+        width: 16.66666666666667%;
+    }
 }
 
 .button-demo {
-  ul {
-    padding-left: 0;
+    ul {
+        padding-left: 0;
 
-    li {
-      list-style: none;
-      padding-left: 0;
-      display: inline-block;
-      margin-right: 7px;
+        li {
+            list-style: none;
+            padding-left: 0;
+            display: inline-block;
+            margin-right: 7px;
 
-      .btn {
-        display: block;
-        min-width: 175px;
-      }
+            .btn {
+                display: block;
+                min-width: 175px;
+            }
+        }
     }
-  }
 
-  .btn {
-    margin-right: 8px;
-    margin-bottom: 13px;
-    min-width: 100px;
-  }
+    .btn {
+        margin-right: 8px;
+        margin-bottom: 13px;
+        min-width: 100px;
+    }
 }
 
 .demo-button-groups {
-  .btn-group {
-    margin-right: 10px;
-    margin-bottom: 10px;
-  }
+    .btn-group {
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
 }
 
 .demo-button-toolbar {
-  .btn-toolbar {
-    float: left;
-    margin-right: 25px;
-    margin-bottom: 10px;
-    .btn-group {
-      margin-left: 5px;
+    .btn-toolbar {
+        float: left;
+        margin-right: 25px;
+        margin-bottom: 10px;
+        .btn-group {
+            margin-left: 5px;
+        }
     }
-  }
 }
 
 .demo-button-nesting {
-  > .btn-group {
-    margin-right: 15px;
-  }
+    > .btn-group {
+        margin-right: 15px;
+    }
 }
 
 .demo-single-button-dropdowns {
-  > .btn-group {
-    margin-right: 10px;
-  }
+    > .btn-group {
+        margin-right: 10px;
+    }
 }
 
 .demo-splite-button-dropdowns {
-  > .btn-group {
-    margin-right: 10px;
-  }
+    > .btn-group {
+        margin-right: 10px;
+    }
 }
 
 .demo-dropup {
-  .dropup {
-    margin-right: 10px;
-  }
+    .dropup {
+        margin-right: 10px;
+    }
 }
 
 /***********************************************************************
@@ -119,9 +119,9 @@
 
 .demo-checkbox,
 .demo-radio-button {
-  label {
-    min-width: 150px;
-  }
+    label {
+        min-width: 150px;
+    }
 }
 /***********************************************************************
 
@@ -130,9 +130,9 @@
 ***********************************************************************/
 
 .demo-knob-chart {
-  div {
-    margin-right: 15px;
-  }
+    div {
+        margin-right: 15px;
+    }
 }
 /***********************************************************************
 
@@ -141,15 +141,15 @@
 ***********************************************************************/
 
 .demo-switch {
-  .switch {
-    display: inline-block;
-    min-width: 170px;
-  }
+    .switch {
+        display: inline-block;
+        min-width: 170px;
+    }
 
-  .demo-switch-title {
-    min-width: 95px;
-    display: inline-block;
-  }
+    .demo-switch-title {
+        min-width: 95px;
+        display: inline-block;
+    }
 }
 /***********************************************************************
 
@@ -157,20 +157,20 @@
 						
 ***********************************************************************/
 .demo-color-box {
-  padding: 15px 0;
-  text-align: center;
-  margin-bottom: 20px;
-  @include border-radius(3px);
+    padding: 15px 0;
+    text-align: center;
+    margin-bottom: 20px;
+    @include border-radius(3px);
 
-  .color-name {
-    font-size: 16px;
-    margin-bottom: 5px;
-  }
+    .color-name {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
 
-  .color-code,
-  .color-class-name {
-    font-size: 13px;
-  }
+    .color-code,
+    .color-class-name {
+        font-size: 13px;
+    }
 }
 /***********************************************************************
 
@@ -178,16 +178,16 @@
 						
 ***********************************************************************/
 .demo-image-copyright {
-  text-align: right;
-  font-style: italic;
-  font-size: 12px;
-  color: #777;
-  margin: 5px 0 10px 0;
+    text-align: right;
+    font-style: italic;
+    font-size: 12px;
+    color: #777;
+    margin: 5px 0 10px 0;
 
-  a {
-    font-weight: bold;
-    color: #555 !important;
-  }
+    a {
+        font-weight: bold;
+        color: #555 !important;
+    }
 }
 /***********************************************************************
 
@@ -195,10 +195,10 @@
 						
 ***********************************************************************/
 .demo-tagsinput-area {
-  margin-bottom: 0px !important;
-  &.form-group .form-line:after {
-    border-bottom: 0px;
-  }
+    margin-bottom: 0px !important;
+    &.form-group .form-line:after {
+        border-bottom: 0px;
+    }
 }
 /***********************************************************************
 
@@ -206,39 +206,39 @@
 						
 ***********************************************************************/
 .demo-icon-container {
-  .demo-google-material-icon {
-    margin-bottom: 5px;
-    text-align: left;
+    .demo-google-material-icon {
+        margin-bottom: 5px;
+        text-align: left;
 
-    .icon-name {
-      position: relative;
-      top: -8px;
-      left: 7px;
-    }
+        .icon-name {
+            position: relative;
+            top: -8px;
+            left: 7px;
+        }
 
-    .material-icons {
-      width: 24px;
+        .material-icons {
+            width: 24px;
+        }
     }
-  }
 }
 .simple-line-icon-container {
-  margin: 0;
-  > div {
-    background: #ffffff;
-    border: 1px solid #e3e3e3;
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 0.875rem;
-    i {
-      display: inline-block;
-      font-size: 20px;
-      width: 30px;
-      text-align: left;
-      color: #353c48;
+    margin: 0;
+    > div {
+        background: #ffffff;
+        border: 1px solid #e3e3e3;
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        font-weight: 400;
+        font-size: 0.875rem;
+        i {
+            display: inline-block;
+            font-size: 20px;
+            width: 30px;
+            text-align: left;
+            color: #353c48;
+        }
     }
-  }
 }
 /***********************************************************************
 
@@ -246,9 +246,9 @@
 						
 ***********************************************************************/
 .demo-preloader {
-  .preloader {
-    margin-right: 10px;
-  }
+    .preloader {
+        margin-right: 10px;
+    }
 }
 /***********************************************************************
 
@@ -256,11 +256,11 @@
 						
 ***********************************************************************/
 .irs-demo {
-  margin-bottom: 40px;
+    margin-bottom: 40px;
 
-  .irs {
-    margin-top: 15px;
-  }
+    .irs {
+        margin-top: 15px;
+    }
 }
 /***********************************************************************
 
@@ -268,123 +268,123 @@
 						
 ***********************************************************************/
 .right-sidebar {
-  .nav-tabs + .tab-content {
-    padding: 0;
-  }
-
-  p {
-    margin: 20px 15px 15px 15px;
-    font-weight: bold;
-    text-align: center;
-  }
-
-  #settings {
-    .setting-list {
-      list-style: none;
-      padding-left: 0;
-      margin-bottom: 20px;
-
-      li {
-        padding: 15px;
-        position: relative;
-        border-top: 1px solid #eee;
-
-        .switch {
-          position: absolute;
-          top: 15px;
-          right: 5px;
-        }
-      }
+    .nav-tabs + .tab-content {
+        padding: 0;
     }
-  }
-  .progress {
-    -webkit-border-radius: 50px;
-    -moz-border-radius: 50px;
-    -ms-border-radius: 50px;
-    border-radius: 50px;
-    height: 7px;
-    margin: 10px 0px 0px 0px;
-  }
+
+    p {
+        margin: 20px 15px 15px 15px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    #settings {
+        .setting-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 20px;
+
+            li {
+                padding: 15px;
+                position: relative;
+                border-top: 1px solid #eee;
+
+                .switch {
+                    position: absolute;
+                    top: 15px;
+                    right: 5px;
+                }
+            }
+        }
+    }
+    .progress {
+        -webkit-border-radius: 50px;
+        -moz-border-radius: 50px;
+        -ms-border-radius: 50px;
+        border-radius: 50px;
+        height: 7px;
+        margin: 10px 0px 0px 0px;
+    }
 }
 .right-sidebar .choose-theme li {
-  position: relative;
-  cursor: pointer;
-  display: inline-block;
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
 }
 
 .demo-choose-skin,
 .demo-choose-logoheader {
-  list-style: none;
-  padding-left: 0;
-  overflow-y: hidden;
+    list-style: none;
+    padding-left: 0;
+    overflow-y: hidden;
 
-  li {
-    padding: 10px 7px 4px 0px;
-    position: relative;
-    cursor: pointer;
-    float: left;
+    li {
+        padding: 10px 7px 4px 0px;
+        position: relative;
+        cursor: pointer;
+        float: left;
 
-    &.actived {
-      &:after {
-        font-family: "Material Icons";
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        content: "\E876";
-        font-size: 18px;
-        color: #ece6e6;
-      }
+        &.actived {
+            &:after {
+                font-family: 'Material Icons';
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                content: '\E876';
+                font-size: 18px;
+                color: #ece6e6;
+            }
+        }
+
+        div {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            @include border-radius(3px);
+        }
+
+        span {
+            position: relative;
+            bottom: 7px;
+            left: 5px;
+        }
+    }
+    .white-theme {
+        background-color: #fff;
+    }
+    .black-theme {
+        background-color: #3a3f51;
+    }
+    .purple-theme {
+        background-color: #909de4;
+    }
+    .blue-theme {
+        background-color: #03a9f3;
+    }
+    .cyan-theme {
+        background-color: #01d8da;
+    }
+    .green-theme {
+        background-color: #57d68f;
+    }
+    .orange-theme {
+        background-color: #ffb463;
     }
 
-    div {
-      width: 24px;
-      height: 24px;
-      display: inline-block;
-      @include border-radius(3px);
+    @each $key, $val in $colors {
+        .#{$key} {
+            background-color: $val;
+        }
     }
-
-    span {
-      position: relative;
-      bottom: 7px;
-      left: 5px;
-    }
-  }
-  .white-theme {
-    background-color: #fff;
-  }
-  .black-theme {
-    background-color: #3a3f51;
-  }
-  .purple-theme {
-    background-color: #909de4;
-  }
-  .blue-theme {
-    background-color: #03a9f3;
-  }
-  .cyan-theme {
-    background-color: #01d8da;
-  }
-  .green-theme {
-    background-color: #57d68f;
-  }
-  .orange-theme {
-    background-color: #ffb463;
-  }
-
-  @each $key, $val in $colors {
-    .#{$key} {
-      background-color: $val;
-    }
-  }
 }
 .white-theme-border {
-  border: 1px solid #888888;
+    border: 1px solid #888888;
 }
 .btn-sidebar-light,
 .btn-theme-light {
-  background: 0 0 !important;
-  color: #888888 !important;
-  border: 1px solid #888888 !important;
-  margin: 10px;
+    background: 0 0 !important;
+    color: #888888 !important;
+    border: 1px solid #888888 !important;
+    margin: 10px;
 }
 //=====================================================================================

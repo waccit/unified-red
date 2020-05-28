@@ -11,16 +11,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
-  declarations: [ChartWidgetComponent, DataWidgetComponent],
-  imports: [
-    CommonModule,
-    WidgetRoutingModule,
-    MorrisJsModule,
-    PerfectScrollbarModule,
-    NgApexchartsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule
-  ]
+    declarations: [ChartWidgetComponent, DataWidgetComponent],
+    imports: [
+        CommonModule,
+        WidgetRoutingModule,
+        MorrisJsModule,
+        PerfectScrollbarModule,
+        NgApexchartsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+    ],
 })
 export class WidgetModule {}

@@ -7,31 +7,31 @@ import { MaterialTableComponent } from './material-table/material-table.componen
 import { AdvanceTableComponent } from './advance-table/advance-table.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'basic-tables',
-    pathMatch: 'full'
-  },
-  {
-    path: 'basic-tables',
-    component: BasicTableComponent
-  },
-  {
-    path: 'advance-table',
-    component: AdvanceTableComponent
-  },
-  {
-    path: 'material-tables',
-    component: MaterialTableComponent
-  },
-  {
-    path: 'ngx-datatable',
-    component: NgxDatatableComponent
-  }
+    {
+        path: '',
+        redirectTo: 'basic-tables',
+        pathMatch: 'full',
+    },
+    {
+        path: 'basic-tables',
+        component: BasicTableComponent,
+    },
+    {
+        path: 'advance-table',
+        component: AdvanceTableComponent,
+    },
+    {
+        path: 'material-tables',
+        component: MaterialTableComponent,
+    },
+    {
+        path: 'ngx-datatable',
+        component: NgxDatatableComponent,
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class TablesRoutingModule {}

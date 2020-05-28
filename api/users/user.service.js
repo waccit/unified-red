@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
-const emailService = require("../email.service");
+const emailService = require('../email.service');
 const User = db.User;
 var _settings;
 
@@ -21,7 +21,7 @@ module.exports = {
     update,
     delete: _delete,
     generateResetToken,
-    resetPassword
+    resetPassword,
 };
 
 async function authenticate({ username, password }) {
@@ -31,14 +31,14 @@ async function authenticate({ username, password }) {
         const token = jwt.sign({ sub: user.id }, config.jwtsecret);
         return {
             ...user.toJSON(),
-            token
+            token,
         };
     }
 }
 
 async function canRegister() {
     // allow registration when no users exist
-    return await User.countDocuments() === 0;
+    return (await User.countDocuments()) === 0;
 }
 
 async function getAll() {
@@ -74,7 +74,10 @@ async function update(id, userParam) {
 
     // validate
     checkValidUser(user);
-    if (user.username !== userParam.username && await User.findOne({ username: userParam.username })) {
+    if (
+        user.username !== userParam.username &&
+        (await User.findOne({ username: userParam.username }))
+    ) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
     // validate email address if it was entered
@@ -96,18 +99,19 @@ async function update(id, userParam) {
 }
 
 async function _delete(id) {
-    if (await User.countDocuments() === 1) {
-        throw "Unable to delete last user";
+    if ((await User.countDocuments()) === 1) {
+        throw 'Unable to delete last user';
     }
     const user = await User.findById(id);
     if (!user) {
-        throw "User not found";
+        throw 'User not found';
     }
     await User.findByIdAndRemove(id);
 }
 
-async function generateResetToken(req, username) { // TODO: decouple from http (req)
-    const user = await User.findOne({ "username": username });
+async function generateResetToken(req, username) {
+    // TODO: decouple from http (req)
+    const user = await User.findOne({ 'username': username });
     checkValidUser(user);
 
     // generate reset token and save in user
@@ -115,23 +119,40 @@ async function generateResetToken(req, username) { // TODO: decouple from http (
     await update(user.id, { resetToken: token });
 
     // build email message
-    let rootPath = "/ui";
-    if (typeof settings().ui !== "undefined" && typeof settings().ui.path !== "undefined") {
-        rootPath = settings().ui.path.length ? "/" + settings().ui.path : "";
+    let rootPath = '/ui';
+    if (
+        typeof settings().ui !== 'undefined' &&
+        typeof settings().ui.path !== 'undefined'
+    ) {
+        rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
     }
-    let resetLink = req.protocol + "://" + req.get('host') + rootPath + "/#/authentication/reset-password?t=" + token;
-    let message = "A password reset has been request for username '" + user.username + 
-                "'. Please click this link to change your password: " + resetLink;
+    let resetLink =
+        req.protocol +
+        '://' +
+        req.get('host') +
+        rootPath +
+        '/#/authentication/reset-password?t=' +
+        token;
+    let message =
+        "A password reset has been request for username '" +
+        user.username +
+        "'. Please click this link to change your password: " +
+        resetLink;
 
-    await emailService.send(user.email, "Password Reset for " + user.username, message);
+    await emailService.send(
+        user.email,
+        'Password Reset for ' + user.username,
+        message
+    );
     return token;
 }
 
-async function resetPassword(token, { password }) { // TODO: need web page to handle new password input
+async function resetPassword(token, { password }) {
+    // TODO: need web page to handle new password input
     // validate token and find user
-    if (!token) throw "Invalid or expired reset token";
-    const user = await User.findOne({ "resetToken": token });
-    if (!user) throw "Invalid or expired reset token";
+    if (!token) throw 'Invalid or expired reset token';
+    const user = await User.findOne({ 'resetToken': token });
+    if (!user) throw 'Invalid or expired reset token';
 
     // update user password
     return await update(user.id, { password: password, resetToken: null });
@@ -139,39 +160,45 @@ async function resetPassword(token, { password }) { // TODO: need web page to ha
 
 function checkValidUser(user) {
     if (!user) {
-        throw "User not found";
+        throw 'User not found';
     }
     if (!user.enabled) {
-        throw "Disabled user account";
+        throw 'Disabled user account';
     }
-    if (user.expirationDate && user.expirationDate.getTime() < new Date().getTime()) {
-        throw "User account has expired";
+    if (
+        user.expirationDate &&
+        user.expirationDate.getTime() < new Date().getTime()
+    ) {
+        throw 'User account has expired';
     }
 }
 
 function validateEmailAddress(email) {
     if (!email || !/^([^@]+)@([^\.]+)\.[a-z]+$/.test(email)) {
-        throw "Invalid email address";
+        throw 'Invalid email address';
     }
 }
 
 function checkStrongPassword(password) {
     /*
-     * Password Regular Expression Pattern: 
+     * Password Regular Expression Pattern:
      * Source: http://www.mkyong.com/regular-expressions/how-to-validate-password-with-regular-expression/
      */
     let minPasswordLength = 8;
-    let passwordPattern = "(" /* Start of group */
-        + "(?=.*[a-z])" /* must contains one lowercase characters */
-        + "(?=.*[A-Z])" /* must contains one uppercase characters */
+    let passwordPattern =
+        '(' /* Start of group */ +
+        '(?=.*[a-z])' /* must contains one lowercase characters */ +
+        '(?=.*[A-Z])' /* must contains one uppercase characters */ +
         /* must contains one digit or symbol in the list "`~!@#$%^&*()-_=+[]{}\/|;:'\",.<>?" */
-        + "(?=.*[0-9`~\\!@#\\$%\\^&\\*\\(\\)\\-_\\=\\+\\[\\]\\{\\}\\\\/\\|;:'\",\\.\\<\\>\\?])"
-        + "." /* match anything with previous condition checking */
-        + "{" + minPasswordLength + ",}" /* length at least 8 characters */
-        + ")"; /* End of group */
+        '(?=.*[0-9`~\\!@#\\$%\\^&\\*\\(\\)\\-_\\=\\+\\[\\]\\{\\}\\\\/\\|;:\'",\\.\\<\\>\\?])' +
+        '.' /* match anything with previous condition checking */ +
+        '{' +
+        minPasswordLength +
+        ',}' /* length at least 8 characters */ +
+        ')'; /* End of group */
 
     if (!new RegExp(passwordPattern).test(password)) {
-        throw "Weak password. Password must have a minimum of 8 characters containing a lowercase character, a uppercase character, and a digit or symbol.";
+        throw 'Weak password. Password must have a minimum of 8 characters containing a lowercase character, a uppercase character, and a digit or symbol.';
     }
 }
 
@@ -179,8 +206,7 @@ function settings() {
     if (!_settings) {
         try {
             _settings = require(process.env.RED_SETTINGS_FILE);
-        }
-        catch (e) {
+        } catch (e) {
             return {};
         }
     }

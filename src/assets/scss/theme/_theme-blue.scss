@@ -3,205 +3,205 @@
  *  Author     : RedStar Template
  *  Description: This scss file for blue theme style classes
  */
-@import "_theme-color-variables";
+@import '_theme-color-variables';
 
 .theme-blue {
-  &.menu_light {
-    .active .menu-toggle {
-      border-right: 2px solid $theme-blue;
+    &.menu_light {
+        .active .menu-toggle {
+            border-right: 2px solid $theme-blue;
+        }
     }
-  }
-  .navbar {
-    background-color: $theme-blue;
-    .collapse-menu-icon .nav-hdr-btn {
-      color: #fff;
+    .navbar {
+        background-color: $theme-blue;
+        .collapse-menu-icon .nav-hdr-btn {
+            color: #fff;
+        }
+        .navbar-right .nav-hdr-btn {
+            color: #fff;
+        }
     }
-    .navbar-right .nav-hdr-btn {
-      color: #fff;
+    .navbar.active {
+        background-color: $theme-blue !important;
+        -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        .nav {
+            > li {
+                > a {
+                    color: #fff;
+                }
+            }
+        }
     }
-  }
-  .navbar.active {
-    background-color: $theme-blue !important;
-    -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
-    -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+
     .nav {
-      > li {
-        > a {
-          color: #fff;
-        }
-      }
-    }
-  }
+        > li {
+            > a {
+                color: $theme-blue-nav-anchor;
+                &:hover {
+                    background-color: $theme-blue-nav-anchor_hover;
+                    text-decoration: none;
+                }
 
-  .nav {
-    > li {
-      > a {
-        color: $theme-blue-nav-anchor;
+                &:focus {
+                    background-color: $theme-blue-nav-anchor_focus;
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+
+    .bars {
+        color: $theme-blue-bar;
+    }
+
+    .sidebar {
+        .menu {
+            .list {
+                li {
+                    &.active {
+                        background-color: $theme-blue-menu-list-active;
+                    }
+                    a {
+                        -moz-transition: all 0.3s;
+                        -o-transition: all 0.3s;
+                        -webkit-transition: all 0.3s;
+                        transition: all 0.3s;
+                        i,
+                        span {
+                            -moz-transition: all 0.3s;
+                            -o-transition: all 0.3s;
+                            -webkit-transition: all 0.3s;
+                            transition: all 0.3s;
+                        }
+                    }
+                }
+
+                .ml-menu {
+                    background-color: $theme-blue-menu-list-submenu;
+                    .active {
+                        a {
+                            font-weight: 700;
+                        }
+                    }
+                    li.active a:not(.menu-toggle):before {
+                        content: '';
+                        display: block;
+                        width: 7px;
+                        height: 7px;
+                        border-radius: 50%;
+                        position: absolute;
+                        background-color: #777676;
+                        border-color: #777676;
+                        left: 17%;
+                        top: 50%;
+                        -webkit-transform: translate(-10px, -50%);
+                        -moz-transform: translate(-10px, -50%);
+                        -ms-transform: translate(-10px, -50%);
+                        -o-transform: translate(-10px, -50%);
+                        transform: translate(-10px, -50%);
+                        opacity: 1;
+                        -webkit-transition: all 0.2s ease;
+                        -o-transition: all 0.2s ease;
+                        -moz-transition: all 0.2s ease;
+                        transition: all 0.2s ease;
+                    }
+                }
+            }
+        }
+
+        .legal {
+            background-color: $theme-blue-legal-bg;
+
+            .copyright {
+                a {
+                    color: $theme-blue !important;
+                }
+            }
+        }
+    }
+
+    .breadcrumb li a {
+        color: $theme-blue !important;
+    }
+
+    .card .header h2 strong {
+        color: $theme-blue !important;
+    }
+
+    .page-item.active .page-link {
+        background-color: $theme-blue;
+        border-color: $theme-blue;
+        color: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+        background-color: $theme-blue !important;
+        color: #fff !important;
+        border-color: $theme-blue !important;
         &:hover {
-          background-color: $theme-blue-nav-anchor_hover;
-          text-decoration: none;
+            background-color: $theme-blue !important;
+            color: #fff !important;
         }
-
+        &:active {
+            background-color: $theme-blue !important;
+            color: #fff !important;
+        }
         &:focus {
-          background-color: $theme-blue-nav-anchor_focus;
-          text-decoration: none;
+            background-color: $theme-blue !important;
+            color: #fff !important;
         }
-      }
+        &:disabled {
+            background-color: $theme-blue !important;
+            color: #fff !important;
+        }
     }
-  }
-
-  .bars {
-    color: $theme-blue-bar;
-  }
-
-  .sidebar {
-    .menu {
-      .list {
-        li {
-          &.active {
-            background-color: $theme-blue-menu-list-active;
-          }
-          a {
-            -moz-transition: all 0.3s;
-            -o-transition: all 0.3s;
-            -webkit-transition: all 0.3s;
-            transition: all 0.3s;
-            i,
-            span {
-              -moz-transition: all 0.3s;
-              -o-transition: all 0.3s;
-              -webkit-transition: all 0.3s;
-              transition: all 0.3s;
+    .btn-outline-primary {
+        background: 0 0 !important;
+        color: $theme-blue !important;
+        border: 1px solid $theme-blue !important;
+        &:hover {
+            background: $theme-blue !important;
+            color: #fff !important;
+            border: 1px solid $theme-blue !important;
+        }
+    }
+    .timelineLabelColor strong {
+        color: $theme-blue !important;
+    }
+    .top-sidebar {
+        .horizontal-menu {
+            li {
+                &.active {
+                    > a {
+                        color: $theme-blue;
+                    }
+                }
+                a {
+                    -moz-transition: all 0.3s;
+                    -o-transition: all 0.3s;
+                    -webkit-transition: all 0.3s;
+                    transition: all 0.3s;
+                    &:hover {
+                        color: $theme-blue;
+                    }
+                }
             }
-          }
         }
-
-        .ml-menu {
-          background-color: $theme-blue-menu-list-submenu;
-          .active {
-            a {
-              font-weight: 700;
-            }
-          }
-          li.active a:not(.menu-toggle):before {
-            content: "";
-            display: block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            position: absolute;
-            background-color: #777676;
-            border-color: #777676;
-            left: 17%;
-            top: 50%;
-            -webkit-transform: translate(-10px, -50%);
-            -moz-transform: translate(-10px, -50%);
-            -ms-transform: translate(-10px, -50%);
-            -o-transform: translate(-10px, -50%);
-            transform: translate(-10px, -50%);
-            opacity: 1;
-            -webkit-transition: all 0.2s ease;
-            -o-transition: all 0.2s ease;
-            -moz-transition: all 0.2s ease;
-            transition: all 0.2s ease;
-          }
-        }
-      }
     }
 
-    .legal {
-      background-color: $theme-blue-legal-bg;
-
-      .copyright {
-        a {
-          color: $theme-blue !important;
-        }
-      }
+    .nav-tabs > li > a:before {
+        border-bottom: 2px solid $theme-blue;
     }
-  }
-
-  .breadcrumb li a {
-    color: $theme-blue !important;
-  }
-
-  .card .header h2 strong {
-    color: $theme-blue !important;
-  }
-
-  .page-item.active .page-link {
-    background-color: $theme-blue;
-    border-color: $theme-blue;
-    color: #ffffff;
-    border-radius: 50%;
-    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
-  }
-
-  .btn-primary {
-    background-color: $theme-blue !important;
-    color: #fff !important;
-    border-color: $theme-blue !important;
-    &:hover {
-      background-color: $theme-blue !important;
-      color: #fff !important;
+    .sidemenu-collapse i {
+        color: #fff;
     }
-    &:active {
-      background-color: $theme-blue !important;
-      color: #fff !important;
-    }
-    &:focus {
-      background-color: $theme-blue !important;
-      color: #fff !important;
-    }
-    &:disabled {
-      background-color: $theme-blue !important;
-      color: #fff !important;
-    }
-  }
-  .btn-outline-primary {
-    background: 0 0 !important;
-    color: $theme-blue !important;
-    border: 1px solid $theme-blue !important;
-    &:hover {
-      background: $theme-blue !important;
-      color: #fff !important;
-      border: 1px solid $theme-blue !important;
-    }
-  }
-  .timelineLabelColor strong {
-    color: $theme-blue !important;
-  }
-  .top-sidebar {
-    .horizontal-menu {
-      li {
-        &.active {
-          > a {
-            color: $theme-blue;
-          }
-        }
-        a {
-          -moz-transition: all 0.3s;
-          -o-transition: all 0.3s;
-          -webkit-transition: all 0.3s;
-          transition: all 0.3s;
-          &:hover {
-            color: $theme-blue;
-          }
-        }
-      }
-    }
-  }
-
-  .nav-tabs > li > a:before {
-    border-bottom: 2px solid $theme-blue;
-  }
-  .sidemenu-collapse i {
-    color: #fff;
-  }
 }
 /*Logo Header Background Color*/
 .logo-blue {
-  .navbar-header {
-    background-color: $theme-blue;
-  }
+    .navbar-header {
+        background-color: $theme-blue;
+    }
 }

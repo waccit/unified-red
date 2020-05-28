@@ -8,35 +8,35 @@ import { TemplateComponent } from './template/template.component';
 import { DemoComponent } from './demo/demo.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'main',
-    pathMatch: 'full'
-  },
-  {
-    path: 'main',
-    component: MainComponent
-  },
-  {
-    path: 'demo',
-    component: DemoComponent
-  },
-  // {
-  //   path: 'dashboard2',
-  //   component: Dashboard2Component
-  // },
-  // {
-  //   path: 'dashboard3',
-  //   component: Dashboard3Component
-  // },
-  {
-    path: 'Template',
-    component: TemplateComponent
-  }
+    {
+        path: '',
+        redirectTo: 'main',
+        pathMatch: 'full',
+    },
+    {
+        path: 'main',
+        component: MainComponent,
+    },
+    {
+        path: 'demo',
+        component: DemoComponent,
+    },
+    // {
+    //   path: 'dashboard2',
+    //   component: Dashboard2Component
+    // },
+    // {
+    //   path: 'dashboard3',
+    //   component: Dashboard3Component
+    // },
+    {
+        path: 'Template',
+        component: TemplateComponent,
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class DashboardRoutingModule {}

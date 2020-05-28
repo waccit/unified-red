@@ -9,7 +9,7 @@ declare const $: any;
 @Component({
     selector: 'app-signin',
     templateUrl: './signin.component.html',
-    styleUrls: ['./signin.component.scss']
+    styleUrls: ['./signin.component.scss'],
 })
 export class SigninComponent implements OnInit {
     loginForm: FormGroup;
@@ -22,7 +22,7 @@ export class SigninComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private authenticationService: AuthenticationService,
-        private snackbar:  SnackbarService
+        private snackbar: SnackbarService
     ) {
         // redirect to home if already logged in
         if (this.authenticationService.currentUserValue) {
@@ -33,7 +33,7 @@ export class SigninComponent implements OnInit {
     ngOnInit() {
         this.loginForm = this.formBuilder.group({
             username: ['', Validators.required],
-            password: ['', Validators.required]
+            password: ['', Validators.required],
         });
 
         // get return url from route parameters or default to '/'
@@ -61,13 +61,17 @@ export class SigninComponent implements OnInit {
         if (this.loginForm.invalid) {
             return;
         }
-        this.authenticationService.login(this.f.username.value, this.f.password.value).pipe(first()).subscribe(
-            data => {
-                this.router.navigate([this.returnUrl]);
-            },
-            error => {
-                console.log(error);
-                this.snackbar.error(error);
-            });
+        this.authenticationService
+            .login(this.f.username.value, this.f.password.value)
+            .pipe(first())
+            .subscribe(
+                (data) => {
+                    this.router.navigate([this.returnUrl]);
+                },
+                (error) => {
+                    console.log(error);
+                    this.snackbar.error(error);
+                }
+            );
     }
 }

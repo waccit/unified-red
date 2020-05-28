@@ -4,45 +4,45 @@
  *  Description: This scss file for progress bars style classes
  */
 .progress {
-  @include border-radius(0);
-  height: 16px;
+    @include border-radius(0);
+    height: 16px;
 
-  &.progress-xs {
-    height: 4px;
-  }
-  &.progress-s {
-    height: 6px;
-  }
-  .progress-bar {
-    line-height: 16px;
-    background-color: #1f91f3;
-  }
+    &.progress-xs {
+        height: 4px;
+    }
+    &.progress-s {
+        height: 6px;
+    }
+    .progress-bar {
+        line-height: 16px;
+        background-color: #1f91f3;
+    }
 
-  .progress-bar-success {
-    background-color: #2b982b;
-  }
+    .progress-bar-success {
+        background-color: #2b982b;
+    }
 
-  .progress-bar-info {
-    background-color: #00b0e4;
-  }
+    .progress-bar-info {
+        background-color: #00b0e4;
+    }
 
-  .progress-bar-warning {
-    background-color: #ff9600;
-  }
+    .progress-bar-warning {
+        background-color: #ff9600;
+    }
 
-  .progress-bar-danger {
-    background-color: #fb483a;
-  }
+    .progress-bar-danger {
+        background-color: #fb483a;
+    }
 }
 .progress-list {
-  position: relative;
+    position: relative;
 
-  .status {
-    display: inline-block;
-    font-size: 12px;
-    padding: 6px;
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
+    .status {
+        display: inline-block;
+        font-size: 12px;
+        padding: 6px;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 }

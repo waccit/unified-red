@@ -17,24 +17,24 @@ import { GaugeComponent } from './gauge/gauge.component';
 import { GaugeModule } from 'angular-gauge';
 
 @NgModule({
-  declarations: [
-    // EchartComponent,
-    // MorrisComponent,
-    // ChartjsComponent,
-    // SparklineComponent,
-    // ApexchartComponent,
-    NgxchartComponent,
-    GaugeComponent
-  ],
-  imports: [
-    CommonModule,
-    ChartsRoutingModule,
-    // NgxEchartsModule,
-    // chartjsModule,
-    // MorrisJsModule,
-    NgxChartsModule,
-    // NgApexchartsModule,
-    GaugeModule.forRoot()
-  ]
+    declarations: [
+        // EchartComponent,
+        // MorrisComponent,
+        // ChartjsComponent,
+        // SparklineComponent,
+        // ApexchartComponent,
+        NgxchartComponent,
+        GaugeComponent,
+    ],
+    imports: [
+        CommonModule,
+        ChartsRoutingModule,
+        // NgxEchartsModule,
+        // chartjsModule,
+        // MorrisJsModule,
+        NgxChartsModule,
+        // NgApexchartsModule,
+        GaugeModule.forRoot(),
+    ],
 })
 export class ChartsModule {}

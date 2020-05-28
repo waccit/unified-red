@@ -1,23 +1,23 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_ur_subtab(x) {
-        return RED._("unified-red/ur_subtab:ur_subtab."+x);
+        return RED._("unified-red/ur_subtab:ur_subtab." + x);
     }
 
-    RED.nodes.registerType('ur_subtab',{
+    RED.nodes.registerType('ur_subtab', {
         category: 'config',
         defaults: {
-            name: {value: c_ur_subtab("label.default")},
-            icon: {value: 'folder'},
-            tab: {type:"ur_tab", required: true },
-            order: {value: 0},
-            disp: {value: true},
-            width: {value: 6},
-            collapse: {value: false},
-            disabled: {value: false},
-            hidden: {value: false}
+            name: { value: c_ur_subtab("label.default") },
+            icon: { value: 'folder' },
+            tab: { type: "ur_tab", required: true },
+            order: { value: 0 },
+            disp: { value: true },
+            width: { value: 6 },
+            collapse: { value: false },
+            disabled: { value: false },
+            hidden: { value: false }
         },
-        sort: function(A,B) {
+        sort: function (A, B) {
             if (A.tab !== B.tab) {
                 var tabA = RED.nodes.node(A.tab);
                 var tabB = RED.nodes.node(B.tab);
@@ -34,15 +34,15 @@
             return A.order - B.order;
         },
         paletteLabel: 'dashboard subtab',
-        label: function() {
+        label: function () {
             var tabNode = RED.nodes.node(this.tab);
             if (tabNode) {
-                return "["+(tabNode.name||c_ur_subtab("label.tab"))+"] " + (this.name || c_ur_subtab("label.subtab"));
+                return "[" + (tabNode.name || c_ur_subtab("label.tab")) + "] " + (this.name || c_ur_subtab("label.subtab"));
             }
-            return "["+c_ur_subtab("label.unassigned")+"] " + (this.name || c_ur_subtab("label.subtab"));
+            return "[" + c_ur_subtab("label.unassigned") + "] " + (this.name || c_ur_subtab("label.subtab"));
         },
         // labelStyle: function() { return this.name?"node_label_italic":""; },
-        oneditprepare: function() {
+        oneditprepare: function () {
             // $("#node-input-size").elementSizer({
             //     width: "#node-config-input-width",
             //     auto: false
@@ -56,50 +56,50 @@
             //         $("#node-config-input-collapse").prop("checked",false);
             //     }
             // });
-            $("#node-config-input-disabled-btn").on("click", function(e) {
-              var i = $(this).find("i");
-              var active = i.hasClass("fa-toggle-on");
-              var newCls = "fa fa-toggle-" + (active ? "off" : "on");
-              i.attr("class", newCls);
-              $("#node-config-input-disabled").prop('checked',active);
+            $("#node-config-input-disabled-btn").on("click", function (e) {
+                var i = $(this).find("i");
+                var active = i.hasClass("fa-toggle-on");
+                var newCls = "fa fa-toggle-" + (active ? "off" : "on");
+                i.attr("class", newCls);
+                $("#node-config-input-disabled").prop('checked', active);
 
-              var newTxt = c_ur_tab(active ? "label.disabled" : "label.enabled");
-              $("#node-config-input-disabled-label").text(newTxt);
+                var newTxt = c_ur_tab(active ? "label.disabled" : "label.enabled");
+                $("#node-config-input-disabled-label").text(newTxt);
 
-              var info = $("#node-config-input-disabled-info");
-              var done = active ? info.show() : info.hide();
-          });
-          if (this.disabled) {
-              $("#node-config-input-disabled-btn").click();
-          }
-          else {
-              $("#node-config-input-disabled-label").text(c_ur_tab("label.enabled"));
-          }
+                var info = $("#node-config-input-disabled-info");
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.disabled) {
+                $("#node-config-input-disabled-btn").click();
+            }
+            else {
+                $("#node-config-input-disabled-label").text(c_ur_tab("label.enabled"));
+            }
 
-          $("#node-config-input-hidden-btn").on("click", function(e) {
-              var i = $(this).find("i");
-              var active = i.hasClass("fa-toggle-on");
-              var newCls = "fa fa-toggle-" + (active ? "off" : "on");
-              i.attr("class", newCls);
-              $("#node-config-input-hidden").prop('checked',active);
+            $("#node-config-input-hidden-btn").on("click", function (e) {
+                var i = $(this).find("i");
+                var active = i.hasClass("fa-toggle-on");
+                var newCls = "fa fa-toggle-" + (active ? "off" : "on");
+                i.attr("class", newCls);
+                $("#node-config-input-hidden").prop('checked', active);
 
-              var newTxt = c_ur_tab(active ? "label.hidden" : "label.visible");
-              $("#node-config-input-hidden-label").text(newTxt);
+                var newTxt = c_ur_tab(active ? "label.hidden" : "label.visible");
+                $("#node-config-input-hidden-label").text(newTxt);
 
-              var info = $("#node-config-input-hidden-info");
-              var done = active ? info.show() : info.hide();
-          });
-          if (this.hidden) {
-              $("#node-config-input-hidden-btn").click();
-          }
-          else {
-              $("#node-config-input-hidden-label").text(c_ur_tab("label.visible"));
-          }
+                var info = $("#node-config-input-hidden-info");
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.hidden) {
+                $("#node-config-input-hidden-btn").click();
+            }
+            else {
+                $("#node-config-input-hidden-label").text(c_ur_tab("label.visible"));
+            }
         },
-        oneditsave: function() {
-          this.disabled = $("#node-config-input-disabled").prop("checked");
-          this.hidden = $("#node-config-input-hidden").prop("checked");
-      }
+        oneditsave: function () {
+            this.disabled = $("#node-config-input-disabled").prop("checked");
+            this.hidden = $("#node-config-input-hidden").prop("checked");
+        }
     });
 </script>
 

@@ -21,86 +21,86 @@ import { SnackbarComponent } from './snackbar/snackbar.component';
 import { ExpansionPanelComponent } from './expansion-panel/expansion-panel.component';
 
 const routes: Routes = [
-  {
-    path: 'alerts',
-    component: AlertsComponent
-  },
-  {
-    path: 'animations',
-    component: AnimationsComponent
-  },
-  {
-    path: 'badges',
-    component: BadgeComponent
-  },
-  {
-    path: 'chips',
-    component: ChipsComponent
-  },
-  {
-    path: 'buttons',
-    component: ButtonsComponent
-  },
-  {
-    path: 'cards',
-    component: CardsComponent
-  },
-  {
-    path: 'expansion-panel',
-    component: ExpansionPanelComponent
-  },
-  {
-    path: 'bottom-sheet',
-    component: BottomSheetComponent
-  },
-  {
-    path: 'dialogs',
-    component: DialogsComponent
-  },
-  {
-    path: 'labels',
-    component: LabelsComponent
-  },
-  {
-    path: 'list-group',
-    component: ListGroupComponent
-  },
-  {
-    path: 'media-object',
-    component: MediaObjectComponent
-  },
-  {
-    path: 'modal',
-    component: ModalComponent
-  },
-  {
-    path: 'snackbar',
-    component: SnackbarComponent
-  },
-  {
-    path: 'preloaders',
-    component: PreloadersComponent
-  },
-  {
-    path: 'progressbars',
-    component: ProgressbarsComponent
-  },
-  {
-    path: 'tabs',
-    component: TabsComponent
-  },
-  {
-    path: 'typography',
-    component: TypographyComponent
-  },
-  {
-    path: 'helper-classes',
-    component: HelperClassesComponent
-  }
+    {
+        path: 'alerts',
+        component: AlertsComponent,
+    },
+    {
+        path: 'animations',
+        component: AnimationsComponent,
+    },
+    {
+        path: 'badges',
+        component: BadgeComponent,
+    },
+    {
+        path: 'chips',
+        component: ChipsComponent,
+    },
+    {
+        path: 'buttons',
+        component: ButtonsComponent,
+    },
+    {
+        path: 'cards',
+        component: CardsComponent,
+    },
+    {
+        path: 'expansion-panel',
+        component: ExpansionPanelComponent,
+    },
+    {
+        path: 'bottom-sheet',
+        component: BottomSheetComponent,
+    },
+    {
+        path: 'dialogs',
+        component: DialogsComponent,
+    },
+    {
+        path: 'labels',
+        component: LabelsComponent,
+    },
+    {
+        path: 'list-group',
+        component: ListGroupComponent,
+    },
+    {
+        path: 'media-object',
+        component: MediaObjectComponent,
+    },
+    {
+        path: 'modal',
+        component: ModalComponent,
+    },
+    {
+        path: 'snackbar',
+        component: SnackbarComponent,
+    },
+    {
+        path: 'preloaders',
+        component: PreloadersComponent,
+    },
+    {
+        path: 'progressbars',
+        component: ProgressbarsComponent,
+    },
+    {
+        path: 'tabs',
+        component: TabsComponent,
+    },
+    {
+        path: 'typography',
+        component: TypographyComponent,
+    },
+    {
+        path: 'helper-classes',
+        component: HelperClassesComponent,
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class UiRoutingModule {}

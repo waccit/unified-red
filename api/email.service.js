@@ -1,8 +1,8 @@
-const config = require("./config.json");
-const nodemailer = require("nodemailer");
+const config = require('./config.json');
+const nodemailer = require('nodemailer');
 
 module.exports = {
-    send
+    send,
 };
 
 // setup email server
@@ -11,7 +11,7 @@ let transporter = nodemailer.createTransport({
     port: config.smtp.port,
     secure: config.smtp.ssl, // true for 465, false for other ports
     auth: { user: config.smtp.user, pass: config.smtp.password },
-    tls: { rejectUnauthorized: false } // do not fail on invalid certs
+    tls: { rejectUnauthorized: false }, // do not fail on invalid certs
 });
 
 function send(to, subject, message) {
@@ -20,6 +20,6 @@ function send(to, subject, message) {
         to: to,
         subject: subject,
         text: message,
-        html: message
+        html: message,
     });
 }

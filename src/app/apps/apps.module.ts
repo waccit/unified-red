@@ -23,29 +23,29 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
-  declarations: [
-    CalendarComponent,
-    // ChatComponent,
-    // DragDropComponent,
-    // ContactListComponent,
-    // ContactGridComponent,
-    // SupportComponent
-  ],
-  imports: [
-    CommonModule,
-    AppsRoutingModule,
-    FullCalendarModule,
-    PerfectScrollbarModule,
-    MatButtonModule,
-    NgxDatatableModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatInputModule,
-    FormsModule,
-    DragulaModule.forRoot()
-  ]
+    declarations: [
+        CalendarComponent,
+        // ChatComponent,
+        // DragDropComponent,
+        // ContactListComponent,
+        // ContactGridComponent,
+        // SupportComponent
+    ],
+    imports: [
+        CommonModule,
+        AppsRoutingModule,
+        FullCalendarModule,
+        PerfectScrollbarModule,
+        MatButtonModule,
+        NgxDatatableModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCheckboxModule,
+        MatInputModule,
+        FormsModule,
+        DragulaModule.forRoot(),
+    ],
 })
 export class AppsModule {}

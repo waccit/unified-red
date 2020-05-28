@@ -1,15 +1,15 @@
 {
-    "ur_group" : {
-        "label" : {
-            "name" : "Name",
-            "tab" : "Tab",
-            "subtab" : "Subtab",
-            "width" : "Width",
-            "default" : "Default",
-            "group" : "Group",
-            "unassigned" : "unassigned"
+    "ur_group": {
+        "label": {
+            "name": "Name",
+            "tab": "Tab",
+            "subtab": "Subtab",
+            "width": "Width",
+            "default": "Default",
+            "group": "Group",
+            "unassigned": "unassigned"
         },
-        "display-name" : "Display group name",
-        "collapse-name" : "Allow group to be collapsed"
+        "display-name": "Display group name",
+        "collapse-name": "Allow group to be collapsed"
     }
 }

@@ -17,8 +17,8 @@ function jwt() {
             '/api/users/authenticate',
             '/api/users/register',
             /\/api\/users\/forgot\/.+/i,
-            /\/api\/users\/reset\/.+/i
-        ]
+            /\/api\/users\/reset\/.+/i,
+        ],
     });
 }
 
@@ -30,4 +30,4 @@ async function isRevoked(req, payload, done) {
     }
 
     done();
-};
+}

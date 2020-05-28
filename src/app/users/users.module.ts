@@ -12,20 +12,18 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @NgModule({
-  declarations: [
-    ProfileComponent
-  ],
-  imports: [
-    CommonModule,
-    UsersRoutingModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCheckboxModule
-  ]
+    declarations: [ProfileComponent],
+    imports: [
+        CommonModule,
+        UsersRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatButtonModule,
+        MatCheckboxModule,
+    ],
 })
 export class UsersModule {}

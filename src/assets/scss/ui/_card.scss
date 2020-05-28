@@ -4,178 +4,179 @@
  *  Description: This scss file for card style classes
  */
 .card {
-  background: #fff;
-  min-height: 50px;
-  box-shadow: none;
-  border: 0;
-  position: relative;
-  margin-bottom: 24px;
-  @include border-radius(10px);
-
-  .card-inside-title {
-    margin-top: 25px;
-    margin-bottom: 15px;
-    display: block;
-    font-size: 15px;
-    color: #000;
-
-    small {
-      color: #999;
-      display: block;
-      font-size: 11px;
-      margin-top: 5px;
-
-      a {
-        color: #777;
-        font-weight: bold;
-      }
-    }
-  }
-
-  .card-inside-title:first-child {
-    margin-top: 0;
-  }
-
-  .bg-red,
-  .bg-pink,
-  .bg-purple,
-  .bg-deep-purple,
-  .bg-indigo,
-  .bg-blue,
-  .bg-light-blue,
-  .bg-cyan,
-  .bg-teal,
-  .bg-green,
-  .bg-light-green,
-  .bg-lime,
-  .bg-yellow,
-  .bg-amber,
-  .bg-orange,
-  .bg-deep-orange,
-  .bg-brown,
-  .bg-grey,
-  .bg-blue-grey,
-  .bg-black {
-    border-bottom: none !important;
-    color: #fff !important;
-
-    h2,
-    small,
-    .material-icons {
-      color: #fff !important;
-    }
-
-    .badge {
-      background-color: #fff;
-      color: #555;
-    }
-  }
-
-  .header {
-    color: #555;
-    padding: 15px;
+    background: #fff;
+    min-height: 50px;
+    box-shadow: none;
+    border: 0;
     position: relative;
+    margin-bottom: 24px;
+    @include border-radius(10px);
 
-    .header-dropdown {
-      position: absolute;
-      top: 20px;
-      right: 15px;
-      list-style: none;
-
-      .dropdown-menu {
-        li {
-          display: block !important;
-        }
-      }
-
-      li {
-        display: inline-block;
-      }
-
-      i {
-        font-size: 20px;
-        color: #999;
-        @include transition(all 0.5s);
-
-        &:hover {
-          color: #000;
-        }
-      }
-    }
-
-    h2 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: normal;
-      color: #5b626b;
-
-      small {
+    .card-inside-title {
+        margin-top: 25px;
+        margin-bottom: 15px;
         display: block;
-        font-size: 12px;
-        margin-top: 5px;
-        color: #999;
-        line-height: 15px;
+        font-size: 15px;
+        color: #000;
 
-        a {
-          font-weight: bold;
-          color: #777;
+        small {
+            color: #999;
+            display: block;
+            font-size: 11px;
+            margin-top: 5px;
+
+            a {
+                color: #777;
+                font-weight: bold;
+            }
         }
-      }
     }
 
-    .col-xs-12 {
-      h2 {
-        margin-top: 5px;
-      }
+    .card-inside-title:first-child {
+        margin-top: 0;
     }
-  }
 
-  .body {
-    font-size: 14px;
-    color: #555;
-    padding: 15px;
+    .bg-red,
+    .bg-pink,
+    .bg-purple,
+    .bg-deep-purple,
+    .bg-indigo,
+    .bg-blue,
+    .bg-light-blue,
+    .bg-cyan,
+    .bg-teal,
+    .bg-green,
+    .bg-light-green,
+    .bg-lime,
+    .bg-yellow,
+    .bg-amber,
+    .bg-orange,
+    .bg-deep-orange,
+    .bg-brown,
+    .bg-grey,
+    .bg-blue-grey,
+    .bg-black {
+        border-bottom: none !important;
+        color: #fff !important;
 
-    @for $i from 1 through 12 {
-      .col-xs-#{$i},
-      .col-sm-#{$i},
-      .col-md-#{$i},
-      .col-lg-#{$i} {
-        margin-bottom: 20px;
-      }
+        h2,
+        small,
+        .material-icons {
+            color: #fff !important;
+        }
+
+        .badge {
+            background-color: #fff;
+            color: #555;
+        }
     }
-  }
+
+    .header {
+        color: #555;
+        padding: 15px;
+        position: relative;
+
+        .header-dropdown {
+            position: absolute;
+            top: 20px;
+            right: 15px;
+            list-style: none;
+
+            .dropdown-menu {
+                li {
+                    display: block !important;
+                }
+            }
+
+            li {
+                display: inline-block;
+            }
+
+            i {
+                font-size: 20px;
+                color: #999;
+                @include transition(all 0.5s);
+
+                &:hover {
+                    color: #000;
+                }
+            }
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: normal;
+            color: #5b626b;
+
+            small {
+                display: block;
+                font-size: 12px;
+                margin-top: 5px;
+                color: #999;
+                line-height: 15px;
+
+                a {
+                    font-weight: bold;
+                    color: #777;
+                }
+            }
+        }
+
+        .col-xs-12 {
+            h2 {
+                margin-top: 5px;
+            }
+        }
+    }
+
+    .body {
+        font-size: 14px;
+        color: #555;
+        padding: 15px;
+
+        @for $i from 1 through 12 {
+            .col-xs-#{$i},
+            .col-sm-#{$i},
+            .col-md-#{$i},
+            .col-lg-#{$i} {
+                margin-bottom: 20px;
+            }
+        }
+    }
 }
 .plain-card {
-  -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
-  -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
-  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  padding-right: 35px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 10px;
-  background: #fff;
-  overflow: hidden;
-  margin-bottom: 26px;
-  margin: 0.5rem 0 1rem 0;
+    -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    padding-right: 35px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    margin-bottom: 26px;
+    margin: 0.5rem 0 1rem 0;
 }
 .card-inner .progress {
-  height: 10px;
-  margin: 0px;
+    height: 10px;
+    margin: 0px;
 }
 .col-block {
-  margin-left: 5px;
+    margin-left: 5px;
 }
 .card-height-100 {
-  height: 100px;
+    height: 100px;
 }
 .banner-card {
-  background: #fff;
-  min-height: 50px;
-  box-shadow: none;
-  border: 0;
-  position: relative;
-  margin: 8px 0 25px 0;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-  @include border-radius(10px);
+    background: #fff;
+    min-height: 50px;
+    box-shadow: none;
+    border: 0;
+    position: relative;
+    margin: 8px 0 25px 0;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+        0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+    @include border-radius(10px);
 }

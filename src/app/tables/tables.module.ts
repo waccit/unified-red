@@ -29,36 +29,36 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
-  declarations: [
-    BasicTableComponent,
-    NgxDatatableComponent,
-    MaterialTableComponent,
-    AdvanceTableComponent,
-    FormDialogComponent,
-    DeleteDialogComponent
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    TablesRoutingModule,
-    NgxDatatableModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSnackBarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatCardModule,
-    MatDatepickerModule,
-    MatDialogModule,
-    MatSortModule,
-    MatToolbarModule,
-    MaterialFileInputModule,
-    MatRadioModule,
-    MatMenuModule
-  ]
+    declarations: [
+        BasicTableComponent,
+        NgxDatatableComponent,
+        MaterialTableComponent,
+        AdvanceTableComponent,
+        FormDialogComponent,
+        DeleteDialogComponent,
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        TablesRoutingModule,
+        NgxDatatableModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSnackBarModule,
+        MatButtonModule,
+        MatIconModule,
+        MatSelectModule,
+        MatCardModule,
+        MatDatepickerModule,
+        MatDialogModule,
+        MatSortModule,
+        MatToolbarModule,
+        MaterialFileInputModule,
+        MatRadioModule,
+        MatMenuModule,
+    ],
 })
 export class TablesModule {}
