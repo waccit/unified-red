@@ -8,34 +8,34 @@ import { CalendarComponent } from './calendar/calendar.component';
 // import { DragDropComponent } from './drag-drop/drag-drop.component';
 
 const routes: Routes = [
-  {
-    path: 'calendar',
-    component: CalendarComponent
-  },
-  // {
-  //   path: 'chat',
-  //   component: ChatComponent
-  // },
-  // {
-  //   path: 'contact-grid',
-  //   component: ContactGridComponent
-  // },
-  // {
-  //   path: 'contact-list',
-  //   component: ContactListComponent
-  // },
-  // {
-  //   path: 'support',
-  //   component: SupportComponent
-  // },
-  // {
-  //   path: 'dragdrop',
-  //   component: DragDropComponent
-  // }
+    {
+        path: 'calendar',
+        component: CalendarComponent,
+    },
+    // {
+    //   path: 'chat',
+    //   component: ChatComponent
+    // },
+    // {
+    //   path: 'contact-grid',
+    //   component: ContactGridComponent
+    // },
+    // {
+    //   path: 'contact-list',
+    //   component: ContactListComponent
+    // },
+    // {
+    //   path: 'support',
+    //   component: SupportComponent
+    // },
+    // {
+    //   path: 'dragdrop',
+    //   component: DragDropComponent
+    // }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class AppsRoutingModule {}

@@ -16,23 +16,23 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
-  declarations: [
-    Page500Component,
-    Page404Component,
-    SigninComponent,
-    SignupComponent,
-    // LockedComponent,
-    ForgotPasswordComponent
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    // AuthenticationRoutingModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatIconModule,
-    MatButtonModule
-  ]
+    declarations: [
+        Page500Component,
+        Page404Component,
+        SigninComponent,
+        SignupComponent,
+        // LockedComponent,
+        ForgotPasswordComponent,
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        // AuthenticationRoutingModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatIconModule,
+        MatButtonModule,
+    ],
 })
 export class AuthenticationModule {}

@@ -9,8 +9,7 @@ import { User } from '../authentication/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient) {}
 
     getAll() {
         return this.http.get<User[]>(`/api/users`);
@@ -45,7 +44,8 @@ export class UserService {
     }
 
     resetPassword(token: string, password: string) {
-        return this.http.post(`/api/users/reset/${token}`, { "password" : password });
+        return this.http.post(`/api/users/reset/${token}`, {
+            'password': password,
+        });
     }
-  
 }

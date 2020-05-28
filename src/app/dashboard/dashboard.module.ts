@@ -10,17 +10,27 @@ import { MainComponent } from './main/main.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 // import { NgApexchartsModule } from 'ng-apexcharts';
+import { DemoComponent } from './demo/demo.component';
+import { UrTextComponent } from '../node-templates/ur-text/ur-text.component';
+import { GroupComponent } from './group/group.component';
 
 @NgModule({
-  declarations: [MainComponent], //, Dashboard2Component, Dashboard3Component
-  imports: [
-    CommonModule,
-    DashboardRoutingModule,
-    // chartjsModule,
-    // NgxEchartsModule,
-    FullCalendarModule,
-    // NgApexchartsModule,
-    PerfectScrollbarModule
-  ]
+    declarations: [
+        MainComponent,
+        // Dashboard2Component,
+        // Dashboard3Component,
+        DemoComponent,
+        UrTextComponent,
+        GroupComponent,
+    ],
+    imports: [
+        CommonModule,
+        DashboardRoutingModule,
+        // chartjsModule,
+        // NgxEchartsModule,
+        FullCalendarModule,
+        // NgApexchartsModule,
+        PerfectScrollbarModule,
+    ],
 })
 export class DashboardModule {}

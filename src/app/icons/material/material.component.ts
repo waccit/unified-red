@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-material',
-  templateUrl: './material.component.html',
-  styleUrls: ['./material.component.scss']
+    selector: 'app-material',
+    templateUrl: './material.component.html',
+    styleUrls: ['./material.component.scss'],
 })
 export class MaterialComponent implements OnInit {
-  constructor() {}
+    constructor() {}
 
-  ngOnInit() {}
+    ngOnInit() {}
 }

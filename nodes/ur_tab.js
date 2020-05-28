@@ -1,5 +1,4 @@
-module.exports = function(RED) {
-
+module.exports = function (RED) {
     function TabNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
@@ -7,9 +6,9 @@ module.exports = function(RED) {
             order: config.order || 0,
             icon: config.icon || '',
             disabled: config.disabled || false,
-            hidden: config.hidden || false
+            hidden: config.hidden || false,
         };
     }
 
-    RED.nodes.registerType("ur_tab", TabNode);
+    RED.nodes.registerType('ur_tab', TabNode);
 };

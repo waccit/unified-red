@@ -1,5 +1,4 @@
-module.exports = function(RED) {
-
+module.exports = function (RED) {
     function SubtabNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
@@ -11,12 +10,18 @@ module.exports = function(RED) {
             collapse: config.collapse || false,
             icon: config.icon || '',
             disabled: config.disabled || false,
-            hidden: config.hidden || false
+            hidden: config.hidden || false,
         };
-        if (!this.config.hasOwnProperty("disp")) { this.config.disp = true; }
-        if (this.config.disp !== false) { this.config.disp = true; }
-        if (!this.config.hasOwnProperty("collapse")) { this.config.collapse = false; }
+        if (!this.config.hasOwnProperty('disp')) {
+            this.config.disp = true;
+        }
+        if (this.config.disp !== false) {
+            this.config.disp = true;
+        }
+        if (!this.config.hasOwnProperty('collapse')) {
+            this.config.collapse = false;
+        }
     }
 
-    RED.nodes.registerType("ur_subtab", SubtabNode);
+    RED.nodes.registerType('ur_subtab', SubtabNode);
 };

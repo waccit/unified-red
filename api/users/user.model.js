@@ -15,7 +15,7 @@ const schema = new Schema({
     enabled: { type: Boolean, default: true, required: true },
     createdDate: { type: Date, default: Date.now },
     expirationDate: { type: Date },
-    resetToken: { type: String }
+    resetToken: { type: String },
 });
 
 schema.set('toJSON', {
@@ -25,7 +25,7 @@ schema.set('toJSON', {
         delete ret._id;
         delete ret.hash;
         delete ret.resetToken;
-    }
+    },
 });
 
 module.exports = mongoose.model('User', schema);

@@ -9,42 +9,42 @@ import { NgxchartComponent } from './ngxchart/ngxchart.component';
 import { GaugeComponent } from './gauge/gauge.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'ngx-charts',
-    pathMatch: 'full'
-  },
-  // {
-  //   path: 'morris',
-  //   component: MorrisComponent
-  // },
-  // {
-  //   path: 'echart',
-  //   component: EchartComponent
-  // },
-  // {
-  //   path: 'apex',
-  //   component: ApexchartComponent
-  // },
-  // {
-  //   path: 'chartjs',
-  //   component: ChartjsComponent
-  // },
-  {
-    path: 'ngx-charts',
-    component: NgxchartComponent
-  },
-  {
-    path: 'gauge',
-    component: GaugeComponent
-  },
-  // {
-  //   path: 'sparkline',
-  //   component: SparklineComponent
-  // }
+    {
+        path: '',
+        redirectTo: 'ngx-charts',
+        pathMatch: 'full',
+    },
+    // {
+    //   path: 'morris',
+    //   component: MorrisComponent
+    // },
+    // {
+    //   path: 'echart',
+    //   component: EchartComponent
+    // },
+    // {
+    //   path: 'apex',
+    //   component: ApexchartComponent
+    // },
+    // {
+    //   path: 'chartjs',
+    //   component: ChartjsComponent
+    // },
+    {
+        path: 'ngx-charts',
+        component: NgxchartComponent,
+    },
+    {
+        path: 'gauge',
+        component: GaugeComponent,
+    },
+    // {
+    //   path: 'sparkline',
+    //   component: SparklineComponent
+    // }
 ];
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class ChartsRoutingModule {}

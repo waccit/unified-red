@@ -3,7 +3,7 @@ Credit to Jason Watmore (https://github.com/cornflourblue) for Angular Reactive 
 Source: https://jasonwatmore.com/post/2018/11/07/angular-7-reactive-forms-validation-example
 */
 
-import { FormGroup, AbstractControl, ValidationErrors } from "@angular/forms"
+import { FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 
 // custom validator to check that two fields match
 export function MustMatch(controlName: string, matchingControlName: string) {
@@ -22,22 +22,34 @@ export function MustMatch(controlName: string, matchingControlName: string) {
         } else {
             matchingControl.setErrors(null);
         }
-    }
+    };
 }
 
-export const PasswordStrengthValidator = function (control: AbstractControl): ValidationErrors | null {
+export const PasswordStrengthValidator = function (
+    control: AbstractControl
+): ValidationErrors | null {
     let value: string = control.value || '';
     if (!value) {
         return null;
     }
     if (!/[A-Z]+/g.test(value)) {
-        return { passwordStrength: `Password must contain an uppercase character` };
+        return {
+            passwordStrength: `Password must contain an uppercase character`,
+        };
     }
     if (!/[a-z]+/g.test(value)) {
-        return { passwordStrength: `Password must contain a lowercase character` };
+        return {
+            passwordStrength: `Password must contain a lowercase character`,
+        };
     }
-    if (!/[0-9`~\!@#\$%\^&\*\(\)\-_\=\+\[\]\{\}\\/\|;:'\",\.\<\>\?]+/g.test(value)) {
-        return { passwordStrength: `Password must contain a number or a symbol` };
+    if (
+        !/[0-9`~\!@#\$%\^&\*\(\)\-_\=\+\[\]\{\}\\/\|;:'\",\.\<\>\?]+/g.test(
+            value
+        )
+    ) {
+        return {
+            passwordStrength: `Password must contain a number or a symbol`,
+        };
     }
     return null;
-}
+};

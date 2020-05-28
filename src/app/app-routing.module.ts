@@ -12,11 +12,11 @@ const routes: Routes = [
         path: '',
         component: DemoComponent,
         pathMatch: 'full',
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
     },
     {
         path: 'users/profile',
-        component: ProfileComponent
+        component: ProfileComponent,
     },
     // {
     //     path: 'dashboard',
@@ -65,23 +65,23 @@ const routes: Routes = [
     // },
     {
         path: 'authentication/login',
-        component: SigninComponent
+        component: SigninComponent,
     },
     {
         path: 'authentication/register',
-        component: SignupComponent
+        component: SignupComponent,
     },
     {
         path: 'authentication/forgot-password',
-        component: ForgotPasswordComponent
+        component: ForgotPasswordComponent,
     },
 
     // otherwise redirect to home
-    { path: '**', redirectTo: '' }
+    { path: '**', redirectTo: '' },
 ];
 
 @NgModule({
     imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule]
+    exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

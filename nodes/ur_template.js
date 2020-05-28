@@ -1,4 +1,4 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
     var ui = require('../ui')(RED);
 
     function TemplateNode(config) {
@@ -6,27 +6,34 @@ module.exports = function(RED) {
         var node = this;
 
         var group = RED.nodes.getNode(config.group);
-        if (!group) { return; }
+        if (!group) {
+            return;
+        }
         var subtab = RED.nodes.getNode(group.config.subtab);
-        if (!subtab) { return; }
+        if (!subtab) {
+            return;
+        }
         var tab = RED.nodes.getNode(subtab.config.tab);
-        if (!tab) { return; }
-
+        if (!tab) {
+            return;
+        }
 
         if (config.templateScope !== 'global') {
             tab = RED.nodes.getNode(group.config.tab);
-            if (!tab) { return; }
+            if (!tab) {
+                return;
+            }
             if (!config.width) {
                 config.width = group.config.width;
             }
         }
-        var hei = Number(config.height|| 0);
-        var previousTemplate = null
+        var hei = Number(config.height || 0);
+        var previousTemplate = null;
         var theme = ui.getTheme();
         var colortheme = {};
         for (var i in theme) {
             if (theme.hasOwnProperty(i)) {
-                colortheme[i.replace(/-/g, "_")] = theme[i].value;
+                colortheme[i.replace(/-/g, '_')] = theme[i].value;
             }
         }
 
@@ -46,24 +53,34 @@ module.exports = function(RED) {
                 height: hei,
                 format: config.format,
                 templateScope: config.templateScope,
-                theme: colortheme
+                theme: colortheme,
             },
-            beforeEmit: function(msg) {
-                var properties = Object.getOwnPropertyNames(msg).filter(function (p) { return p[0] != '_'; });
+            beforeEmit: function (msg) {
+                var properties = Object.getOwnPropertyNames(msg).filter(
+                    function (p) {
+                        return p[0] != '_';
+                    }
+                );
                 var clonedMsg = {
-                    templateScope: config.templateScope
+                    templateScope: config.templateScope,
                 };
-                for (var i=0; i<properties.length; i++) {
+                for (var i = 0; i < properties.length; i++) {
                     var property = properties[i];
                     clonedMsg[property] = msg[property];
                 }
 
                 // transform to string if msg.template is buffer
-                if (clonedMsg.template !== undefined && Buffer.isBuffer(clonedMsg.template)) {
+                if (
+                    clonedMsg.template !== undefined &&
+                    Buffer.isBuffer(clonedMsg.template)
+                ) {
                     clonedMsg.template = clonedMsg.template.toString();
                 }
 
-                if (clonedMsg.template === undefined && previousTemplate !== null) {
+                if (
+                    clonedMsg.template === undefined &&
+                    previousTemplate !== null
+                ) {
                     clonedMsg.template = previousTemplate;
                 }
 
@@ -75,21 +92,26 @@ module.exports = function(RED) {
                 // }
 
                 if (clonedMsg.template) {
-                    previousTemplate = clonedMsg.template
+                    previousTemplate = clonedMsg.template;
                 }
 
-                return { msg:clonedMsg };
+                return { msg: clonedMsg };
             },
             beforeSend: function (msg, original) {
-                if (original && original.hasOwnProperty("msg") && original.msg !== null) {
+                if (
+                    original &&
+                    original.hasOwnProperty('msg') &&
+                    original.msg !== null
+                ) {
                     var om = original.msg;
                     om.socketid = original.socketid;
                     return om;
                 }
-            }
+            },
         });
-        node.on("close", done);
+        console.log('TemplateNode done: ', done);
+        node.on('close', done);
     }
-    RED.nodes.registerType("ur_template", TemplateNode);
-    // RED.library.register("uitemplates");
+    RED.nodes.registerType('ur_template', TemplateNode);
+    RED.library.register('uitemplates');
 };

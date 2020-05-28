@@ -8,12 +8,12 @@ import { SimpleLineComponent } from './simple-line/simple-line.component';
 import { ThemifyComponent } from './themify/themify.component';
 
 @NgModule({
-  declarations: [
-    MaterialComponent,
-    FontAwesomeComponent,
-    SimpleLineComponent,
-    ThemifyComponent
-  ],
-  imports: [CommonModule, IconsRoutingModule]
+    declarations: [
+        MaterialComponent,
+        FontAwesomeComponent,
+        SimpleLineComponent,
+        ThemifyComponent,
+    ],
+    imports: [CommonModule, IconsRoutingModule],
 })
 export class IconsModule {}

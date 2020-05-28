@@ -1,22 +1,22 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_ur_group(x) {
-        return RED._("unified-red/ur_group:ur_group."+x);
+        return RED._("unified-red/ur_group:ur_group." + x);
     }
 
-    RED.nodes.registerType('ur_group',{
+    RED.nodes.registerType('ur_group', {
         category: 'config',
         defaults: {
-            name: {value: c_ur_group("label.default")},
-            subtab: {type:"ur_subtab", required: true },
-            order: {value: 0},
-            disp: {value: true},
-            width: {value: 6},
-            collapse: {value: false},
-            disabled: {value: false},
-            hidden: {value: false}
+            name: { value: c_ur_group("label.default") },
+            subtab: { type: "ur_subtab", required: true },
+            order: { value: 0 },
+            disp: { value: true },
+            width: { value: 6 },
+            collapse: { value: false },
+            disabled: { value: false },
+            hidden: { value: false }
         },
-        sort: function(A,B) {
+        sort: function (A, B) {
             if (A.subtab !== B.subtab) {
                 var subtabA = RED.nodes.node(A.subtab);
                 var subtabB = RED.nodes.node(B.subtab);
@@ -33,27 +33,27 @@
             return A.order - B.order;
         },
         paletteLabel: 'dashboard group',
-        label: function() {
+        label: function () {
             var subtabNode = RED.nodes.node(this.subtab);
             var tabNode = RED.nodes.node(subtabNode.tab);
             var subtabName = subtabNode ? subtabNode.name : "label.unassigned";
             var tabName = tabNode ? tabNode.name : "label.unassigned";
-            
-            return "["+(tabName || c_ur_group("label.tab"))+"] ["+(subtabName||c_ur_group("label.subtab"))+"] " + (this.name || c_ur_group("label.group"));
+
+            return "[" + (tabName || c_ur_group("label.tab")) + "] [" + (subtabName || c_ur_group("label.subtab")) + "] " + (this.name || c_ur_group("label.group"));
         },
-        labelStyle: function() { return this.name?"node_label_italic":""; },
-        oneditprepare: function() {
+        labelStyle: function () { return this.name ? "node_label_italic" : ""; },
+        oneditprepare: function () {
             $("#node-input-size").elementSizer({
                 width: "#node-config-input-width",
                 auto: false
             });
-            $("#node-config-input-disp").on("change", function() {
+            $("#node-config-input-disp").on("change", function () {
                 if ($("#node-config-input-disp").is(":checked")) {
                     $("#group-collapse-flag").show();
                 }
                 else {
                     $("#group-collapse-flag").hide();
-                    $("#node-config-input-collapse").prop("checked",false);
+                    $("#node-config-input-collapse").prop("checked", false);
                 }
             });
         }
