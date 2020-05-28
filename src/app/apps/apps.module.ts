@@ -7,10 +7,10 @@ import { FormsModule } from '@angular/forms';
 import { AppsRoutingModule } from './apps-routing.module';
 import { CalendarComponent } from './calendar/calendar.component';
 // import { ChatComponent } from './chat/chat.component';
-import { DragDropComponent } from './drag-drop/drag-drop.component';
+// import { DragDropComponent } from './drag-drop/drag-drop.component';
 // import { ContactListComponent } from './contact-list/contact-list.component';
 // import { ContactGridComponent } from './contact-grid/contact-grid.component';
-import { SupportComponent } from './support/support.component';
+// import { SupportComponent } from './support/support.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -26,10 +26,10 @@ import { MatInputModule } from '@angular/material/input';
   declarations: [
     CalendarComponent,
     // ChatComponent,
-    DragDropComponent,
+    // DragDropComponent,
     // ContactListComponent,
     // ContactGridComponent,
-    SupportComponent
+    // SupportComponent
   ],
   imports: [
     CommonModule,

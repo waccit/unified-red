@@ -3,15 +3,15 @@ Credit to Jason Watmore (https://github.com/cornflourblue) for Angular Registrat
 Source: https://github.com/cornflourblue/angular-8-registration-login-example
 */
 
-export class User {
+export interface User {
     id: number;
     username: string;
     password: string;
     firstName: string;
     lastName: string;
-    token: string;
+    token?: string;
     enabled: boolean;
     email: string;
-    // expirationDate: Date;
-    // createdDate: Date;
+    // expirationDate?: Date;
+    // createdDate?: Date;
 }

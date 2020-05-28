@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { AuthenticationService } from '../../services/';
+import { AuthenticationService, SnackbarService } from '../../services/';
 
 declare const $: any;
 
@@ -21,7 +21,8 @@ export class SigninComponent implements OnInit {
         private formBuilder: FormBuilder,
         private route: ActivatedRoute,
         private router: Router,
-        private authenticationService: AuthenticationService
+        private authenticationService: AuthenticationService,
+        private snackbar:  SnackbarService
     ) {
         // redirect to home if already logged in
         if (this.authenticationService.currentUserValue) {
@@ -66,8 +67,7 @@ export class SigninComponent implements OnInit {
             },
             error => {
                 console.log(error);
-                // this.alertService.error(error);
-                //TODO: toast
+                this.snackbar.error(error);
             });
     }
 }
