@@ -4,6 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
+// import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -24,6 +25,12 @@ import {
 } from 'ngx-perfect-scrollbar';
 import { JwtInterceptor } from './authentication/jwt.interceptor';
 import { ErrorInterceptor } from './authentication/error.interceptor';
+
+import { Page500Component } from './authentication/page500/page500.component';
+import { Page404Component } from './authentication/page404/page404.component';
+import { SigninComponent } from './authentication/signin/signin.component';
+import { SignupComponent } from './authentication/signup/signup.component';
+import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -59,7 +66,12 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     SimpleDialogComponent,
     DialogformComponent,
     BottomSheetOverviewExampleSheet,
-    RightSidebarComponent
+    RightSidebarComponent,
+    Page500Component,
+    Page404Component,
+    SigninComponent,
+    SignupComponent,
+    ForgotPasswordComponent,
   ],
   imports: [
     BrowserModule,
@@ -86,6 +98,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     MatSlideToggleModule,
     MatMenuModule,
     NgxMaskModule.forRoot(),
+    // CommonModule,
     // AgmCoreModule.forRoot({ apiKey: 'YOUR API KEY' }),
   ],
   providers: [
