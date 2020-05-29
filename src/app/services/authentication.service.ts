@@ -13,16 +13,23 @@ import { User } from '../authentication/user.model';
 export class AuthenticationService {
     private currentUserSubject: BehaviorSubject<User>;
     public currentUser: Observable<User>;
+    private _currentUser: User;
+    private tokenSubject: BehaviorSubject<string>;
+    public token: Observable<string>;
 
     constructor(private http: HttpClient) {
-        this.currentUserSubject = new BehaviorSubject<User>(
-            JSON.parse(localStorage.getItem('currentUser'))
-        );
+        this.currentUserSubject = new BehaviorSubject<User>(this._currentUser);
         this.currentUser = this.currentUserSubject.asObservable();
+        this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
+        this.token = this.tokenSubject.asObservable();
     }
 
-    public get currentUserValue(): User {
+    public get userValue(): User {
         return this.currentUserSubject.value;
+    }
+
+    public get tokenValue(): string {
+        return this.tokenSubject.value;
     }
 
     login(username, password) {
@@ -30,17 +37,19 @@ export class AuthenticationService {
             .post<any>('/api/users/authenticate', { username, password })
             .pipe(
                 map((user) => {
-                    // store user details and jwt token in local storage to keep user logged in between page refreshes
-                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    // store user details and jwt token in session storage to keep user logged in between page refreshes
+                    sessionStorage.setItem('token', user.token);
                     this.currentUserSubject.next(user);
-                    return user;
+                    this.tokenSubject.next(user.token);
+                    return user.token;
                 })
             );
     }
 
     logout() {
-        // remove user from local storage and set current user to null
-        localStorage.removeItem('currentUser');
+        // remove user from session storage and set current user and token to null
+        sessionStorage.removeItem('token');
         this.currentUserSubject.next(null);
+        this.tokenSubject.next(null);
     }
 }

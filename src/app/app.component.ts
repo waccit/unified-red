@@ -20,7 +20,7 @@ export class AppComponent {
     currentUrl: string;
     showLoadingIndicatior = true;
     sidebarItems: any[] = [];
-    currentUser: User;
+    private currentUser: User;
 
     constructor(public _router: Router, location: PlatformLocation, private webSocketService: WebSocketService, private authenticationService: AuthenticationService) {
         console.log("AppComponent Constructor Called");
