@@ -34,7 +34,7 @@ export class SignupComponent implements OnInit {
         private snackbar: SnackbarService
     ) {
         // redirect to home if already logged in
-        if (this.authenticationService.currentUserValue) {
+        if (this.authenticationService.tokenValue) {
             this.router.navigate(['/']);
         }
     }
@@ -111,7 +111,6 @@ export class SignupComponent implements OnInit {
                     this.success = true;
                 },
                 (error) => {
-                    console.log(error);
                     this.snackbar.error(error);
                 }
             );

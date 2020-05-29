@@ -25,7 +25,7 @@ export class SigninComponent implements OnInit {
         private snackbar: SnackbarService
     ) {
         // redirect to home if already logged in
-        if (this.authenticationService.currentUserValue) {
+        if (this.authenticationService.tokenValue) {
             this.router.navigate(['/']);
         }
     }
@@ -69,7 +69,6 @@ export class SigninComponent implements OnInit {
                     this.router.navigate([this.returnUrl]);
                 },
                 (error) => {
-                    console.log(error);
                     this.snackbar.error(error);
                 }
             );
