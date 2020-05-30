@@ -3,9 +3,6 @@
         <div class="wrap-login100">
             <form class="login100-form validate-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <span class="login100-form-title pb-5">Login</span>
-                <div *ngIf="registeredUser" class="alert alert-success">
-                    <strong>Success!</strong> Your new user account is set up. Please login!
-                </div>
                 <div class="row">
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width" appearance="outline">
@@ -19,8 +16,8 @@
                     <div class="col-xl-12col-lg-12 col-md-12 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width" appearance="outline">
                             <mat-label>Password</mat-label>
-                            <input matInput type="password" formControlName="password">
-                            <mat-icon matSuffix>vpn_key</mat-icon>
+                            <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" required>
+                            <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
                         </mat-form-field>
                     </div>
                 </div>

@@ -74,10 +74,7 @@ async function update(id, userParam) {
 
     // validate
     checkValidUser(user);
-    if (
-        user.username !== userParam.username &&
-        (await User.findOne({ username: userParam.username }))
-    ) {
+    if (user.username !== userParam.username && (await User.findOne({ username: userParam.username }))) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
     // validate email address if it was entered
@@ -120,30 +117,17 @@ async function generateResetToken(req, username) {
 
     // build email message
     let rootPath = '/ui';
-    if (
-        typeof settings().ui !== 'undefined' &&
-        typeof settings().ui.path !== 'undefined'
-    ) {
+    if (typeof settings().ui !== 'undefined' && typeof settings().ui.path !== 'undefined') {
         rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
     }
-    let resetLink =
-        req.protocol +
-        '://' +
-        req.get('host') +
-        rootPath +
-        '/#/authentication/reset-password/' +
-        token;
+    let resetLink = req.protocol + '://' + req.get('host') + rootPath + '/#/authentication/reset-password/' + token;
     let message =
         "A password reset has been request for username '" +
         user.username +
         "'. Please click this link to change your password: " +
         resetLink;
 
-    await emailService.send(
-        user.email,
-        'Password Reset for ' + user.username,
-        message
-    );
+    await emailService.send(user.email, 'Password Reset for ' + user.username, message);
     return token;
 }
 
@@ -165,10 +149,7 @@ function checkValidUser(user) {
     if (!user.enabled) {
         throw 'Disabled user account';
     }
-    if (
-        user.expirationDate &&
-        user.expirationDate.getTime() < new Date().getTime()
-    ) {
+    if (user.expirationDate && user.expirationDate.getTime() < new Date().getTime()) {
         throw 'User account has expired';
     }
 }

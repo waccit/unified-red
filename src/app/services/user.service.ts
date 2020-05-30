@@ -35,17 +35,8 @@ export class UserService {
         return this.http.get<User>(`/api/users/${id}`);
     }
 
-    update(id: string, user: User) {
+    update(id: string, user: any) {
         return this.http.put<User>(`/api/users/${id}`, user);
     }
 
-    forgotPassword(username: string) {
-        return this.http.get(`/api/users/forgot/${username}`);
-    }
-
-    resetPassword(token: string, password: string) {
-        return this.http.post(`/api/users/reset/${token}`, {
-            'password': password,
-        });
-    }
 }

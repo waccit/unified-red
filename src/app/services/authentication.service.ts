@@ -54,12 +54,13 @@ export class AuthenticationService {
         this.tokenSubject.next(null);
     }
 
-    forgotPassword(username){
-        return this.http.get('/api/users/forgot/'+username);
+    forgotPassword(username: string) {
+        return this.http.get(`/api/users/forgot/${username}`);
     }
 
-    resetPassword(resetToken, password) {
+    resetPassword(resetToken: string, password: string) {
         return this.http
-            .post<any>('/api/users/reset/'+resetToken, { password });
+            .post<any>(`/api/users/reset/${resetToken}`, { password });
     }
+
 }
