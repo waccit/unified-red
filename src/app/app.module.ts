@@ -4,7 +4,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-// import { CommonModule } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -23,15 +22,14 @@ import {
   PERFECT_SCROLLBAR_CONFIG,
   PerfectScrollbarConfigInterface
 } from 'ngx-perfect-scrollbar';
+import { UsersModule } from './users/users.module';
+import { AuthenticationModule } from './authentication/authentication.module';
+
 import { JwtInterceptor } from './authentication/jwt.interceptor';
 import { ErrorInterceptor } from './authentication/error.interceptor';
 
 import { Page500Component } from './authentication/page500/page500.component';
 import { Page404Component } from './authentication/page404/page404.component';
-import { LoginComponent } from './authentication/login/login.component';
-import { RegisterComponent } from './authentication/register/register.component';
-import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './authentication/reset-password/reset-password.component';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -71,14 +69,12 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     RightSidebarComponent,
     Page500Component,
     Page404Component,
-    LoginComponent,
-    RegisterComponent,
-    ForgotPasswordComponent,
-    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    AuthenticationModule,
+    UsersModule,
     AppRoutingModule,
     NgbModule,
     HttpClientModule,
@@ -101,7 +97,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     MatSlideToggleModule,
     MatMenuModule,
     NgxMaskModule.forRoot(),
-    // CommonModule,
     // AgmCoreModule.forRoot({ apiKey: 'YOUR API KEY' }),
   ],
   providers: [

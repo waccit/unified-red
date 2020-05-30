@@ -2,22 +2,13 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './authentication/auth.guard';
 import { DemoComponent } from './dashboard/demo/demo.component';
-import { LoginComponent } from './authentication/login/login.component';
-import { RegisterComponent } from './authentication/register/register.component';
-import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './authentication/reset-password/reset-password.component';
-import { ProfileComponent } from './users/profile/profile.component';
+import { Page404Component } from './authentication/page404/page404.component';
 
 const routes: Routes = [
     {
         path: '',
         component: DemoComponent,
         pathMatch: 'full',
-        canActivate: [AuthGuard],
-    },
-    {
-        path: 'users/profile',
-        component: ProfileComponent,
         canActivate: [AuthGuard],
     },
     // {
@@ -65,25 +56,13 @@ const routes: Routes = [
     //     path: 'icons',
     //     loadChildren: () => import('./icons/icons.module').then(m => m.IconsModule)
     // },
-    {
-        path: 'authentication/login',
-        component: LoginComponent,
-    },
-    {
-        path: 'authentication/register',
-        component: RegisterComponent,
-    },
-    {
-        path: 'authentication/forgot-password',
-        component: ForgotPasswordComponent,
-    },
-    {
-        path: 'authentication/reset-password/:resetToken',
-        component: ResetPasswordComponent,
-    },
 
-    // otherwise redirect to home
-    { path: '**', redirectTo: '' },
+    // otherwise page not found
+    {
+        path: '**',
+        component: Page404Component,
+        // redirectTo: ''
+    },
 ];
 
 @NgModule({
