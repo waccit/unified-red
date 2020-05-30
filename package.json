@@ -35,7 +35,8 @@
         "tabWidth": 4,
         "semi": true,
         "bracketSpacing": true,
-        "quoteProps": "preserve"
+        "quoteProps": "preserve",
+        "printWidth": 120
     },
     "node-red": {
         "version": ">=0.14.0",
