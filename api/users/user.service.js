@@ -131,7 +131,7 @@ async function generateResetToken(req, username) {
         '://' +
         req.get('host') +
         rootPath +
-        '/#/authentication/reset-password?t=' +
+        '/#/authentication/reset-password/' +
         token;
     let message =
         "A password reset has been request for username '" +
