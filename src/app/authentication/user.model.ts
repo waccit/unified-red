@@ -4,7 +4,7 @@ Source: https://github.com/cornflourblue/angular-8-registration-login-example
 */
 
 export interface User {
-    id: number;
+    id: string;
     username: string;
     password: string;
     firstName: string;
