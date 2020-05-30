@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './authentication/auth.guard';
 import { DemoComponent } from './dashboard/demo/demo.component';
-import { SigninComponent } from './authentication/signin/signin.component';
-import { SignupComponent } from './authentication/signup/signup.component';
+import { LoginComponent } from './authentication/login/login.component';
+import { RegisterComponent } from './authentication/register/register.component';
 import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
 import { ProfileComponent } from './users/profile/profile.component';
 
@@ -65,11 +65,11 @@ const routes: Routes = [
     // },
     {
         path: 'authentication/login',
-        component: SigninComponent,
+        component: LoginComponent,
     },
     {
         path: 'authentication/register',
-        component: SignupComponent,
+        component: RegisterComponent,
     },
     {
         path: 'authentication/forgot-password',

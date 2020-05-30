@@ -28,8 +28,8 @@ import { ErrorInterceptor } from './authentication/error.interceptor';
 
 import { Page500Component } from './authentication/page500/page500.component';
 import { Page404Component } from './authentication/page404/page404.component';
-import { SigninComponent } from './authentication/signin/signin.component';
-import { SignupComponent } from './authentication/signup/signup.component';
+import { LoginComponent } from './authentication/login/login.component';
+import { RegisterComponent } from './authentication/register/register.component';
 import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -69,8 +69,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     RightSidebarComponent,
     Page500Component,
     Page404Component,
-    SigninComponent,
-    SignupComponent,
+    LoginComponent,
+    RegisterComponent,
     ForgotPasswordComponent,
   ],
   imports: [

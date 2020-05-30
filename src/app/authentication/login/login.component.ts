@@ -2,16 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { AuthenticationService, SnackbarService } from '../../services/';
+import { AuthenticationService, SnackbarService } from '../../services';
 
 declare const $: any;
 
 @Component({
-    selector: 'app-signin',
-    templateUrl: './signin.component.html',
-    styleUrls: ['./signin.component.scss'],
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
 })
-export class SigninComponent implements OnInit {
+export class LoginComponent implements OnInit {
     loginForm: FormGroup;
     submitted = false;
     returnUrl: string;
