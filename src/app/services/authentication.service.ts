@@ -9,6 +9,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../authentication/user.model';
 
+
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
     private currentUserSubject: BehaviorSubject<User>;
@@ -51,5 +52,14 @@ export class AuthenticationService {
         sessionStorage.removeItem('token');
         this.currentUserSubject.next(null);
         this.tokenSubject.next(null);
+    }
+
+    forgotPassword(username){
+        return this.http.get('/api/users/forgot/'+username);
+    }
+
+    resetPassword(resetToken, password) {
+        return this.http
+            .post<any>('/api/users/reset/'+resetToken, { password });
     }
 }

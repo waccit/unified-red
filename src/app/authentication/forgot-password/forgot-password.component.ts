@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { first } from 'rxjs/operators';
+import { AuthenticationService, SnackbarService } from '../../services/';
 
 declare const $: any;
 
@@ -10,18 +12,20 @@ declare const $: any;
     styleUrls: ['./forgot-password.component.scss'],
 })
 export class ForgotPasswordComponent implements OnInit {
-    loginForm: FormGroup;
+    forgotForm: FormGroup;
     submitted = false;
     returnUrl: string;
 
     constructor(
         private formBuilder: FormBuilder,
         private route: ActivatedRoute,
-        private router: Router
+        private router: Router,
+        private authenticationService: AuthenticationService,
+        private snackbar: SnackbarService
     ) {}
 
     ngOnInit() {
-        this.loginForm = this.formBuilder.group({
+        this.forgotForm = this.formBuilder.group({
             username: ['', Validators.required],
         });
 
@@ -40,17 +44,30 @@ export class ForgotPasswordComponent implements OnInit {
         });
     }
     get f() {
-        return this.loginForm.controls;
+        return this.forgotForm.controls;
     }
 
     onSubmit() {
         this.submitted = true;
 
         // stop here if form is invalid
-        if (this.loginForm.invalid) {
+        if (this.forgotForm.invalid) {
             return;
         } else {
-            this.router.navigate(['/']); // redirect home
+            this.authenticationService
+            .forgotPassword(this.f.username.value)
+            .pipe(first())
+            .subscribe(
+                (data) => {
+                    this.router.navigate([this.returnUrl]);
+                    console.log(data);
+                },
+                (error) => {
+                    console.log(error);
+                    this.snackbar.error(error);
+                }
+            );
+            this.snackbar.success('Email Has Been Sent to '+this.f.username.value+'!');
         }
     }
 }

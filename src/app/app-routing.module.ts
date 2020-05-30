@@ -5,6 +5,7 @@ import { DemoComponent } from './dashboard/demo/demo.component';
 import { LoginComponent } from './authentication/login/login.component';
 import { RegisterComponent } from './authentication/register/register.component';
 import { ForgotPasswordComponent } from './authentication/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './authentication/reset-password/reset-password.component';
 import { ProfileComponent } from './users/profile/profile.component';
 
 const routes: Routes = [
@@ -74,6 +75,10 @@ const routes: Routes = [
     {
         path: 'authentication/forgot-password',
         component: ForgotPasswordComponent,
+    },
+    {
+        path: 'authentication/reset-password/:resetToken',
+        component: ResetPasswordComponent,
     },
 
     // otherwise redirect to home
