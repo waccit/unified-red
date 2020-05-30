@@ -18,6 +18,7 @@ const routes: Routes = [
     {
         path: 'users/profile',
         component: ProfileComponent,
+        canActivate: [AuthGuard],
     },
     // {
     //     path: 'dashboard',
