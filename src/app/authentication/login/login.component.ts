@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit {
     loginForm: FormGroup;
     submitted = false;
     returnUrl: string;
+    registeredUser: string;
     hide = true;
 
     constructor(
@@ -31,13 +32,14 @@ export class LoginComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.loginForm = this.formBuilder.group({
-            username: ['', Validators.required],
-            password: ['', Validators.required],
-        });
-
         // get return url from route parameters or default to '/'
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+        this.registeredUser = this.route.snapshot.queryParams["registered"] || '';
+
+        this.loginForm = this.formBuilder.group({
+            username: [this.registeredUser, Validators.required],
+            password: ['', Validators.required],
+        });
 
         //    [Focus input] * /
         $('.input100').each(function () {

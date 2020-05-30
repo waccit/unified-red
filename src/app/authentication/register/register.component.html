@@ -5,10 +5,6 @@
             <form *ngIf="canRegister" class="login100-form validate-form" [formGroup]="registerForm"
                 (ngSubmit)="onSubmit()">
                 <span class="login100-form-title p-b-30">Register</span>
-                <div *ngIf="submitted && success" class="alert alert-success">
-                    <strong>Success!</strong> Your new user account is set up.
-                    Please go here to <a routerLink="/authentication/login" class="alert-link">Login</a>
-                </div>
                 <mat-form-field class="example-full-width" appearance="outline">
                     <mat-label>First Name</mat-label>
                     <input matInput formControlName="firstName" required>
