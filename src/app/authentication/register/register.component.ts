@@ -6,17 +6,17 @@ import {
     AuthenticationService,
     UserService,
     SnackbarService,
-} from '../../services/';
+} from '../../services';
 import { MustMatch, PasswordStrengthValidator } from './password.validators';
 
 declare const $: any;
 
 @Component({
-    selector: 'app-signup',
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.scss'],
+    selector: 'app-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss'],
 })
-export class SignupComponent implements OnInit {
+export class RegisterComponent implements OnInit {
     registerForm: FormGroup;
     submitted = false;
     returnUrl: string;
