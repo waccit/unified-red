@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService, SnackbarService } from '../../services/';
+import { MustMatch, PasswordStrengthValidator } from '../register/password.validators';
 
 declare const $: any;
 
@@ -13,11 +14,9 @@ declare const $: any;
 })
 export class ResetPasswordComponent implements OnInit {
     resetForm: FormGroup;
-    submitted = false;
-    returnUrl: string;
-
     resetToken: string;
-    private sub: any;
+    hide = true;
+    chide = true;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -28,25 +27,17 @@ export class ResetPasswordComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.resetForm = this.formBuilder.group({
-            password: ['', Validators.required],
-        });
+        this.resetForm = this.formBuilder.group(
+            {
+                password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
+                cpassword: ['', Validators.required],
+            },
+            {
+                validator: MustMatch('password', 'cpassword'),
+            }
+        );
 
-        // get return url from route parameters or default to '/'
-        this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-
-        //    [Focus input] * /
-        $('.input100').each(function () {
-            $(this).on('blur', function () {
-                if ($(this).val().trim() != '') {
-                    $(this).addClass('has-val');
-                } else {
-                    $(this).removeClass('has-val');
-                }
-            });
-        });
-
-        this.sub = this.route.params.subscribe(params => {
+        this.route.params.subscribe((params) => {
             this.resetToken = params['resetToken'];
         });
     }
@@ -55,26 +46,24 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     onSubmit() {
-        this.submitted = true;
-
         // stop here if form is invalid
         if (this.resetForm.invalid) {
             return;
         } else {
             this.authenticationService
-            .resetPassword(this.resetToken, this.f.password.value)
-            .pipe(first())
-            .subscribe(
-                (data) => {
-                    this.router.navigate([this.returnUrl]);
-                    console.log(data);
-                },
-                (error) => {
-                    console.log(error);
-                    this.snackbar.error(error);
-                }
-            );
-            this.snackbar.success('Your password has been changed!');
+                .resetPassword(this.resetToken, this.f.password.value)
+                .pipe(first())
+                .subscribe(
+                    (data) => {
+                        console.log(data);
+                        this.snackbar.success('Your password has been changed!');
+                        this.router.navigate(['/']);
+                    },
+                    (error) => {
+                        console.log(error);
+                        this.snackbar.error(error);
+                    }
+                );
         }
     }
 }

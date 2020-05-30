@@ -13,9 +13,7 @@ declare const $: any;
 })
 export class LoginComponent implements OnInit {
     loginForm: FormGroup;
-    submitted = false;
     returnUrl: string;
-    registeredUser: string;
     hide = true;
 
     constructor(
@@ -34,22 +32,10 @@ export class LoginComponent implements OnInit {
     ngOnInit() {
         // get return url from route parameters or default to '/'
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.registeredUser = this.route.snapshot.queryParams["registered"] || '';
 
         this.loginForm = this.formBuilder.group({
-            username: [this.registeredUser, Validators.required],
+            username: ['', Validators.required],
             password: ['', Validators.required],
-        });
-
-        //    [Focus input] * /
-        $('.input100').each(function () {
-            $(this).on('blur', function () {
-                if ($(this).val().trim() != '') {
-                    $(this).addClass('has-val');
-                } else {
-                    $(this).removeClass('has-val');
-                }
-            });
         });
     }
 
@@ -58,7 +44,6 @@ export class LoginComponent implements OnInit {
     }
 
     onSubmit() {
-        this.submitted = true;
         // stop here if form is invalid
         if (this.loginForm.invalid) {
             return;
