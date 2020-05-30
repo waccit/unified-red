@@ -3,6 +3,9 @@
         <div class="wrap-login100">
             <form class="login100-form validate-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <span class="login100-form-title pb-5">Login</span>
+                <div *ngIf="registeredUser" class="alert alert-success">
+                    <strong>Success!</strong> Your new user account is set up. Please login!
+                </div>
                 <div class="row">
                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                         <mat-form-field class="example-full-width" appearance="outline">

@@ -8,6 +8,7 @@ import {
     SnackbarService,
 } from '../../services';
 import { MustMatch, PasswordStrengthValidator } from './password.validators';
+import { User } from '../user.model';
 
 declare const $: any;
 
@@ -23,7 +24,6 @@ export class RegisterComponent implements OnInit {
     hide = true;
     chide = true;
     canRegister = false;
-    success = false;
 
     constructor(
         private formBuilder: FormBuilder,
@@ -107,8 +107,8 @@ export class RegisterComponent implements OnInit {
             .register(this.registerForm.value)
             .pipe(first())
             .subscribe(
-                (data) => {
-                    this.success = true;
+                (data:User) => {
+                    this.router.navigate(['/authentication/login'], { queryParams: { registered: data.username } });
                 },
                 (error) => {
                     this.snackbar.error(error);
