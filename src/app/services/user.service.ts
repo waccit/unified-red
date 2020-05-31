@@ -5,7 +5,7 @@ Source: https://github.com/cornflourblue/angular-8-registration-login-example
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { User } from '../authentication/user.model';
+import { User } from '../data/';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
