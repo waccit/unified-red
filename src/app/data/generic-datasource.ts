@@ -23,7 +23,6 @@ export abstract class GenericDataSource<T> extends DataSource<T> {
         super();
         // Reset to the first page when the user changes the filter.
         this.filterSubject.subscribe(() => (this.paginator.pageIndex = 0));
-        this.processData();
     }
 
     connect(): Observable<T[]> {
