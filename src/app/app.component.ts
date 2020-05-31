@@ -9,7 +9,7 @@ import {
 import { PlatformLocation } from '@angular/common';
 import { WebSocketService } from './services/web-socket.service';
 import { AuthenticationService } from './services/';
-import { User } from './authentication/user.model';
+import { User } from './data/';
 
 @Component({
     selector: 'app-root',

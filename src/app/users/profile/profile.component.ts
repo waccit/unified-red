@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService, UserService, SnackbarService } from '../../services';
 import { MustMatch, PasswordStrengthValidator } from '../../authentication/register/password.validators';
-import { User } from '../../authentication/user.model';
+import { User } from '../../data/';
 
 @Component({
     selector: 'app-profile',

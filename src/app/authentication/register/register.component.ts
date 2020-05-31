@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService, UserService, SnackbarService } from '../../services';
 import { MustMatch, PasswordStrengthValidator } from './password.validators';
-import { User } from '../user.model';
+import { User } from '../../data/';
 
 declare const $: any;
 
