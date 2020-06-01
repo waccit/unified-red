@@ -83,8 +83,6 @@ export class ProfileComponent implements OnInit {
         if (this.settingsForm.invalid) {
             return;
         }
-        console.log('profile.component 85: this.settingsForm.value');
-        console.log(this.settingsForm.value);
         this.userService
             .update(this.userId, this.settingsForm.value)
             .pipe(first())
@@ -102,8 +100,6 @@ export class ProfileComponent implements OnInit {
         if (this.usernameForm.invalid) {
             return;
         }
-        console.log('profile.component 104: this.usernameForm.value');
-        console.log(this.usernameForm.value);
         this.authenticationService
             .login(this.username, this.uf.password.value)
             .pipe(first())
@@ -132,8 +128,6 @@ export class ProfileComponent implements OnInit {
         if (this.passwordForm.invalid) {
             return;
         }
-        console.log('profile.component 133: this.passwordForm.value');
-        console.log(this.passwordForm.value);
         this.authenticationService
             .login(this.username, this.pf.password.value)
             .pipe(first())
