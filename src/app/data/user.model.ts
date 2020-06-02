@@ -12,6 +12,6 @@ export interface User {
     token?: string;
     enabled: boolean;
     email: string;
-    // expirationDate?: Date;
-    // createdDate?: Date;
+    expirationDate?: Date;
+    createdDate?: Date;
 }
