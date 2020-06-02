@@ -24,10 +24,15 @@ function jwt() {
 
 async function isRevoked(req, payload, done) {
     const user = await userService.getById(payload.sub);
-    // revoke token if user no longer exists
+    // revoke token if user no longer exists, is disabled, or is expired
     if (!user) {
-        return done(null, true);
+        return done(new Error('User not found'), true);
     }
-
+    if (!user.enabled) {
+        return done(new Error('Disabled user account'), true);
+    }
+    if (user.expirationDate && user.expirationDate.getTime() < new Date().getTime()) {
+        return done(new Error('User account has expired'), true);
+    }
     done();
 }
