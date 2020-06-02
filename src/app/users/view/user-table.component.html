@@ -1,0 +1,108 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="materialTableHeader">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <ul class="header-buttons-left ml-0">
+                                            <li class="dropdown">
+                                                <h2><strong>User Management</strong></h2>
+                                            </li>
+                                            <li class="dropdown m-l-20">
+                                                <label for="search-input"><i
+                                                        class="material-icons search-icon">search</i></label>
+                                                <input placeholder="Search" type="text" #filter
+                                                    class="browser-default search-field" aria-label="Search box">
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-4">
+                                        <ul class="header-buttons">
+                                            <li>
+                                                <div class="icon-button-demo">
+                                                    <button mat-mini-fab color="primary" (click)="addNew()">
+                                                        <mat-icon class="col-white">add</mat-icon>
+                                                    </button>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="icon-button-demo">
+                                                    <button mat-mini-fab color="primary" (click)="refreshData()">
+                                                        <mat-icon class="col-white">refresh</mat-icon>
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- <div class="spinner-container" *ngIf="dataSource.loading | async">
+                                <mat-spinner></mat-spinner>
+                            </div> -->
+                            <mat-table #table [dataSource]="dataSource" matSort class="mat-cell">
+                                <ng-container matColumnDef="enabled">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header></mat-header-cell>
+                                    <mat-cell *matCellDef="let row">
+                                        <mat-icon *ngIf="row.enabled" aria-label="Enabled" color="primary">check_circle
+                                        </mat-icon>
+                                        <mat-icon *ngIf="!row.enabled" aria-label="Disabled" color="warn">cancel
+                                        </mat-icon>
+                                    </mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="username">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Username</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.username}}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="firstName">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>First Name</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.firstName}}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="lastName">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.lastName}}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="email">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.email}}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="expirationDate">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Expiration Date</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.expirationDate | date: 'MM/dd/yyyy' }}
+                                    </mat-cell>
+                                </ng-container>
+                                <!-- actions -->
+                                <ng-container matColumnDef="actions">
+                                    <mat-header-cell *matHeaderCellDef class="pr-0">Actions</mat-header-cell>
+                                    <mat-cell *matCellDef="let row; let i=index;" class="pr-0">
+                                        <button mat-icon-button color="accent" class="btn-tbl-edit"
+                                            (click)="editCall(row)">
+                                            <mat-icon aria-label="Edit" class="col-white">edit</mat-icon>
+                                        </button>
+                                        <button mat-icon-button color="accent" class="btn-tbl-delete"
+                                            (click)="deleteItem(row)">
+                                            <mat-icon aria-label="Delete" class="col-white">delete</mat-icon>
+                                        </button>
+                                    </mat-cell>
+                                </ng-container>
+                                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                <mat-row *matRowDef="let row; columns: displayedColumns;" matRipple>
+                                </mat-row>
+                            </mat-table>
+
+                            <div class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
+                                No results
+                            </div>
+                            <mat-paginator #paginator [length]="dataSource.filteredData.length" [pageIndex]="0"
+                                [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

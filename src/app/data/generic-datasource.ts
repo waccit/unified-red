@@ -9,15 +9,16 @@ export abstract class GenericDataSource<T> extends DataSource<T> {
     private loadingSubject = new BehaviorSubject<boolean>(false);
     public loading = this.loadingSubject.asObservable();
 
-    filterSubject = new BehaviorSubject('');
+    private filterSubject = new BehaviorSubject('');
     get filter(): string {
         return this.filterSubject.value;
     }
     set filter(filter: string) {
         this.filterSubject.next(filter);
     }
-    filteredData: T[] = [];
-    renderedData: T[] = [];
+
+    public filteredData: T[] = [];
+    public renderedData: T[] = [];
 
     constructor(private paginator: MatPaginator, private sort: MatSort) {
         super();
