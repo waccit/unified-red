@@ -21,6 +21,16 @@ function errorHandler(err, req, res, next) {
         return res.status(401).json({ message: 'Invalid Token' });
     }
 
+    if (err.message) {
+        switch (err.message) {
+            case 'User not found':
+            case 'Disabled user account':
+            case 'User account has expired':
+                return res.status(401).json({ message: err.message });
+        }
+        return res.status(500).json({ message: err.message });
+    }
+
     // default to 500 server error
-    return res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: 'Unknown error' });
 }
