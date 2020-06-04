@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService, UserService, SnackbarService } from '../../services';
 import { MustMatch, PasswordStrengthValidator } from './password.validators';
-import { User } from '../../data/';
+import { User, Role } from '../../data/';
 
 declare const $: any;
 
@@ -37,7 +37,7 @@ export class RegisterComponent implements OnInit {
             {
                 firstName: ['', Validators.required],
                 lastName: ['', Validators.required],
-                username: ['', Validators.required],
+                username: ['', [Validators.required, Validators.minLength(3)]],
                 email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
                 password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
                 cpassword: ['', Validators.required],
@@ -63,10 +63,14 @@ export class RegisterComponent implements OnInit {
     }
 
     onSubmit() {
+        if (!this.canRegister) {
+            return;
+        }
         // stop here if form is invalid
         if (this.registerForm.invalid) {
             return;
         }
+        this.registerForm.value['role'] = Role.Level10; //Make first user to an admin
         this.userService
             .register(this.registerForm.value)
             .pipe(first())

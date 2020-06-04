@@ -21,6 +21,15 @@ export class AuthGuard implements CanActivate {
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
         if (this.authenticationService.tokenValue) {
+            let userRole = this.authenticationService.roleValue;
+            console.log("auth guard route.data.roles", route.data.roles);
+            console.log("auth guard userRole", userRole);
+            if (route.data.role && userRole >= route.data.role) {
+                console.log("auth guard forbidden");
+                // role not authorised so redirect to forbidden
+                this.router.navigate(['/403-forbidden']);
+                return false;
+            }
             return true; // authorized so return true
         }
         // not logged in so redirect to login page with the return url

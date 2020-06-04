@@ -18,7 +18,7 @@ import { User, UserDataSource } from '../../data/';
     providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
 })
 export class UserTableComponent implements OnInit {
-    displayedColumns = ['enabled', 'username', 'firstName', 'lastName', 'email', 'expirationDate', 'actions'];
+    displayedColumns = ['enabled', 'username', 'firstName', 'lastName', 'role', 'email', 'expirationDate', 'actions'];
     dataSource: UserDataSource;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;

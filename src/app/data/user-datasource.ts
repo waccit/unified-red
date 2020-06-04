@@ -2,8 +2,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { formatDate } from '@angular/common';
 
-import { User, GenericDataSource } from './';
 import { UserService } from '../services';
+import { GenericDataSource } from './generic-datasource';
+import { User } from './user.model';
 
 export class UserDataSource extends GenericDataSource<User> {
     constructor(private userService: UserService, paginator: MatPaginator, sort: MatSort) {

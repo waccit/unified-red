@@ -98,6 +98,16 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Role</mat-label>
+                        <select matNativeControl formControlName="role" required>
+                            <option *ngFor="let key of objectKeys(roles)" [ngValue]="key">{{ roles[key] }}</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
