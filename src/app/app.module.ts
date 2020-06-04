@@ -14,9 +14,6 @@ import { RightSidebarComponent } from './layout/right-sidebar/right-sidebar.comp
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { DynamicScriptLoaderService } from './services/dynamic-script-loader.service';
 import { RightSidebarService } from './services/rightsidebar.service';
-import { SimpleDialogComponent } from './ui/modal/simpleDialog.component';
-import { DialogformComponent } from './ui/modal/dialogform/dialogform.component';
-import { BottomSheetOverviewExampleSheet } from './ui/bottom-sheet/bottom-sheet.component';
 import {
   PerfectScrollbarModule,
   PERFECT_SCROLLBAR_CONFIG,
@@ -24,10 +21,8 @@ import {
 } from 'ngx-perfect-scrollbar';
 import { UsersModule } from './users/users.module';
 import { AuthenticationModule } from './authentication/authentication.module';
-
 import { JwtInterceptor } from './authentication/jwt.interceptor';
 import { ErrorInterceptor } from './authentication/error.interceptor';
-
 import { Page500Component } from './authentication/page500/page500.component';
 import { Page404Component } from './authentication/page404/page404.component';
 
@@ -48,9 +43,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AdvanceTableService } from '../app/tables/advance-table/advance-table.service';
-
-// import { AgmCoreModule } from '@agm/core';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   suppressScrollX: true,
@@ -63,9 +55,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     HeaderComponent,
     PageLoaderComponent,
     SidebarComponent,
-    SimpleDialogComponent,
-    DialogformComponent,
-    BottomSheetOverviewExampleSheet,
     RightSidebarComponent,
     Page500Component,
     Page404Component,
@@ -97,7 +86,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     MatSlideToggleModule,
     MatMenuModule,
     NgxMaskModule.forRoot(),
-    // AgmCoreModule.forRoot({ apiKey: 'YOUR API KEY' }),
   ],
   providers: [
     { provide: LocationStrategy, useClass: HashLocationStrategy },
@@ -107,14 +95,10 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     },
     DynamicScriptLoaderService,
     RightSidebarService,
-    AdvanceTableService,
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
   ],
   entryComponents: [
-    SimpleDialogComponent,
-    DialogformComponent,
-    BottomSheetOverviewExampleSheet
   ],
   bootstrap: [AppComponent]
 })
