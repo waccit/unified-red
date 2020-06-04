@@ -26,7 +26,7 @@ var serveStatic = require("serve-static");
 var compression = require("compression");
 
 // Unified API requires
-const jwt = require("./api/jwt");
+// const jwt = require("./api/jwt");
 const errorHandler = require("./api/error-handler");
 
 var urVersion = require("./package.json").version;
@@ -514,7 +514,7 @@ function init(server, app, log, redSettings) {
 
         // Define Unified API
         process.env.RED_SETTINGS_FILE = redSettings.settingsFile;
-        app.use(jwt());
+        // app.use(jwt());
         app.use("/api", require("./api/api.controller"));
         app.use(errorHandler);
     });

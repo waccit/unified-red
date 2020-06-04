@@ -6,18 +6,22 @@ Source: https://github.com/cornflourblue/node-mongo-registration-login-api
 const app = require('express');
 const router = app.Router();
 const userService = require('./user.service');
+const authorize = require('../authorize');
+const Role = require('./role.model');
 
-// routes
+// public routes
 router.post('/authenticate', authenticate);
 router.post('/register', register);
 router.get('/register', canRegister);
-router.get('/', getAll);
-router.get('/current', getCurrent);
-router.get('/:id', getById);
-router.put('/:id', update);
-router.delete('/:id', _delete);
 router.get('/forgot/:username', forgot);
 router.post('/reset/:token', resetPassword);
+
+// protected routes
+router.get('/',         authorize(Role.Level01), getAll);
+router.get('/current',  authorize(Role.Level01), getCurrent);
+router.get('/:id',      authorize(Role.Level01), getById);
+router.put('/:id',      authorize(Role.Level01), update);
+router.delete('/:id',   authorize(Role.Level01), _delete);
 
 module.exports = router;
 

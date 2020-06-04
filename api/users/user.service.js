@@ -28,7 +28,7 @@ async function authenticate({ username, password }) {
     const user = await User.findOne({ username });
     checkValidUser(user);
     if (user && bcrypt.compareSync(password, user.hash)) {
-        const token = jwt.sign({ sub: user.id }, config.jwtsecret);
+        const token = jwt.sign({ sub: user.id, role: user.role }, config.jwtsecret);
         return {
             ...user.toJSON(),
             token,

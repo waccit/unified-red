@@ -65,6 +65,10 @@
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</mat-header-cell>
                                     <mat-cell *matCellDef="let row">{{row.lastName}}</mat-cell>
                                 </ng-container>
+                                <ng-container matColumnDef="role">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Role</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{row.role}}</mat-cell>
+                                </ng-container>
                                 <ng-container matColumnDef="email">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Email</mat-header-cell>
                                     <mat-cell *matCellDef="let row">{{row.email}}</mat-cell>

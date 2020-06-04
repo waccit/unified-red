@@ -7,19 +7,23 @@ const expressJwt = require('express-jwt');
 const config = require('./config.json');
 const userService = require('./users/user.service');
 
-module.exports = jwt;
+module.exports = authorize;
 
-function jwt() {
+function authorize(role) {
     const secret = config.jwtsecret;
-    return expressJwt({ secret, isRevoked }).unless({
-        path: [
-            // public routes that don't require authentication
-            '/api/users/authenticate',
-            '/api/users/register',
-            /\/api\/users\/forgot\/.+/i,
-            /\/api\/users\/reset\/.+/i,
-        ],
-    });
+    return [
+        // authenticate JWT token
+        expressJwt({ secret, isRevoked }),
+
+        // authorize based on user role
+        (req, res, next) => {
+            if (role && req.user.role >= role) {
+                return res.status(401).json({ message: 'Unauthorized' }); // user's role is not authorized
+            }
+            // authentication and authorization successful
+            next();
+        },
+    ];
 }
 
 async function isRevoked(req, payload, done) {
