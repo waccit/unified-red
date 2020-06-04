@@ -41,12 +41,10 @@ export class ForgotPasswordComponent implements OnInit {
                 .pipe(first())
                 .subscribe(
                     (data) => {
-                        console.log(data);
                         this.snackbar.success('Email has been sent to ' + this.f.username.value + '!');
                         this.router.navigate(['/']);
                     },
                     (error) => {
-                        console.log(error);
                         this.snackbar.error(error);
                     }
                 );

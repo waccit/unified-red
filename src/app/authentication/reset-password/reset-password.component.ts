@@ -55,12 +55,10 @@ export class ResetPasswordComponent implements OnInit {
                 .pipe(first())
                 .subscribe(
                     (data) => {
-                        console.log(data);
                         this.snackbar.success('Your password has been changed!');
                         this.router.navigate(['/']);
                     },
                     (error) => {
-                        console.log(error);
                         this.snackbar.error(error);
                     }
                 );
