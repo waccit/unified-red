@@ -1,15 +1,15 @@
 <aside id="rightsidebar" class="right-sidebar" [ngClass]="isOpenSidebar ? 'open' : 'close'">
     <div class="rightSidebarClose" (click)="toggleRightSidebar()"><i class="nav-hdr-btn ti-close"></i></div>
     <ul class="nav nav-tabs tab-nav-right" role="tablist">
-        <li role="presentation">
-            <a href="#skins" data-toggle="tab" class="active">SKINS</a>
+        <li role="presentation" *ngIf="showSettings">
+            <a href="#settings" data-toggle="tab" class="active">SETTINGS</a>
         </li>
         <li role="presentation">
-            <a href="#settings" data-toggle="tab">SETTINGS</a>
+            <a href="#skins" data-toggle="tab">SKINS</a>
         </li>
     </ul>
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane in active in active stretchLeft" id="skins">
+        <div role="tabpanel" class="tab-pane stretchLeft" id="skins">
             <div class="demo-skin"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
@@ -143,38 +143,23 @@
                 </div>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane stretchRight" id="settings">
+        <div role="tabpanel" class="tab-pane in active in active stretchRight" id="settings">
             <div class="demo-settings"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
-                <p>GENERAL SETTINGS</p>
-
-                <ul class="setting-list">
-                    <li>
-                        <mat-slide-toggle checked>Report Panel Usage</mat-slide-toggle>
-                    </li>
-                    <li>
-                        <mat-slide-toggle>Email Redirect</mat-slide-toggle>
-                    </li>
-                </ul>
-                <p>SYSTEM SETTINGS</p>
-                <ul class="setting-list">
-                    <li>
-                        <mat-slide-toggle>Notifications</mat-slide-toggle>
-                    </li>
-                    <li>
-                        <mat-slide-toggle checked>Auto Updates</mat-slide-toggle>
-                    </li>
-                </ul>
                 <p>ACCOUNT SETTINGS</p>
-                <ul class="setting-list">
-                    <li>
-                        <mat-slide-toggle>Offline</mat-slide-toggle>
-                    </li>
-                    <li>
-                        <mat-slide-toggle checked>Location Permission</mat-slide-toggle>
-                    </li>
-                </ul>
+                <div class="body">
+                    <div class="list-group m-t-20">
+                        <!-- <a href="#" onClick="return false;" class="list-group-item active">
+                            Cras justo odio
+                        </a> -->
+                        <a class="list-group-item" routerLink="/users/view" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>Account Management</a>
+                        <!-- <a href="#" onClick="return false;" class="list-group-item">Dapibus ac facilisis in</a>
+                        <a href="#" onClick="return false;" class="list-group-item">Morbi leo risus</a>
+                        <a href="#" onClick="return false;" class="list-group-item">Porta ac consectetur ac</a>
+                        <a href="#" onClick="return false;" class="list-group-item">Vestibulum at eros</a> -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
