@@ -11,6 +11,7 @@ const { v4: uuidv4 } = require('uuid');
 const emailService = require('../email.service');
 const User = db.User;
 var _settings;
+const Role = require('./role.model');
 
 module.exports = {
     authenticate,
@@ -71,6 +72,9 @@ async function create(userParam) {
 
 async function update(id, userParam) {
     const user = await User.findById(id);
+    let level = userParam.role;
+    userParam.role = Role[level];
+
     if (!user) {
         throw 'User not found';
     }

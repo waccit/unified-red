@@ -1,12 +1,9 @@
 import { DOCUMENT } from '@angular/common';
-import {
-    Component,
-    Inject,
-    ElementRef,
-    OnInit,
-    Renderer2,
-} from '@angular/core';
+import {Component, Inject, ElementRef, OnInit, Renderer2, } from '@angular/core';
+import { first } from 'rxjs/operators';
 import { RightSidebarService } from '../../services/rightsidebar.service';
+import { UserService } from '../../services/';
+import { User, Role } from '../../data/';
 
 @Component({
     selector: 'app-right-sidebar',
@@ -18,19 +15,23 @@ export class RightSidebarComponent implements OnInit {
     maxHeight: string;
     maxWidth: string;
     showpanel: boolean = false;
-
+    private userRole: Role;
+    
+    showSettings: boolean;
     isOpenSidebar: boolean;
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
-        private dataService: RightSidebarService
+        private dataService: RightSidebarService,
+        private userService: UserService,
     ) {}
 
     ngOnInit() {
         this.dataService.currentStatus.subscribe((data: boolean) => {
             this.isOpenSidebar = data;
+            this.showSettingsPanel(this.isOpenSidebar);
         });
 
         this.setRightSidebarWindowHeight();
@@ -46,6 +47,23 @@ export class RightSidebarComponent implements OnInit {
                 this.document.body,
                 'theme-' + this.selectedBgColor
             );
+        }
+
+    }
+
+    
+    
+    showSettingsPanel(run: boolean){
+        if(run){
+            this.userService.getCurrent().pipe(first()).subscribe(
+                (user: User) => {
+                    this.userRole = user.role;
+                    this.showSettings = (this.userRole === 10) ? true : false;
+                },
+                (error) => {
+                    console.log(error);
+                }
+                );
         }
     }
     selectTheme(e) {
