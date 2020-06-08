@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
     selector: 'app-ur-button',
@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
     styleUrls: ['./ur-button.component.sass'],
 })
 export class UrButtonComponent implements OnInit {
+    @Input() text: string = 'defualt';
+
     constructor() {}
 
     ngOnInit(): void {}

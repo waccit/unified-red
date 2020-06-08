@@ -11,8 +11,8 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 // import { NgApexchartsModule } from 'ng-apexcharts';
 import { DemoComponent } from './demo/demo.component';
-import { UrTextComponent } from '../node-templates/ur-text/ur-text.component';
 import { GroupComponent } from './group/group.component';
+import { DashboardDirective } from '../directives/dashboard.directive';
 
 @NgModule({
     declarations: [
@@ -20,8 +20,8 @@ import { GroupComponent } from './group/group.component';
         // Dashboard2Component,
         // Dashboard3Component,
         DemoComponent,
-        UrTextComponent,
         GroupComponent,
+        DashboardDirective,
     ],
     imports: [
         CommonModule,
@@ -32,5 +32,6 @@ import { GroupComponent } from './group/group.component';
         // NgApexchartsModule,
         PerfectScrollbarModule,
     ],
+    entryComponents: [GroupComponent],
 })
 export class DashboardModule {}
