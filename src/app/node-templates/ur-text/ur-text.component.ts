@@ -6,7 +6,7 @@ import { Component, OnInit, Input } from '@angular/core';
     styleUrls: ['./ur-text.component.sass'],
 })
 export class UrTextComponent implements OnInit {
-    @Input() text: string;
+    @Input() text: string = 'default';
 
     constructor() {}
 
