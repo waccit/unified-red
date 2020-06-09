@@ -8,16 +8,17 @@ import { UserTableComponent } from './view/user-table.component';
 const routes: Routes = [
     {
         path: 'users',
-        canActivate: [AuthGuard],
         children: [
             {
                 path: 'profile',
                 component: ProfileComponent,
-                data: { roles: Role.Level10 },
+                canActivate: [AuthGuard],
+                data: { roles: Role.Level1 },
             },
             {
                 path: 'view',
                 component: UserTableComponent,
+                canActivate: [AuthGuard],
                 data: { roles: Role.Level10 },
             }
         ],
