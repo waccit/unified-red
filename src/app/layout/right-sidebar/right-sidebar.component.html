@@ -1,15 +1,15 @@
 <aside id="rightsidebar" class="right-sidebar" [ngClass]="isOpenSidebar ? 'open' : 'close'">
     <div class="rightSidebarClose" (click)="toggleRightSidebar()"><i class="nav-hdr-btn ti-close"></i></div>
     <ul class="nav nav-tabs tab-nav-right" role="tablist">
-        <li role="presentation" *ngIf="showSettings">
-            <a href="#settings" data-toggle="tab" class="active">SETTINGS</a>
-        </li>
         <li role="presentation">
-            <a href="#skins" data-toggle="tab">SKINS</a>
+            <a href="#skins" data-toggle="tab" class="active">SKINS</a>
+        </li>
+        <li role="presentation" *ngIf="showSettings">
+            <a href="#settings" data-toggle="tab">SETTINGS</a>
         </li>
     </ul>
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane stretchLeft" id="skins">
+        <div role="tabpanel" class="tab-pane in active in active stretchLeft" id="skins">
             <div class="demo-skin"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
@@ -143,7 +143,7 @@
                 </div>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane in active in active stretchRight" id="settings">
+        <div role="tabpanel" class="tab-pane stretchRight" id="settings"  *ngIf="showSettings">
             <div class="demo-settings"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
