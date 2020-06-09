@@ -60,7 +60,7 @@ export class UserFormDialogComponent {
                     username: ['', [Validators.required, Validators.minLength(3)]],
                     firstName: ['', Validators.required],
                     lastName: ['', Validators.required],
-                    role: [1, Validators.required],
+                    role: ['', Validators.required],
                     email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
                     expirationDate: [null], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
                     password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
@@ -78,6 +78,6 @@ export class UserFormDialogComponent {
     public confirm(): void {
         let role:Role = Role.Level10;
         // console.log(this.roles[Role[role] as keyof typeof this.roles]);
-        console.log(this.roles[ Role[role] ]);
+        // console.log(this.roles[ Role[role] ]);
     }    
 }
