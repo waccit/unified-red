@@ -51,6 +51,8 @@ async function getById(id) {
 }
 
 async function create(userParam) {
+    let level = userParam.role;
+    userParam.role = Role[level];
     // validate
     if (await User.findOne({ username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
