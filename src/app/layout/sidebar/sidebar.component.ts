@@ -1,13 +1,9 @@
 import { DOCUMENT } from '@angular/common';
-import {
-    Component,
-    Inject,
-    ElementRef,
-    OnInit,
-    Renderer2,
-    HostListener,
-    Input,
-} from '@angular/core';
+import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input, } from '@angular/core';
+import { first } from 'rxjs/operators';
+import { User, Role } from '../../data';
+import { Observable } from 'rxjs';
+import { AuthenticationService } from '../../services/';
 // import { ROUTES } from './sidebar-items';
 
 declare const Waves: any;
@@ -22,13 +18,16 @@ export class SidebarComponent implements OnInit {
     showSubMenu: string = '';
     public innerHeight: any;
     public bodyTag: any;
+    public currentUser: Observable<User>;
     listMaxHeight: string;
     listMaxWidth: string;
     headerHeight = 60;
+    @Input() user: User;
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
-        public elementRef: ElementRef
+        public elementRef: ElementRef,
+        private authenticationService: AuthenticationService,
     ) {}
 
     @HostListener('window:resize', ['$event'])
@@ -42,6 +41,13 @@ export class SidebarComponent implements OnInit {
         if (!this.elementRef.nativeElement.contains(event.target)) {
             this.renderer.removeClass(this.document.body, 'overlay-open');
         }
+    }
+
+    getCurrentUser(){
+        this.authenticationService.currentUser.pipe(first()).subscribe(
+            (user: User) => {this.user = user;},
+            (error) => {console.log(error);}
+        );
     }
     callMenuToggle(event: any, element: any) {
         if (element === this.showMenu) {
@@ -73,6 +79,7 @@ export class SidebarComponent implements OnInit {
         //Set menu height
         _this.setMenuHeight();
         _this.checkStatuForResize(true);
+        _this.getCurrentUser();
     }
     setMenuHeight() {
         this.innerHeight = window.innerHeight;

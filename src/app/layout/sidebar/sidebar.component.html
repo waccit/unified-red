@@ -6,14 +6,14 @@
             <ul class="list"
                 [ngStyle]="{'position' : 'relative', 'max-height' : listMaxHeight+'px', 'max-width' : listMaxWidth+'px'}"
                 [perfectScrollbar]>
-                <li>
+                <li *ngIf="user">
                     <div class="sidebar-profile clearfix">
-                        <div class="profile-img">
+                        <!-- <div class="profile-img">
                             <img src="assets/images/usrbig.jpg" alt="profile">
-                        </div>
+                        </div> -->
                         <div class="profile-info">
-                            <h3>Sarah Deo</h3>
-                            <p>Welcome Admin !</p>
+                            <h3>{{user.firstName}} {{user.lastName}}</h3>
+                            <p>Welcome {{user.role}}!</p>
                         </div>
                     </div>
                 </li>
@@ -50,7 +50,7 @@
                         </li>
                     </ul>
                 </li>
-                <li>
+                <!-- <li>
                     <hr>
                     <div class="leftSideProgress">
                         <div class="progress-list">
@@ -82,7 +82,7 @@
                             </div>
                         </div>
                     </div>
-                </li>
+                </li> -->
             </ul>
         </div>
         <!-- #Menu -->
