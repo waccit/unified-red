@@ -2,9 +2,9 @@ import { DOCUMENT } from '@angular/common';
 import {Component, Inject, ElementRef, OnInit, Renderer2, } from '@angular/core';
 import { first } from 'rxjs/operators';
 import { RightSidebarService } from '../../services/rightsidebar.service';
-import { UserService } from '../../services/';
+import { Observable } from 'rxjs';
 import { User, Role } from '../../data/';
-
+import { AuthenticationService } from '../../services/';
 @Component({
     selector: 'app-right-sidebar',
     templateUrl: './right-sidebar.component.html',
@@ -16,6 +16,7 @@ export class RightSidebarComponent implements OnInit {
     maxWidth: string;
     showpanel: boolean = false;
     private userRole: Role;
+    public currentUser: Observable<User>;
     
     showSettings: boolean;
     isOpenSidebar: boolean;
@@ -25,13 +26,13 @@ export class RightSidebarComponent implements OnInit {
         private renderer: Renderer2,
         public elementRef: ElementRef,
         private dataService: RightSidebarService,
-        private userService: UserService,
+        private authenticationService: AuthenticationService,
     ) {}
 
     ngOnInit() {
         this.dataService.currentStatus.subscribe((data: boolean) => {
             this.isOpenSidebar = data;
-            this.showSettingsPanel(this.isOpenSidebar);
+            this.checkUserPrivillages();
         });
 
         this.setRightSidebarWindowHeight();
@@ -51,20 +52,16 @@ export class RightSidebarComponent implements OnInit {
 
     }
 
-    
-    
-    showSettingsPanel(run: boolean){
-        if(run){
-            this.userService.getCurrent().pipe(first()).subscribe(
-                (user: User) => {
-                    this.userRole = user.role;
-                    this.showSettings = (this.userRole === 10) ? true : false;
-                },
-                (error) => {
-                    console.log(error);
-                }
-                );
-        }
+    checkUserPrivillages(){
+        this.authenticationService.currentUser.pipe(first()).subscribe(
+            (user: User) => {
+                this.userRole = user.role;
+                this.showSettings = (this.userRole === 10) ? true : false;
+            },
+            (error) => {
+                console.log(error);
+            }
+            );
     }
     selectTheme(e) {
         this.selectedBgColor = e;
