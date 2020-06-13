@@ -44,10 +44,17 @@ export class SidebarComponent implements OnInit {
     }
 
     getCurrentUser(){
-        this.authenticationService.currentUser.pipe(first()).subscribe(
-            (user: User) => {this.user = user;},
-            (error) => {console.log(error);}
-        );
+        if(this.authenticationService.tokenValue){
+            this.authenticationService.userValue().pipe(first())
+            .subscribe(
+                (user) => {
+                    this.user = user;
+                },
+                (error) => {
+                    console.log(error);
+                }
+            );
+        }
     }
     callMenuToggle(event: any, element: any) {
         if (element === this.showMenu) {
