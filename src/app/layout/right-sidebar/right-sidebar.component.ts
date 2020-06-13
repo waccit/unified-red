@@ -15,7 +15,7 @@ export class RightSidebarComponent implements OnInit {
     maxHeight: string;
     maxWidth: string;
     showpanel: boolean = false;
-    private userRole: Role;
+    private _userRole: Role;
     public currentUser: Observable<User>;
     
     showSettings: boolean;
@@ -53,15 +53,18 @@ export class RightSidebarComponent implements OnInit {
     }
 
     checkUserPrivillages(){
-        this.authenticationService.currentUser.pipe(first()).subscribe(
-            (user: User) => {
-                this.userRole = user.role;
-                this.showSettings = (this.userRole === 10) ? true : false;
-            },
-            (error) => {
-                console.log(error);
-            }
+        if(this.authenticationService.tokenValue){
+            this.authenticationService.userValue().pipe(first())
+            .subscribe(
+                (user) => {
+                    this._userRole = user.role;
+                    this.showSettings = (this._userRole === 10) ? true : false;
+                },
+                (error) => {
+                    console.log(error);
+                }
             );
+        }
     }
     selectTheme(e) {
         this.selectedBgColor = e;

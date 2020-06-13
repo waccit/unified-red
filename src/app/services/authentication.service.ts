@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { User } from '../data/';
+import { UserService} from './user.service';
 
 
 @Injectable({ providedIn: 'root' })
@@ -17,28 +18,28 @@ export class AuthenticationService {
     private _currentUser: User;
     private tokenSubject: BehaviorSubject<string>;
     public token: Observable<string>;
-    private roleSubject: BehaviorSubject<string>;
-    public role: Observable<string>;
+    
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private userService: UserService) {
         this.currentUserSubject = new BehaviorSubject<User>(this._currentUser);
         this.currentUser = this.currentUserSubject.asObservable();
         this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
         this.token = this.tokenSubject.asObservable();
-        this.roleSubject = new BehaviorSubject<string>(sessionStorage.getItem('role'));
-        this.role = this.roleSubject.asObservable();
     }
 
-    public get userValue(): User {
-        return this.currentUserSubject.value;
+    public userValue() {
+        if(sessionStorage.getItem('token')){
+            return this.userService.getCurrent().pipe(
+                map((user) => {
+                    this.currentUserSubject.next(user);
+                    return this.currentUserSubject.value;
+                })
+            );
+        }
     }
 
     public get tokenValue(): string {
         return this.tokenSubject.value;
-    }
-
-    public get roleValue(): string {
-        return this.roleSubject.value;
     }
 
     login(username, password) {
@@ -48,8 +49,6 @@ export class AuthenticationService {
                 map((user) => {
                     // store user details and jwt token in session storage to keep user logged in between page refreshes
                     sessionStorage.setItem('token', user.token);
-                    sessionStorage.setItem('role', user.role);
-                    console.log("authentication.service user.role", user.role);
                     this.currentUserSubject.next(user);
                     this.tokenSubject.next(user.token);
                     return user.token;
@@ -60,7 +59,6 @@ export class AuthenticationService {
     logout() {
         // remove user from session storage and set current user and token to null
         sessionStorage.removeItem('token');
-        sessionStorage.removeItem('role');
         this.currentUserSubject.next(null);
         this.tokenSubject.next(null);
     }
