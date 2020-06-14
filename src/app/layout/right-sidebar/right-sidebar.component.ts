@@ -15,11 +15,8 @@ export class RightSidebarComponent implements OnInit {
     maxHeight: string;
     maxWidth: string;
     showpanel: boolean = false;
-    private _userRole: Role;
-    public currentUser: Observable<User>;
-    
-    showSettings: boolean;
-    isOpenSidebar: boolean;
+    showSettings: boolean = false;
+    isOpenSidebar: boolean = false;
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
@@ -27,14 +24,14 @@ export class RightSidebarComponent implements OnInit {
         public elementRef: ElementRef,
         private dataService: RightSidebarService,
         private authenticationService: AuthenticationService,
-    ) {}
-
-    ngOnInit() {
+    ) {
         this.dataService.currentStatus.subscribe((data: boolean) => {
             this.isOpenSidebar = data;
-            this.checkUserPrivillages();
+            this.showSettings = this.authenticationService.getUserRole() === Role.Level10; // show/hide settings tab
         });
+    }
 
+    ngOnInit() {
         this.setRightSidebarWindowHeight();
         // set header color on startup
         if (localStorage.getItem('choose_skin')) {
@@ -49,23 +46,8 @@ export class RightSidebarComponent implements OnInit {
                 'theme-' + this.selectedBgColor
             );
         }
-
     }
 
-    checkUserPrivillages(){
-        if(this.authenticationService.tokenValue){
-            this.authenticationService.userValue().pipe(first())
-            .subscribe(
-                (user) => {
-                    this._userRole = user.role;
-                    this.showSettings = (this._userRole === 10) ? true : false;
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );
-        }
-    }
     selectTheme(e) {
         this.selectedBgColor = e;
         var prevTheme = this.elementRef.nativeElement

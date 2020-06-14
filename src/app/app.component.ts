@@ -9,7 +9,6 @@ import {
 import { PlatformLocation } from '@angular/common';
 import { WebSocketService } from './services/web-socket.service';
 import { AuthenticationService } from './services/';
-import { User } from './data/';
 
 @Component({
     selector: 'app-root',
@@ -20,11 +19,11 @@ export class AppComponent {
     currentUrl: string;
     showLoadingIndicatior = true;
     sidebarItems: any[] = [];
-    private currentUser: User;
+    isLoggedIn = false;
 
     constructor(public _router: Router, location: PlatformLocation, private webSocketService: WebSocketService, private authenticationService: AuthenticationService) {
         console.log("AppComponent Constructor Called");
-        this.authenticationService.currentUser.subscribe(x => this.currentUser = x);
+        this.authenticationService.token.subscribe(token => { this.isLoggedIn = !!token; });
         this._router.events.subscribe((routerEvent: Event) => {
             if (routerEvent instanceof NavigationStart) {
                 this.showLoadingIndicatior = true;
