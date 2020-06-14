@@ -7,37 +7,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { User } from '../data/';
 import { UserService} from './user.service';
-
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
-    private currentUserSubject: BehaviorSubject<User>;
-    public currentUser: Observable<User>;
-    private _currentUser: User;
     private tokenSubject: BehaviorSubject<string>;
     public token: Observable<string>;
-    
+    private decodedJwtPayload = { role:0 };
 
     constructor(private http: HttpClient, private userService: UserService) {
-        this.currentUserSubject = new BehaviorSubject<User>(this._currentUser);
-        this.currentUser = this.currentUserSubject.asObservable();
         this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
         this.token = this.tokenSubject.asObservable();
     }
-
-    public userValue() {
-        if(sessionStorage.getItem('token')){
-            return this.userService.getCurrent().pipe(
-                map((user) => {
-                    this.currentUserSubject.next(user);
-                    return this.currentUserSubject.value;
-                })
-            );
-        }
-    }
-    
 
     public get tokenValue(): string {
         return this.tokenSubject.value;
@@ -48,10 +29,13 @@ export class AuthenticationService {
             .post<any>('/api/users/authenticate', { username, password })
             .pipe(
                 map((user) => {
-                    // store user details and jwt token in session storage to keep user logged in between page refreshes
+                    // store jwt token in session storage to keep user logged in between page refreshes
                     sessionStorage.setItem('token', user.token);
-                    this.currentUserSubject.next(user);
                     this.tokenSubject.next(user.token);
+                    //decode jwt token and store in memory
+                    try {
+                        this.decodedJwtPayload = JSON.parse(atob(this.tokenSubject.value.split('.')[1]));
+                    } catch (e) { }
                     return user.token;
                 })
             );
@@ -60,7 +44,6 @@ export class AuthenticationService {
     logout() {
         // remove user from session storage and set current user and token to null
         sessionStorage.removeItem('token');
-        this.currentUserSubject.next(null);
         this.tokenSubject.next(null);
     }
 
@@ -73,4 +56,7 @@ export class AuthenticationService {
             .post<any>(`/api/users/reset/${resetToken}`, { password });
     }
 
+    getUserRole() {
+        return this.decodedJwtPayload.role;
+    }
 }

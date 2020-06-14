@@ -20,26 +20,17 @@ export class AuthGuard implements CanActivate {
         private router: Router,
         private authenticationService: AuthenticationService
     ) {}
-    private _userRole: Role;
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
         if (this.authenticationService.tokenValue) {
-            this.authenticationService.userValue().pipe(first())
-            .subscribe(
-                (user) => {
-                    this._userRole = user.role;
-                    // console.log("auth guard route.data.roles", route.data.roles, "auth guard userRole", this._userRole);
-                    if (route.data.roles && (this._userRole < route.data.roles)) {
-                        console.log("auth guard forbidden");
-                        // role not authorised so redirect to forbidden
-                        this.router.navigate(['/403-forbidden']);
-                        return false;
-                    }
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );
+            let userRole = this.authenticationService.getUserRole();
+            console.log("auth guard route.data.roles", route.data.roles, "auth guard userRole", userRole);
+            if (route.data.roles && userRole < route.data.roles) {
+                // console.log("auth guard forbidden");
+                // role not authorised so redirect to forbidden
+                this.router.navigate(['/403-forbidden']);
+                return false;
+            }
             return true; // authorized so return true
         }
         // not logged in so redirect to login page with the return url

@@ -1,9 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input, } from '@angular/core';
-import { first } from 'rxjs/operators';
-import { User, Role } from '../../data';
+import { User } from '../../data';
 import { Observable } from 'rxjs';
-import { AuthenticationService } from '../../services/';
+import { UserService } from '../../services/';
 // import { ROUTES } from './sidebar-items';
 
 declare const Waves: any;
@@ -22,13 +21,16 @@ export class SidebarComponent implements OnInit {
     listMaxHeight: string;
     listMaxWidth: string;
     headerHeight = 60;
-    @Input() user: User;
+    user: User;
+
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
-        private authenticationService: AuthenticationService,
-    ) {}
+        private userService: UserService
+    ) {
+        this.userService.getCurrent().subscribe(user => { this.user = user });
+    }
 
     @HostListener('window:resize', ['$event'])
     windowResizecall(event) {
@@ -43,19 +45,6 @@ export class SidebarComponent implements OnInit {
         }
     }
 
-    getCurrentUser(){
-        if(this.authenticationService.tokenValue){
-            this.authenticationService.userValue().pipe(first())
-            .subscribe(
-                (user) => {
-                    this.user = user;
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );
-        }
-    }
     callMenuToggle(event: any, element: any) {
         if (element === this.showMenu) {
             this.showMenu = '0';
@@ -81,13 +70,13 @@ export class SidebarComponent implements OnInit {
         this.initLeftSidebar();
         this.bodyTag = this.document.body;
     }
+
     initLeftSidebar() {
-        var _this = this;
         //Set menu height
-        _this.setMenuHeight();
-        _this.checkStatuForResize(true);
-        _this.getCurrentUser();
+        this.setMenuHeight();
+        this.checkStatuForResize(true);
     }
+
     setMenuHeight() {
         this.innerHeight = window.innerHeight;
         var height = this.innerHeight - this.headerHeight;
