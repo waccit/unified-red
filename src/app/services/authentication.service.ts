@@ -37,6 +37,7 @@ export class AuthenticationService {
             );
         }
     }
+    
 
     public get tokenValue(): string {
         return this.tokenSubject.value;
