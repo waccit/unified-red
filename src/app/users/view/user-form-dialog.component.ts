@@ -20,16 +20,16 @@ export class UserFormDialogComponent {
     hide = true;
     chide = true;
     roles: {[key:string]: string} = {
-        "Level1": 'Viewer',
-        "Level2": 'Limited Operator',
-        "Level3": 'Standard Operator',
-        "Level4": 'IT Operator',
-        "Level5": 'Security Operator',
-        // "Level6": 'Reserved',
-        // "Level7": 'Reserved',
-        // "Level8": 'Reserved',
-        "Level9": 'Tech',
-        "Level10": 'Admin',
+        "1": 'Viewer',
+        "2": 'Limited Operator',
+        "3": 'Standard Operator',
+        "4": 'IT Operator',
+        "5": 'Security Operator',
+        // "6": 'Reserved',
+        // "7": 'Reserved',
+        // "8": 'Reserved',
+        "9": 'Tech',
+        "10": 'Admin',
     };
     objectKeys = Object.keys;
 
@@ -41,7 +41,7 @@ export class UserFormDialogComponent {
         this.action = dialogData.action;
         if (this.action === 'edit') {
             this.data = dialogData.data;
-            this.title = this.data.username + ' - ' + this.data.firstName + ' ' + this.data.lastName;
+            this.title = 'Edit ' + this.data.username;
             this.form = this.formBuilder.group({
                 enabled: [this.data.enabled],
                 username: [this.data.username, [Validators.required, Validators.minLength(3)]],
@@ -76,8 +76,5 @@ export class UserFormDialogComponent {
     submit() {}
 
     public confirm(): void {
-        let role:Role = Role.Level10;
-        // console.log(this.roles[Role[role] as keyof typeof this.roles]);
-        // console.log(this.roles[ Role[role] ]);
     }    
 }
