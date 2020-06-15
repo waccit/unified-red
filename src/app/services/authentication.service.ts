@@ -13,11 +13,12 @@ import { UserService} from './user.service';
 export class AuthenticationService {
     private tokenSubject: BehaviorSubject<string>;
     public token: Observable<string>;
-    private decodedJwtPayload = { role:0 };
+    private decodedJwtPayload;
 
     constructor(private http: HttpClient, private userService: UserService) {
         this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
         this.token = this.tokenSubject.asObservable();
+        this.decodedJwtPayload = this.decodeJwt();
     }
 
     public get tokenValue(): string {
@@ -32,10 +33,7 @@ export class AuthenticationService {
                     // store jwt token in session storage to keep user logged in between page refreshes
                     sessionStorage.setItem('token', user.token);
                     this.tokenSubject.next(user.token);
-                    //decode jwt token and store in memory
-                    try {
-                        this.decodedJwtPayload = JSON.parse(atob(this.tokenSubject.value.split('.')[1]));
-                    } catch (e) { }
+                    this.decodedJwtPayload = this.decodeJwt();
                     return user.token;
                 })
             );
@@ -54,6 +52,13 @@ export class AuthenticationService {
     resetPassword(resetToken: string, password: string) {
         return this.http
             .post<any>(`/api/users/reset/${resetToken}`, { password });
+    }
+
+    private decodeJwt() {
+        try {
+            return JSON.parse(atob(this.tokenSubject.value.split('.')[1]));
+        } catch (e) { }
+        return { role:0 };
     }
 
     getUserRole() {
