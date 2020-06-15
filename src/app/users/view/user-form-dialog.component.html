@@ -102,7 +102,7 @@
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Role</mat-label>
                         <select matNativeControl formControlName="role" required>
-                            <option *ngFor="let key of objectKeys(roles)" [ngValue]="key">{{ roles[key] }}</option>
+                            <option *ngFor="let key of objectKeys(roles)" [value]="key">{{ roles[key] }}</option>
                         </select>
                     </mat-form-field>
                 </div>
