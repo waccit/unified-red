@@ -18,24 +18,24 @@ module.exports = function (RED) {
     };
 };
 
-var fs = require("fs");
-var path = require("path");
-var events = require("events");
-var socketio = require("socket.io");
-var serveStatic = require("serve-static");
-var compression = require("compression");
+var fs = require('fs');
+var path = require('path');
+var events = require('events');
+var socketio = require('socket.io');
+var serveStatic = require('serve-static');
+var compression = require('compression');
 
 // Unified API requires
 // const jwt = require("./api/jwt");
-const errorHandler = require("./api/error-handler");
+const errorHandler = require('./api/error-handler');
 
-var urVersion = require("./package.json").version;
+var urVersion = require('./package.json').version;
 var baseConfiguration = {};
 var io;
 var menu = [];
 var globals = [];
 var settings = {};
-var updateValueEventName = "update-value";
+var updateValueEventName = 'update-value';
 var currentValues = {};
 var replayMessages = {};
 var removeStateTimers = {};
@@ -46,17 +46,17 @@ ev.setMaxListeners(0);
 
 // default manifest.json to be returned as required.
 var mani = {
-    name: "unified-RED Dashboard",
-    short_name: "Dashboard",
-    description: "A dashboard for Node-RED",
-    start_url: "./#/0",
-    background_color: "#910000",
-    theme_color: "#910000",
-    display: "standalone",
+    name: 'unified-RED Dashboard',
+    short_name: 'Dashboard',
+    description: 'A dashboard for Node-RED',
+    start_url: './#/0',
+    background_color: '#910000',
+    theme_color: '#910000',
+    display: 'standalone',
     icons: [
-        { src: "icon192x192.png", sizes: "192x192", type: "image/png" },
-        { src: "icon120x120.png", sizes: "120x120", type: "image/png" },
-        { src: "icon64x64.png", sizes: "64x64", type: "image/png" },
+        { src: 'icon192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: 'icon120x120.png', sizes: '120x120', type: 'image/png' },
+        { src: 'icon64x64.png', sizes: '64x64', type: 'image/png' },
     ],
 };
 
@@ -64,7 +64,7 @@ function toNumber(keepDecimals, config, input, old, m, s) {
     if (input === undefined) {
         return;
     }
-    if (typeof input !== "number") {
+    if (typeof input !== 'number') {
         var inputString = input.toString();
         input = keepDecimals ? parseFloat(inputString) : parseInt(inputString);
     }
@@ -79,15 +79,11 @@ function emit(event, data) {
 }
 
 function emitSocket(event, data) {
-    console.log("ui.js emitSocket called event: ", event);
-    console.log("ui.js emitSocket called data: ", data);
-    if (
-        data.hasOwnProperty("msg") &&
-        data.msg.hasOwnProperty("socketid") &&
-        data.msg.socketid !== undefined
-    ) {
+    console.log('ui.js emitSocket called event: ', event);
+    console.log('ui.js emitSocket called data: ', data);
+    if (data.hasOwnProperty('msg') && data.msg.hasOwnProperty('socketid') && data.msg.socketid !== undefined) {
         io.to(data.msg.socketid).emit(event, data);
-    } else if (data.hasOwnProperty("socketid") && data.socketid !== undefined) {
+    } else if (data.hasOwnProperty('socketid') && data.socketid !== undefined) {
         io.to(data.socketid).emit(event, data);
     } else {
         io.emit(event, data);
@@ -134,16 +130,16 @@ function add(opt) {
     clearTimeout(removeStateTimers[opt.node.id]);
     delete removeStateTimers[opt.node.id];
 
-    if (typeof opt.emitOnlyNewValues === "undefined") {
+    if (typeof opt.emitOnlyNewValues === 'undefined') {
         opt.emitOnlyNewValues = true;
     }
-    if (typeof opt.forwardInputMessages === "undefined") {
+    if (typeof opt.forwardInputMessages === 'undefined') {
         opt.forwardInputMessages = true;
     }
-    if (typeof opt.storeFrontEndInputAsState === "undefined") {
+    if (typeof opt.storeFrontEndInputAsState === 'undefined') {
         opt.storeFrontEndInputAsState = true;
     }
-    if (typeof opt.persistantFrontEndValue === "undefined") {
+    if (typeof opt.persistantFrontEndValue === 'undefined') {
         opt.persistantFrontEndValue = true;
     }
     opt.convert = opt.convert || noConvert;
@@ -153,9 +149,9 @@ function add(opt) {
     opt.control.id = opt.node.id;
     var remove = addControl(opt.tab, opt.subtab, opt.group, opt.control);
 
-    opt.node.on("input", function (msg) {
-        console.log("opt.node.on input: ", msg);
-        if (typeof msg.enabled === "boolean") {
+    opt.node.on('input', function (msg) {
+        console.log('opt.node.on input: ', msg);
+        if (typeof msg.enabled === 'boolean') {
             var state = replayMessages[opt.node.id];
             if (!state) {
                 replayMessages[opt.node.id] = state = { id: opt.node.id };
@@ -165,10 +161,10 @@ function add(opt) {
         }
 
         // remove res and req as they are often circular
-        if (msg.hasOwnProperty("res")) {
+        if (msg.hasOwnProperty('res')) {
             delete msg.res;
         }
-        if (msg.hasOwnProperty("req")) {
+        if (msg.hasOwnProperty('req')) {
             delete msg.req;
         }
 
@@ -178,25 +174,22 @@ function add(opt) {
         // let any arriving msg.ui_control message mess with control parameters
         if (
             msg.ui_control &&
-            typeof msg.ui_control === "object" &&
+            typeof msg.ui_control === 'object' &&
             !Array.isArray(msg.ui_control) &&
             !Buffer.isBuffer(msg.ui_control)
         ) {
             var changed = {};
             for (var property in msg.ui_control) {
-                if (
-                    msg.ui_control.hasOwnProperty(property) &&
-                    opt.control.hasOwnProperty(property)
-                ) {
+                if (msg.ui_control.hasOwnProperty(property) && opt.control.hasOwnProperty(property)) {
                     if (
-                        property !== "id" &&
-                        property !== "type" &&
-                        property !== "order" &&
-                        property !== "name" &&
-                        property !== "value" &&
-                        property !== "label" &&
-                        property !== "width" &&
-                        property !== "height"
+                        property !== 'id' &&
+                        property !== 'type' &&
+                        property !== 'order' &&
+                        property !== 'name' &&
+                        property !== 'value' &&
+                        property !== 'label' &&
+                        property !== 'width' &&
+                        property !== 'height'
                     ) {
                         opt.control[property] = msg.ui_control[property];
                         changed[property] = msg.ui_control[property];
@@ -204,26 +197,21 @@ function add(opt) {
                 }
             }
             if (Object.keys(changed).length !== 0) {
-                io.emit("ui-control", { control: changed, id: opt.node.id });
+                io.emit('ui-control', { control: changed, id: opt.node.id });
             }
-            if (!msg.hasOwnProperty("payload")) {
+            if (!msg.hasOwnProperty('payload')) {
                 return;
             }
         }
 
         // Call the convert function in the node to get the new value
         // as well as the full dataset.
-        var conversion = opt.convert(
-            msg.payload,
-            oldValue,
-            msg,
-            opt.control.step
-        );
+        var conversion = opt.convert(msg.payload, oldValue, msg, opt.control.step);
 
         // If the update flag is set, emit the newPoint, and store the full dataset
         var fullDataset;
         var newPoint;
-        if (typeof conversion === "object" && conversion.update !== undefined) {
+        if (typeof conversion === 'object' && conversion.update !== undefined) {
             newPoint = conversion.newPoint;
             fullDataset = conversion.updatedValues;
         } else if (conversion === undefined) {
@@ -236,11 +224,7 @@ function add(opt) {
         }
 
         // If we have something new to emit
-        if (
-            newPoint !== undefined ||
-            !opt.emitOnlyNewValues ||
-            oldValue != fullDataset
-        ) {
+        if (newPoint !== undefined || !opt.emitOnlyNewValues || oldValue != fullDataset) {
             currentValues[opt.node.id] = fullDataset;
 
             // Determine what to emit over the websocket
@@ -249,74 +233,59 @@ function add(opt) {
             // Always store the full dataset.
             var toStore = opt.beforeEmit(msg, fullDataset);
             var toEmit;
-            if (newPoint !== undefined && typeof newPoint !== "boolean") {
+            if (newPoint !== undefined && typeof newPoint !== 'boolean') {
                 toEmit = opt.beforeEmit(msg, newPoint);
             } else {
                 toEmit = toStore;
             }
 
             var addField = function (m) {
-                if (
-                    opt.control.hasOwnProperty(m) &&
-                    opt.control[m] &&
-                    opt.control[m].indexOf("{{") !== -1
-                ) {
-                    var a = opt.control[m].split("{{");
+                if (opt.control.hasOwnProperty(m) && opt.control[m] && opt.control[m].indexOf('{{') !== -1) {
+                    var a = opt.control[m].split('{{');
                     a.shift();
                     for (var i = 0; i < a.length; i++) {
-                        var b = a[i].split("}}")[0].trim();
-                        b.replace(/\"/g, "").replace(/\'/g, "");
-                        if (b.indexOf("|") !== -1) {
-                            b = b.split("|")[0];
+                        var b = a[i].split('}}')[0].trim();
+                        b.replace(/\"/g, '').replace(/\'/g, '');
+                        if (b.indexOf('|') !== -1) {
+                            b = b.split('|')[0];
                         }
-                        if (b.indexOf(" ") !== -1) {
-                            b = b.split(" ")[0];
+                        if (b.indexOf(' ') !== -1) {
+                            b = b.split(' ')[0];
                         }
-                        if (b.indexOf("?") !== -1) {
-                            b = b.split("?")[0];
+                        if (b.indexOf('?') !== -1) {
+                            b = b.split('?')[0];
                         }
-                        b.replace(/\(/g, "").replace(/\)/g, "");
-                        if (b.indexOf("msg.") >= 0) {
-                            b = b.split("msg.")[1];
-                            if (b.indexOf(".") !== -1) {
-                                b = b.split(".")[0];
+                        b.replace(/\(/g, '').replace(/\)/g, '');
+                        if (b.indexOf('msg.') >= 0) {
+                            b = b.split('msg.')[1];
+                            if (b.indexOf('.') !== -1) {
+                                b = b.split('.')[0];
                             }
-                            if (b.indexOf("[") !== -1) {
-                                b = b.split("[")[0];
+                            if (b.indexOf('[') !== -1) {
+                                b = b.split('[')[0];
                             }
-                            if (!toEmit.hasOwnProperty("msg")) {
+                            if (!toEmit.hasOwnProperty('msg')) {
                                 toEmit.msg = {};
                             }
-                            if (
-                                !toEmit.msg.hasOwnProperty(b) &&
-                                msg.hasOwnProperty(b) &&
-                                msg[b] !== undefined
-                            ) {
+                            if (!toEmit.msg.hasOwnProperty(b) && msg.hasOwnProperty(b) && msg[b] !== undefined) {
                                 if (Buffer.isBuffer(msg[b])) {
-                                    toEmit.msg[b] = msg[b].toString("binary");
+                                    toEmit.msg[b] = msg[b].toString('binary');
                                 } else {
-                                    toEmit.msg[b] = JSON.parse(
-                                        JSON.stringify(msg[b])
-                                    );
+                                    toEmit.msg[b] = JSON.parse(JSON.stringify(msg[b]));
                                 }
                             }
                         } else {
-                            if (b.indexOf(".") !== -1) {
-                                b = b.split(".")[0];
+                            if (b.indexOf('.') !== -1) {
+                                b = b.split('.')[0];
                             }
-                            if (b.indexOf("[") !== -1) {
-                                b = b.split("[")[0];
+                            if (b.indexOf('[') !== -1) {
+                                b = b.split('[')[0];
                             }
-                            if (
-                                !toEmit.hasOwnProperty(b) &&
-                                msg.hasOwnProperty(b)
-                            ) {
+                            if (!toEmit.hasOwnProperty(b) && msg.hasOwnProperty(b)) {
                                 if (Buffer.isBuffer(msg[b])) {
-                                    toEmit[b] = msg[b].toString("binary");
+                                    toEmit[b] = msg[b].toString('binary');
                                 } else {
-                                    toEmit[b] = JSON.parse(
-                                        JSON.stringify(msg[b])
-                                    );
+                                    toEmit[b] = JSON.parse(JSON.stringify(msg[b]));
                                 }
                             }
                         }
@@ -325,11 +294,11 @@ function add(opt) {
             };
 
             // if label, format or color field is set to a msg property, emit that as well
-            addField("label");
-            addField("format");
-            addField("color");
-            addField("units");
-            if (msg.hasOwnProperty("enabled")) {
+            addField('label');
+            addField('format');
+            addField('color');
+            addField('units');
+            if (msg.hasOwnProperty('enabled')) {
                 toEmit.disabled = !msg.enabled;
             }
             toEmit.id = toStore.id = opt.node.id;
@@ -370,10 +339,10 @@ function add(opt) {
             var toSend = { payload: converted };
             toSend = opt.beforeSend(toSend, msg) || toSend;
             toSend.socketid = toSend.socketid || msg.socketid;
-            if (toSend.hasOwnProperty("topic") && toSend.topic === undefined) {
+            if (toSend.hasOwnProperty('topic') && toSend.topic === undefined) {
                 delete toSend.topic;
             }
-            if (!msg.hasOwnProperty("_fromInput")) {
+            if (!msg.hasOwnProperty('_fromInput')) {
                 // TODO: too specific
                 opt.node.send(toSend); // send to following nodes
             }
@@ -398,20 +367,20 @@ function add(opt) {
 
 //from: https://stackoverflow.com/a/28592528/3016654
 function join() {
-    var trimRegex = new RegExp("^\\/|\\/$", "g");
+    var trimRegex = new RegExp('^\\/|\\/$', 'g');
     var paths = Array.prototype.slice.call(arguments);
     return (
-        "/" +
+        '/' +
         paths
             .map(function (e) {
                 if (e) {
-                    return e.replace(trimRegex, "");
+                    return e.replace(trimRegex, '');
                 }
             })
             .filter(function (e) {
                 return e;
             })
-            .join("/")
+            .join('/')
     );
 }
 
@@ -421,29 +390,23 @@ function init(server, app, log, redSettings) {
     //   console.log(log);
     //   console.log(redSettings);
     var uiSettings = redSettings.ui || {};
-    if (
-        uiSettings.hasOwnProperty("path") &&
-        typeof uiSettings.path === "string"
-    ) {
+    if (uiSettings.hasOwnProperty('path') && typeof uiSettings.path === 'string') {
         settings.path = uiSettings.path;
     } else {
-        settings.path = "ui";
+        settings.path = 'ui';
     }
-    if (
-        uiSettings.hasOwnProperty("readOnly") &&
-        typeof uiSettings.readOnly === "boolean"
-    ) {
+    if (uiSettings.hasOwnProperty('readOnly') && typeof uiSettings.readOnly === 'boolean') {
         settings.readOnly = uiSettings.readOnly;
     } else {
         settings.readOnly = false;
     }
-    settings.defaultGroupHeader = uiSettings.defaultGroup || "Default";
+    settings.defaultGroupHeader = uiSettings.defaultGroup || 'Default';
     settings.verbose = redSettings.verbose || false;
 
     var fullPath = join(redSettings.httpNodeRoot, settings.path);
-    console.log("ui.js 333 fullPath: ", fullPath);
-    var socketIoPath = join(fullPath, "socket.io");
-    console.log("ui.js 335 socketIoPath: ", socketIoPath);
+    console.log('ui.js 333 fullPath: ', fullPath);
+    var socketIoPath = join(fullPath, 'socket.io');
+    console.log('ui.js 335 socketIoPath: ', socketIoPath);
 
     io = socketio(server, { path: socketIoPath });
     //   console.log(io);
@@ -453,61 +416,51 @@ function init(server, app, log, redSettings) {
     };
 
     if (uiSettings.middleware) {
-        if (typeof uiSettings.middleware === "function") {
+        if (typeof uiSettings.middleware === 'function') {
             dashboardMiddleware = uiSettings.middleware;
         }
     }
 
-    fs.stat(path.join(__dirname, "dist/index.html"), function (err, stat) {
+    fs.stat(path.join(__dirname, 'dist/index.html'), function (err, stat) {
         app.use(compression());
         //   console.log('ui.js 349: ' + __dirname);
         if (!err) {
-            app.use(join(settings.path, "manifest.json"), function (req, res) {
+            app.use(join(settings.path, 'manifest.json'), function (req, res) {
                 res.send(mani);
             });
             //   console.log("serveStatic: ", path.join(__dirname, "dist"));
-            app.use(
-                join(settings.path),
-                dashboardMiddleware,
-                serveStatic(path.join(__dirname, "dist"))
-            );
+            app.use(join(settings.path), dashboardMiddleware, serveStatic(path.join(__dirname, 'dist')));
         } else {
-            log.info("[Dashboard] Dashboard using development folder");
-            app.use(
-                join(settings.path),
-                dashboardMiddleware,
-                serveStatic(path.join(__dirname, "src"))
-            );
+            log.info('[Dashboard] Dashboard using development folder');
+            app.use(join(settings.path), dashboardMiddleware, serveStatic(path.join(__dirname, 'src')));
             var vendor_packages = [
-                "angular",
-                "angular-sanitize",
-                "angular-animate",
-                "angular-aria",
-                "angular-material",
-                "angular-touch",
-                "angular-material-icons",
-                "svg-morpheus",
-                "font-awesome",
-                "weather-icons-lite",
-                "sprintf-js",
-                "jquery",
-                "jquery-ui",
-                "d3",
-                "raphael",
-                "justgage",
-                "angular-chart.js",
-                "chart.js",
-                "moment",
-                "angularjs-color-picker",
-                "tinycolor2",
-                "less",
+                'angular',
+                'angular-sanitize',
+                'angular-animate',
+                'angular-aria',
+                'angular-material',
+                'angular-touch',
+                'angular-material-icons',
+                'svg-morpheus',
+                'font-awesome',
+                'weather-icons-lite',
+                'sprintf-js',
+                'jquery',
+                'jquery-ui',
+                'd3',
+                'raphael',
+                'justgage',
+                'angular-chart.js',
+                'chart.js',
+                'moment',
+                'angularjs-color-picker',
+                'tinycolor2',
+                'less',
             ];
             vendor_packages.forEach(function (packageName) {
                 app.use(
-                    join(settings.path, "vendor", packageName),
-                    serveStatic(
-                        path.join(__dirname, "node_modules", packageName)
-                    )
+                    join(settings.path, 'vendor', packageName),
+                    serveStatic(path.join(__dirname, 'node_modules', packageName))
                 );
             });
         }
@@ -515,33 +468,29 @@ function init(server, app, log, redSettings) {
         // Define Unified API
         process.env.RED_SETTINGS_FILE = redSettings.settingsFile;
         // app.use(jwt());
-        app.use("/api", require("./api/api.controller"));
+        app.use('/api', require('./api/api.controller'));
         app.use(errorHandler);
     });
 
-    log.info("Dashboard version " + urVersion + " started at " + fullPath);
+    log.info('Dashboard version ' + urVersion + ' started at ' + fullPath);
 
-    io.on("connection", function (socket) {
+    io.on('connection', function (socket) {
         //   console.log("ui io.on connection: ", socket);
-        ev.emit(
-            "newsocket",
-            socket.client.id,
-            socket.request.connection.remoteAddress
-        );
+        ev.emit('newsocket', socket.client.id, socket.request.connection.remoteAddress);
         updateUi(socket);
 
         socket.on(updateValueEventName, ev.emit.bind(ev, updateValueEventName));
-        socket.on("ui-replay-state", function () {
+        socket.on('ui-replay-state', function () {
             var ids = Object.getOwnPropertyNames(replayMessages);
             setTimeout(function () {
                 ids.forEach(function (id) {
                     socket.emit(updateValueEventName, replayMessages[id]);
                 });
             }, 50);
-            socket.emit("ui-replay-done");
+            socket.emit('ui-replay-done');
         });
-        socket.on("ui-change", function (tabIndex, subtabIndex) {
-            var name = "";
+        socket.on('ui-change', function (tabIndex, subtabIndex) {
+            var name = '';
             if (
                 tabIndex != null &&
                 subtabIndex != null &&
@@ -555,42 +504,23 @@ function init(server, app, log, redSettings) {
                 menu[tabIndex].items[subtabIndex]
             ) {
                 name =
-                    menu[tabIndex].items[subtabIndex].hasOwnProperty(
-                        "header"
-                    ) &&
-                    typeof menu[tabIndex].items[subtabIndex].header !==
-                        "undefined"
+                    menu[tabIndex].items[subtabIndex].hasOwnProperty('header') &&
+                    typeof menu[tabIndex].items[subtabIndex].header !== 'undefined'
                         ? menu[tabIndex].items[subtabIndex].header
                         : menu[tabIndex].items[subtabIndex].name;
-                ev.emit(
-                    "changetab",
-                    index,
-                    name,
-                    socket.client.id,
-                    socket.request.connection.remoteAddress,
-                    params
-                );
+                ev.emit('changetab', index, name, socket.client.id, socket.request.connection.remoteAddress, params);
             }
         });
-        socket.on("ui-refresh", function () {
+        socket.on('ui-refresh', function () {
             updateUi();
         });
-        socket.on("disconnect", function () {
-            ev.emit(
-                "endsocket",
-                socket.client.id,
-                socket.request.connection.remoteAddress
-            );
+        socket.on('disconnect', function () {
+            ev.emit('endsocket', socket.client.id, socket.request.connection.remoteAddress);
         });
-        socket.on("ui-audio", function (audioStatus) {
-            ev.emit(
-                "audiostatus",
-                audioStatus,
-                socket.client.id,
-                socket.request.connection.remoteAddress
-            );
+        socket.on('ui-audio', function (audioStatus) {
+            ev.emit('audiostatus', audioStatus, socket.client.id, socket.request.connection.remoteAddress);
         });
-        socket.on("ui-params", function (p) {
+        socket.on('ui-params', function (p) {
             delete p.socketid;
             params = p;
         });
@@ -610,9 +540,9 @@ function updateUi(to) {
         menu.forEach(function (o) {
             o.theme = baseConfiguration.theme;
         });
-        to.emit("ui-controls", {
-            site: baseConfiguration.site,
-            theme: baseConfiguration.theme,
+        to.emit('ui-controls', {
+            // site: baseConfiguration.site,
+            // theme: baseConfiguration.theme,
             menu: menu,
             globals: globals,
         });
@@ -637,13 +567,13 @@ function itemSorter(item1, item2) {
     return item1.order - item2.order;
 }
 
-function addControl(tab, subtab, groupHeader, control) {
-    if (typeof control.type !== "string") {
+function addControl(menu_item, menu_page, page_group, control) {
+    if (typeof control.type !== 'string') {
         return function () {};
     }
 
     // global template?
-    if (control.type === "template" && control.templateScope === "global") {
+    if (control.type === 'template' && control.templateScope === 'global') {
         // add content to globals
         globals.push(control);
         updateUi();
@@ -657,62 +587,81 @@ function addControl(tab, subtab, groupHeader, control) {
             }
         };
     } else {
-        groupHeader = groupHeader || settings.defaultGroupHeader;
+        page_group = page_group || settings.defaultGroupHeader;
         control.order = parseFloat(control.order);
-        // console.log("tab, groupHeader, control", tab, groupHeader, control);
+        // console.log("menu_item, page_group, control", menu_item, page_group, control);
         // console.log("ui.js 466 menu: ", JSON.stringify(menu, null, '\t'));
         // console.log("menu[0].items: ", menu[0]);
-        var foundTab = find(menu, function (t) {
-            return t.id === tab.id;
+        var foundMenuItem = find(menu, function (mi) {
+            return mi.id === menu_item.id;
         });
-        if (!foundTab) {
-            foundTab = {
-                id: tab.id,
-                header: tab.config.name,
-                order: parseFloat(tab.config.order),
-                icon: tab.config.icon,
-                //icon: tab.config.hidden ? "fa-ban" : tab.config.icon,
-                disabled: tab.config.disabled,
-                hidden: tab.config.hidden,
+
+        if (!foundMenuItem) {
+            foundMenuItem = {
+                id: menu_item.id,
+                header: menu_item.config.name,
+                order: parseFloat(menu_item.config.order),
+                icon: menu_item.config.icon,
+                //icon: menu_item.config.hidden ? "fa-ban" : menu_item.config.icon,
+                disabled: menu_item.config.disabled,
+                hidden: menu_item.config.hidden,
                 show: false,
                 items: [],
+                // Atrio sidebarItems properties:
+                path: '',
+                title: menu_item.config.name,
+                icon: menu_item.config.icon,
+                class: 'menu-toggle',
+                groupTitle: false,
+                submenu: [],
             };
-            menu.push(foundTab);
+            menu.push(foundMenuItem);
             menu.sort(itemSorter);
         }
 
-        var foundSubtab = find(foundTab.items, function (s) {
-            return s.id === subtab.id;
+        var foundMenuPage = find(foundMenuItem.items, function (mp) {
+            return mp.id === menu_page.id;
         });
-        if (!foundSubtab) {
-            foundSubtab = {
-                id: subtab.id,
-                header: subtab.config.name,
-                order: parseFloat(subtab.config.order),
-                icon: subtab.config.icon,
-                disabled: subtab.config.disabled,
-                hidden: subtab.config.hidden,
+        if (!foundMenuPage) {
+            foundMenuPage = {
+                id: menu_page.id,
+                header: menu_page.config.name,
+                order: parseFloat(menu_page.config.order),
+                icon: menu_page.config.icon,
+                disabled: menu_page.config.disabled,
+                hidden: menu_page.config.hidden,
                 items: [],
+                // Atrio sidebarItems properties:
+                path: '/',
+                title: menu_page.config.name,
+                icon: menu_page.config.icon,
+                class: '',
+                groupTitle: false,
+                submenu: [],
             };
-            foundTab.items.push(foundSubtab);
+            foundMenuItem.items.push(foundMenuPage);
+            foundMenuItem.submenu.push(foundMenuPage);
         }
 
-        var foundGroup = find(foundSubtab.items, function (g) {
-            return g.header === groupHeader;
+        var foundGroup = find(foundMenuPage.items, function (g) {
+            return g.header === page_group.config.name;
         });
         if (!foundGroup) {
             foundGroup = {
-                header: groupHeader,
-                order: groupHeader.config.order,
+                header: page_group.config.name,
+                // order: page_group.config.order,
                 items: [],
+                // New properties needed
+                // componentTypes: [],
             };
-            foundSubtab.items.push(foundGroup);
+            foundMenuPage.items.push(foundGroup);
         }
         foundGroup.items.push(control);
         foundGroup.items.sort(itemSorter);
-        // foundGroup.order = groupHeader.config.order;
-        foundSubtab.items.sort(itemSorter);
-        foundTab.items.sort(itemSorter);
+
+        // foundGroup.order = page_group.config.order;
+        foundMenuPage.items.sort(itemSorter);
+        foundMenuItem.items.sort(itemSorter);
 
         updateUi();
 
@@ -723,21 +672,21 @@ function addControl(tab, subtab, groupHeader, control) {
                 // Remove the item from the group
                 foundGroup.items.splice(index, 1);
 
-                // If the group is now empty, remove it from the subtab
+                // If the group is now empty, remove it from the menu_page
                 if (foundGroup.items.length === 0) {
-                    index = foundSubtab.items.indexOf(foundGroup);
+                    index = foundMenuPage.items.indexOf(foundGroup);
                     if (index >= 0) {
-                        foundSubtab.items.splice(index, 1);
+                        foundMenuPage.items.splice(index, 1);
 
-                        // If the subtab is now empty, remove it from the tab
-                        if (foundSubtab.items.length === 0) {
-                            index = foundTab.indexOf(foundSubtab);
+                        // If the menu_page is now empty, remove it from the tab
+                        if (foundMenuPage.items.length === 0) {
+                            index = foundMenuItem.indexOf(foundMenuPage);
                             if (index >= 0) {
-                                foundTab.items.splice(index, 1);
+                                foundMenuItem.items.splice(index, 1);
 
                                 // If the tab is now empty, remove it as well
-                                if (foundTab.items.length === 0) {
-                                    index = menu.indexOf(foundTab);
+                                if (foundMenuItem.items.length === 0) {
+                                    index = menu.indexOf(foundMenuItem);
                                     if (index >= 0) {
                                         menu.splice(index, 1);
                                     }
@@ -779,12 +728,10 @@ function addBaseConfig(config) {
     if (config) {
         baseConfiguration = config;
     }
-    mani.name = config.site ? config.site.name : "Node-RED Dashboard";
-    mani.short_name = mani.name.replace("Node-RED", "").trim();
-    mani.background_color =
-        config.theme.themeState["page-titlebar-backgroundColor"].value;
-    mani.theme_color =
-        config.theme.themeState["page-titlebar-backgroundColor"].value;
+    mani.name = config.site ? config.site.name : 'Node-RED Dashboard';
+    mani.short_name = mani.name.replace('Node-RED', '').trim();
+    mani.background_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
+    mani.theme_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
     updateUi();
 }
 
@@ -803,9 +750,9 @@ function addBaseConfig(config) {
 function getSizes() {
     if (
         baseConfiguration &&
-        baseConfiguration.hasOwnProperty("site") &&
-        typeof baseConfiguration.site !== "undefined" &&
-        baseConfiguration.site.hasOwnProperty("sizes")
+        baseConfiguration.hasOwnProperty('site') &&
+        typeof baseConfiguration.site !== 'undefined' &&
+        baseConfiguration.site.hasOwnProperty('sizes')
     ) {
         return baseConfiguration.site.sizes;
     } else {
