@@ -10,5 +10,8 @@ export class UrTextInputComponent implements OnInit {
 
     constructor() {}
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        // TODO: add WebSocketService Listener
+        // TODO: add WebSocketService Emitter
+    }
 }
