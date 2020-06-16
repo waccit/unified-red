@@ -3,6 +3,6 @@ import { Directive, ViewContainerRef } from '@angular/core';
 @Directive({
     selector: '[group-host]',
 })
-export class DashboardDirective {
+export class GroupDirective {
     constructor(public viewContainerRef: ViewContainerRef) {}
 }
