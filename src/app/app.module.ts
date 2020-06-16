@@ -15,9 +15,9 @@ import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { DynamicScriptLoaderService } from './services/dynamic-script-loader.service';
 import { RightSidebarService } from './services/rightsidebar.service';
 import {
-  PerfectScrollbarModule,
-  PERFECT_SCROLLBAR_CONFIG,
-  PerfectScrollbarConfigInterface
+    PerfectScrollbarModule,
+    PERFECT_SCROLLBAR_CONFIG,
+    PerfectScrollbarConfigInterface,
 } from 'ngx-perfect-scrollbar';
 import { UsersModule } from './users/users.module';
 import { AuthenticationModule } from './authentication/authentication.module';
@@ -45,61 +45,60 @@ import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
-  suppressScrollX: true,
-  wheelPropagation: false
+    suppressScrollX: true,
+    wheelPropagation: false,
 };
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    PageLoaderComponent,
-    SidebarComponent,
-    RightSidebarComponent,
-    Page500Component,
-    Page404Component,
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AuthenticationModule,
-    UsersModule,
-    AppRoutingModule,
-    NgbModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    FormsModule,
-    PerfectScrollbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressBarModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatListModule,
-    MatSidenavModule,
-    MatSnackBarModule,
-    MatButtonToggleModule,
-    MatCheckboxModule,
-    MatSlideToggleModule,
-    MatMenuModule,
-    NgxMaskModule.forRoot(),
-  ],
-  providers: [
-    { provide: LocationStrategy, useClass: HashLocationStrategy },
-    {
-      provide: PERFECT_SCROLLBAR_CONFIG,
-      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG
-    },
-    DynamicScriptLoaderService,
-    RightSidebarService,
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
-  ],
-  entryComponents: [
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        HeaderComponent,
+        PageLoaderComponent,
+        SidebarComponent,
+        RightSidebarComponent,
+        Page500Component,
+        Page404Component,
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        AuthenticationModule,
+        UsersModule,
+        AppRoutingModule,
+        NgbModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        FormsModule,
+        PerfectScrollbarModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressBarModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatListModule,
+        MatSidenavModule,
+        MatSnackBarModule,
+        MatButtonToggleModule,
+        MatCheckboxModule,
+        MatSlideToggleModule,
+        MatMenuModule,
+        NgxMaskModule.forRoot(),
+    ],
+    providers: [
+        { provide: LocationStrategy, useClass: HashLocationStrategy },
+        {
+            provide: PERFECT_SCROLLBAR_CONFIG,
+            useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
+        },
+        DynamicScriptLoaderService,
+        RightSidebarService,
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    ],
+    entryComponents: [],
+    bootstrap: [AppComponent],
 })
 export class AppModule {}
