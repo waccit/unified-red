@@ -47,6 +47,7 @@
             "ur_subtab": "nodes/ur_subtab.js",
             "ur_group": "nodes/ur_group.js",
             "ur_text": "nodes/ur_text.js",
+            "ur_text_input": "nodes/ur_text_input.js",
             "ur_template": "nodes/ur_template.js",
             "ur_pagerduty_config": "nodes/ur_pagerduty_config.js",
             "ur_pagerduty": "nodes/ur_pagerduty.js"
