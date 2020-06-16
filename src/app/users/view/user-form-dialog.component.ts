@@ -2,9 +2,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-// import { formatDate } from '@angular/common';
-import { User, Role } from '../../data';
+import { User, RoleName } from '../../data';
 import { PasswordStrengthValidator, MustMatch } from '../../authentication/register/password.validators';
+import { RoleService } from '../../services';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'app-user-form-dialog',
@@ -19,25 +20,16 @@ export class UserFormDialogComponent {
     data: User;
     hide = true;
     chide = true;
-    roles: {[key:string]: string} = {
-        "1": 'Viewer',
-        "2": 'Limited Operator',
-        "3": 'Standard Operator',
-        "4": 'IT Operator',
-        "5": 'Security Operator',
-        // "6": 'Reserved',
-        // "7": 'Reserved',
-        // "8": 'Reserved',
-        "9": 'Tech',
-        "10": 'Admin',
-    };
+    roles: [RoleName];
     objectKeys = Object.keys;
 
     constructor(
         public dialogRef: MatDialogRef<UserFormDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private roleService: RoleService
     ) {
+        this.roleService.getAll().pipe(first()).subscribe((roles) => { this.roles = roles; });
         this.action = dialogData.action;
         if (this.action === 'edit') {
             this.data = dialogData.data;
@@ -75,6 +67,5 @@ export class UserFormDialogComponent {
 
     submit() {}
 
-    public confirm(): void {
-    }    
+    public confirm(): void {}
 }

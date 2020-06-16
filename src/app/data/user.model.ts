@@ -9,7 +9,7 @@ export interface User {
     id: string;
     username: string;
     password: string;
-    role: Role;
+    role: string;
     firstName: string;
     lastName: string;
     token?: string;
