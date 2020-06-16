@@ -3,11 +3,18 @@ import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './authentication/auth.guard';
 import { DemoComponent } from './dashboard/demo/demo.component';
 import { Page404Component } from './authentication/page404/page404.component';
+import { MenuPageComponent } from './dashboard/menu-page/menu-page.component';
 
 const routes: Routes = [
     {
         path: '',
         component: DemoComponent,
+        pathMatch: 'full',
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'menu-page',
+        component: MenuPageComponent,
         pathMatch: 'full',
         canActivate: [AuthGuard],
     },

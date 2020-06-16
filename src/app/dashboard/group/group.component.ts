@@ -1,6 +1,14 @@
-import { Component, OnInit, OnDestroy, Input, ViewChild, ComponentFactoryResolver } from '@angular/core';
-import { DashboardDirective } from '../../directives/dashboard.directive';
-import { groupWidget } from './group-widget';
+import {
+    Component,
+    OnInit,
+    OnDestroy,
+    Input,
+    ViewChild,
+    ComponentFactoryResolver,
+    ViewContainerRef,
+} from '@angular/core';
+import { GroupDirective } from '../../directives/group.directive';
+import { groupWidgets } from './group-widget';
 
 @Component({
     selector: 'app-group',
@@ -8,25 +16,35 @@ import { groupWidget } from './group-widget';
     styleUrls: ['./group.component.sass'],
 })
 export class GroupComponent implements OnInit, OnDestroy {
-    @Input() widgets: groupWidget[];
-    @ViewChild(DashboardDirective, { static: true }) groupHost: DashboardDirective;
+    @Input() header: string;
+    @Input() widgets: groupWidgets[];
+    @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
 
-    constructor(private componentFactoryResolver: ComponentFactoryResolver) {}
+    constructor(
+        private componentFactoryResolver: ComponentFactoryResolver,
+        private viewContainerRef: ViewContainerRef
+    ) {}
 
     ngOnInit() {
-        this.loadComponents();
+        this.viewContainerRef = this.groupHost.viewContainerRef;
+        this.loadWidgets();
     }
 
-    ngOnDestroy(): void {}
+    ngOnDestroy(): void {
+        this.viewContainerRef.clear();
+    }
 
-    loadComponents() {
-        const viewContainerRef = this.groupHost.viewContainerRef;
+    loadWidgets() {
+        this.viewContainerRef.clear();
 
-        this.widgets.forEach((widget) => {
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(widget.component);
+        if (this.widgets) {
+            this.widgets.forEach((widget) => {
+                const componentFactory = this.componentFactoryResolver.resolveComponentFactory(widget.component);
 
-            const componentRef = viewContainerRef.createComponent(componentFactory);
-            componentRef.instance.text = widget.text;
-        });
+                const componentRef = this.viewContainerRef.createComponent(componentFactory);
+                componentRef.instance.data = widget.data;
+                componentRef.instance.text = widget.text;
+            });
+        }
     }
 }

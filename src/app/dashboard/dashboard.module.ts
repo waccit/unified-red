@@ -12,7 +12,9 @@ import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 // import { NgApexchartsModule } from 'ng-apexcharts';
 import { DemoComponent } from './demo/demo.component';
 import { GroupComponent } from './group/group.component';
-import { DashboardDirective } from '../directives/dashboard.directive';
+import { GroupDirective } from '../directives/group.directive';
+import { MenuPageComponent } from './menu-page/menu-page.component';
+import { MenuPageDirective } from '../directives/menu-page.directive';
 
 @NgModule({
     declarations: [
@@ -21,7 +23,9 @@ import { DashboardDirective } from '../directives/dashboard.directive';
         // Dashboard3Component,
         DemoComponent,
         GroupComponent,
-        DashboardDirective,
+        GroupDirective,
+        MenuPageDirective,
+        MenuPageComponent,
     ],
     imports: [
         CommonModule,

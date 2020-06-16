@@ -44,14 +44,15 @@ module.exports = function (RED) {
             subtab: subtab,
             group: group,
             control: {
+                id: config.id,
                 type: 'text',
                 label: config.label,
                 order: config.order,
                 format: config.format,
-                width: config.width || group.config.width || 6,
-                height: config.height || 1,
-                layout: angLayout,
-                layoutAlign: angLayoutAlign,
+                // width: config.width || group.config.width || 6,
+                // height: config.height || 1,
+                // layout: angLayout,
+                // layoutAlign: angLayoutAlign,
             },
             convert: function (value) {
                 if (value !== undefined) {
@@ -64,7 +65,6 @@ module.exports = function (RED) {
                 return value;
             },
         });
-        console.log('TextNode done: ', done);
         node.on('close', done);
     }
     RED.nodes.registerType('ur_text', TextNode);
