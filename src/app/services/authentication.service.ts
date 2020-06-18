@@ -7,7 +7,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { UserService} from './user.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
@@ -15,7 +14,7 @@ export class AuthenticationService {
     public token: Observable<string>;
     private decodedJwtPayload;
 
-    constructor(private http: HttpClient, private userService: UserService) {
+    constructor(private http: HttpClient) {
         this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
         this.token = this.tokenSubject.asObservable();
         this.decodedJwtPayload = this.decodeJwt();

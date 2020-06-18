@@ -6,10 +6,25 @@ Source: https://github.com/cornflourblue/angular-8-registration-login-example
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { User } from '../data/';
+import { WebSocketService } from './web-socket.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-    constructor(private http: HttpClient) {}
+    private currentUserSubject: BehaviorSubject<User> = new BehaviorSubject<User>(null);
+    public currentUser: Observable<User> = this.currentUserSubject.asObservable();
+
+    constructor(private http: HttpClient, private webSocketService: WebSocketService) {
+        this.getCurrent().subscribe(user => {
+            this.currentUserSubject.next(user);
+            this.webSocketService.listen('ur-user-update').subscribe((data: any) => {
+                // filter on user id
+                if (this.currentUserSubject.value && data.id === this.currentUserSubject.value.id) {
+                    this.currentUserSubject.next(data);
+                }
+            });
+        });
+    }
 
     getAll() {
         return this.http.get<User[]>(`/api/users`);

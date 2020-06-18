@@ -21,12 +21,11 @@ module.exports = function (RED) {
 var fs = require("fs");
 var path = require("path");
 var events = require("events");
-var socketio = require("socket.io");
+var socketio = require("./socket");
 var serveStatic = require("serve-static");
 var compression = require("compression");
 
 // Unified API requires
-// const jwt = require("./api/jwt");
 const errorHandler = require("./api/error-handler");
 
 var urVersion = require("./package.json").version;
@@ -445,7 +444,8 @@ function init(server, app, log, redSettings) {
     var socketIoPath = join(fullPath, "socket.io");
     console.log("ui.js 335 socketIoPath: ", socketIoPath);
 
-    io = socketio(server, { path: socketIoPath });
+    socketio.connect(server, { path: socketIoPath });
+    io = socketio.connection();
     //   console.log(io);
 
     var dashboardMiddleware = function (req, res, next) {
@@ -514,7 +514,6 @@ function init(server, app, log, redSettings) {
 
         // Define Unified API
         process.env.RED_SETTINGS_FILE = redSettings.settingsFile;
-        // app.use(jwt());
         app.use("/api", require("./api/api.controller"));
         app.use(errorHandler);
     });
