@@ -1,5 +1,5 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { User, RoleName } from '../../data';
@@ -29,17 +29,18 @@ export class UserFormDialogComponent {
         private formBuilder: FormBuilder,
         private roleService: RoleService
     ) {
-        this.roleService.getAll().pipe(first()).subscribe((roles) => { this.roles = roles; });
-        this.action = dialogData.action;
+        this.roles = this.roleService.roles;
+        this.action = this.dialogData.action;
         if (this.action === 'edit') {
-            this.data = dialogData.data;
+            this.data = this.dialogData.data;
             this.title = 'Edit ' + this.data.username;
+            let roleLevel = this.roles.find(r => r.name === this.data.role).level;
             this.form = this.formBuilder.group({
                 enabled: [this.data.enabled],
                 username: [this.data.username, [Validators.required, Validators.minLength(3)]],
                 firstName: [this.data.firstName, Validators.required],
                 lastName: [this.data.lastName, Validators.required],
-                role: [this.data.role, Validators.required],
+                role: [roleLevel, Validators.required],
                 email: [this.data.email, [Validators.required, Validators.email, Validators.minLength(5)]],
                 expirationDate: [this.data.expirationDate], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
             });
