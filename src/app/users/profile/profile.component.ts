@@ -36,35 +36,31 @@ export class ProfileComponent implements OnInit {
             username: ['', Validators.required],
             password: ['', Validators.required],
         });
-        this.passwordForm = this.formBuilder.group({
-            password: ['', Validators.required],
-            newPassword: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
-            cNewPassword: ['', Validators.required],
-        },
-        {
-            validator: MustMatch('newPassword', 'cNewPassword'),
+        this.passwordForm = this.formBuilder.group(
+            {
+                password: ['', Validators.required],
+                newPassword: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
+                cNewPassword: ['', Validators.required],
+            },
+            {
+                validator: MustMatch('newPassword', 'cNewPassword'),
+            }
+        );
+        this.userService.currentUser.subscribe((user: User) => {
+            if (user) {
+                this.userId = user.id;
+                this.username = user.username;
+                this.settingsForm.setValue({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                });
+                this.usernameForm.setValue({
+                    username: user.username,
+                    password: '',
+                });
+            }
         });
-        this.userService
-            .getCurrent()
-            .pipe(first())
-            .subscribe(
-                (user: User) => {
-                    this.userId = user.id;
-                    this.username = user.username;
-                    this.settingsForm.setValue({
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                    });
-                    this.usernameForm.setValue({
-                        username: user.username,
-                        password: '',
-                    });
-                },
-                (error) => {
-                    console.log(error);
-                }
-            );
     }
 
     get sf() {
