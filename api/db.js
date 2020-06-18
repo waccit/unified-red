@@ -19,5 +19,5 @@ mongoose.Promise = global.Promise;
 
 module.exports = {
     User: require('./users/user.model'),
-    Role: require('./users/roleName.model'),
+    Role: require('./users/role-name.model'),
 };
