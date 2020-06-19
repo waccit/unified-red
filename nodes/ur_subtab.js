@@ -2,6 +2,7 @@ module.exports = function (RED) {
     function SubtabNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
+            pathName: config.name.replace(' ', '_'),
             name: config.name,
             disp: config.disp,
             width: config.width,
