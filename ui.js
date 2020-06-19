@@ -632,7 +632,7 @@ function addControl(menu_item, menu_page, page_group, control) {
                 hidden: menu_page.config.hidden,
                 items: [],
                 // Atrio sidebarItems properties:
-                path: '/',
+                path: '/dashboard/menu-page/' + menu_page.config.pathName,
                 title: menu_page.config.name,
                 icon: menu_page.config.icon,
                 class: '',
