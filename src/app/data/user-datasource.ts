@@ -2,17 +2,31 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { formatDate } from '@angular/common';
 
-import { UserService } from '../services';
+import { UserService, RoleService } from '../services';
 import { GenericDataSource } from './generic-datasource';
 import { User } from './user.model';
+import { first, map } from 'rxjs/operators';
 
 export class UserDataSource extends GenericDataSource<User> {
-    constructor(private userService: UserService, paginator: MatPaginator, sort: MatSort) {
+    private customRoleNames = {};
+
+    constructor(private userService: UserService, private roleService: RoleService, paginator: MatPaginator, sort: MatSort) {
         super(paginator, sort);
+        // build custom role name lookup array
+        this.roleService.getAll().pipe(first()).subscribe(roles => { 
+            for (let r of roles) {
+                this.customRoleNames[r.level] = r.name;
+            }
+        });
     }
 
     dataSource() {
-        return this.userService.getAll();
+        return this.userService.getAll().pipe(map((users) => {
+            return users.map(user => {
+                user.role = this.customRoleNames[user.role];
+                return user;
+            })
+        }));
     }
 
     searchColumns(item: User) {
@@ -21,6 +35,7 @@ export class UserDataSource extends GenericDataSource<User> {
             item.firstName,
             item.lastName,
             item.email,
+            item.role,
             item.enabled ? 'enabled' : 'disabled',
             item.expirationDate ? formatDate(item.expirationDate, 'MM/dd/yyyy', 'en') : '',
         ];

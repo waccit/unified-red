@@ -4,6 +4,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { AuthGuard } from '../authentication/auth.guard';
 import { Role } from '../data'
 import { UserTableComponent } from './view/user-table.component';
+import { RolesTableComponent } from './roles/roles-table.component';
 
 const routes: Routes = [
     {
@@ -18,6 +19,12 @@ const routes: Routes = [
             {
                 path: 'view',
                 component: UserTableComponent,
+                canActivate: [AuthGuard],
+                data: { roles: Role.Level10 },
+            },
+            {
+                path: 'roles',
+                component: RolesTableComponent,
                 canActivate: [AuthGuard],
                 data: { roles: Role.Level10 },
             }

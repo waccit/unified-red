@@ -8,7 +8,7 @@ import { fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { UserFormDialogComponent } from './user-form-dialog.component';
 import { UserDeleteDialogComponent } from './user-delete-dialog.component';
-import { SnackbarService, UserService } from '../../services';
+import { SnackbarService, UserService, RoleService } from '../../services';
 import { User, UserDataSource } from '../../data/';
 
 @Component({
@@ -29,6 +29,7 @@ export class UserTableComponent implements OnInit {
         public httpClient: HttpClient,
         public dialog: MatDialog,
         private userService: UserService,
+        private roleService: RoleService,
         private snackbar: SnackbarService
     ) {}
 
@@ -37,7 +38,7 @@ export class UserTableComponent implements OnInit {
     }
 
     refreshData() {
-        this.dataSource = new UserDataSource(this.userService, this.paginator, this.sort);
+        this.dataSource = new UserDataSource(this.userService, this.roleService, this.paginator, this.sort);
         fromEvent(this.filter.nativeElement, 'keyup')
             .pipe(debounceTime(150), distinctUntilChanged())
             .subscribe(() => {

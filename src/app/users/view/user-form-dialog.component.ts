@@ -1,10 +1,11 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-// import { formatDate } from '@angular/common';
-import { User, Role } from '../../data';
+import { User, RoleName } from '../../data';
 import { PasswordStrengthValidator, MustMatch } from '../../authentication/register/password.validators';
+import { RoleService } from '../../services';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'app-user-form-dialog',
@@ -19,35 +20,27 @@ export class UserFormDialogComponent {
     data: User;
     hide = true;
     chide = true;
-    roles: {[key:string]: string} = {
-        "1": 'Viewer',
-        "2": 'Limited Operator',
-        "3": 'Standard Operator',
-        "4": 'IT Operator',
-        "5": 'Security Operator',
-        // "6": 'Reserved',
-        // "7": 'Reserved',
-        // "8": 'Reserved',
-        "9": 'Tech',
-        "10": 'Admin',
-    };
+    roles: [RoleName];
     objectKeys = Object.keys;
 
     constructor(
         public dialogRef: MatDialogRef<UserFormDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private roleService: RoleService
     ) {
-        this.action = dialogData.action;
+        this.roles = this.roleService.roles;
+        this.action = this.dialogData.action;
         if (this.action === 'edit') {
-            this.data = dialogData.data;
+            this.data = this.dialogData.data;
             this.title = 'Edit ' + this.data.username;
+            let roleLevel = this.roles.find(r => r.name === this.data.role).level;
             this.form = this.formBuilder.group({
                 enabled: [this.data.enabled],
                 username: [this.data.username, [Validators.required, Validators.minLength(3)]],
                 firstName: [this.data.firstName, Validators.required],
                 lastName: [this.data.lastName, Validators.required],
-                role: [this.data.role, Validators.required],
+                role: [roleLevel, Validators.required],
                 email: [this.data.email, [Validators.required, Validators.email, Validators.minLength(5)]],
                 expirationDate: [this.data.expirationDate], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
             });
@@ -75,6 +68,5 @@ export class UserFormDialogComponent {
 
     submit() {}
 
-    public confirm(): void {
-    }    
+    public confirm(): void {}
 }
