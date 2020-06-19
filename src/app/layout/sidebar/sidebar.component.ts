@@ -17,7 +17,6 @@ export class SidebarComponent implements OnInit {
     showSubMenu: string = '';
     public innerHeight: any;
     public bodyTag: any;
-    public currentUser: Observable<User>;
     listMaxHeight: string;
     listMaxWidth: string;
     headerHeight = 60;
@@ -29,7 +28,7 @@ export class SidebarComponent implements OnInit {
         public elementRef: ElementRef,
         private userService: UserService
     ) {
-        this.userService.getCurrent().subscribe(user => { this.user = user });
+        this.userService.currentUser.subscribe(user => { this.user = user });
     }
 
     @HostListener('window:resize', ['$event'])

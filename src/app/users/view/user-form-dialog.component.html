@@ -12,7 +12,7 @@
         </button>
     </div>
     <div mat-dialog-content>
-        <form class="register-form m-4" [formGroup]="form" (ngSubmit)="submit">
+        <form class="register-form m-4" [formGroup]="form" (ngSubmit)="submit()">
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                     <mat-form-field class="example-full-width" appearance="outline">
@@ -102,7 +102,7 @@
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Role</mat-label>
                         <select matNativeControl formControlName="role" required>
-                            <option *ngFor="let key of objectKeys(roles)" [value]="key">{{ roles[key] }}</option>
+                            <option *ngFor="let role of roles" [value]="role.level">{{ role.name }}</option>
                         </select>
                     </mat-form-field>
                 </div>
