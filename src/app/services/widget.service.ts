@@ -3,6 +3,7 @@ import { groupWidgets } from '../dashboard/group/group-widget';
 import { UrTextComponent } from '../node-templates/ur-text/ur-text.component';
 import { UrButtonComponent } from '../node-templates/ur-button/ur-button.component';
 import { UrTextInputComponent } from '../node-templates/ur-text-input/ur-text-input.component';
+import { UrTemplateComponent } from '../node-templates/ur-template/ur-template.component';
 
 @Injectable({
     providedIn: 'root',
@@ -17,6 +18,8 @@ export class WidgetService {
                     return new groupWidgets(UrButtonComponent, 'UR-BUTTON', widget);
                 case 'text-input':
                     return new groupWidgets(UrTextInputComponent, 'UR-TEXT-INPUT', widget);
+                case 'template':
+                    return new groupWidgets(UrTemplateComponent, 'UR-TEMPLATE', widget);
             }
         });
     }

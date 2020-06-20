@@ -6,9 +6,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { UrTextInputComponent } from './ur-text-input/ur-text-input.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { UrTemplateComponent } from './ur-template/ur-template.component';
 
 @NgModule({
-    declarations: [UrTextComponent, UrButtonComponent, UrTextInputComponent],
+    declarations: [UrTextComponent, UrButtonComponent, UrTextInputComponent, UrTemplateComponent],
     imports: [CommonModule, MatButtonModule, MatFormFieldModule, MatInputModule],
 })
 export class NodeTemplatesModule {}

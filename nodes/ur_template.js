@@ -19,23 +19,12 @@ module.exports = function (RED) {
         }
 
         if (config.templateScope !== 'global') {
-            tab = RED.nodes.getNode(group.config.tab);
-            if (!tab) {
-                return;
-            }
             if (!config.width) {
                 config.width = group.config.width;
             }
         }
         var hei = Number(config.height || 0);
         var previousTemplate = null;
-        var theme = ui.getTheme();
-        var colortheme = {};
-        for (var i in theme) {
-            if (theme.hasOwnProperty(i)) {
-                colortheme[i.replace(/-/g, '_')] = theme[i].value;
-            }
-        }
 
         var done = ui.add({
             forwardInputMessages: config.fwdInMessages,
@@ -53,7 +42,6 @@ module.exports = function (RED) {
                 height: hei,
                 format: config.format,
                 templateScope: config.templateScope,
-                theme: colortheme,
             },
             beforeEmit: function (msg) {
                 var properties = Object.getOwnPropertyNames(msg).filter(
@@ -109,7 +97,6 @@ module.exports = function (RED) {
                 }
             },
         });
-        console.log('TemplateNode done: ', done);
         node.on('close', done);
     }
     RED.nodes.registerType('ur_template', TemplateNode);
