@@ -17,6 +17,8 @@ const schema = new Schema({
     createdDate: { type: Date, default: Date.now },
     expirationDate: { type: Date },
     resetToken: { type: String },
+    sessionExpiration: { type: Number },
+    sessionInactivity: { type: Number },
 });
 
 schema.set('toJSON', {
