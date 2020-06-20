@@ -3,8 +3,6 @@ Credit to Jason Watmore (https://github.com/cornflourblue) for Angular Registrat
 Source: https://github.com/cornflourblue/angular-8-registration-login-example
 */
 
-import { Role } from '.';
-
 export interface User {
     id: string;
     username: string;
@@ -17,4 +15,6 @@ export interface User {
     email: string;
     expirationDate?: Date;
     createdDate?: Date;
+    sessionExpiration?: Number;
+    sessionInactivity?: Number;
 }
