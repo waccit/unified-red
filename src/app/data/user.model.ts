@@ -15,6 +15,6 @@ export interface User {
     email: string;
     expirationDate?: Date;
     createdDate?: Date;
-    sessionExpiration?: Number;
-    sessionInactivity?: Number;
+    sessionExpiration?: number;
+    sessionInactivity?: number;
 }

@@ -9,7 +9,8 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { RightSidebarService } from '../../services/rightsidebar.service';
-import { AuthenticationService } from '../../services/';
+import { AuthenticationService, UserService } from '../../services/';
+import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 
 const document: any = window.document;
 
@@ -19,14 +20,23 @@ const document: any = window.document;
     styleUrls: ['./header.component.sass'],
 })
 export class HeaderComponent implements OnInit {
+    
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
         private dataService: RightSidebarService,
         public router: Router,
-        private authenticationService: AuthenticationService
-    ) {}
+        private authenticationService: AuthenticationService,
+        private userService: UserService,
+        private idle: Idle
+    ) {
+        this.userService.currentUser.subscribe(user => { 
+            if (user) {
+                this.setupInactivityMonitor(user.sessionInactivity);
+            }
+        });
+    }
 
     notifications: Object[] = [
         {
@@ -166,5 +176,29 @@ export class HeaderComponent implements OnInit {
     logout() {
         this.authenticationService.logout();
         this.router.navigate(['/authentication/login']);
+    }
+
+    setupInactivityMonitor(sessionInactivity: number) {
+        if (!sessionInactivity) {
+            return;
+        }
+        this.idle.setIdle(sessionInactivity * 60); // set idle time in seconds
+        this.idle.setTimeout(120); // warn for 2 mins before logging out
+        this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
+        this.idle.onTimeout.subscribe(() => {
+            this.logout()
+        });
+        // this.idle.onIdleEnd.subscribe(() => { 
+        //     console.log('No longer idle');
+        // });
+        this.idle.onIdleStart.subscribe(() => {
+            console.log("You've gone idle!");
+            // TODO: show warning model
+            // this.childModal.show();
+        });
+        // this.idle.onTimeoutWarning.subscribe((countdown) => {
+            // console.log('You will time out in ' + countdown + ' seconds!');
+        // });
+        this.idle.watch();
     }
 }
