@@ -43,7 +43,9 @@ export class UserFormDialogComponent {
                 role: [roleLevel, Validators.required],
                 email: [this.data.email, [Validators.required, Validators.email, Validators.minLength(5)]],
                 expirationDate: [this.data.expirationDate], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
-            });
+                sessionExpiration: [this.data.sessionExpiration || ''],
+                sessionInactivity: [this.data.sessionInactivity || ''],
+        });
         } else {
             this.title = 'New User';
             this.data = <User>{};
@@ -58,6 +60,8 @@ export class UserFormDialogComponent {
                     expirationDate: [null], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
                     password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
                     cpassword: ['', Validators.required],
+                    sessionExpiration: [''],
+                    sessionInactivity: [''],
                 },
                 {
                     validator: MustMatch('password', 'cpassword'),

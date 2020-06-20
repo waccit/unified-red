@@ -108,6 +108,24 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Session Expiration</mat-label>
+                        <input matInput type="number" formControlName="sessionExpiration">
+                        <span matSuffix>days</span>
+                        <mat-hint>Leave blank to never expire session</mat-hint>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Inactivity Logout</mat-label>
+                        <input matInput type="number" formControlName="sessionInactivity">
+                        <span matSuffix>mins</span>
+                        <mat-hint>Leave blank to disable inactivity logout</mat-hint>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
