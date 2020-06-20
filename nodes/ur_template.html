@@ -25,7 +25,12 @@
                 }
             },
             height: { value: 0 },
-            format: { value: '<div ng-bind-html="msg.payload"></div>' },
+            format: { value: `<div><\/div>
+<script>
+$("#{{id}}").on("update-value", function (evt, data) {
+    $(this).find("div").html(data.msg.payload);
+});
+<\/script>` },
             storeOutMessages: { value: true },
             fwdInMessages: { value: true },
             resendOnRefresh: { value: true },
