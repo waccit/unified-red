@@ -29,7 +29,13 @@ async function authenticate({ username, password }) {
     const user = await User.findOne({ username });
     checkValidUser(user);
     if (user && bcrypt.compareSync(password, user.hash)) {
-        const token = jwt.sign({ sub: user.id, role: user.role }, config.jwtsecret);
+        let payload = { sub: user.id, role: user.role };
+        // Add expiration date if user is configured for session expiry
+        if (user.sessionExpiration) {
+            let today = parseInt(Date.now() / 1000);
+            payload.exp = today + user.sessionExpiration * 86400; // expire in X days: # of days * seconds per day
+        }
+        const token = jwt.sign(payload, config.jwtsecret);
         return {
             ...user.toJSON(),
             token,
