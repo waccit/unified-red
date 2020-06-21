@@ -26,9 +26,13 @@
             },
             height: { value: 0 },
             format: { value: `<div><\/div>
+<button class="mat-raised-button mat-primary">Send<\/button>
 <script>
-$("#{{id}}").on("update-value", function (evt, data) {
-    $(this).find("div").html(data.msg.payload);
+$node.on("update-value", function(evt, data) {
+    $node.find("div").html(data.msg.payload);
+});
+$node.find("button").click(function() {
+    $node.trigger('send', 'some value');
 });
 <\/script>` },
             storeOutMessages: { value: true },
