@@ -37,8 +37,7 @@ export class UrTemplateComponent implements AfterViewInit {
 
         // Add send event to DOM element
         $(this.container.nativeElement).on("send", (evt, msg) => {
-            console.log("template container send", this.data.id, msg);
-            this.webSocketService.emit(this.data.id, msg);
+            this.webSocketService.emit('update-value', { id: this.data.id, msg: msg });
         });
     }
 }
