@@ -29,10 +29,16 @@ export class UrTemplateComponent implements AfterViewInit {
 
         // jQuery cannot handle ID's with periods. Must escape periods.
         let nodeId = this.data.id.replace(/\./g, '\\\\.');
-        // Substite any node ID references in the template code
-        let html = this.data.format.replace(/\{\{id\}\}/g, nodeId);
+        // Substite any $node references in the template code
+        let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         // Use createContextualFragment to ensure user scripts execute
         const executableCode = document.createRange().createContextualFragment(html);
         this.container.nativeElement.appendChild(executableCode);
+
+        // Add send event to DOM element
+        $(this.container.nativeElement).on("send", (evt, msg) => {
+            console.log("template container send", this.data.id, msg);
+            this.webSocketService.emit(this.data.id, msg);
+        });
     }
 }
