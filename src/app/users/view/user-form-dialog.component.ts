@@ -60,8 +60,8 @@ export class UserFormDialogComponent {
                     expirationDate: [null], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
                     password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
                     cpassword: ['', Validators.required],
-                    sessionExpiration: [''],
-                    sessionInactivity: [''],
+                    sessionExpiration: [30],
+                    sessionInactivity: [30],
                 },
                 {
                     validator: MustMatch('password', 'cpassword'),
