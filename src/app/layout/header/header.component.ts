@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { RightSidebarService } from '../../services/rightsidebar.service';
-import { AuthenticationService, UserService } from '../../services/';
+import { AuthenticationService, UserService, SnackbarService } from '../../services/';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 
 const document: any = window.document;
@@ -29,7 +29,8 @@ export class HeaderComponent implements OnInit {
         public router: Router,
         private authenticationService: AuthenticationService,
         private userService: UserService,
-        private idle: Idle
+        private idle: Idle,
+        private snackbar: SnackbarService
     ) {
         this.userService.currentUser.subscribe(user => { 
             if (user) {
@@ -192,9 +193,7 @@ export class HeaderComponent implements OnInit {
         //     console.log('No longer idle');
         // });
         this.idle.onIdleStart.subscribe(() => {
-            console.log("You've gone idle!");
-            // TODO: show warning model
-            // this.childModal.show();
+            this.snackbar.default("You've been idle for sometime...", "Stay logged in");
         });
         // this.idle.onTimeoutWarning.subscribe((countdown) => {
             // console.log('You will time out in ' + countdown + ' seconds!');
