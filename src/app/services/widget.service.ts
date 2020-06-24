@@ -13,7 +13,7 @@ export class WidgetService {
         return widgetsList.map((widget) => {
             switch (widget.type) {
                 case 'text':
-                    return new groupWidgets(UrTextComponent, 'UR-TEXT', widget);
+                    return new groupWidgets(UrTextComponent, null, widget);
                 case 'button':
                     return new groupWidgets(UrButtonComponent, 'UR-BUTTON', widget);
                 case 'text-input':
