@@ -18,16 +18,12 @@ export class BaseNode implements AfterViewInit {
         });
 
         // Add send event to jQuery element
-        this.jQcontainer.on("send", (evt, msg) => {
+        this.container.on("send", (evt, msg) => {
             this.send(msg);
         });
     }
 
     get container() {
-        return this._container ? this._container.nativeElement : null;
-    }
-
-    get jQcontainer() {
         return this._container ? $(this._container.nativeElement) : null;
     }
 
@@ -45,7 +41,7 @@ export class BaseNode implements AfterViewInit {
     }
 
     updateValue(msg:any) {
-        this.jQcontainer.trigger('update-value', [msg]);
+        this.container.trigger('update-value', [msg]);
     }
 
     send(msg:any) {

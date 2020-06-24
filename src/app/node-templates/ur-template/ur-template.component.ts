@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 
+declare var $: any;
 @Component({
     selector: 'app-ur-template',
     templateUrl: './ur-template.component.html',
@@ -10,7 +11,7 @@ export class UrTemplateComponent extends BaseNode {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         if (!this.data || !this.data.format) {
-            this.container.innerHTML = 'No template code found';
+            this.container.html('No template code found');
             return;
         }
         this.appendHtml();
@@ -21,8 +22,6 @@ export class UrTemplateComponent extends BaseNode {
         let nodeId = this.nodeId.replace(/\./g, '\\\\.');
         // Substite any $node references in the template code
         let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
-        // Use createContextualFragment to ensure user scripts execute
-        const executableCode = document.createRange().createContextualFragment(html);
-        this.container.appendChild(executableCode);
+        this.container.html($(html));
     }
 }
