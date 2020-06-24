@@ -1,0 +1,14 @@
+{
+    "ur_animation": {
+        "label": {
+            "category": "dashboard",
+            "group": "Group",
+            "size": "Size",
+            "name": "Name",
+            "template": "Template",
+            "expand": "Expand",
+            "viewport": "View",
+            "rules": "Rules"
+        }
+    }
+}
