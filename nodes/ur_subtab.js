@@ -2,14 +2,14 @@ module.exports = function (RED) {
     function SubtabNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
-            pathName: config.name.replace(' ', '_'),
+            pathName: config.name.replace(' ', '').toLowerCase(),
             name: config.name,
             disp: config.disp,
             width: config.width,
             order: config.order || 0,
             tab: config.tab,
             collapse: config.collapse || false,
-            icon: config.icon || '',
+            // icon: config.icon || 'ti-folder',
             disabled: config.disabled || false,
             hidden: config.hidden || false,
         };

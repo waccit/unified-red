@@ -78,8 +78,8 @@ function emit(event, data) {
 }
 
 function emitSocket(event, data) {
-    console.log('ui.js emitSocket called event: ', event);
-    console.log('ui.js emitSocket called data: ', data);
+    // console.log('ui.js emitSocket called event: ', event);
+    // console.log('ui.js emitSocket called data: ', data);
     if (data.hasOwnProperty('msg') && data.msg.hasOwnProperty('socketid') && data.msg.socketid !== undefined) {
         io.to(data.msg.socketid).emit(event, data);
     } else if (data.hasOwnProperty('socketid') && data.socketid !== undefined) {
@@ -149,7 +149,7 @@ function add(opt) {
     var remove = addControl(opt.tab, opt.subtab, opt.group, opt.control);
 
     opt.node.on('input', function (msg) {
-        console.log('opt.node.on input: ', msg);
+        // console.log('opt.node.on input: ', msg);
         if (typeof msg.enabled === 'boolean') {
             var state = replayMessages[opt.node.id];
             if (!state) {
@@ -403,9 +403,9 @@ function init(server, app, log, redSettings) {
     settings.verbose = redSettings.verbose || false;
 
     var fullPath = join(redSettings.httpNodeRoot, settings.path);
-    console.log('ui.js 333 fullPath: ', fullPath);
+    // console.log('ui.js 333 fullPath: ', fullPath);
     var socketIoPath = join(fullPath, 'socket.io');
-    console.log('ui.js 335 socketIoPath: ', socketIoPath);
+    // console.log('ui.js 335 socketIoPath: ', socketIoPath);
 
     socketio.connect(server, { path: socketIoPath });
     io = socketio.connection();
@@ -536,9 +536,9 @@ function updateUi(to) {
         to = io;
     }
     process.nextTick(function () {
-        menu.forEach(function (o) {
-            o.theme = baseConfiguration.theme;
-        });
+        // menu.forEach(function (o) {
+        //     o.theme = baseConfiguration.theme;
+        // });
         to.emit('ui-controls', {
             // site: baseConfiguration.site,
             // theme: baseConfiguration.theme,
@@ -566,6 +566,15 @@ function itemSorter(item1, item2) {
     return item1.order - item2.order;
 }
 
+function needsUpdate(current, incoming) {
+    return (
+        current.title !== incoming.config.name ||
+        current.icon !== incoming.config.icon ||
+        current.disabled !== incoming.config.disabled ||
+        current.hidden !== incoming.config.hidden
+    );
+}
+
 function addControl(menu_item, menu_page, page_group, control) {
     if (typeof control.type !== 'string') {
         return function () {};
@@ -588,23 +597,39 @@ function addControl(menu_item, menu_page, page_group, control) {
     } else {
         page_group = page_group || settings.defaultGroupHeader;
         control.order = parseFloat(control.order);
-        // console.log("menu_item, page_group, control", menu_item, page_group, control);
-        // console.log("ui.js 466 menu: ", JSON.stringify(menu, null, '\t'));
-        // console.log("menu[0].items: ", menu[0]);
+        let pathNeedsUpdate = false;
+
         var foundMenuItem = find(menu, function (mi) {
             return mi.id === menu_item.id;
         });
 
+        if (foundMenuItem && needsUpdate(foundMenuItem, menu_item)) {
+            var updatedMenuItem = {
+                id: menu_item.id,
+                order: parseFloat(menu_item.config.order),
+                disabled: menu_item.config.disabled,
+                hidden: menu_item.config.hidden,
+                items: foundMenuItem.items,
+                // Atrio sidebarItems properties:
+                path: '',
+                title: menu_item.config.name,
+                icon: menu_item.config.icon,
+                class: foundMenuItem.class,
+                groupTitle: foundMenuItem.groupTitle,
+                submenu: foundMenuItem.submenu,
+            };
+
+            menu.splice(menu.indexOf(foundMenuItem), 1, updatedMenuItem);
+            foundMenuItem = updatedMenuItem;
+            pathNeedsUpdate = true;
+        }
+
         if (!foundMenuItem) {
             foundMenuItem = {
                 id: menu_item.id,
-                header: menu_item.config.name,
                 order: parseFloat(menu_item.config.order),
-                icon: menu_item.config.icon,
-                //icon: menu_item.config.hidden ? "fa-ban" : menu_item.config.icon,
                 disabled: menu_item.config.disabled,
                 hidden: menu_item.config.hidden,
-                show: false,
                 items: [],
                 // Atrio sidebarItems properties:
                 path: '',
@@ -621,23 +646,45 @@ function addControl(menu_item, menu_page, page_group, control) {
         var foundMenuPage = find(foundMenuItem.items, function (mp) {
             return mp.id === menu_page.id;
         });
+
+        if (foundMenuPage && (pathNeedsUpdate || needsUpdate(foundMenuPage, menu_page))) {
+            var updatedMenuPage = {
+                id: menu_page.id,
+                order: parseFloat(menu_page.config.order),
+                disabled: menu_page.config.disabled,
+                hidden: menu_page.config.hidden,
+                items: foundMenuPage.items,
+                // Atrio sidebarItems properties:
+                path: '/d/' + menu_item.config.pathName + '/' + menu_page.config.pathName,
+                title: menu_page.config.name,
+                // icon: menu_page.config.icon,
+                class: foundMenuPage.class,
+                groupTitle: foundMenuPage.groupTitle,
+                submenu: foundMenuPage.submenu,
+            };
+
+            foundMenuItem.items.splice(foundMenuItem.items.indexOf(foundMenuPage), 1, updatedMenuPage);
+            foundMenuItem.submenu.splice(foundMenuItem.submenu.indexOf(foundMenuPage), 1, updatedMenuPage);
+            foundMenuPage = updatedMenuPage;
+            pathNeedsUpdate = false;
+        }
+
         if (!foundMenuPage) {
             foundMenuPage = {
                 id: menu_page.id,
-                header: menu_page.config.name,
                 order: parseFloat(menu_page.config.order),
-                icon: menu_page.config.icon,
                 disabled: menu_page.config.disabled,
                 hidden: menu_page.config.hidden,
                 items: [],
                 // Atrio sidebarItems properties:
-                path: '/dashboard/menu-page/' + menu_page.config.pathName,
+                path: '/d/' + menu_item.config.pathName + '/' + menu_page.config.pathName,
                 title: menu_page.config.name,
-                icon: menu_page.config.icon,
+                // icon: menu_page.config.icon,
                 class: '',
                 groupTitle: false,
                 submenu: [],
             };
+
             foundMenuItem.items.push(foundMenuPage);
             foundMenuItem.submenu.push(foundMenuPage);
         }
@@ -648,17 +695,15 @@ function addControl(menu_item, menu_page, page_group, control) {
         if (!foundGroup) {
             foundGroup = {
                 header: page_group.config.name,
-                // order: page_group.config.order,
+                order: page_group.config.order,
                 items: [],
-                // New properties needed
-                // componentTypes: [],
             };
             foundMenuPage.items.push(foundGroup);
         }
         foundGroup.items.push(control);
         foundGroup.items.sort(itemSorter);
 
-        // foundGroup.order = page_group.config.order;
+        foundGroup.order = page_group.config.order;
         foundMenuPage.items.sort(itemSorter);
         foundMenuItem.items.sort(itemSorter);
 
@@ -677,13 +722,13 @@ function addControl(menu_item, menu_page, page_group, control) {
                     if (index >= 0) {
                         foundMenuPage.items.splice(index, 1);
 
-                        // If the menu_page is now empty, remove it from the tab
+                        // If the menu_page is now empty, remove it from the menu-item
                         if (foundMenuPage.items.length === 0) {
                             index = foundMenuItem.indexOf(foundMenuPage);
                             if (index >= 0) {
                                 foundMenuItem.items.splice(index, 1);
 
-                                // If the tab is now empty, remove it as well
+                                // If the menu-item is now empty, remove it as well
                                 if (foundMenuItem.items.length === 0) {
                                     index = menu.indexOf(foundMenuItem);
                                     if (index >= 0) {
@@ -746,18 +791,18 @@ function addBaseConfig(config) {
 //     }
 // }
 
-function getSizes() {
-    if (
-        baseConfiguration &&
-        baseConfiguration.hasOwnProperty('site') &&
-        typeof baseConfiguration.site !== 'undefined' &&
-        baseConfiguration.site.hasOwnProperty('sizes')
-    ) {
-        return baseConfiguration.site.sizes;
-    } else {
-        return { sx: 48, sy: 48, gx: 6, gy: 6, cx: 6, cy: 6, px: 0, py: 0 };
-    }
-}
+// function getSizes() {
+//     if (
+//         baseConfiguration &&
+//         baseConfiguration.hasOwnProperty('site') &&
+//         typeof baseConfiguration.site !== 'undefined' &&
+//         baseConfiguration.site.hasOwnProperty('sizes')
+//     ) {
+//         return baseConfiguration.site.sizes;
+//     } else {
+//         return { sx: 48, sy: 48, gx: 6, gy: 6, cx: 6, cy: 6, px: 0, py: 0 };
+//     }
+// }
 
 // function isDark() {
 //     if (
