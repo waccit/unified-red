@@ -5,6 +5,7 @@ import { BaseNode } from '../ur-base-node';
     selector: 'app-ur-template',
     templateUrl: './ur-template.component.html',
     styleUrls: ['./ur-template.component.sass'],
+    host: { 'class': 'col-lg-4 col-md-4 col-sm-6 col-xs-12' },
 })
 export class UrTemplateComponent extends BaseNode {
     ngAfterViewInit(): void {
