@@ -1,21 +1,21 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_ur_subtab(x) {
-        return RED._("unified-red/ur_subtab:ur_subtab." + x);
+        return RED._('unified-red/ur_subtab:ur_subtab.' + x);
     }
 
     RED.nodes.registerType('ur_subtab', {
         category: 'config',
         defaults: {
-            name: { value: c_ur_subtab("label.default") },
-            icon: { value: 'folder' },
-            tab: { type: "ur_tab", required: true },
+            name: { value: c_ur_subtab('label.default') },
+            // icon: { value: 'folder' },
+            tab: { type: 'ur_tab', required: true },
             order: { value: 0 },
             disp: { value: true },
             width: { value: 6 },
             collapse: { value: false },
             disabled: { value: false },
-            hidden: { value: false }
+            hidden: { value: false },
         },
         sort: function (A, B) {
             if (A.tab !== B.tab) {
@@ -23,11 +23,9 @@
                 var tabB = RED.nodes.node(B.tab);
                 if (!tabA && tabB) {
                     return -1;
-                }
-                else if (tabA && !tabB) {
+                } else if (tabA && !tabB) {
                     return 1;
-                }
-                else {
+                } else {
                     return tabA.order - tabB.order;
                 }
             }
@@ -37,9 +35,11 @@
         label: function () {
             var tabNode = RED.nodes.node(this.tab);
             if (tabNode) {
-                return "[" + (tabNode.name || c_ur_subtab("label.tab")) + "] " + (this.name || c_ur_subtab("label.subtab"));
+                return (
+                    '[' + (tabNode.name || c_ur_subtab('label.tab')) + '] ' + (this.name || c_ur_subtab('label.subtab'))
+                );
             }
-            return "[" + c_ur_subtab("label.unassigned") + "] " + (this.name || c_ur_subtab("label.subtab"));
+            return '[' + c_ur_subtab('label.unassigned') + '] ' + (this.name || c_ur_subtab('label.subtab'));
         },
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
@@ -56,50 +56,48 @@
             //         $("#node-config-input-collapse").prop("checked",false);
             //     }
             // });
-            $("#node-config-input-disabled-btn").on("click", function (e) {
-                var i = $(this).find("i");
-                var active = i.hasClass("fa-toggle-on");
-                var newCls = "fa fa-toggle-" + (active ? "off" : "on");
-                i.attr("class", newCls);
-                $("#node-config-input-disabled").prop('checked', active);
+            $('#node-config-input-disabled-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-disabled').prop('checked', active);
 
-                var newTxt = c_ur_tab(active ? "label.disabled" : "label.enabled");
-                $("#node-config-input-disabled-label").text(newTxt);
+                var newTxt = c_ur_tab(active ? 'label.disabled' : 'label.enabled');
+                $('#node-config-input-disabled-label').text(newTxt);
 
-                var info = $("#node-config-input-disabled-info");
+                var info = $('#node-config-input-disabled-info');
                 var done = active ? info.show() : info.hide();
             });
             if (this.disabled) {
-                $("#node-config-input-disabled-btn").click();
+                $('#node-config-input-disabled-btn').click();
+            } else {
+                $('#node-config-input-disabled-label').text(c_ur_tab('label.enabled'));
             }
-            else {
-                $("#node-config-input-disabled-label").text(c_ur_tab("label.enabled"));
-            }
 
-            $("#node-config-input-hidden-btn").on("click", function (e) {
-                var i = $(this).find("i");
-                var active = i.hasClass("fa-toggle-on");
-                var newCls = "fa fa-toggle-" + (active ? "off" : "on");
-                i.attr("class", newCls);
-                $("#node-config-input-hidden").prop('checked', active);
+            $('#node-config-input-hidden-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-hidden').prop('checked', active);
 
-                var newTxt = c_ur_tab(active ? "label.hidden" : "label.visible");
-                $("#node-config-input-hidden-label").text(newTxt);
+                var newTxt = c_ur_tab(active ? 'label.hidden' : 'label.visible');
+                $('#node-config-input-hidden-label').text(newTxt);
 
-                var info = $("#node-config-input-hidden-info");
+                var info = $('#node-config-input-hidden-info');
                 var done = active ? info.show() : info.hide();
             });
             if (this.hidden) {
-                $("#node-config-input-hidden-btn").click();
-            }
-            else {
-                $("#node-config-input-hidden-label").text(c_ur_tab("label.visible"));
+                $('#node-config-input-hidden-btn').click();
+            } else {
+                $('#node-config-input-hidden-label').text(c_ur_tab('label.visible'));
             }
         },
         oneditsave: function () {
-            this.disabled = $("#node-config-input-disabled").prop("checked");
-            this.hidden = $("#node-config-input-hidden").prop("checked");
-        }
+            this.disabled = $('#node-config-input-disabled').prop('checked');
+            this.hidden = $('#node-config-input-hidden').prop('checked');
+        },
     });
 </script>
 
@@ -108,10 +106,10 @@
         <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_subtab.label.name"></span></label>
         <input type="text" id="node-config-input-name">
     </div>
-    <div class="form-row">
+    <!-- <div class="form-row">
         <label for="node-config-input-icon"><i class="fa fa-file-image-o"></i><span data-i18n="ur_subtab.label.icon"></span></label>
         <input type="text" id="node-config-input-icon">
-    </div>
+    </div> -->
     <div class="form-row">
         <label for="node-config-input-tab"><i class="fa fa-table"></i> <span data-i18n="ur_subtab.label.tab"></span></label>
         <input type="text" id="node-config-input-tab">
@@ -125,7 +123,7 @@
     <div class="form-row">
         <label for="node-config-input-hidden-btn"><i class="fa fa-eye-slash"></i><span data-i18n="ur_subtab.label.navmenu"></span></label>
         <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;"><i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span></button>
-        <input type="checkbox" id="node-config-input-hidden" style="display:none;">  
+        <input type="checkbox" id="node-config-input-hidden" style="display:none;">
         <span id="node-config-input-hidden-info" data-i18n="[html]ur_subtab.info.hidden" style="display:none;"></span>
     </div>
     <div class="form-tips" data-i18n="[html]ur_subtab.tip"></div>
@@ -143,4 +141,4 @@
     <i>(e.g. 'check', 'close')</i> or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a>
     <i>(e.g. 'fa-fire')</i>, or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
     You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.</p>
-  </script>
+</script>

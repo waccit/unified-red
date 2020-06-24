@@ -1,68 +1,68 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_ur_tab(x) {
-        return RED._("unified-red/ur_tab:ur_tab." + x);
+        return RED._('unified-red/ur_tab:ur_tab.' + x);
     }
 
     RED.nodes.registerType('ur_tab', {
         category: 'config',
         defaults: {
-            name: { value: c_ur_tab("label.home") },
+            name: { value: c_ur_tab('label.home') },
             icon: { value: 'dashboard' },
             order: { value: 0 },
             disabled: { value: false },
-            hidden: { value: false }
+            hidden: { value: false },
         },
         paletteLabel: 'dashboard tab',
-        label: function () { return this.name || c_ur_tab("label.tab"); },
+        label: function () {
+            return this.name || c_ur_tab('label.tab');
+        },
         sort: function (A, B) {
             return A.order - B.order;
         },
         oneditprepare: function () {
-            $("#node-config-input-disabled-btn").on("click", function (e) {
-                var i = $(this).find("i");
-                var active = i.hasClass("fa-toggle-on");
-                var newCls = "fa fa-toggle-" + (active ? "off" : "on");
-                i.attr("class", newCls);
-                $("#node-config-input-disabled").prop('checked', active);
+            $('#node-config-input-disabled-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-disabled').prop('checked', active);
 
-                var newTxt = c_ur_tab(active ? "label.disabled" : "label.enabled");
-                $("#node-config-input-disabled-label").text(newTxt);
+                var newTxt = c_ur_tab(active ? 'label.disabled' : 'label.enabled');
+                $('#node-config-input-disabled-label').text(newTxt);
 
-                var info = $("#node-config-input-disabled-info");
+                var info = $('#node-config-input-disabled-info');
                 var done = active ? info.show() : info.hide();
             });
             if (this.disabled) {
-                $("#node-config-input-disabled-btn").click();
+                $('#node-config-input-disabled-btn').click();
+            } else {
+                $('#node-config-input-disabled-label').text(c_ur_tab('label.enabled'));
             }
-            else {
-                $("#node-config-input-disabled-label").text(c_ur_tab("label.enabled"));
-            }
 
-            $("#node-config-input-hidden-btn").on("click", function (e) {
-                var i = $(this).find("i");
-                var active = i.hasClass("fa-toggle-on");
-                var newCls = "fa fa-toggle-" + (active ? "off" : "on");
-                i.attr("class", newCls);
-                $("#node-config-input-hidden").prop('checked', active);
+            $('#node-config-input-hidden-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-hidden').prop('checked', active);
 
-                var newTxt = c_ur_tab(active ? "label.hidden" : "label.visible");
-                $("#node-config-input-hidden-label").text(newTxt);
+                var newTxt = c_ur_tab(active ? 'label.hidden' : 'label.visible');
+                $('#node-config-input-hidden-label').text(newTxt);
 
-                var info = $("#node-config-input-hidden-info");
+                var info = $('#node-config-input-hidden-info');
                 var done = active ? info.show() : info.hide();
             });
             if (this.hidden) {
-                $("#node-config-input-hidden-btn").click();
-            }
-            else {
-                $("#node-config-input-hidden-label").text(c_ur_tab("label.visible"));
+                $('#node-config-input-hidden-btn').click();
+            } else {
+                $('#node-config-input-hidden-label').text(c_ur_tab('label.visible'));
             }
         },
         oneditsave: function () {
-            this.disabled = $("#node-config-input-disabled").prop("checked");
-            this.hidden = $("#node-config-input-hidden").prop("checked");
-        }
+            this.disabled = $('#node-config-input-disabled').prop('checked');
+            this.hidden = $('#node-config-input-hidden').prop('checked');
+        },
     });
 </script>
 

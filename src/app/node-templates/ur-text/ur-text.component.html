@@ -1,18 +1,18 @@
-<div>
-    <div class="info-box7 l-bg-green order-info-box7">
-        <div class="info-box7-block align-center">
-            <div class="preloader pl-size-m" *ngIf="!label">
-                <div class="spinner-layer">
-                    <div class="circle-clipper left">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="circle-clipper right">
-                        <div class="circle"></div>
-                    </div>
+<div class="card">
+    <div class="body" [ngClass]="'bg-' + getBgColor()">
+        <div class="preloader pl-size-m" *ngIf="!text">
+            <div class="spinner-layer">
+                <div class="circle-clipper left">
+                    <div class="circle"></div>
+                </div>
+                <div class="circle-clipper right">
+                    <div class="circle"></div>
                 </div>
             </div>
-            <h3>{{ label }}</h3>
-            <p>{{ text }}</p>
+        </div>
+        <div class="content">
+            <h3>{{ text }}</h3>
+            <p>{{ label }}</p>
         </div>
     </div>
 </div>
