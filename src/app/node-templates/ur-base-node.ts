@@ -40,8 +40,8 @@ export class BaseNode implements AfterViewInit {
         this.label = this.data.label;
     }
 
-    updateValue(msg:any) {
-        this.container.trigger('update-value', [msg]);
+    updateValue(data:any) {
+        this.container.trigger('update-value', [data]);
     }
 
     send(msg:any) {
