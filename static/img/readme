@@ -1,0 +1,3 @@
+Please put your image files in this folder, then set the following parameter in your Node-RED settings.js file to include static files:
+
+httpStatic: "./node_modules/unified-red/static/",
