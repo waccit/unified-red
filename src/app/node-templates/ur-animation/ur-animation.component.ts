@@ -28,7 +28,7 @@ export class UrAnimationComponent extends UrTemplateComponent {
     private processImages() {
         /*
         Example DOM:
-        <img src="/img/VAV/hwreheat/background.jpg">
+        <img static src="/img/VAV/hwreheat/background.jpg">
         <img animated name="damper" src="/img/VAV/hwreheat/damper1.jpg" style="position: absolute;">
         <img animated name="coil" src="/img/VAV/hwreheat/coil10.jpg" style="position: absolute;"
         */
@@ -36,21 +36,37 @@ export class UrAnimationComponent extends UrTemplateComponent {
             // setTimeout used to stall so that container width can be properly calculated.
             // https://stackoverflow.com/questions/6132141/jquery-why-does-width-sometimes-return-0-after-inserting-elements-with-html
             setTimeout(() => {
-                let containerHeight = this.container.height();
-                let containerWidth = this.container.width();
-                this.container.find("[animated]").each(function() {
-                    let anime = $(this);
-                    let position = anime.position();
-                    let top = 100 * position.top / containerHeight;
-                    let left = 100 * position.left / containerWidth;
-                    anime.css({ 'position':'absolute', 'top': top+'%', 'left': left+'%' });
-                    if (anime.is("img")) {
-                        let width = anime.width();
-                        let widthPerc = 100 * width / containerWidth;
-                        anime.css({ 'width': widthPerc+'%', 'max-width': width+'px' });
-                    }
-                });
+                let staticElement = this.container.find("[static]");
+                if (staticElement.length) {
+                    let that = this;
+                    // load static image in the background to get the native image width and height
+                    let nativeImg = new Image();
+                    nativeImg.onload = function() {
+                        let img = this as HTMLImageElement;
+                        that.convertToPercent(img.height, img.width);
+                        img.remove();
+                    };
+                    nativeImg.src = staticElement.attr("src");
+                }
+                else {
+                    this.convertToPercent(this.container.height(), this.container.width());
+                }
             }, 100);    
+        });
+    }
+
+    convertToPercent(containerHeight, containerWidth) {
+        this.container.find("[animated]").each(function() {
+            let anime = $(this);
+            let position = anime.position();
+            let top = 100 * position.top / containerHeight;
+            let left = 100 * position.left / containerWidth;
+            anime.css({ 'position':'absolute', 'top': top+'%', 'left': left+'%' });
+            if (anime.is("img")) {
+                let width = anime.width();
+                let widthPerc = 100 * width / containerWidth;
+                anime.css({ 'width': widthPerc+'%', 'max-width': width+'px' });
+            }
         });
     }
 
@@ -60,6 +76,7 @@ export class UrAnimationComponent extends UrTemplateComponent {
             this.processRule(data.msg);
         }
     }
+
     private processRule(msg:any) {
         for (let i = 0; i < this.data.rules.length; i++) {
             let rule:AnimationRule = this.data.rules[i];
