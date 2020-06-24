@@ -12,7 +12,8 @@ import { ActivatedRoute } from '@angular/router';
     styleUrls: ['./menu-page.component.sass'],
 })
 export class MenuPageComponent implements OnInit, OnDestroy {
-    menuPageTitle: string;
+    menuItem: string;
+    menuPage: string;
     pageGroupsList: pageGroups[];
     @ViewChild(MenuPageDirective, { static: true }) menuPageHost: MenuPageDirective;
 
@@ -28,18 +29,20 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         this.viewContainerRef = this.menuPageHost.viewContainerRef;
 
         this.route.params.subscribe((params) => {
-            this.menuPageTitle = params['pageTitle'];
+            this.menuItem = params['menuItem'];
+            this.menuPage = params['menuPage'];
 
             this.webSocketService.emit('ui-refresh', null);
 
             this.webSocketService.listen('ui-controls').subscribe((data: any) => {
                 this.setPageGroupsList(data.menu);
-                console.log('MenuPageComponent pageGroupsList: ', this.pageGroupsList);
+                // console.log('MenuPageComponent data.menu: ', data.menu);
+                // console.log('MenuPageComponent pageGroupsList: ', this.pageGroupsList);
                 this.loadGroups();
             });
-        });
 
-        console.log('menu-page.component pageTitle: ', this.menuPageTitle);
+            // console.log('menu-page.component :menuItem/:menuPage: ', this.menuItem + '/' + this.menuPage);
+        });
     }
 
     ngOnDestroy(): void {}
@@ -47,36 +50,46 @@ export class MenuPageComponent implements OnInit, OnDestroy {
     setPageGroupsList(menu: any[]) {
         this.pageGroupsList = [];
 
-        let foundMenuPage = this.getObject(menu, this.menuPageTitle);
+        let foundMenuItem = this.findMenuEntityByKeyValue(menu, 'title', this.menuItem);
+        let foundMenuPage: any;
 
-        foundMenuPage.items.forEach((g) => {
-            this.pageGroupsList.push({
-                header: g.header,
-                widgets: this.widgetService.getWidgets(g.items),
+        if (foundMenuItem) {
+            foundMenuPage = this.findMenuEntityByKeyValue(foundMenuItem.items, 'title', this.menuPage);
+        }
+
+        if (foundMenuPage) {
+            foundMenuPage.items.forEach((g) => {
+                this.pageGroupsList.push({
+                    header: g.header,
+                    widgets: this.widgetService.getWidgets(g.items),
+                });
             });
-        });
+        }
+
+        // console.log('menu-page.comp foundMenuItem: ', foundMenuItem);
+        // console.log('menu-page.comp foundMenuPage: ', foundMenuPage);
     }
 
     // credit: https://stackoverflow.com/questions/15523514/find-by-key-deep-in-a-nested-array
-    getObject(theObject: any, value: string) {
+    findMenuEntityByKeyValue(container: any, key: string, value: string) {
         var result = null;
-        if (theObject instanceof Array) {
-            for (var i = 0; i < theObject.length; i++) {
-                result = this.getObject(theObject[i], value);
+        if (container instanceof Array) {
+            for (var i = 0; i < container.length; i++) {
+                result = this.findMenuEntityByKeyValue(container[i], key, value);
                 if (result) {
                     break;
                 }
             }
         } else {
-            for (var prop in theObject) {
-                // console.log(prop + ': ' + theObject[prop]);
-                if (prop == 'header') {
-                    if (theObject[prop].replace(' ', '_') == value) {
-                        return theObject;
+            for (var prop in container) {
+                // console.log(prop + ': ' + container[prop]);
+                if (prop == key) {
+                    if (container[prop].replace(' ', '').toLowerCase() == value) {
+                        return container;
                     }
                 }
-                if (theObject[prop] instanceof Object || theObject[prop] instanceof Array) {
-                    result = this.getObject(theObject[prop], value);
+                if (container[prop] instanceof Object || container[prop] instanceof Array) {
+                    result = this.findMenuEntityByKeyValue(container[prop], key, value);
                     if (result) {
                         break;
                     }

@@ -5,7 +5,7 @@ import { MenuPageComponent } from './menu-page/menu-page.component';
 
 const routes: Routes = [
     {
-        path: 'dashboard',
+        path: 'd',
         children: [
             {
                 path: '',
@@ -17,7 +17,7 @@ const routes: Routes = [
                 component: MainComponent,
             },
             {
-                path: 'menu-page/:pageTitle',
+                path: ':menuItem/:menuPage',
                 component: MenuPageComponent,
             },
         ],
