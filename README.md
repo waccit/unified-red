@@ -11,6 +11,20 @@ npm install --save ~/git/unified-red
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
+# Node-RED Configuration
+
+## Security
+
+To apply Unified user authentication to the Node-RED editor, please set the following parameter in your Node-RED settings.js file:
+
+`adminAuth: require("./node_modules/unified-red/admin-auth"),`
+
+## Static Files
+
+To include static files (CSS, JS, image, etc), please set the following parameter in your Node-RED settings.js file:
+
+`httpStatic: "./node_modules/unified-red/static/",`
+
 # Old Angular CLI notes:
 
 ## Development server
