@@ -88,6 +88,8 @@ export class UrAnimationComponent extends UrTemplateComponent {
                         case 'vis': result = this.vis(element, rule.exp, msg.payload); break;
                         case 'src': result = this.src(element, rule.exp, msg.payload); break;
                         case 'sub': result = this.sub(element, rule.exp, msg.payload); break;
+                        case 'cls': result = this.cls(element, rule.exp, msg.payload); break;
+                        case 'css': result = this.css(element, rule.exp, msg.payload); break;
                     }
                 }
             }
@@ -99,16 +101,16 @@ export class UrAnimationComponent extends UrTemplateComponent {
             if (typeof value !== 'undefined') {
                 exp = exp.replace(/\{x\}/g, value);
             }
-            return eval(exp+ '; ' + this.expressionGlobals);    
+            return eval('(' + exp + '); ' + this.expressionGlobals);    
         } catch (error) {
             console.log("Animation evaluate error:", error);
         }
     }
 
+    // Example vis expressions:
+    // {x} > 0
+    // {x} === "On"
     private vis(element, exp, payload?) {
-        // Example expressions:
-        // {x} > 0
-        // {x} === "On"
         let result = this.evaluate(exp, payload);
         if (result) {
             element.show();
@@ -119,19 +121,25 @@ export class UrAnimationComponent extends UrTemplateComponent {
         return result;
     }
 
+    // Example src expressions:
+    // {x} > 0 ? "valve_open.png" : "valve_closed.png"
+    // if ({x} === "On") { return "fan_on.gif"; } else { return "fan_off.gif" }
     private src(element, exp, payload) {
         if (!element.is("img")) {
             console.log('Animation failed to process source rule because element is not an image (img)', element);
             return;
         }
-        // Example expressions:
-        // {x} > 0 ? "valve_open.png" : "valve_closed.png"
-        // if ({x} === "On") { return "fan_on.gif"; } else { return "fan_off.gif" }
         let result = this.evaluate(exp, payload);
         element.attr("src", result);
         return result;
     }
 
+    // Example sub expressions:
+    // {x}
+    // parseInt({x} / 10)
+    // parseInt(1 + {x} / (100 / 9))
+    // Math.round({x} / 10)
+    // parseInt( interpolate({x}, 0, 100, 1, 10) )
     private sub(element, exp, payload) {
         if (!element.is("img")) {
             console.log('Animation failed to process source substitution rule because element is not an image (img)', element);
@@ -154,16 +162,37 @@ export class UrAnimationComponent extends UrTemplateComponent {
             '    Any file path that ends in one or more digits before the file extension:\n'+
             '        any.thing/you_want0000.png\n', srcParts);
         }
-        // Example expressions:
-        // {x}
-        // parseInt({x} / 10)
-        // parseInt(1 + {x} / (100 / 9))
-        // Math.round({x} / 10)
-        // parseInt( interpolate({x}, 0, 100, 1, 10) )
         let result = this.evaluate(exp, payload);
         let newSrc = srcParts[1] + result + srcParts[3];
         element.attr("src", newSrc);
         return newSrc;
+    }
+
+    // Example cls expressions:
+    // { "alarm": {x} === "Alarm", "success": {x} !== "Alarm" }
+    // { "success": {x} === "On" }
+    private cls(element, exp, payload) {
+        let result = this.evaluate(exp, payload);
+        Object.keys(result).forEach(classname => {
+            if (!result[classname]) {
+                element.removeClass(classname);
+            }
+            else {
+                element.addClass(classname);
+            }
+        });        
+        return result;
+    }
+
+    // Example css expressions:
+    // {x} === "Alarm" ? { background:"red", color:"white" } : { background:"green", color:"black" }
+    // { background: ({x} === "On" ? "green" : "") }
+    // { opacity: {x} / 100 }
+    // { opacity: ({x} > 0 ? 1.0 : 0.5) }
+    private css(element, exp, payload) {
+        let result = this.evaluate(exp, payload);
+        element.css(result);
+        return result;
     }
 }
 
