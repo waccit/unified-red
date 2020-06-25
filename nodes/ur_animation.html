@@ -4,10 +4,12 @@
         return RED._("unified-red/ur_animation:ur_animation." + x);
     }
 
-    var properties = [
+    let properties = [
         { v: "vis", t: "visible" },
         { v: "src", t: "src" },
         { v: "sub", t: "src sub" },
+        { v: "cls", t: "css class" },
+        { v: "css", t: "css style" },
     ];
 
     RED.nodes.registerType('ur_animation', {
@@ -222,28 +224,11 @@
             }).on("mouseup", function() {
                 let $drag = $(this).removeClass('draggable');
                 let pos = $drag.position();
-                // let parent = $drag.parent();
-                // let parentWidth = parent.width();
-                // let top = (100 * pos.top / parent.height()).toFixed(4);
-                // let left = (100 * pos.left / parentWidth).toFixed(4);
-                // $drag.css({ 'position':'absolute', 'top': top+'%', 'left': left+'%' });
                 $drag.css({ 'position':'absolute', 'top': pos.top+'px', 'left': pos.left+'px', 'z-index': '' });
                 if ($drag.attr('class') === '') {
                     $drag.removeAttr('class');
                 }
-                // if ($drag.is("img")) {
-                //     let width = (100 * $drag.width() / parentWidth).toFixed(4);
-                //     $drag.css('width', width+'%');
-                //     // load image to find native width in pixels
-                //     $("<img/>").attr("src", $drag.attr("src")).load(function() {
-                //         $drag.css('max-width', this.width+'px');
-                //         $(this).remove();
-                //         callback();
-                //     });
-                // }
-                // else {
-                    callback();
-                // }
+                callback();
             });
         }
     })(window.jQuery);
