@@ -13,7 +13,14 @@ function authorize(role) {
     const secret = config.jwtsecret;
     return [
         // authenticate JWT token
-        expressJwt({ secret, isRevoked }),
+        expressJwt({ secret, isRevoked }).unless({
+        path: [
+            // public routes that don't require authentication
+            '/api/users/authenticate',
+            '/api/users/current',
+            '/api/users/register'
+        ]
+    }),
 
         // authorize based on user role
         (req, res, next) => {
