@@ -41,7 +41,9 @@ export class BaseNode implements AfterViewInit {
     }
 
     updateValue(data:any) {
-        this.container.trigger('update-value', [data]);
+        if (this.container && this.container.length) {
+            this.container.trigger('update-value', [data]);
+        }
     }
 
     send(msg:any) {
