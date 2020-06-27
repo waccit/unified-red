@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { RightSidebarService } from '../../services/rightsidebar.service';
-import { AuthenticationService, UserService, SnackbarService } from '../../services/';
+import { AuthenticationService, CurrentUserService, SnackbarService } from '../../services/';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 
 const document: any = window.document;
@@ -28,11 +28,11 @@ export class HeaderComponent implements OnInit {
         private dataService: RightSidebarService,
         public router: Router,
         private authenticationService: AuthenticationService,
-        private userService: UserService,
+        private currentUserService: CurrentUserService,
         private idle: Idle,
         private snackbar: SnackbarService
     ) {
-        this.userService.currentUser.subscribe(user => { 
+        this.currentUserService.currentUser.subscribe(user => { 
             if (user) {
                 this.setupInactivityMonitor(user.sessionInactivity);
             }
