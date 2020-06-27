@@ -19,10 +19,20 @@ export class UrTemplateComponent extends BaseNode {
     }
 
     private appendHtml() {
-        // jQuery cannot handle ID's with periods. Must escape periods.
-        let nodeId = this.nodeId.replace(/\./g, '\\\\.');
+        // escape any funky symbols in the node ID
+        let nodeId = $.escapeSelector(this.nodeId);
         // Substite any $node references in the template code
         let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         this.container.html($(html));
+    }
+
+    updateValue(data:any) {
+        super.updateValue(data);
+        if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
+            // process any elements with topic attributes
+            let elements = this.container.find(`[topic='${data.msg.topic}']`);
+            elements.filter("input, select").val(data.msg.payload);
+            elements.not("img, input, select").html(data.msg.payload);
+        }
     }
 }
