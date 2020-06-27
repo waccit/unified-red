@@ -25,11 +25,14 @@
                 }
             },
             height: { value: 0 },
-            format: { value: `<div><\/div>
+            format: { value: `<input feedback="some\/fb\/point" request="some\/rq\/point">
+<div feedback="some\/fb\/point"><\/div>
+<div class="js-point"><\/div>
+
 <button class="mat-raised-button mat-primary">Send<\/button>
 <script>
 $node.on("update-value", function(evt, data) {
-    $node.find("div").html(data.msg.payload);
+    $node.find(".js-point").html(data.msg.payload);
 });
 $node.find("button").click(function() {
     $node.trigger('send', 'some value');
@@ -217,40 +220,26 @@ $node.find("button").click(function() {
     <p>This node can be used to create a dynamic user interface element that changes its appearence
     based on the input message and can send back messages to Node-RED.</p>
     <p><b>For example:</b><br>
-    <pre style="font-size:smaller;">&lt;div layout=&quot;row&quot; layout-align=&quot;space-between&quot;&gt;
-  &lt;p&gt;The number is&lt;/p&gt;
-  &lt;font color=&quot;{{((msg.payload || 0) % 2 === 0) ? 'green' : 'red'}}&quot;&gt;
-    {{(msg.payload || 0) % 2 === 0 ? 'even' : 'odd'}}
-  &lt;/font&gt;
-&lt;/div&gt;</pre>
-    Will display if the number received as <code>msg.payload</code> is even or odd. It will also
-    change the color of the text to green if the number is even or red if odd.<br/>
-    The next example shows how to set a unique id for your template, pick up the default theme colour,
-    and watch for any incoming message.</p>
-    <pre style="font-size:smaller;">
-&lt;div id="{{'my_'+$id}}" style="{{'color:'+theme.base_color}}"&gt;Some text&lt;/div&gt;
+    <pre style="font-size:smaller;">&lt;div feedback=&quot;some/fb/point&quot;&gt;&lt;/div&gt;</pre>
+    Will display the <code>msg.payload</code> for the topic "some/fb/point".<br/>
+    The next example shows how watch for any incoming message and update HTML elements using jQuery.</p>
+    <pre style="font-size:smaller;">&lt;div class=&quot;js-point&quot;&gt;&lt;/div&gt;
 &lt;script&gt;
-(function(scope) {
-  scope.$watch('msg', function(msg) {
-    if (msg) {
-      // Do something when msg arrives
-      $("#my_"+scope.$id).html(msg.payload);
-    }
-  });
-})(scope);
+$node.on(&quot;update-value&quot;, function(evt, data) {
+    $node.find(&quot;.js-point&quot;).html(data.msg.payload);
+});
 &lt;/script&gt;</pre>
     <p>Templates made in this way can be copied and remain independent of each other.</p>
     <p><b>Sending a message:</b><br>
-    <pre style="font-size:smaller;">
+        <pre style="font-size:smaller;">&lt;input feedback=&quot;some/fb/point&quot; request=&quot;some/rq/point&quot;&gt;
+&lt;button class=&quot;mat-raised-button mat-primary&quot;&gt;Send&lt;/button&gt;
 &lt;script&gt;
-var value = "hello world";
-// or overwrite value in your callback function ...
-this.scope.action = function() { return value; }
-&lt;/script&gt;
-&lt;md-button ng-click=&quot;send({payload:action()})&quot;&gt;
-    Click me to send a hello world
-&lt;/md-button&gt;</pre>
-    Will display a button that when clicked will send a message with the payload <code>'Hello world'</code>.</p>
+$node.find(&quot;button&quot;).click(function() {
+    $node.trigger(&quot;send&quot;, &quot;Hello world&quot;);
+});
+&lt;/script&gt;</pre>
+    Will display a text input and a button. Changing the value in the text input will send the new value to Node-RED. 
+    Clicking the button will send a message <code>'Hello world'</code>.</p>
     <p><b>Using <code>msg.template</code>:</b><br>
     You can also define the template content via <code>msg.template</code>, so you can use external files for example.<br>
     Template will be reloaded on input if it has changed.<br>
