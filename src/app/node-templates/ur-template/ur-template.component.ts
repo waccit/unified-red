@@ -19,8 +19,8 @@ export class UrTemplateComponent extends BaseNode {
     }
 
     private appendHtml() {
-        // escape any funky symbols in the node ID
-        let nodeId = $.escapeSelector(this.nodeId);
+        // Escape any funky symbols in the node ID
+        let nodeId = this.nodeId.replace(/(\W)/g, '\\\\$1');
         // Substite any $node references in the template code
         let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         this.container.html($(html));
