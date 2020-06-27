@@ -1,8 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input, } from '@angular/core';
 import { User } from '../../data';
-import { Observable } from 'rxjs';
-import { UserService } from '../../services/';
+import { CurrentUserService } from '../../services/';
 // import { ROUTES } from './sidebar-items';
 
 declare const Waves: any;
@@ -26,9 +25,9 @@ export class SidebarComponent implements OnInit {
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
-        private userService: UserService
+        private currentUserService: CurrentUserService
     ) {
-        this.userService.currentUser.subscribe(user => { this.user = user });
+        this.currentUserService.currentUser.subscribe(user => { this.user = user });
     }
 
     @HostListener('window:resize', ['$event'])

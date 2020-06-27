@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { AuthenticationService, UserService, SnackbarService } from '../../services';
+import { AuthenticationService, SnackbarService, CurrentUserService, UserService } from '../../services';
 import { MustMatch, PasswordStrengthValidator } from '../../authentication/register/password.validators';
 import { User } from '../../data/';
 
@@ -22,6 +22,7 @@ export class ProfileComponent implements OnInit {
     constructor(
         private formBuilder: FormBuilder,
         private userService: UserService,
+        private currentUserService: CurrentUserService,
         private authenticationService: AuthenticationService,
         private snackbar: SnackbarService
     ) {}
@@ -46,7 +47,7 @@ export class ProfileComponent implements OnInit {
                 validator: MustMatch('newPassword', 'cNewPassword'),
             }
         );
-        this.userService.currentUser.subscribe((user: User) => {
+        this.currentUserService.currentUser.subscribe((user: User) => {
             if (user) {
                 this.userId = user.id;
                 this.username = user.username;
