@@ -1,7 +1,7 @@
 {
     "ur_template": {
         "label": {
-            "category": "dashboard",
+            "category": "unified-red",
             "type": "Template type",
             "local": "Widget in group",
             "global": "Added to site <head> section",
