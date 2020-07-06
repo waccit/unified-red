@@ -1,4 +1,12 @@
-import { Component, OnInit, OnDestroy, ComponentFactoryResolver, ViewChild, ViewContainerRef } from '@angular/core';
+import {
+    Component,
+    OnInit,
+    OnDestroy,
+    ComponentFactoryResolver,
+    ViewChild,
+    ViewContainerRef,
+    Renderer2,
+} from '@angular/core';
 import { MenuPageDirective } from '../../directives/menu-page.directive';
 import { GroupComponent } from '../group/group.component';
 import { pageGroups } from './page-groups';
@@ -22,7 +30,8 @@ export class MenuPageComponent implements OnInit, OnDestroy {
         private webSocketService: WebSocketService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private widgetService: WidgetService,
-        private viewContainerRef: ViewContainerRef
+        private viewContainerRef: ViewContainerRef,
+        private renderer2: Renderer2
     ) {}
 
     ngOnInit(): void {
@@ -61,6 +70,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
             foundMenuPage.items.forEach((g) => {
                 this.pageGroupsList.push({
                     header: g.header,
+                    cols: { lg: g.widthLg, md: g.widthMd, sm: g.widthSm },
                     widgets: this.widgetService.getWidgets(g.items),
                 });
             });
@@ -107,6 +117,12 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
             const componentRef = this.viewContainerRef.createComponent(componentFactory);
             componentRef.instance.header = group.header;
+            for (var size in group.cols) {
+                let colClass = 'col-' + size + '-' + group.cols[size];
+                this.renderer2.addClass(componentRef.location.nativeElement, colClass);
+            }
+
+            // componentRef.instance.cols = group.cols;
             componentRef.instance.widgets = group.widgets;
         });
     }

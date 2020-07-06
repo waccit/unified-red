@@ -1,15 +1,15 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_(x) {
-        return RED._("unified-red/ur_animation:ur_animation." + x);
+        return RED._('unified-red/ur_animation:ur_animation.' + x);
     }
 
     let properties = [
-        { v: "vis", t: "visible" },
-        { v: "src", t: "src" },
-        { v: "sub", t: "src sub" },
-        { v: "cls", t: "css class" },
-        { v: "css", t: "css style" },
+        { v: 'vis', t: 'visible' },
+        { v: 'src', t: 'src' },
+        { v: 'sub', t: 'src sub' },
+        { v: 'cls', t: 'css class' },
+        { v: 'css', t: 'css style' },
     ];
 
     RED.nodes.registerType('ur_animation', {
@@ -19,60 +19,54 @@
             group: { type: 'ur_group', required: true },
             name: { value: '' },
             order: { value: 0 },
-            width: {
-                value: 0, validate: function (v) {
-                    var valid = true;
-                    var width = v || 0;
-                    var currentGroup = $('#node-input-group').val() || this.group;
-                    var groupNode = RED.nodes.node(currentGroup);
-                    valid = !groupNode || +width <= +groupNode.width;
-                    $("#node-input-size").toggleClass("input-error", !valid);
-                    return valid;
-                }
-            },
+            width: { value: 12 },
             height: { value: 0 },
             format: {
                 value: `<img static src="/img/VAV/hwreheat/background.jpg">
 <img animated name="damper" src="/img/VAV/hwreheat/damper1.jpg" style="position: absolute;">
-<img animated name="coil" src="/img/VAV/hwreheat/coil10.jpg" style="position: absolute;">` },
-            rules: { value: [{ img: "", topic: "", prop: "vis", exp: "" }] },
+<img animated name="coil" src="/img/VAV/hwreheat/coil10.jpg" style="position: absolute;">`,
+            },
+            rules: { value: [{ img: '', topic: '', prop: 'vis', exp: '' }] },
         },
         inputs: 1,
         outputs: 0,
-        icon: "font-awesome/fa-image",
+        icon: 'font-awesome/fa-image',
         paletteLabel: 'animation',
-        label: function () { return this.name || 'animation'; },
-        labelStyle: function () { return this.name ? "node_label_italic" : ""; },
+        label: function () {
+            return this.name || 'animation';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
         oneditprepare: function () {
-            if (RED.editor.hasOwnProperty("editText") && typeof RED.editor.editText === "function") {
-                $("#node-template-expand-editor").show();
-            }
-            else {
-                $("#node-template-expand-editor").hide();
+            if (RED.editor.hasOwnProperty('editText') && typeof RED.editor.editText === 'function') {
+                $('#node-template-expand-editor').show();
+            } else {
+                $('#node-template-expand-editor').hide();
             }
             var that = this;
-            $("#node-input-size").elementSizer({
-                width: "#node-input-width",
-                height: "#node-input-height",
-                group: "#node-input-group"
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
             });
 
             var editorFocus = false;
             this.editor = RED.editor.createEditor({
                 id: 'node-input-format-editor',
                 mode: 'ace/mode/html',
-                value: $("#node-input-format").val()
+                value: $('#node-input-format').val(),
             });
 
-            this.editor.on('focus', () => editorFocus = true);
-            this.editor.on('blur', () => editorFocus = false);
+            this.editor.on('focus', () => (editorFocus = true));
+            this.editor.on('blur', () => (editorFocus = false));
 
             var updateViewport = (code) => {
                 if (editorFocus) {
-                    $("#node-input-viewport").html(code).click(() => editorFocus = false);
+                    $('#node-input-viewport')
+                        .html(code)
+                        .click(() => (editorFocus = false));
                     $('#node-input-viewport [animated]').drags(() => {
                         if (!editorFocus) {
-                            var code = $("#node-input-viewport").html();
+                            var code = $('#node-input-viewport').html();
                             that.editor.setValue(code, -1);
                         }
                     });
@@ -86,85 +80,109 @@
             });
 
             RED.library.create({
-                url: "ur_animation", // where to get the data from
-                type: "ur_animation", // the type of object the library is for
+                url: 'ur_animation', // where to get the data from
+                type: 'ur_animation', // the type of object the library is for
                 editor: this.editor, // the field name the main text body goes to
-                mode: "ace/mode/html",
-                fields: ['name']
+                mode: 'ace/mode/html',
+                fields: ['name'],
             });
 
             this.editor.focus();
-            updateViewport($("#node-input-format").val());
+            updateViewport($('#node-input-format').val());
 
-            RED.popover.tooltip($("#node-template-expand-editor"), c_("label.expand"));
+            RED.popover.tooltip($('#node-template-expand-editor'), c_('label.expand'));
 
-            $("#node-template-expand-editor").on("click", function (e) {
+            $('#node-template-expand-editor').on('click', function (e) {
                 e.preventDefault();
                 var value = that.editor.getValue();
                 RED.editor.editText({
                     mode: 'html',
                     value: value,
-                    width: "Infinity",
+                    width: 'Infinity',
                     cursor: that.editor.getCursorPosition(),
                     complete: function (v, cursor) {
                         that.editor.setValue(v, -1);
                         that.editor.gotoLine(cursor.row + 1, cursor.column, false);
-                        setTimeout(function () { 
+                        setTimeout(function () {
                             that.editor.focus();
                             updateViewport(v);
                         }, 300);
-                    }
-                })
+                    },
+                });
             });
 
-            $("#node-input-rule-container").css('min-height', '150px').css('min-width', '650px').editableList({
-                addItem: function (container, i, opt) {
-                    if (!opt.hasOwnProperty('rule')) {
-                        opt.rule = {};
-                    }
-                    var rule = opt.rule;
-                    if (!rule.hasOwnProperty('prop')) {
-                        rule.prop = 'vis';
-                    }
-                    container.css({
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap'
-                    });
-                    var row = $('<div/>').appendTo(container);
-                    // image field
-                    $('<input/>', { class: "node-input-rule-img", type: "text", placeholder: "img name", style: "margin-left: 5px; width: 10%;" }).appendTo(row).val(rule.img);
-                    // topic field
-                    $('<input/>', { class: "node-input-rule-topic", type: "text", placeholder: "topic", style: "margin-left: 5px; width: 38%;" }).appendTo(row).val(rule.topic);
-                    // property field
-                    var propField = $('<select/>', { style: "margin-left: 5px; width: 15%;" }).appendTo(row);
-                    var propGroup = $("<optgroup>", { label: "property" }).appendTo(propField);
-                    for (var d in properties) {
-                        $("<option>").val(properties[d].v).text(properties[d].t).appendTo(propGroup);
-                    }
-                    propField.val(rule.prop).change();
-                    // expression field
-                    $('<input/>', { class: "node-input-rule-exp", type: "text", placeholder: "expression", style: "margin-left: 5px; width: 33%;" }).appendTo(row).val(rule.exp);
-                },
-                sortable: true,
-                removable: true
-            });
+            $('#node-input-rule-container')
+                .css('min-height', '150px')
+                .css('min-width', '650px')
+                .editableList({
+                    addItem: function (container, i, opt) {
+                        if (!opt.hasOwnProperty('rule')) {
+                            opt.rule = {};
+                        }
+                        var rule = opt.rule;
+                        if (!rule.hasOwnProperty('prop')) {
+                            rule.prop = 'vis';
+                        }
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                        });
+                        var row = $('<div/>').appendTo(container);
+                        // image field
+                        $('<input/>', {
+                            class: 'node-input-rule-img',
+                            type: 'text',
+                            placeholder: 'img name',
+                            style: 'margin-left: 5px; width: 10%;',
+                        })
+                            .appendTo(row)
+                            .val(rule.img);
+                        // topic field
+                        $('<input/>', {
+                            class: 'node-input-rule-topic',
+                            type: 'text',
+                            placeholder: 'topic',
+                            style: 'margin-left: 5px; width: 38%;',
+                        })
+                            .appendTo(row)
+                            .val(rule.topic);
+                        // property field
+                        var propField = $('<select/>', { style: 'margin-left: 5px; width: 15%;' }).appendTo(row);
+                        var propGroup = $('<optgroup>', { label: 'property' }).appendTo(propField);
+                        for (var d in properties) {
+                            $('<option>').val(properties[d].v).text(properties[d].t).appendTo(propGroup);
+                        }
+                        propField.val(rule.prop).change();
+                        // expression field
+                        $('<input/>', {
+                            class: 'node-input-rule-exp',
+                            type: 'text',
+                            placeholder: 'expression',
+                            style: 'margin-left: 5px; width: 33%;',
+                        })
+                            .appendTo(row)
+                            .val(rule.exp);
+                    },
+                    sortable: true,
+                    removable: true,
+                });
 
             for (let i = 0; i < this.rules.length; i++) {
-                $("#node-input-rule-container").editableList('addItem', { rule: this.rules[i] });
+                $('#node-input-rule-container').editableList('addItem', { rule: this.rules[i] });
             }
         },
         oneditsave: function () {
             // store rules from editable list
-            let rules = $("#node-input-rule-container").editableList('items');
+            let rules = $('#node-input-rule-container').editableList('items');
             let node = this;
             node.rules = [];
-            rules.each(function(i) {
+            rules.each(function (i) {
                 let container = $(this);
                 let rule = {
-                    img: container.find(".node-input-rule-img").val(),
-                    topic: container.find(".node-input-rule-topic").val(),
-                    prop: container.find("select").val(),
-                    exp: container.find(".node-input-rule-exp").val()
+                    img: container.find('.node-input-rule-img').val(),
+                    topic: container.find('.node-input-rule-topic').val(),
+                    prop: container.find('select').val(),
+                    exp: container.find('.node-input-rule-exp').val(),
                 };
                 node.rules.push(rule);
             });
@@ -172,14 +190,14 @@
             // store template from code editor
             let annot = this.editor.getSession().getAnnotations();
             this.noerr = 0;
-            $("#node-input-noerr").val(0);
+            $('#node-input-noerr').val(0);
             for (let k = 0; k < annot.length; k++) {
-                if (annot[k].type === "error") {
-                    $("#node-input-noerr").val(annot.length);
+                if (annot[k].type === 'error') {
+                    $('#node-input-noerr').val(annot.length);
                     this.noerr = annot.length;
                 }
             }
-            $("#node-input-format").val(this.editor.getValue());
+            $('#node-input-format').val(this.editor.getValue());
             this.editor.destroy();
             delete this.editor;
         },
@@ -188,116 +206,123 @@
             delete this.editor;
         },
         oneditresize: function (size) {
-            let rows = $("#dialog-form>div:not(.node-text-editor-row)");
-            let height = $("#dialog-form").height();
+            let rows = $('#dialog-form>div:not(.node-text-editor-row)');
+            let height = $('#dialog-form').height();
             for (let i = 0; i < rows.size(); i++) {
                 height = height - $(rows[i]).outerHeight(true);
             }
-            let editorRow = $("#dialog-form>div.node-text-editor-row");
-            height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
-            $(".node-text-editor").css("height", height + "px");
+            let editorRow = $('#dialog-form>div.node-text-editor-row');
+            height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
+            $('.node-text-editor').css('height', height + 'px');
             this.editor.resize();
-        }
+        },
     });
 
-    (function($) {
-        $.fn.drags = function(callback) {
+    (function ($) {
+        $.fn.drags = function (callback) {
             let $el = this;
-            return $el.on("mousedown", function(e) {
-                let $drag = $(this).addClass('draggable');
-                let dragH = $drag.outerHeight();
-                let dragW = $drag.outerWidth();
-                let posY = $drag.offset().top + dragH - e.pageY;
-                let posX = $drag.offset().left + dragW - e.pageX;
+            return $el
+                .on('mousedown', function (e) {
+                    let $drag = $(this).addClass('draggable');
+                    let dragH = $drag.outerHeight();
+                    let dragW = $drag.outerWidth();
+                    let posY = $drag.offset().top + dragH - e.pageY;
+                    let posX = $drag.offset().left + dragW - e.pageX;
 
-                let viewport = $drag.css('z-index', 1000).closest(".node-text-viewport");
-                let viewportWidth = viewport.width();
-                let viewportHeight = viewport.height();
-                viewport.on("mousemove", function(e) {
-                    let top = e.pageY + posY - dragH;
-                    let left = e.pageX + posX - dragW;
-                    $('.draggable').offset({ top: top, left: left }).on("mouseup", function() {
-                        viewport.off("mousemove");
+                    let viewport = $drag.css('z-index', 1000).closest('.node-text-viewport');
+                    let viewportWidth = viewport.width();
+                    let viewportHeight = viewport.height();
+                    viewport.on('mousemove', function (e) {
+                        let top = e.pageY + posY - dragH;
+                        let left = e.pageX + posX - dragW;
+                        $('.draggable')
+                            .offset({ top: top, left: left })
+                            .on('mouseup', function () {
+                                viewport.off('mousemove');
+                            });
                     });
+                    e.preventDefault(); // disable selection
+                })
+                .on('mouseup', function () {
+                    let $drag = $(this).removeClass('draggable');
+                    let pos = $drag.position();
+                    $drag.css({
+                        'position': 'absolute',
+                        'top': pos.top + 'px',
+                        'left': pos.left + 'px',
+                        'z-index': '',
+                    });
+                    if ($drag.attr('class') === '') {
+                        $drag.removeAttr('class');
+                    }
+                    callback();
                 });
-                e.preventDefault(); // disable selection
-            }).on("mouseup", function() {
-                let $drag = $(this).removeClass('draggable');
-                let pos = $drag.position();
-                $drag.css({ 'position':'absolute', 'top': pos.top+'px', 'left': pos.left+'px', 'z-index': '' });
-                if ($drag.attr('class') === '') {
-                    $drag.removeAttr('class');
-                }
-                callback();
-            });
-        }
+        };
     })(window.jQuery);
-
 </script>
 
 <script type="text/html" data-template-name="ur_animation">
-    <style>
-        #node-input-viewport [animated] {
-            cursor: move;
-        }
-    </style>
-	<div class="form-row" id="template-row-group">
-        <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ur_animation.label.group"></span></label>
-        <input type="text" id="node-input-group">
-    </div>
-    <div class="form-row" id="template-row-size">
-        <label><i class="fa fa-object-group"></i> <span data-i18n="ur_animation.label.size"></span></label>
-        <input type="hidden" id="node-input-width">
-        <input type="hidden" id="node-input-height">
-        <button class="editor-button" id="node-input-size"></button>
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_animation.label.name"></span></label>
-        <div style="display:inline-block; width:calc(100% - 105px)">
-            <input type="text" id="node-input-name">
-        </div>
-    </div>
-    <div class="form-row" style="margin-bottom:0px;">
-        <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ur_animation.label.template"></span></label>
-        <input type="hidden" id="node-input-format">
-        <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right"><i class="fa fa-expand"></i></button>
-    </div>
-    <div class="form-row node-text-editor-row">
-        <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor" ></div>
-    </div>
-    <div class="form-row" style="margin-bottom:0px;">
-        <label><i class="fa fa-eye"></i> <span data-i18n="ur_animation.label.viewport"></span></label>
-    </div>
-    <div class="form-row node-text-viewport-row">
-        <div style="display: table;">
-            <div style="display: table-cell;">
-                <div id="node-input-viewport" class="node-text-viewport red-ui-editableList-border" style="position:relative; margin:auto;"></div>
-            </div>
-        </div>
-    </div>
-    <div class="form-row" style="margin-bottom:0px;">
-        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="ur_animation.label.rules"></span></label>
-    </div>
-    <div class="form-row node-input-rule-container-row">
-        <ol id="node-input-rule-container"></ol>
-    </div>
+       <style>
+           #node-input-viewport [animated] {
+               cursor: move;
+           }
+       </style>
+    <div class="form-row" id="template-row-group">
+           <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ur_animation.label.group"></span></label>
+           <input type="text" id="node-input-group">
+       </div>
+       <div class="form-row" id="template-row-size">
+           <label><i class="fa fa-object-group"></i> <span data-i18n="ur_animation.label.size"></span></label>
+           <input type="hidden" id="node-input-width">
+           <button class="editor-button" id="node-input-size"></button>
+       </div>
+       <div class="form-row">
+           <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_animation.label.name"></span></label>
+           <div style="display:inline-block; width:calc(100% - 105px)">
+               <input type="text" id="node-input-name">
+           </div>
+       </div>
+       <div class="form-row" style="margin-bottom:0px;">
+           <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ur_animation.label.template"></span></label>
+           <input type="hidden" id="node-input-format">
+           <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right"><i class="fa fa-expand"></i></button>
+       </div>
+       <div class="form-row node-text-editor-row">
+           <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor" ></div>
+       </div>
+       <div class="form-row" style="margin-bottom:0px;">
+           <label><i class="fa fa-eye"></i> <span data-i18n="ur_animation.label.viewport"></span></label>
+       </div>
+       <div class="form-row node-text-viewport-row">
+           <div style="display: table;">
+               <div style="display: table-cell;">
+                   <div id="node-input-viewport" class="node-text-viewport red-ui-editableList-border" style="position:relative; margin:auto;"></div>
+               </div>
+           </div>
+       </div>
+       <div class="form-row" style="margin-bottom:0px;">
+           <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="ur_animation.label.rules"></span></label>
+       </div>
+       <div class="form-row node-input-rule-container-row">
+           <ol id="node-input-rule-container"></ol>
+       </div>
 </script>
 
 <script type="text/html" data-help-name="ur_animation">
-    <p>The animation widget can contain any valid html and jQuery.</p>
-    <p>This node can be used to create a dynamic user interface element that changes its appearence
-    based on the input message.</p>
-    <p><b>For example:</b><br>
-    <pre style="font-size:smaller;">&lt;img static src=&quot;/img/VAV/hwreheat/background.jpg&quot; style=&quot;max-width: 358px;&quot;&gt;
+        <p>The animation widget can contain any valid html and jQuery.</p>
+        <p>This node can be used to create a dynamic user interface element that changes its appearence
+        based on the input message.</p>
+        <p><b>For example:</b><br>
+        <pre style="font-size:smaller;">&lt;img static src=&quot;/img/VAV/hwreheat/background.jpg&quot; style=&quot;max-width: 358px;&quot;&gt;
 
-&lt;img animated name=&quot;damper&quot; src=&quot;/img/VAV/hwreheat/damper1.jpg&quot; style=&quot;position: absolute; top: 0%; left: 0%; width: 48.0447%; max-width: 172px;&quot;&gt;
+    &lt;img animated name=&quot;damper&quot; src=&quot;/img/VAV/hwreheat/damper1.jpg&quot; style=&quot;position: absolute; top: 0%; left: 0%; width: 48.0447%; max-width: 172px;&quot;&gt;
 
-&lt;img animated name=&quot;coil&quot; src=&quot;/img/VAV/hwreheat/coil10.jpg&quot; style=&quot;position: absolute; top: 16.8999%; left: 58.6025%; width: 41.3408%; max-width: 148px;&quot;&gt;</pre>
-    Will display if the number received as <code>msg.payload</code> is even or odd. It will also
-    change the color of the text to green if the number is even or red if odd.<br/>
-    <p>Templates made in this way can be copied and remain independent of each other.</p>
-    <p><b>Using <code>msg.template</code>:</b><br>
-    You can also define the template content via <code>msg.template</code>, so you can use external files for example.<br>
-    Template will be reloaded on input if it has changed.<br>
-    Code written in the Template field will be ignored when <code>msg.template</code> is present.</p>
+    &lt;img animated name=&quot;coil&quot; src=&quot;/img/VAV/hwreheat/coil10.jpg&quot; style=&quot;position: absolute; top: 16.8999%; left: 58.6025%; width: 41.3408%; max-width: 148px;&quot;&gt;</pre>
+        Will display if the number received as <code>msg.payload</code> is even or odd. It will also
+        change the color of the text to green if the number is even or red if odd.<br/>
+        <p>Templates made in this way can be copied and remain independent of each other.</p>
+        <p><b>Using <code>msg.template</code>:</b><br>
+        You can also define the template content via <code>msg.template</code>, so you can use external files for example.<br>
+        Template will be reloaded on input if it has changed.<br>
+        Code written in the Template field will be ignored when <code>msg.template</code> is present.</p>
 </script>

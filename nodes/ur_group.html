@@ -1,20 +1,24 @@
 <script type="text/javascript">
     // convert to i18 text
     function c_ur_group(x) {
-        return RED._("unified-red/ur_group:ur_group." + x);
+        return RED._('unified-red/ur_group:ur_group.' + x);
     }
 
     RED.nodes.registerType('ur_group', {
         category: 'config',
         defaults: {
-            name: { value: c_ur_group("label.default") },
-            subtab: { type: "ur_subtab", required: true },
+            name: { value: c_ur_group('label.default') },
+            subtab: { type: 'ur_subtab', required: true },
             order: { value: 0 },
             disp: { value: true },
-            width: { value: 6 },
+            // width: { value: 30 },
+            // width: { value: { lg: 6, md: 6, sm: 12 } },
+            widthLg: { value: 6 },
+            widthMd: { value: 6 },
+            widthSm: { value: 12 },
             collapse: { value: false },
             disabled: { value: false },
-            hidden: { value: false }
+            hidden: { value: false },
         },
         sort: function (A, B) {
             if (A.subtab !== B.subtab) {
@@ -22,11 +26,9 @@
                 var subtabB = RED.nodes.node(B.subtab);
                 if (!subtabA && subtabB) {
                     return -1;
-                }
-                else if (subtabA && !subtabB) {
+                } else if (subtabA && !subtabB) {
                     return 1;
-                }
-                else {
+                } else {
                     return subtabA.order - subtabB.order;
                 }
             }
@@ -36,27 +38,57 @@
         label: function () {
             var subtabNode = RED.nodes.node(this.subtab);
             var tabNode = RED.nodes.node(subtabNode.tab);
-            var subtabName = subtabNode ? subtabNode.name : "label.unassigned";
-            var tabName = tabNode ? tabNode.name : "label.unassigned";
+            var subtabName = subtabNode ? subtabNode.name : 'label.unassigned';
+            var tabName = tabNode ? tabNode.name : 'label.unassigned';
 
-            return "[" + (tabName || c_ur_group("label.tab")) + "] [" + (subtabName || c_ur_group("label.subtab")) + "] " + (this.name || c_ur_group("label.group"));
+            return (
+                '[' +
+                (tabName || c_ur_group('label.tab')) +
+                '] [' +
+                (subtabName || c_ur_group('label.subtab')) +
+                '] ' +
+                (this.name || c_ur_group('label.group'))
+            );
         },
-        labelStyle: function () { return this.name ? "node_label_italic" : ""; },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
         oneditprepare: function () {
-            $("#node-input-size").elementSizer({
-                width: "#node-config-input-width",
-                auto: false
+            $('#node-input-size-lg').elementSizer({
+                width: '#node-config-input-widthLg',
+                auto: false,
             });
-            $("#node-config-input-disp").on("change", function () {
-                if ($("#node-config-input-disp").is(":checked")) {
-                    $("#group-collapse-flag").show();
-                }
-                else {
-                    $("#group-collapse-flag").hide();
-                    $("#node-config-input-collapse").prop("checked", false);
+            $('#node-input-size-md').elementSizer({
+                width: '#node-config-input-widthMd',
+                auto: false,
+            });
+            $('#node-input-size-sm').elementSizer({
+                width: '#node-config-input-widthSm',
+                auto: false,
+            });
+
+            // $('#node-config-input-widthLg').val(this.widthLg);
+            // $('#node-config-input-widthMd').val(this.widthMd);
+            // $('#node-config-input-widthSm').val(this.widthSm);
+
+            // $("#node-input-size").elementSizer({
+            //     width: {
+            //         lg: '#node-config-input-width-lg',
+            //         md: '#node-config-input-width-md',
+            //         sm: '#node-config-input-width-sm',
+            //     },
+            //     auto: false
+            // });
+
+            $('#node-config-input-disp').on('change', function () {
+                if ($('#node-config-input-disp').is(':checked')) {
+                    $('#group-collapse-flag').show();
+                } else {
+                    $('#group-collapse-flag').hide();
+                    $('#node-config-input-collapse').prop('checked', false);
                 }
             });
-        }
+        },
     });
 </script>
 
@@ -70,9 +102,19 @@
         <input type="text" id="node-config-input-subtab">
     </div>
     <div class="form-row">
-        <label for="node-config-input-width"><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span></label>
-        <input type="hidden" id="node-config-input-width">
-        <button class="editor-button" id="node-input-size"></button>
+        <label for="node-config-input-width-row"><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span></label>
+
+        <label for="node-config-input-widthLg" style="width: auto;"> <span data-i18n="ur_group.label.widthLg"></span></label>
+        <input type="hidden" id="node-config-input-widthLg">
+        <button class="editor-button" id="node-input-size-lg" style="margin-right: 7px;"></button>
+
+        <label for="node-config-input-widthMd" style="width: auto;"> <span data-i18n="ur_group.label.widthMd"></span></label>
+        <input type="hidden" id="node-config-input-widthMd">
+        <button class="editor-button" id="node-input-size-md" style="margin-right: 7px;"></button>
+
+        <label for="node-config-input-widthSm" style="width: auto;"> <span data-i18n="ur_group.label.widthSm"></span></label>
+        <input type="hidden" id="node-config-input-widthSm">
+        <button class="editor-button" id="node-input-size-sm" style="margin-right: 7px;"></button>
     </div>
     <div class="form-row">
         <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp"> <label style="width:auto" for="node-config-input-disp"><span data-i18n="ur_group.display-name"></span></label>

@@ -4,7 +4,10 @@ module.exports = function (RED) {
         this.config = {
             name: config.name,
             disp: config.disp,
-            width: config.width,
+            // width: config.width || { lg: '6', md: '6', sm: '12' },
+            widthLg: config.widthLg || '6',
+            widthMd: config.widthMd || '6',
+            widthSm: config.widthSm || '12',
             order: config.order || 0,
             subtab: config.subtab,
             collapse: config.collapse || false,

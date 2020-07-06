@@ -6,6 +6,7 @@ import {
     ViewChild,
     ComponentFactoryResolver,
     ViewContainerRef,
+    Renderer2,
 } from '@angular/core';
 import { GroupDirective } from '../../directives/group.directive';
 import { groupWidgets } from './group-widget';
@@ -16,13 +17,15 @@ import { groupWidgets } from './group-widget';
     styleUrls: ['./group.component.sass'],
 })
 export class GroupComponent implements OnInit, OnDestroy {
-    @Input() header: string;
-    @Input() widgets: groupWidgets[];
+    header: string;
+    cols: string;
+    widgets: groupWidgets[];
     @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
 
     constructor(
         private componentFactoryResolver: ComponentFactoryResolver,
-        private viewContainerRef: ViewContainerRef
+        private viewContainerRef: ViewContainerRef,
+        private renderer2: Renderer2
     ) {}
 
     ngOnInit() {
@@ -43,7 +46,10 @@ export class GroupComponent implements OnInit, OnDestroy {
 
                 const componentRef = this.viewContainerRef.createComponent(componentFactory);
                 componentRef.instance.data = widget.data;
-                componentRef.instance.text = widget.text;
+                // componentRef.instance.text = widget.text;
+                let colWidth = widget.data.width !== 0 ? widget.data.width : 12;
+                let colClass = 'col-' + colWidth;
+                this.renderer2.addClass(componentRef.location.nativeElement, colClass);
             });
         }
     }

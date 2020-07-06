@@ -49,7 +49,7 @@ module.exports = function (RED) {
                 label: config.label,
                 order: config.order,
                 format: config.format,
-                // width: config.width || group.config.width || 6,
+                width: config.width || 12,
                 // height: config.height || 1,
                 // layout: angLayout,
                 // layoutAlign: angLayoutAlign,

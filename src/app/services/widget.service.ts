@@ -14,15 +14,15 @@ export class WidgetService {
         return widgetsList.map((widget) => {
             switch (widget.type) {
                 case 'text':
-                    return new groupWidgets(UrTextComponent, null, widget);
+                    return new groupWidgets(UrTextComponent, widget);
                 case 'button':
-                    return new groupWidgets(UrButtonComponent, 'UR-BUTTON', widget);
+                    return new groupWidgets(UrButtonComponent, widget);
                 case 'text-input':
-                    return new groupWidgets(UrTextInputComponent, 'UR-TEXT-INPUT', widget);
+                    return new groupWidgets(UrTextInputComponent, widget);
                 case 'template':
-                    return new groupWidgets(UrTemplateComponent, 'UR-TEMPLATE', widget);
+                    return new groupWidgets(UrTemplateComponent, widget);
                 case 'animation':
-                    return new groupWidgets(UrAnimationComponent, 'UR-ANIMATION', widget);
+                    return new groupWidgets(UrAnimationComponent, widget);
             }
         });
     }

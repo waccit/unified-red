@@ -5,14 +5,11 @@ import { WebSocketService } from '../../services';
     selector: 'app-ur-text',
     templateUrl: './ur-text.component.html',
     styleUrls: ['./ur-text.component.sass'],
-    host: { 'class': 'col-lg-4 col-md-4 col-sm-6 col-xs-12' },
 })
 export class UrTextComponent implements OnInit {
-    // @Input() text: string = 'default';
     @Input() data: any;
     nodeId: string;
     label: string;
-    // bgColor: string;
     text: any;
 
     constructor(private webSocketService: WebSocketService) {}
@@ -24,6 +21,7 @@ export class UrTextComponent implements OnInit {
 
         // this.bgColor = localStorage.getItem('choose_skin_active') || 'cyan';
         // console.log('ur-text.comp bgColor: ', this.bgColor);
+        this.webSocketService.emit('ui-replay-state', null);
 
         this.webSocketService.listen('update-value').subscribe((data: any) => {
             if (this.nodeId == data.id) {

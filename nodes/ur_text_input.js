@@ -32,8 +32,8 @@ module.exports = function (RED) {
                 delay: config.delay,
                 order: config.order,
                 value: '',
-                width: config.width || group.config.width || 6,
-                height: config.height || 1,
+                width: config.width || 12,
+                // height: config.height || 1,
             },
             beforeSend: function (msg) {
                 if (config.mode === 'time') {
