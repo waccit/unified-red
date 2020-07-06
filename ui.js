@@ -696,6 +696,9 @@ function addControl(menu_item, menu_page, page_group, control) {
             foundGroup = {
                 header: page_group.config.name,
                 order: page_group.config.order,
+                widthLg: page_group.config.widthLg,
+                widthMd: page_group.config.widthMd,
+                widthSm: page_group.config.widthSm,
                 items: [],
             };
             foundMenuPage.items.push(foundGroup);

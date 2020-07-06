@@ -6,7 +6,6 @@ declare var $: any;
     selector: 'app-ur-template',
     templateUrl: './ur-template.component.html',
     styleUrls: ['./ur-template.component.sass'],
-    host: { 'class': 'col-lg-4 col-md-4 col-sm-6 col-xs-12' },
 })
 export class UrTemplateComponent extends BaseNode {
     ngAfterViewInit(): void {
@@ -26,22 +25,22 @@ export class UrTemplateComponent extends BaseNode {
         let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         this.container.html($(html));
         // process any elements with request topic attributes
-        this.container.find("input[request], select[request]").change(function() {
+        this.container.find('input[request], select[request]').change(function () {
             let msg = {
-                topic: $(this).attr("request"),
-                payload: $(this).val()
+                topic: $(this).attr('request'),
+                payload: $(this).val(),
             };
             that.send(msg);
         });
     }
 
-    updateValue(data:any) {
+    updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
             // process any elements with feedback topic attributes
             let elements = this.container.find(`[feedback='${data.msg.topic}']`);
-            elements.filter("input, select").val(data.msg.payload);
-            elements.not("img, input, select").html(data.msg.payload);
+            elements.filter('input, select').val(data.msg.payload);
+            elements.not('img, input, select').html(data.msg.payload);
         }
     }
 }

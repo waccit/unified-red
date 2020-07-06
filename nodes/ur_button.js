@@ -28,9 +28,7 @@ module.exports = function (RED) {
                     throw new Error();
                 }
             } catch (err) {
-                node.warn(
-                    'Invalid payload property expression - defaulting to node id'
-                );
+                node.warn('Invalid payload property expression - defaulting to node id');
                 payload = node.id;
                 payloadType = 'str';
             }
@@ -56,8 +54,8 @@ module.exports = function (RED) {
                 order: config.order,
                 value: payload,
                 format: config.bgcolor,
-                width: config.width || group.config.width || 3,
-                height: config.height || 1,
+                width: config.width || 3,
+                // height: config.height || 1,
             },
             beforeSend: function (msg) {
                 msg.topic = config.topic || msg.topic;
@@ -66,11 +64,7 @@ module.exports = function (RED) {
                 if (payloadType === 'date') {
                     value = Date.now();
                 } else {
-                    value = RED.util.evaluateNodeProperty(
-                        payload,
-                        payloadType,
-                        node
-                    );
+                    value = RED.util.evaluateNodeProperty(payload, payloadType, node);
                 }
                 return value;
             },

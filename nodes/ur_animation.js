@@ -33,17 +33,15 @@ module.exports = function (RED) {
             control: {
                 type: 'animation',
                 order: config.order,
-                width: config.width || 6,
+                width: config.width || 12,
                 height: hei,
                 format: config.format,
                 rules: config.rules,
             },
             beforeEmit: function (msg) {
-                var properties = Object.getOwnPropertyNames(msg).filter(
-                    function (p) {
-                        return p[0] != '_';
-                    }
-                );
+                var properties = Object.getOwnPropertyNames(msg).filter(function (p) {
+                    return p[0] != '_';
+                });
                 var clonedMsg = {};
                 for (var i = 0; i < properties.length; i++) {
                     var property = properties[i];
@@ -51,17 +49,11 @@ module.exports = function (RED) {
                 }
 
                 // transform to string if msg.template is buffer
-                if (
-                    clonedMsg.template !== undefined &&
-                    Buffer.isBuffer(clonedMsg.template)
-                ) {
+                if (clonedMsg.template !== undefined && Buffer.isBuffer(clonedMsg.template)) {
                     clonedMsg.template = clonedMsg.template.toString();
                 }
 
-                if (
-                    clonedMsg.template === undefined &&
-                    previousTemplate !== null
-                ) {
+                if (clonedMsg.template === undefined && previousTemplate !== null) {
                     clonedMsg.template = previousTemplate;
                 }
 
@@ -79,11 +71,7 @@ module.exports = function (RED) {
                 return { msg: clonedMsg };
             },
             beforeSend: function (msg, original) {
-                if (
-                    original &&
-                    original.hasOwnProperty('msg') &&
-                    original.msg !== null
-                ) {
+                if (original && original.hasOwnProperty('msg') && original.msg !== null) {
                     var om = original.msg;
                     om.socketid = original.socketid;
                     return om;

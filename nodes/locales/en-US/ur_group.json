@@ -5,6 +5,9 @@
             "tab": "Tab",
             "subtab": "Subtab",
             "width": "Width",
+            "widthLg": "lg",
+            "widthMd": "md",
+            "widthSm": "sm",
             "default": "Default",
             "group": "Group",
             "unassigned": "unassigned"
