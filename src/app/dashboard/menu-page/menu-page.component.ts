@@ -1,28 +1,22 @@
-import {
-    Component,
-    OnInit,
-    OnDestroy,
-    ComponentFactoryResolver,
-    ViewChild,
-    ViewContainerRef,
-    Renderer2,
-} from '@angular/core';
+import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
 import { MenuPageDirective } from '../../directives/menu-page.directive';
 import { GroupComponent } from '../group/group.component';
 import { pageGroups } from './page-groups';
 import { WebSocketService } from '../../services';
 import { WidgetService } from '../../services/widget.service';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-menu-page',
     templateUrl: './menu-page.component.html',
     styleUrls: ['./menu-page.component.sass'],
 })
-export class MenuPageComponent implements OnInit, OnDestroy {
-    menuItem: string;
-    menuPage: string;
-    pageGroupsList: pageGroups[];
+export class MenuPageComponent implements OnInit {
+    private menuItem: string;
+    private menuPage: string;
+    private pageGroupsList: pageGroups[];
+    private _wsSubscription: Subscription;
     @ViewChild(MenuPageDirective, { static: true }) menuPageHost: MenuPageDirective;
 
     constructor(
@@ -43,18 +37,18 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
             this.webSocketService.emit('ui-refresh', null);
 
-            this.webSocketService.listen('ui-controls').subscribe((data: any) => {
+            if (this._wsSubscription !== undefined) {
+                this._wsSubscription.unsubscribe();
+            }
+
+            this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
                 this.setPageGroupsList(data.menu);
-                // console.log('MenuPageComponent data.menu: ', data.menu);
-                // console.log('MenuPageComponent pageGroupsList: ', this.pageGroupsList);
                 this.loadGroups();
             });
 
             // console.log('menu-page.component :menuItem/:menuPage: ', this.menuItem + '/' + this.menuPage);
         });
     }
-
-    ngOnDestroy(): void {}
 
     setPageGroupsList(menu: any[]) {
         this.pageGroupsList = [];
@@ -75,9 +69,7 @@ export class MenuPageComponent implements OnInit, OnDestroy {
                 });
             });
         }
-
-        // console.log('menu-page.comp foundMenuItem: ', foundMenuItem);
-        // console.log('menu-page.comp foundMenuPage: ', foundMenuPage);
+        console.log('setPageGroupsList Called');
     }
 
     // credit: https://stackoverflow.com/questions/15523514/find-by-key-deep-in-a-nested-array
@@ -114,15 +106,15 @@ export class MenuPageComponent implements OnInit, OnDestroy {
 
         this.pageGroupsList.forEach((group) => {
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(GroupComponent);
-
             const componentRef = this.viewContainerRef.createComponent(componentFactory);
+
             componentRef.instance.header = group.header;
+
             for (var size in group.cols) {
                 let colClass = 'col-' + size + '-' + group.cols[size];
                 this.renderer2.addClass(componentRef.location.nativeElement, colClass);
             }
 
-            // componentRef.instance.cols = group.cols;
             componentRef.instance.widgets = group.widgets;
         });
     }
