@@ -3,6 +3,7 @@ import { Event, Router, NavigationStart, NavigationEnd, RouterEvent } from '@ang
 import { PlatformLocation } from '@angular/common';
 import { WebSocketService } from './services/web-socket.service';
 import { AuthenticationService } from './services/';
+import { MenuService } from './services/menu.service';
 
 @Component({
     selector: 'app-root',
@@ -12,13 +13,14 @@ import { AuthenticationService } from './services/';
 export class AppComponent {
     currentUrl: string;
     showLoadingIndicatior = true;
-    sidebarItems: any[] = [];
+    // sidebarItems: any[] = [];
     isLoggedIn = false;
 
     constructor(
         public _router: Router,
         location: PlatformLocation,
-        private webSocketService: WebSocketService,
+        // private webSocketService: WebSocketService,
+        // private menuService: MenuService,
         private authenticationService: AuthenticationService
     ) {
         console.log('AppComponent Constructor Called');
@@ -39,10 +41,15 @@ export class AppComponent {
             window.scrollTo(0, 0);
         });
 
-        this.webSocketService.listen('ui-controls').subscribe((data: any) => {
-            console.log('app.component listening to WebSocketService data: ', data);
-            this.sidebarItems = data.menu;
-            // this.pageGroupsService.setPageGroupsList(data.menu);
-        });
+        // this.menuService.menu.subscribe((data) => {
+        //     this.sidebarItems = data;
+        // });
+
+        // this.webSocketService.listen('ui-controls').subscribe((data: any) => {
+        //     console.log('app.component listening to WebSocketService data: ', data);
+        //     this.sidebarItems = [];
+        //     this.sidebarItems = data.menu;
+        //     // this.pageGroupsService.setPageGroupsList(data.menu);
+        // });
     }
 }

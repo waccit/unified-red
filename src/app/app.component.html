@@ -2,6 +2,7 @@
     <app-page-loader></app-page-loader>
 </div>
 <app-header *ngIf="isLoggedIn"></app-header>
-<app-sidebar *ngIf="isLoggedIn" [sidebarItems]="sidebarItems"></app-sidebar>
+<app-sidebar *ngIf="isLoggedIn"></app-sidebar>
+<!-- <app-sidebar *ngIf="isLoggedIn" [sidebarItems]="sidebarItems"></app-sidebar> -->
 <app-right-sidebar *ngIf="isLoggedIn"></app-right-sidebar>
 <router-outlet></router-outlet>

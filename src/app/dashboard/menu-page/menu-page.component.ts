@@ -6,6 +6,8 @@ import { WebSocketService } from '../../services';
 import { WidgetService } from '../../services/widget.service';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { MenuService } from '../../services/menu.service';
+import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 
 @Component({
     selector: 'app-menu-page',
@@ -16,7 +18,7 @@ export class MenuPageComponent implements OnInit {
     private menuItem: string;
     private menuPage: string;
     private pageGroupsList: pageGroups[];
-    private _wsSubscription: Subscription;
+    private _menuSubscription: Subscription;
     @ViewChild(MenuPageDirective, { static: true }) menuPageHost: MenuPageDirective;
 
     constructor(
@@ -24,6 +26,7 @@ export class MenuPageComponent implements OnInit {
         private webSocketService: WebSocketService,
         private componentFactoryResolver: ComponentFactoryResolver,
         private widgetService: WidgetService,
+        private menuService: MenuService,
         private viewContainerRef: ViewContainerRef,
         private renderer2: Renderer2
     ) {}
@@ -32,19 +35,25 @@ export class MenuPageComponent implements OnInit {
         this.viewContainerRef = this.menuPageHost.viewContainerRef;
 
         this.route.params.subscribe((params) => {
+            console.log('menu-page params: ', params);
             this.menuItem = params['menuItem'];
             this.menuPage = params['menuPage'];
 
-            this.webSocketService.emit('ui-refresh', null);
+            this.webSocketService.emit('ui-refresh', {});
 
-            if (this._wsSubscription !== undefined) {
-                this._wsSubscription.unsubscribe();
+            if (this._menuSubscription !== undefined) {
+                this._menuSubscription.unsubscribe();
             }
 
-            this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
-                this.setPageGroupsList(data.menu);
+            this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
+                this.setPageGroupsList(menu);
                 this.loadGroups();
             });
+
+            // this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
+            //     this.setPageGroupsList(data.menu);
+            //     this.loadGroups();
+            // });
 
             // console.log('menu-page.component :menuItem/:menuPage: ', this.menuItem + '/' + this.menuPage);
         });

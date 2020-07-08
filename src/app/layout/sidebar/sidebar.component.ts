@@ -1,7 +1,9 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input, } from '@angular/core';
+import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input } from '@angular/core';
 import { User } from '../../data';
 import { CurrentUserService } from '../../services/';
+import { MenuService } from '../../services/menu.service';
+import { RouteInfo } from './sidebar.metadata';
 // import { ROUTES } from './sidebar-items';
 
 declare const Waves: any;
@@ -11,7 +13,8 @@ declare const Waves: any;
     styleUrls: ['./sidebar.component.sass'],
 })
 export class SidebarComponent implements OnInit {
-    @Input() sidebarItems: any[];
+    // @Input() sidebarItems: any[];
+    sidebarItems: RouteInfo[];
     showMenu: string = '';
     showSubMenu: string = '';
     public innerHeight: any;
@@ -25,9 +28,12 @@ export class SidebarComponent implements OnInit {
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
-        private currentUserService: CurrentUserService
+        private currentUserService: CurrentUserService,
+        private menuService: MenuService
     ) {
-        this.currentUserService.currentUser.subscribe(user => { this.user = user });
+        this.currentUserService.currentUser.subscribe((user) => {
+            this.user = user;
+        });
     }
 
     @HostListener('window:resize', ['$event'])
@@ -65,6 +71,9 @@ export class SidebarComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.menuService.menu.subscribe((menu: RouteInfo[]) => {
+            this.sidebarItems = menu;
+        });
         this.initLeftSidebar();
         this.bodyTag = this.document.body;
     }
