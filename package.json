@@ -51,7 +51,9 @@
             "ur_template": "nodes/ur_template.js",
             "ur_animation": "nodes/ur_animation.js",
             "ur_pagerduty_config": "nodes/ur_pagerduty_config.js",
-            "ur_pagerduty": "nodes/ur_pagerduty.js"
+            "ur_pagerduty": "nodes/ur_pagerduty.js",
+            "ur_schedule": "nodes/ur_schedule.js",
+            "ur_schedule_holidays_config": "nodes/ur_schedule_holidays_config.js"
         }
     },
     "dependencies": {
@@ -92,6 +94,7 @@
         "compression": "^1.7.4",
         "core-js": "^3.6.4",
         "cors": "^2.8.5",
+        "cron": "^1.8.2",
         "express": "^4.17.1",
         "express-jwt": "^5.3.3",
         "gulp": "^4.0.2",
