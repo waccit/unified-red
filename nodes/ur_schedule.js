@@ -305,7 +305,7 @@ module.exports = function (RED) {
                 type: 'schedule',
                 label: config.label,
                 order: config.order,
-                // width: config.width || group.config.width || 6,
+                width: config.width || group.config.width || 12,
                 // height: config.height || 1,
                 values: config.values,
                 weekdays: config.weekdays,
