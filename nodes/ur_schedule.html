@@ -10,16 +10,7 @@
         defaults: {
             group: { type: 'ur_group', required: true },
             order: { value: 0 },
-            width: {
-                value: 0, validate: function (v) {
-                    var width = v || 0;
-                    var currentGroup = $('#node-input-group').val() || this.group;
-                    var groupNode = RED.nodes.node(currentGroup);
-                    var valid = !groupNode || +width <= +groupNode.width;
-                    $("#node-input-size").toggleClass("input-error", !valid);
-                    return valid;
-                }
-            },
+            width: { value: 12 },
             height: { value: 0 },
             holidays: { type: 'ur_schedule_holidays_config', required: true },
             name: { value: '' },
