@@ -1,15 +1,14 @@
 var cron = require('cron');
+var buildJob = null;
 
 module.exports = function (RED) {
     var ui = require('../ui')(RED);
-    var currTime = function() { return new Date().toLocaleString(); };
 
     function ScheduleNode(config) {
         RED.nodes.createNode(this, config);
         this.holidays = RED.nodes.getNode(config.holidays).events;
         this.cronJobs = [];
         this.valuePriority = { holiday: null, date: null, weekday: null };
-        this.nextBuild = null;
         var node = this;
 
         var group = RED.nodes.getNode(config.group);
@@ -25,20 +24,22 @@ module.exports = function (RED) {
             return;
         }
 
-        let setPrioritySchedule = function(type, job) {
-            node.valuePriority[type] = true; // just make the value non-falsy. Later an actual schedule value will be applied.
-            if (job) {
-                job.stop();
-                delete job;    
+        /*
+        HELPER FUCTIONS
+        */
+
+        let setPrioritySchedule = function() {
+            if (RED.settings.verbose) { 
+                node.log("setPrioritySchedule for " + this.type);
             }
+            node.valuePriority[this.type] = true; // just make the value non-falsy. Later an actual schedule value will be applied.
         };
 
-        let clearPrioritySchedule = function(type, job) {
-            node.valuePriority[type] = null;
-            if (job) {
-                job.stop();
-                delete job;    
+        let clearPrioritySchedule = function() {
+            if (RED.settings.verbose) { 
+                node.log("clearPrioritySchedule for " + this.type);
             }
+            node.valuePriority[this.type] = null;
         };
 
         let fireEvent = function() {
@@ -47,19 +48,29 @@ module.exports = function (RED) {
                     // set value in priority object
                     let value = this.event.value;
                     node.valuePriority[this.type] = config.values.find(v => v.name === value);
+                    console.log("valuePriority", node.valuePriority);
 
                     if (node.valuePriority.holiday) { //prioritize holiday schedules over date schedules
                         if (this.type === 'holiday' && node.valuePriority.holiday.value) {
+                            if (RED.settings.verbose) { 
+                                node.log("fireEvent " + this.type + " " + JSON.stringify(node.valuePriority.holiday));
+                            }
                             node.send({ topic: config.topic, payload: node.valuePriority.holiday.value });
                         }
                     }
                     else if (node.valuePriority.date) { //prioritize date schedules over weekday schedules
                         if (this.type === 'date' && node.valuePriority.date.value) {
+                            if (RED.settings.verbose) { 
+                                node.log("fireEvent " + this.type + " " + JSON.stringify(node.valuePriority.date));
+                            }
                             node.send({ topic: config.topic, payload: node.valuePriority.date.value });
                         }
                     }
                     else if (node.valuePriority.weekday) {
                         if (this.type === 'weekday' && node.valuePriority.weekday.value) {
+                            if (RED.settings.verbose) { 
+                                node.log("fireEvent " + this.type + " " + JSON.stringify(node.valuePriority.weekday));
+                            }
                             node.send({ topic: config.topic, payload: node.valuePriority.weekday.value });
                         }
                     }
@@ -98,6 +109,9 @@ module.exports = function (RED) {
         };
 
         let scheduleHolidayJob = function(sch, time) {
+            if (RED.settings.verbose) { 
+                node.log("scheduleHolidayJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
+            }
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
@@ -111,6 +125,9 @@ module.exports = function (RED) {
         };
 
         let scheduleDateJob = function(sch, time) {
+            if (RED.settings.verbose) { 
+                node.log("scheduleDateJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
+            }
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
@@ -124,6 +141,9 @@ module.exports = function (RED) {
         };
 
         let scheduleWeekdayJob = function(sch, time) {
+            if (RED.settings.verbose) { 
+                node.log("scheduleWeekdayJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
+            }
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
@@ -138,34 +158,42 @@ module.exports = function (RED) {
 
         let schedulePriorityScheduleJobs = function(sch, type, time) {
             // activate date or holiday schedule at beginning of day (unless time overriden)
-            new cron.CronJob({
+            let startJob = new cron.CronJob({
                 cronTime: setCronTime(sch.pattern, time ? time.getHours() : 0, time ? time.getMinutes() : 0, time ? time.getSeconds() : 0),
-                onTick: function() { setPrioritySchedule(type, this); },
-                start: true
+                onTick: setPrioritySchedule,
+                start: true,
+                context: { event: sch, type: type }
             });
-            // deactivate date or holiday schedule at end of day (unless time overriden)
-            new cron.CronJob({
+            node.cronJobs.push(startJob);
+            // deactivate date or holiday schedule at end of day
+            let endJob = new cron.CronJob({
                 cronTime: setCronTime(sch.pattern, 23, 59, 59),
-                onTick: function() { clearPrioritySchedule(type, this); },
-                start: true
+                onTick: clearPrioritySchedule,
+                start: true,
+                context: { event: sch, type: type }
             });
+            node.cronJobs.push(endJob);
         };
 
-        let buildSchedules = function() {
-            if (node.nextBuild && new Date() < node.nextBuild) {
-                return;
-            }
+        /*
+        SCHEDULE MAGIC
+        */
 
-            node.nextBuild = new Date();
-            node.nextBuild.setHours(24,0,0,0);
-            node.log("Building schedules... Next build at " + node.nextBuild.toLocaleString());
+        let buildSchedules = function() {
+            node.log("Building schedules...");
             
             // stop and delete any existing cron jobs
-            for (let job of node.cronJobs) {
-                job.stop();
+            try {
+                console.log(typeof node.cronJobs, Array.isArray(node.cronJobs));
+                for (let job of node.cronJobs) {
+                    job.stop();
+                }
+            } catch (e) {
+                node.error(e);
+                console.log(e);
             }
             node.cronJobs = [];
-    
+
             // build map of all holiday events and index by cron pattern
             if (node.holidays && node.holidays.length) {
                 for (let holidaySch of node.holidays) {
@@ -178,7 +206,11 @@ module.exports = function (RED) {
 
                         // schedule recovery job: since we don't know if we're currently in a holiday, 
                         // fire recovery for all holidays. Only today's holiday will fire anyways.
-                        scheduleHolidayJob(holidaySch, secondsFromNow(5));
+                        let scheduledTime = new Date();
+                        scheduledTime.setHours(holidaySch.hour,holidaySch.minute,0,0);
+                        if (new Date() > scheduledTime) {
+                            scheduleHolidayJob(holidaySch, secondsFromNow(5));
+                        }
                         schedulePriorityScheduleJobs(holidaySch, "holiday", secondsFromNow(2));
                     } catch (err) {
                         node.error(err);
@@ -193,6 +225,7 @@ module.exports = function (RED) {
                     try {
                         // catalog date schedules to later find last (missed) event
                         let d = new Date(dateSch.date);
+                        d.setFullYear(new Date().getFullYear()); // normalize key to current year
                         let dateKey =  d.getTime();
                         if (!dateSchedules[dateKey]) {
                             dateSchedules[dateKey] = [];
@@ -253,11 +286,13 @@ module.exports = function (RED) {
 
         buildSchedules();
         // rebuild schedules everyday at midnight
-        new cron.CronJob({
-            cronTime: "0 * * * * *",
-            onTick: buildSchedules,
-            start: true
-        });
+        if (!buildJob) {
+            buildJob = new cron.CronJob({
+                cronTime: "0 0 0 * * *",
+                onTick: buildSchedules,
+                start: true
+            });
+        }
 
         var done = ui.add({
             emitOnlyNewValues: false,
@@ -286,11 +321,13 @@ module.exports = function (RED) {
      */
     ScheduleNode.prototype.close = function() {
         // tear down all cron jobs
-        if (RED.settings.verbose) { this.log(RED._("schedule.stopped")); }
+        if (RED.settings.verbose) {
+            this.log(RED._("schedule.stopped"));
+        }
         for (let job of this.cronJobs) {
             job.stop();
         }
-        delete this.cronJobs;
+        this.cronJobs = [];
     };
 
     function setCronTime(pattern, hour, minute, second) {
