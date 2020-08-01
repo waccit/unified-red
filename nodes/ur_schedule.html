@@ -124,7 +124,7 @@
                     });
                     var row = $('<div/>').appendTo(container);
                     // date field
-                    $('<input/>', { class: "node-input-date-date", type: "text", placeholder: "Date (mm/dd/yyyy)", style: "margin-left: 5px; width: 32%;" }).appendTo(row).val(event.date);
+                    $('<input/>', { class: "node-input-date-date", type: "text", placeholder: "Date (mm/dd)", style: "margin-left: 5px; width: 32%;" }).appendTo(row).val(event.date);
                     // value field
                     var valueField = $('<select/>', { class: "node-input-date-value", style: "margin-left: 5px; width: 33%;" }).appendTo(row);
                     for (let v of node.values) {
