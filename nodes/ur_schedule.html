@@ -11,7 +11,6 @@
             group: { type: 'ur_group', required: true },
             order: { value: 0 },
             width: { value: 12 },
-            height: { value: 0 },
             holidays: { type: 'ur_schedule_holidays_config', required: true },
             name: { value: '' },
             topic: { value: '', required: true },
@@ -35,7 +34,7 @@
                 this.weekdays = [ /* { weekday:0, value: "On", hour: 12, minute: 0 }, { weekday:0, value: "Off", hour: 14, minute: 0 } */ ];
             }
             if (this.dates == null) {
-                this.dates = [/* { date:"06/29/2020", value: "On", hour: 12, minute: 0 }, { date:"06/29/2020", value: "Off", hour: 14, minute: 0 } */ ];
+                this.dates = [/* { date:"06/29", value: "On", hour: 12, minute: 0 }, { date:"06/29", value: "Off", hour: 14, minute: 0 } */ ];
             }
             $("#node-input-size").elementSizer({
                 width: "#node-input-width",
