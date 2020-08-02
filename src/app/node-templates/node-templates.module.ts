@@ -8,9 +8,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { UrTemplateComponent } from './ur-template/ur-template.component';
 import { UrAnimationComponent } from './ur-animation/ur-animation.component';
-
+import { UrScheduleComponent } from './ur-schedule/ur-schedule.component';
+import { FullCalendarModule } from '@fullcalendar/angular';
 @NgModule({
-    declarations: [UrTextComponent, UrButtonComponent, UrTextInputComponent, UrTemplateComponent, UrAnimationComponent],
-    imports: [CommonModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+    declarations: [UrTextComponent, UrButtonComponent, UrTextInputComponent, UrTemplateComponent, UrAnimationComponent, UrScheduleComponent],
+    imports: [CommonModule, MatButtonModule, MatFormFieldModule, MatInputModule, FullCalendarModule],
 })
 export class NodeTemplatesModule {}

@@ -45,6 +45,16 @@ import { MatInputModule } from '@angular/material/input';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { NgIdleModule } from '@ng-idle/core';
+import { FullCalendarModule } from '@fullcalendar/angular';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+
+FullCalendarModule.registerPlugins([ // register FullCalendar plugins
+    dayGridPlugin,
+    timeGridPlugin,
+    interactionPlugin
+]);
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     suppressScrollX: true,
@@ -90,6 +100,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         MatMenuModule,
         NgxMaskModule.forRoot(),
         NgIdleModule.forRoot(),
+        FullCalendarModule
     ],
     providers: [
         { provide: LocationStrategy, useClass: HashLocationStrategy },
