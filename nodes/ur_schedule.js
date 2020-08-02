@@ -1,4 +1,4 @@
-var cron = require('cron');
+var cron = require('node-cron');
 var buildJob = null;
 
 module.exports = function (RED) {
@@ -48,7 +48,6 @@ module.exports = function (RED) {
                     // set value in priority object
                     let value = this.event.value;
                     node.valuePriority[this.type] = config.values.find(v => v.name === value);
-                    console.log("valuePriority", node.valuePriority);
 
                     if (node.valuePriority.holiday) { //prioritize holiday schedules over date schedules
                         if (this.type === 'holiday' && node.valuePriority.holiday.value) {
@@ -115,12 +114,7 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = new cron.CronJob({
-                cronTime: sch.pattern,
-                onTick: fireEvent,
-                start: true,
-                context: { event: sch, type: "holiday" }
-            });
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: "holiday" }));
             node.cronJobs.push(job);
         };
 
@@ -131,12 +125,7 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = new cron.CronJob({
-                cronTime: sch.pattern,
-                onTick: fireEvent,
-                start: true,
-                context: { event: sch, type: "date" }
-            });
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: "date" }));
             node.cronJobs.push(job);
         };
 
@@ -147,31 +136,18 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = new cron.CronJob({
-                cronTime: sch.pattern,
-                onTick: fireEvent,
-                start: true,
-                context: { event: sch, type: "weekday" }
-            });
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: "weekday" }));
             node.cronJobs.push(job);
         };
 
         let schedulePriorityScheduleJobs = function(sch, type, time) {
             // activate date or holiday schedule at beginning of day (unless time overriden)
-            let startJob = new cron.CronJob({
-                cronTime: setCronTime(sch.pattern, time ? time.getHours() : 0, time ? time.getMinutes() : 0, time ? time.getSeconds() : 0),
-                onTick: setPrioritySchedule,
-                start: true,
-                context: { event: sch, type: type }
-            });
+            let startPattern = setCronTime(sch.pattern, time ? time.getHours() : 0, time ? time.getMinutes() : 0, time ? time.getSeconds() : 0);
+            let startJob = cron.schedule(startPattern, setPrioritySchedule.bind({ event: sch, type: type }));
             node.cronJobs.push(startJob);
             // deactivate date or holiday schedule at end of day
-            let endJob = new cron.CronJob({
-                cronTime: setCronTime(sch.pattern, 23, 59, 59),
-                onTick: clearPrioritySchedule,
-                start: true,
-                context: { event: sch, type: type }
-            });
+            let endPattern = setCronTime(sch.pattern, 23, 59, 59);
+            let endJob = cron.schedule(endPattern, clearPrioritySchedule.bind({ event: sch, type: type }));
             node.cronJobs.push(endJob);
         };
 
@@ -186,7 +162,7 @@ module.exports = function (RED) {
             try {
                 console.log(typeof node.cronJobs, Array.isArray(node.cronJobs));
                 for (let job of node.cronJobs) {
-                    job.stop();
+                    job.destroy();
                 }
             } catch (e) {
                 node.error(e);
@@ -216,7 +192,7 @@ module.exports = function (RED) {
                         node.error(err);
                     }
                 }
-            };
+            }
 
             // build map of all date events and index by date
             if (config.dates && config.dates.length) {
@@ -287,11 +263,7 @@ module.exports = function (RED) {
         buildSchedules();
         // rebuild schedules everyday at midnight
         if (!buildJob) {
-            buildJob = new cron.CronJob({
-                cronTime: "0 0 0 * * *",
-                onTick: buildSchedules,
-                start: true
-            });
+            buildJob = cron.schedule("0 0 0 * * *", buildSchedules);
         }
 
         var done = ui.add({
@@ -306,10 +278,10 @@ module.exports = function (RED) {
                 label: config.label,
                 order: config.order,
                 width: config.width || group.config.width || 12,
-                // height: config.height || 1,
                 values: config.values,
                 weekdays: config.weekdays,
-                dates: config.dates
+                dates: config.dates,
+                holidays: this.holidays
             }
         });
         node.on('close', done);
@@ -325,7 +297,7 @@ module.exports = function (RED) {
             this.log(RED._("schedule.stopped"));
         }
         for (let job of this.cronJobs) {
-            job.stop();
+            job.destroy();
         }
         this.cronJobs = [];
     };
