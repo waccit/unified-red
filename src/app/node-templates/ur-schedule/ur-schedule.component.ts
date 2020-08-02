@@ -90,7 +90,8 @@ export class UrScheduleComponent extends BaseNode {
                                 startPattern: start.pattern,
                                 // if no end event was defined, then set end to end of day
                                 endTime: end ? `${ end.hour.padStart(2, "0") }:${ end.minute.padStart(2, "0") }:00` : '23:59:59',
-                                endPattern: end ? end.pattern : null
+                                endPattern: end ? end.pattern : null,
+                                classNames: ["ur-schedule-weekday-event"]
                             };
                             events.push(event);
                         } catch (err) {
@@ -142,7 +143,8 @@ export class UrScheduleComponent extends BaseNode {
                                 // if no end event was defined, then set end to end of day
                                 end: end ? new Date(year, month, date, end.hour, end.minute) 
                                     : new Date(year, month, date, 23, 59, 59),
-                                endPattern: end ? end.pattern : null
+                                endPattern: end ? end.pattern : null,
+                                classNames: ["ur-schedule-date-event"]
                             };
                             events.push(event);
                         } catch (err) {
@@ -208,7 +210,8 @@ export class UrScheduleComponent extends BaseNode {
                                 // if no end event was defined, then set end to end of day
                                 end: end ? new Date(year, month, date, end.hour, end.minute) 
                                     : new Date(year, month, date, 23, 59, 59),
-                                endPattern: end ? end.pattern : null
+                                endPattern: end ? end.pattern : null,
+                                classNames: ["ur-schedule-holiday-event"]
                             };
                             events.push(event);
                         } catch (err) {

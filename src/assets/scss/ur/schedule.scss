@@ -1,0 +1,27 @@
+$weekdayEventColor: var(--fc-event-bg-color,#3788d8);
+$dateEventColor: seagreen;
+$holidateEventColor: tomato;
+
+.ur-schedule-weekday-event.fc-daygrid-dot-event .fc-daygrid-event-dot {
+    border-color: $weekdayEventColor;
+}
+
+.ur-schedule-date-event.fc-daygrid-dot-event .fc-daygrid-event-dot {
+    border-color: $dateEventColor;
+}
+
+.ur-schedule-holiday-event.fc-daygrid-dot-event .fc-daygrid-event-dot {
+    border-color: $holidateEventColor;
+}
+
+.ur-schedule-weekday-event.fc-timegrid-event {
+    background-color: $weekdayEventColor;
+}
+
+.ur-schedule-date-event.fc-timegrid-event {
+    background-color: $dateEventColor;
+}
+
+.ur-schedule-holiday-event.fc-timegrid-event {
+    background-color: $holidateEventColor;
+}
