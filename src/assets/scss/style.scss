@@ -59,7 +59,7 @@
 // @import 'apps/_contactlist.scss';
 // @import 'apps/_contactgrid.scss';
 // @import 'apps/_dragdrop.scss';
-// @import 'apps/_task.scss';
+@import 'apps/_task.scss';
 
 /*                 [5. Pages ]                   				*/
 @import 'pages/_dashboard.scss';
@@ -67,7 +67,7 @@
 // @import 'pages/_pricing.scss';
 // @import 'pages/_profile.scss';
 // @import 'pages/_timeline.scss';
-// @import 'pages/_extra_pages.scss';
+@import 'pages/_extra_pages.scss';
 
 /*                 [6. Pugins ]                   				*/
 // @import 'plugins/_carousel.scss';
