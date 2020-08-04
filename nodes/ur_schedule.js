@@ -160,13 +160,11 @@ module.exports = function (RED) {
             
             // stop and delete any existing cron jobs
             try {
-                console.log(typeof node.cronJobs, Array.isArray(node.cronJobs));
                 for (let job of node.cronJobs) {
                     job.destroy();
                 }
             } catch (e) {
                 node.error(e);
-                console.log(e);
             }
             node.cronJobs = [];
 
@@ -209,7 +207,7 @@ module.exports = function (RED) {
                         dateSchedules[dateKey].push(dateSch);
 
                         // schedule job and "priority schedule" jobs
-                        dateSch.pattern = ["0", dateSch.minute, dateSch.hour, d.getDate(), d.getMonth(), "*"].join(" ");
+                        dateSch.pattern = ["0", dateSch.minute, dateSch.hour, d.getDate(), d.getMonth()+1, "*"].join(" ");
                         scheduleDateJob(dateSch);
                         schedulePriorityScheduleJobs(dateSch, "date");
                     } catch (err) {
@@ -284,23 +282,23 @@ module.exports = function (RED) {
                 holidays: this.holidays
             }
         });
-        node.on('close', done);
+
+        /*
+        * This function is called when the node is being stopped, for example when a new flow configuration is deployed.
+        */
+        node.on('close', () => {
+            // tear down all cron jobs
+            if (RED.settings.verbose) {
+                this.log(RED._("schedule.stopped"));
+            }
+            for (let job of this.cronJobs) {
+                job.destroy();
+            }
+            this.cronJobs = [];
+            done();
+        });
     }
     RED.nodes.registerType('ur_schedule', ScheduleNode);
-
-    /*
-     * This function is called when the node is being stopped, for example when a new flow configuration is deployed.
-     */
-    ScheduleNode.prototype.close = function() {
-        // tear down all cron jobs
-        if (RED.settings.verbose) {
-            this.log(RED._("schedule.stopped"));
-        }
-        for (let job of this.cronJobs) {
-            job.destroy();
-        }
-        this.cronJobs = [];
-    };
 
     function setCronTime(pattern, hour, minute, second) {
         let parts = pattern.split(/\s+/);
