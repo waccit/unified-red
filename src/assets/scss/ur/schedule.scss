@@ -25,3 +25,13 @@ $holidateEventColor: tomato;
 .ur-schedule-holiday-event.fc-timegrid-event {
     background-color: $holidateEventColor;
 }
+
+.ur-schedule-event-module {
+    .mat-drawer.mat-drawer-end {
+        width: 220px;
+        min-width: 220px;
+    }
+    .task-container .header .header-close {
+        top: 5px;
+    }
+}
