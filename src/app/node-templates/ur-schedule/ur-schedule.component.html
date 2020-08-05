@@ -1,3 +1,8 @@
 <span #container [id]="data.id" class="ur-schedule-container">
     <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+    <div class="row" *ngIf="dirty">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2 mb-2">
+            <button mat-raised-button color="primary" class="example-full-width" [disabled]="!dirty" (click)="deploy()">Deploy</button>
+        </div>
+    </div>
 </span>

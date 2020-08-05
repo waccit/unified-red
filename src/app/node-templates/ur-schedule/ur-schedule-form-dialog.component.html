@@ -1,0 +1,157 @@
+<div class="scheduluDialogContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 p-l-10 font-17">{{title}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="form" (ngSubmit)="submit()">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Event Type</mat-label>
+                        <select matNativeControl formControlName="type" required>
+                            <option value="weekday">Weekday</option>
+                            <option value="date">Date</option>
+                            <option value="holiday">Holiday</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'weekday'">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Weekday</mat-label>
+                        <select matNativeControl formControlName="weekday" required>
+                            <option value="0">Sunday</option>
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'date'">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Date</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="date" placeholder="mm/dd" mask="00/00">
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker touchUi></mat-datepicker>
+                        <mat-error *ngIf="form.get('date').hasError('required')">
+                            Please select date
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'holiday'">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Holiday</mat-label>
+                        <input matInput formControlName="holiday">
+                        <mat-error *ngIf="form.get('holiday').hasError('required')">
+                            Please select date
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12">
+                    <div class="card h-100">
+                        <div class="card-body" style="padding: 0;">
+                            <div class="task-module ur-schedule-event-module">
+                                <div class="task-header">
+                                    <div class="task-title">
+                                        <div class="font-weight-bold p-t-5 p-l-10 font-17">Events</div>
+                                    </div>
+                                    <div class="header-button">
+                                        <button mat-raised-button color="primary" (click)="addNewEvent(sidenav)">Add Event</button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12">
+                                        <mat-sidenav-container class="task-container">
+                                            <mat-sidenav #sidenav [mode]="mode.value" position="end">
+                                                <div class="header">
+                                                    <h2 class="header-title">{{dialogTitle}}</h2>
+                                                    <div class="header-close m-l-0">
+                                                        <button mat-icon-button *ngIf="!isNewEvent" (click)="deleteEvent(sidenav)" matTooltip="Delete Event"><mat-icon>delete</mat-icon></button>
+                                                        <button mat-icon-button *ngIf="isNewEvent" (click)="saveEvent()" matTooltip="Save Event"><mat-icon>save</mat-icon></button>
+                                                        <button mat-icon-button *ngIf="!isNewEvent" (click)="editEvent()" matTooltip="Edit Event"><mat-icon>save</mat-icon></button>
+                                                        <button mat-icon-button (click)="closeSlider(sidenav)"><mat-icon>close</mat-icon></button>
+                                                    </div>
+                                                </div>
+                                                <form class="register-form m-4" [formGroup]="eventForm">
+                                                    <div class="row">
+                                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                                                            <mat-form-field [hidden]="true"><input matInput formControlName="id"></mat-form-field>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                                <mat-label>Value</mat-label>
+                                                                <select matNativeControl formControlName="value" required>
+                                                                    <option *ngFor="let value of data.values" [value]="value.name">{{ value.name }}</option>
+                                                                </select>
+                                                            </mat-form-field>
+                                                        </div>
+                                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                                <mat-label>Hour</mat-label>
+                                                                <select matNativeControl formControlName="hour" required>
+                                                                    <option *ngFor="let i of hours" [value]="i">{{ i }}</option>
+                                                                </select>
+                                                            </mat-form-field>
+                                                        </div>
+                                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
+                                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                                <mat-label>Minute</mat-label>
+                                                                <select matNativeControl formControlName="minute" required>
+                                                                    <option *ngFor="let i of minutes" [value]="i">{{ i }}</option>
+                                                                </select>
+                                                            </mat-form-field>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-xl-10 col-lg-10 col-md-12 col-sm-12">
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </mat-sidenav>
+                                            <mat-sidenav-content>
+                                                <div cdkDropList class="task-list" (cdkDropListDropped)="drop($event)" style="position: relative; height: 240px;" [perfectScrollbar]>
+                                                    <div class="task-box" *ngFor="let event of events" (click)="eventClick(event, sidenav)" cdkDrag>
+                                                        <div class="task-handle m-r-20" cdkDragHandle><mat-icon>drag_handle</mat-icon></div>
+                                                        <div class="task-custom-placeholder" *cdkDragPlaceholder></div>
+                                                        <div>{{ event.hour }}:{{ event.minute }}</div>
+                                                        <div class="m-l-30">{{event.value}}</div>
+                                                    </div>
+                                                </div>
+                                            </mat-sidenav-content>
+                                        </mat-sidenav-container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
+                            [mat-dialog-close]="form.getRawValue()" (click)="confirm()">Save</button>
+                        <button mat-raised-button color="warn" (click)="dialogRef.close()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
