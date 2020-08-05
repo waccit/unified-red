@@ -10,7 +10,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     private _wsSubscription: Subscription;
     @ViewChild('container', { static: true }) private _container: ElementRef;
 
-    constructor(private webSocketService: WebSocketService) {}
+    constructor(protected webSocketService: WebSocketService) {}
 
     ngAfterViewInit(): void {
         this._wsSubscription = this.webSocketService.listen('update-value').subscribe((msg: any) => {
