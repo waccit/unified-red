@@ -146,7 +146,7 @@ function add(opt) {
     opt.convertBack = opt.convertBack || noConvert;
     opt.beforeSend = opt.beforeSend || beforeSend;
     opt.control.id = opt.node.id;
-    var remove = addControl(opt.tab, opt.subtab, opt.group, opt.control);
+    var remove = addControl(opt.menuItem, opt.menuPage, opt.group, opt.control);
 
     opt.node.on('input', function (msg) {
         // console.log('opt.node.on input: ', msg);
@@ -488,25 +488,25 @@ function init(server, app, log, redSettings) {
             }, 50);
             socket.emit('ui-replay-done');
         });
-        socket.on('ui-change', function (tabIndex, subtabIndex) {
+        socket.on('ui-change', function (menuItemIndex, menuPageIndex) {
             var name = '';
             if (
-                tabIndex != null &&
-                subtabIndex != null &&
-                !isNaN(tabIndex) &&
-                !isNaN(subtabIndex) &&
+                menuItemIndex != null &&
+                menuPageIndex != null &&
+                !isNaN(menuItemIndex) &&
+                !isNaN(menuPageIndex) &&
                 menu.length > 0 &&
-                menu[tabIndex].items.length > 0 &&
-                tabIndex < menu.length &&
-                subtabIndex < menu[tabIndex].items.length &&
-                menu[tabIndex] &&
-                menu[tabIndex].items[subtabIndex]
+                menu[menuItemIndex].items.length > 0 &&
+                menuItemIndex < menu.length &&
+                menuPageIndex < menu[menuItemIndex].items.length &&
+                menu[menuItemIndex] &&
+                menu[menuItemIndex].items[menuPageIndex]
             ) {
                 name =
-                    menu[tabIndex].items[subtabIndex].hasOwnProperty('header') &&
-                    typeof menu[tabIndex].items[subtabIndex].header !== 'undefined'
-                        ? menu[tabIndex].items[subtabIndex].header
-                        : menu[tabIndex].items[subtabIndex].name;
+                    menu[menuItemIndex].items[menuPageIndex].hasOwnProperty('header') &&
+                    typeof menu[menuItemIndex].items[menuPageIndex].header !== 'undefined'
+                        ? menu[menuItemIndex].items[menuPageIndex].header
+                        : menu[menuItemIndex].items[menuPageIndex].name;
                 ev.emit('changetab', index, name, socket.client.id, socket.request.connection.remoteAddress, params);
             }
         });
