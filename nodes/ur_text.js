@@ -9,39 +9,39 @@ module.exports = function (RED) {
         if (!group) {
             return;
         }
-        var subtab = RED.nodes.getNode(group.config.subtab);
-        if (!subtab) {
+        var menuPage = RED.nodes.getNode(group.config.menuPage);
+        if (!menuPage) {
             return;
         }
-        var tab = RED.nodes.getNode(subtab.config.tab);
-        if (!tab) {
+        var menuItem = RED.nodes.getNode(menuPage.config.menuItem);
+        if (!menuItem) {
             return;
         }
 
-        var layout = config.layout || 'row-spread';
-        var angLayout = 'row';
-        var angLayoutAlign = 'space-between center';
-        if (layout === 'row-spread') {
-            angLayout = 'row';
-            angLayoutAlign = 'space-between center';
-        } else if (layout === 'row-left') {
-            angLayout = 'row';
-            angLayoutAlign = 'start center';
-        } else if (layout === 'row-center') {
-            angLayout = 'row';
-            angLayoutAlign = 'center center';
-        } else if (layout === 'row-right') {
-            angLayout = 'row';
-            angLayoutAlign = 'end center';
-        } else if (layout === 'col-center') {
-            angLayout = 'column';
-            angLayoutAlign = 'center center';
-        }
+        // var layout = config.layout || 'row-spread';
+        // var angLayout = 'row';
+        // var angLayoutAlign = 'space-between center';
+        // if (layout === 'row-spread') {
+        //     angLayout = 'row';
+        //     angLayoutAlign = 'space-between center';
+        // } else if (layout === 'row-left') {
+        //     angLayout = 'row';
+        //     angLayoutAlign = 'start center';
+        // } else if (layout === 'row-center') {
+        //     angLayout = 'row';
+        //     angLayoutAlign = 'center center';
+        // } else if (layout === 'row-right') {
+        //     angLayout = 'row';
+        //     angLayoutAlign = 'end center';
+        // } else if (layout === 'col-center') {
+        //     angLayout = 'column';
+        //     angLayoutAlign = 'center center';
+        // }
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
-            tab: tab,
-            subtab: subtab,
+            menuItem: menuItem,
+            menuPage: menuPage,
             group: group,
             control: {
                 id: config.id,

@@ -20,9 +20,10 @@
         "auto": "auto",
         "title": "Node-RED Dashboard",
         "layout": {
-            "tab-and-link": "Tabs & Links",
-            "tab": "tab",
-            "subtab": "subtab",
+            "nav-menu": "Navigation Menu",
+            "menuItem": "item",
+            "menuSubItem": "folder",
+            "menuPage": "page",
             "link": "link",
             "group": "group",
             "edit": "edit",

@@ -1,5 +1,5 @@
 module.exports = function (RED) {
-    function SubtabNode(config) {
+    function MenuPageNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
             pathName: config.name.replace(' ', '').toLowerCase(),
@@ -7,7 +7,7 @@ module.exports = function (RED) {
             disp: config.disp,
             width: config.width,
             order: config.order || 0,
-            tab: config.tab,
+            menuItem: config.menuItem,
             collapse: config.collapse || false,
             // icon: config.icon || 'ti-folder',
             disabled: config.disabled || false,
@@ -24,5 +24,5 @@ module.exports = function (RED) {
         }
     }
 
-    RED.nodes.registerType('ur_subtab', SubtabNode);
+    RED.nodes.registerType('ur_menu_page', MenuPageNode);
 };

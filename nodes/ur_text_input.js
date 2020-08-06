@@ -9,19 +9,19 @@ module.exports = function (RED) {
         if (!group) {
             return;
         }
-        var subtab = RED.nodes.getNode(group.config.subtab);
-        if (!subtab) {
+        var menuPage = RED.nodes.getNode(group.config.menuPage);
+        if (!menuPage) {
             return;
         }
-        var tab = RED.nodes.getNode(subtab.config.tab);
-        if (!tab) {
+        var menuItem = RED.nodes.getNode(menuPage.config.menuItem);
+        if (!menuItem) {
             return;
         }
 
         var done = ui.add({
             node: node,
-            tab: tab,
-            subtab: subtab,
+            menuItem: menuItem,
+            menuPage: menuPage,
             group: group,
             forwardInputMessages: config.passthru,
             control: {

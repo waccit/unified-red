@@ -8,7 +8,7 @@
         category: 'config',
         defaults: {
             name: { value: c_ur_group('label.default') },
-            subtab: { type: 'ur_subtab', required: true },
+            menuPage: { type: 'ur_menu_page', required: true },
             order: { value: 0 },
             disp: { value: true },
             // width: { value: 30 },
@@ -21,31 +21,31 @@
             hidden: { value: false },
         },
         sort: function (A, B) {
-            if (A.subtab !== B.subtab) {
-                var subtabA = RED.nodes.node(A.subtab);
-                var subtabB = RED.nodes.node(B.subtab);
-                if (!subtabA && subtabB) {
+            if (A.menuPage !== B.menuPage) {
+                var menuPageA = RED.nodes.node(A.menuPage);
+                var menuPageB = RED.nodes.node(B.menuPage);
+                if (!menuPageA && menuPageB) {
                     return -1;
-                } else if (subtabA && !subtabB) {
+                } else if (menuPageA && !menuPageB) {
                     return 1;
                 } else {
-                    return subtabA.order - subtabB.order;
+                    return menuPageA.order - menuPageB.order;
                 }
             }
             return A.order - B.order;
         },
         paletteLabel: 'dashboard group',
         label: function () {
-            var subtabNode = RED.nodes.node(this.subtab);
-            var tabNode = RED.nodes.node(subtabNode.tab);
-            var subtabName = subtabNode ? subtabNode.name : 'label.unassigned';
-            var tabName = tabNode ? tabNode.name : 'label.unassigned';
+            var menuPageNode = RED.nodes.node(this.menuPage);
+            var menuItemNode = RED.nodes.node(menuPageNode.menuItem);
+            var menuPageName = menuPageNode ? menuPageNode.name : 'label.unassigned';
+            var menuItemName = menuItemNode ? menuItemNode.name : 'label.unassigned';
 
             return (
                 '[' +
-                (tabName || c_ur_group('label.tab')) +
+                (menuItemName || c_ur_group('label.menuItem')) +
                 '] [' +
-                (subtabName || c_ur_group('label.subtab')) +
+                (menuPageName || c_ur_group('label.menuPage')) +
                 '] ' +
                 (this.name || c_ur_group('label.group'))
             );
@@ -98,8 +98,8 @@
         <input type="text" id="node-config-input-name">
     </div>
     <div class="form-row">
-        <label for="node-config-input-subtab"><i class="fa fa-table"></i> <span data-i18n="ur_group.label.subtab"></span></label>
-        <input type="text" id="node-config-input-subtab">
+        <label for="node-config-input-menuPage"><i class="fa fa-table"></i> <span data-i18n="ur_group.label.menuPage"></span></label>
+        <input type="text" id="node-config-input-menuPage">
     </div>
     <div class="form-row">
         <label for="node-config-input-width-row"><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span></label>
