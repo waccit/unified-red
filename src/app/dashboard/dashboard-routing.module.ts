@@ -1,20 +1,18 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MainComponent } from './main/main.component';
 import { MenuPageComponent } from './menu-page/menu-page.component';
+import { AuthGuard } from '../authentication/auth.guard';
 
 const routes: Routes = [
     {
         path: 'd',
+        canActivate: [AuthGuard],
         children: [
             {
                 path: '',
-                redirectTo: 'main',
+                // TODO add home page component
+                // component: HomePageComponent,
                 pathMatch: 'full',
-            },
-            {
-                path: 'main',
-                component: MainComponent,
             },
             {
                 path: ':menuItem/:menuPage',
