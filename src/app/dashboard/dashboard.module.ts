@@ -15,6 +15,7 @@ import { GroupComponent } from './group/group.component';
 import { GroupDirective } from '../directives/group.directive';
 import { MenuPageComponent } from './menu-page/menu-page.component';
 import { MenuPageDirective } from '../directives/menu-page.directive';
+import { HomePageComponent } from './home-page/home-page.component';
 
 @NgModule({
     declarations: [
@@ -26,6 +27,7 @@ import { MenuPageDirective } from '../directives/menu-page.directive';
         GroupDirective,
         MenuPageDirective,
         MenuPageComponent,
+        HomePageComponent,
     ],
     imports: [
         CommonModule,
