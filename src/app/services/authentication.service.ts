@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { NodeRedApiService } from './nodered-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthenticationService {
@@ -14,7 +15,7 @@ export class AuthenticationService {
     public token: Observable<string>;
     private decodedJwtPayload;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private red : NodeRedApiService) {
         this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
         this.token = this.tokenSubject.asObservable();
         this.decodedJwtPayload = this.decodeJwt();
@@ -29,6 +30,9 @@ export class AuthenticationService {
             .post<any>('/api/users/authenticate', { username, password })
             .pipe(
                 map((user) => {
+                    // authenticate with Node-RED as well so we can interface with the Node-RED Admin API
+                    this.red.login(username, password).subscribe();
+
                     // store jwt token in session storage to keep user logged in between page refreshes
                     sessionStorage.setItem('token', user.token);
                     this.tokenSubject.next(user.token);
@@ -39,9 +43,10 @@ export class AuthenticationService {
     }
 
     logout() {
-        // remove user from session storage and set current user and token to null
+        // remove user from session storage, set token to null, and logout of Node-RED
         sessionStorage.removeItem('token');
         this.tokenSubject.next(null);
+        this.red.logout();
     }
 
     forgotPassword(username: string) {

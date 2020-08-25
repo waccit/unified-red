@@ -1,0 +1,136 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_schedule_holidays_config', {
+        category: 'config',
+        defaults: {
+            name: { value: "Holidays", required: true },
+            values: [],
+            events: []
+        },
+        label: function () {
+            return this.name;
+        },
+        oneditprepare: function () {
+            let node = this;
+            if (this.values == null) {
+                this.values = [ { name: "On", value: 1 }, { name: "Off", value: 0 } ];
+            }
+
+            $("#node-config-input-value-container").css('min-height', '160px').css('min-width', '450px').editableList({
+                addItem: function (container, i, opt) {
+                    if (!opt.hasOwnProperty('value')) {
+                        opt.value = {};
+                    }
+                    var value = opt.value;
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
+                    var row = $('<div/>').appendTo(container);
+                    // name field
+                    $('<input/>', { class: "node-config-input-value-name", type: "text", placeholder: "name", style: "margin-left: 5px; width: 48%;" }).appendTo(row).val(value.name);
+                    // value field
+                    $('<input/>', { class: "node-config-input-value-value", type: "text", placeholder: "value", style: "margin-left: 5px; width: 48%;" }).appendTo(row).val(value.value);
+                },
+                sortable: true,
+                removable: true
+            });
+
+            $("#node-config-input-event-container").css('min-height', '360px').css('min-width', '450px').editableList({
+                addItem: function (container, i, opt) {
+                    if (!opt.hasOwnProperty('event')) {
+                        opt.event = {};
+                    }
+                    var event = opt.event;
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
+                    var row = $('<div/>').appendTo(container);
+                    // name field
+                    $('<input/>', { class: "node-config-input-event-name", type: "text", placeholder: "name", style: "margin-left: 5px; width: 30%;" }).appendTo(row).val(event.name);
+                    // pattern field
+                    let pattern = event.pattern ? event.pattern.split(/\s+/).slice(3).join(' ') : '';
+                    $('<input/>', { class: "node-config-input-event-pattern", type: "text", placeholder: "date month weekday", style: "margin-left: 5px; width: 30%;" }).appendTo(row).val(pattern);
+                    // value field
+                    var valueField = $('<select/>', { class: "node-config-input-event-value", style: "margin-left: 5px; width: 15%;" }).appendTo(row);
+                    for (let v of node.values) {
+                        $("<option>").val(v.value).text(v.name).prop('selected', v.name == event.value).appendTo(valueField);
+                    }
+                    // hour field
+                    var hourField = $('<select/>', { class: "node-config-input-event-hour", style: "margin-left: 5px; width: 10%;" }).appendTo(row);
+                    for (let i = 0; i < 24; i++) {
+                        $("<option>").val(i).text(i).appendTo(hourField);
+                    }
+                    hourField.val(event.hour);
+                    // minute field
+                    var minuteField = $('<select/>', { class: "node-config-input-event-minute", style: "margin-left: 5px; width: 10%;" }).appendTo(row);
+                    for (let i = 0; i < 60; i++) {
+                        $("<option>").val(i).text(i < 10 ? "0"+i : i).appendTo(minuteField);
+                    }
+                    minuteField.val(event.minute);
+                },
+                sortable: true,
+                removable: true
+            });
+
+            if (this.values && this.values.length) {
+                for (let value of this.values) {
+                    $("#node-config-input-value-container").editableList('addItem', { value: value });
+                }
+            }
+            if (this.events && this.events.length) {
+                for (let event of this.events) {
+                    $("#node-config-input-event-container").editableList('addItem', { event: event });
+                }
+            }
+        },
+        oneditsave: function () {
+            let node = this;
+            // store values from editable list
+            let values = $("#node-config-input-value-container").editableList('items');
+            node.values = [];
+            values.each(function(i) {
+                let container = $(this);
+                let value = {
+                    name: container.find(".node-config-input-value-name").val(),
+                    value: container.find(".node-config-input-value-value").val()
+                };
+                node.values.push(value);
+            });
+
+            // store events from editable list
+            let events = $("#node-config-input-event-container").editableList('items');
+            node.events = [];
+            events.each(function(i) {
+                let container = $(this);
+                let event = {
+                    name: container.find(".node-config-input-event-name").val(),
+                    pattern: "0 * * " + container.find(".node-config-input-event-pattern").val(),
+                    value: container.find(".node-config-input-event-value option:selected").text(),
+                    hour: container.find(".node-config-input-event-hour").val(),
+                    minute: container.find(".node-config-input-event-minute").val()
+                };
+                node.events.push(event);
+            });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_schedule_holidays_config">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_schedule.label.name"></span></label>
+        <input type="text" id="node-config-input-name">
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-config-input-value-container"><i class="fa fa-list"></i> <span data-i18n="ur_schedule.label.values"></span></label>
+    </div>
+    <div class="form-row node-config-input-value-container-row">
+        <ol id="node-config-input-value-container"></ol>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-config-input-event-container"><i class="fa fa-clock-o"></i> <span data-i18n="ur_schedule.label.events"></span></label>
+    </div>
+    <div class="form-row node-config-input-event-container-row">
+        <ol id="node-config-input-event-container"></ol>
+    </div>
+</script>

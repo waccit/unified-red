@@ -6,3 +6,4 @@ export * from './current-user.service';
 export * from './roles.service';
 export * from './web-socket.service';
 export * from './snackbar.service';
+export * from './nodered-api.service';

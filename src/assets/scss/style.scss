@@ -54,27 +54,27 @@
 @import 'components/_todo.scss';
 
 /*                 [4. Apps]                   				*/
-@import 'apps/_calendar.scss';
-@import 'apps/_chat.scss';
-@import 'apps/_contactlist.scss';
-@import 'apps/_contactgrid.scss';
-@import 'apps/_dragdrop.scss';
+// @import 'apps/_calendar.scss';
+// @import 'apps/_chat.scss';
+// @import 'apps/_contactlist.scss';
+// @import 'apps/_contactgrid.scss';
+// @import 'apps/_dragdrop.scss';
 @import 'apps/_task.scss';
 
 /*                 [5. Pages ]                   				*/
 @import 'pages/_dashboard.scss';
-@import 'pages/_inbox.scss';
-@import 'pages/_pricing.scss';
-@import 'pages/_profile.scss';
-@import 'pages/_timeline.scss';
+// @import 'pages/_inbox.scss';
+// @import 'pages/_pricing.scss';
+// @import 'pages/_profile.scss';
+// @import 'pages/_timeline.scss';
 @import 'pages/_extra_pages.scss';
 
 /*                 [6. Pugins ]                   				*/
-@import 'plugins/_carousel.scss';
+// @import 'plugins/_carousel.scss';
 @import 'plugins/_charts.scss';
 @import 'plugins/_formwizard.scss';
-@import 'plugins/_lightgallery.scss';
-@import 'plugins/_maps.scss';
+// @import 'plugins/_lightgallery.scss';
+// @import 'plugins/_maps.scss';
 @import 'plugins/_tables.scss';
 
 /*                 [7. UI ]                   */
@@ -96,6 +96,9 @@
 @import 'ui/_snackbar.scss';
 @import 'ui/_tabs.scss';
 @import 'ui/_tooltippopovers.scss';
+
+/*                 [Unified]                   				*/
+@import 'ur/schedule.scss';
 
 /*                 [8. Browser ]                   			*/
 @import 'browser/_ie10.scss';

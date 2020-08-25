@@ -1,0 +1,16 @@
+{
+    "ur_schedule": {
+        "label": {
+            "category": "unified-red",
+            "group": "Group",
+            "size": "Size",
+            "name": "Name",
+            "topic": "Topic",
+            "events": "Events",
+            "values": "Values",
+            "weekdays": "Weekdays",
+            "dates": "Dates",
+            "holidays": "Holidays"
+        }
+    }
+}

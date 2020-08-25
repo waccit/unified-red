@@ -4,8 +4,8 @@ import { DragulaModule } from 'ng2-dragula';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { FormsModule } from '@angular/forms';
 
-import { AppsRoutingModule } from './apps-routing.module';
-import { CalendarComponent } from './calendar/calendar.component';
+// import { AppsRoutingModule } from './apps-routing.module';
+// import { CalendarComponent } from './calendar/calendar.component';
 // import { ChatComponent } from './chat/chat.component';
 // import { DragDropComponent } from './drag-drop/drag-drop.component';
 // import { ContactListComponent } from './contact-list/contact-list.component';
@@ -24,7 +24,7 @@ import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
     declarations: [
-        CalendarComponent,
+        // CalendarComponent,
         // ChatComponent,
         // DragDropComponent,
         // ContactListComponent,
