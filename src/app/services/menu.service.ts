@@ -17,6 +17,7 @@ export class MenuService {
 
         this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
             this._menuSubject.next(data.menu);
+            console.log('menuService data: ', data);
         });
     }
 

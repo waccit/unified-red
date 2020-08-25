@@ -81,31 +81,31 @@
                     background-color: $theme-orange-menu-list-submenu;
                     .active {
                         a {
-                            font-weight: 700;
+                            font-weight: 1000;
                         }
                     }
-                    li.active a:not(.menu-toggle):before {
-                        content: '';
-                        display: block;
-                        width: 7px;
-                        height: 7px;
-                        border-radius: 50%;
-                        position: absolute;
-                        background-color: #777676;
-                        border-color: #777676;
-                        left: 17%;
-                        top: 50%;
-                        -webkit-transform: translate(-10px, -50%);
-                        -moz-transform: translate(-10px, -50%);
-                        -ms-transform: translate(-10px, -50%);
-                        -o-transform: translate(-10px, -50%);
-                        transform: translate(-10px, -50%);
-                        opacity: 1;
-                        -webkit-transition: all 0.2s ease;
-                        -o-transition: all 0.2s ease;
-                        -moz-transition: all 0.2s ease;
-                        transition: all 0.2s ease;
-                    }
+                    // li.active a:not(.menu-toggle):before {
+                    //     content: '';
+                    //     display: block;
+                    //     width: 7px;
+                    //     height: 7px;
+                    //     border-radius: 50%;
+                    //     position: absolute;
+                    //     background-color: #777676;
+                    //     border-color: #777676;
+                    //     left: 17%;
+                    //     top: 50%;
+                    //     -webkit-transform: translate(-10px, -50%);
+                    //     -moz-transform: translate(-10px, -50%);
+                    //     -ms-transform: translate(-10px, -50%);
+                    //     -o-transform: translate(-10px, -50%);
+                    //     transform: translate(-10px, -50%);
+                    //     opacity: 1;
+                    //     -webkit-transition: all 0.2s ease;
+                    //     -o-transition: all 0.2s ease;
+                    //     -moz-transition: all 0.2s ease;
+                    //     transition: all 0.2s ease;
+                    // }
                 }
             }
         }

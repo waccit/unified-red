@@ -18,6 +18,14 @@ module.exports = function (RED) {
             return;
         }
 
+        // menu-item tree stack (First In Last Out)
+        var menuItems = [];
+        menuItems.push(menuItem);
+        while (menuItem.config.menuItem) {
+            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
+            menuItems.push(menuItem);
+        }
+
         if (config.templateScope !== 'global') {
             if (!config.width) {
                 config.width = group.config.width;
@@ -32,7 +40,7 @@ module.exports = function (RED) {
             persistantFrontEndValue: config.resendOnRefresh,
             emitOnlyNewValues: false,
             node: node,
-            menuItem: menuItem,
+            menuItems: menuItems,
             menuPage: menuPage,
             group: group,
             control: {

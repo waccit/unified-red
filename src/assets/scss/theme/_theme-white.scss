@@ -111,31 +111,31 @@
                     background-color: $theme-white-menu-list-submenu;
                     .active {
                         a {
-                            font-weight: 700;
+                            font-weight: 1000;
                         }
                     }
-                    li.active a:not(.menu-toggle):before {
-                        content: '';
-                        display: block;
-                        width: 7px;
-                        height: 7px;
-                        border-radius: 50%;
-                        position: absolute;
-                        background-color: #777676;
-                        border-color: #777676;
-                        left: 17%;
-                        top: 50%;
-                        -webkit-transform: translate(-10px, -50%);
-                        -moz-transform: translate(-10px, -50%);
-                        -ms-transform: translate(-10px, -50%);
-                        -o-transform: translate(-10px, -50%);
-                        transform: translate(-10px, -50%);
-                        opacity: 1;
-                        -webkit-transition: all 0.2s ease;
-                        -o-transition: all 0.2s ease;
-                        -moz-transition: all 0.2s ease;
-                        transition: all 0.2s ease;
-                    }
+                    // li.active a:not(.menu-toggle):before {
+                    //     content: '';
+                    //     display: block;
+                    //     width: 7px;
+                    //     height: 7px;
+                    //     border-radius: 50%;
+                    //     position: absolute;
+                    //     background-color: #777676;
+                    //     border-color: #777676;
+                    //     left: 17%;
+                    //     top: 50%;
+                    //     -webkit-transform: translate(-10px, -50%);
+                    //     -moz-transform: translate(-10px, -50%);
+                    //     -ms-transform: translate(-10px, -50%);
+                    //     -o-transform: translate(-10px, -50%);
+                    //     transform: translate(-10px, -50%);
+                    //     opacity: 1;
+                    //     -webkit-transition: all 0.2s ease;
+                    //     -o-transition: all 0.2s ease;
+                    //     -moz-transition: all 0.2s ease;
+                    //     transition: all 0.2s ease;
+                    // }
                 }
             }
         }
@@ -164,8 +164,7 @@
         border-color: $theme-white-active-color;
         border-radius: 50%;
         margin: 5px;
-        box-shadow: 0 4px 5px 0 #d4d8da, 0 1px 10px 0 #d4d8da,
-            0 2px 4px -1px #d4d8da;
+        box-shadow: 0 4px 5px 0 #d4d8da, 0 1px 10px 0 #d4d8da, 0 2px 4px -1px #d4d8da;
         padding: 0px 12px;
         min-width: 30px;
         line-height: 30px;

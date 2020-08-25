@@ -18,9 +18,17 @@ module.exports = function (RED) {
             return;
         }
 
+        // menu-item tree stack (First In Last Out)
+        var menuItems = [];
+        menuItems.push(menuItem);
+        while (menuItem.config.menuItem) {
+            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
+            menuItems.push(menuItem);
+        }
+
         var done = ui.add({
             node: node,
-            menuItem: menuItem,
+            menuItems: menuItems,
             menuPage: menuPage,
             group: group,
             forwardInputMessages: config.passthru,

@@ -236,7 +236,7 @@
                 }
             }
 
-            .activeSub .ml-sub-menu {
+            .activeSub > div > .ml-sub-menu {
                 &:before {
                     @include transform(scale(0));
                 }

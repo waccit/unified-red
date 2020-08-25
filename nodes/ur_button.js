@@ -18,6 +18,14 @@ module.exports = function (RED) {
             return;
         }
 
+        // menu-item tree stack (First In Last Out)
+        var menuItems = [];
+        menuItems.push(menuItem);
+        while (menuItem.config.menuItem) {
+            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
+            menuItems.push(menuItem);
+        }
+
         var payloadType = config.payloadType;
         var payload = config.payload;
 
@@ -38,7 +46,7 @@ module.exports = function (RED) {
 
         var done = ui.add({
             node: node,
-            menuItem: menuItem,
+            menuItems: menuItems,
             menuPage: menuPage,
             group: group,
             emitOnlyNewValues: false,

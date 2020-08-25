@@ -2,7 +2,7 @@ module.exports = function (RED) {
     function MenuPageNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
-            pathName: config.name.replace(' ', '').toLowerCase(),
+            pathName: config.name.replace(/ /g, '').toLowerCase(),
             name: config.name,
             disp: config.disp,
             width: config.width,

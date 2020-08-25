@@ -1,0 +1,29 @@
+<!-- Second level menu -->
+<ul class="ml-menu">
+    <li
+        *ngFor="let sidebarSubItem of sidebarItems"
+        [class.activeSub]="showSubMenu === sidebarSubItem.title"
+        [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'"
+    >
+        <div *ngIf="sidebarSubItem.submenu.length > 0">
+            <a (click)="callSubMenuToggle(sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
+                {{ sidebarSubItem.title }}
+            </a>
+
+            <app-menu-entity
+                [ngClass]="
+                    !sidebarSubItem.isMenuPage
+                        ? { 'collapse': true, 'in': showSubMenu === sidebarSubItem.title }
+                        : 'collapse'
+                "
+                [sidebarItems]="sidebarSubItem.submenu"
+            ></app-menu-entity>
+        </div>
+
+        <div *ngIf="sidebarSubItem.submenu.length == 0">
+            <a [routerLink]="[sidebarSubItem.path]">
+                {{ sidebarSubItem.title }}
+            </a>
+        </div>
+    </li>
+</ul>
