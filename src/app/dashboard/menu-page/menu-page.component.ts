@@ -4,8 +4,8 @@ import { GroupComponent } from '../group/group.component';
 import { pageGroups } from './page-groups';
 import { WebSocketService } from '../../services';
 import { WidgetService } from '../../services/widget.service';
-import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { ActivatedRoute, UrlSegment } from '@angular/router';
+import { Subscription, Observable } from 'rxjs';
 import { MenuService } from '../../services/menu.service';
 import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 
@@ -16,9 +16,12 @@ import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 })
 export class MenuPageComponent implements OnInit {
     private menuItem: string;
+    private menuItems: string[];
+    private pathList: string[];
     private menuPage: string;
     private pageGroupsList: pageGroups[];
     private _menuSubscription: Subscription;
+    breadcrumbs: string[];
     @ViewChild(MenuPageDirective, { static: true }) menuPageHost: MenuPageDirective;
 
     constructor(
@@ -34,12 +37,11 @@ export class MenuPageComponent implements OnInit {
     ngOnInit(): void {
         this.viewContainerRef = this.menuPageHost.viewContainerRef;
 
-        this.route.params.subscribe((params) => {
-            console.log('menu-page params: ', params);
-            this.menuItem = params['menuItem'];
-            this.menuPage = params['menuPage'];
-
-            this.webSocketService.emit('ui-refresh', {});
+        this.route.url.subscribe((segments: UrlSegment[]) => {
+            // this.breadcrumbs = [...segments.map((seg) => seg.path)];
+            this.menuItems = [...segments.map((seg) => seg.path).slice(0, segments.length - 1)];
+            this.pathList = [...segments.map((seg) => seg.path)];
+            this.menuPage = segments[segments.length - 1].path;
 
             if (this._menuSubscription !== undefined) {
                 this._menuSubscription.unsubscribe();
@@ -49,27 +51,49 @@ export class MenuPageComponent implements OnInit {
                 this.setPageGroupsList(menu);
                 this.loadGroups();
             });
-
-            // this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
-            //     this.setPageGroupsList(data.menu);
-            //     this.loadGroups();
-            // });
-
-            // console.log('menu-page.component :menuItem/:menuPage: ', this.menuItem + '/' + this.menuPage);
         });
     }
 
     setPageGroupsList(menu: any[]) {
         this.pageGroupsList = [];
+        this.breadcrumbs = [];
+        let localCopy = [...this.pathList];
+        let parent: any = null;
 
-        let foundMenuItem = this.findMenuEntityByKeyValue(menu, 'title', this.menuItem);
-        let foundMenuPage: any;
+        // console.log('localCopy: ', localCopy);
 
-        if (foundMenuItem) {
-            foundMenuPage = this.findMenuEntityByKeyValue(foundMenuItem.items, 'title', this.menuPage);
+        while (localCopy.length > 2) {
+            let curr = localCopy.shift();
+
+            if (parent) {
+                parent = this.findMenuEntityByKeyValue(parent, 'title', curr);
+            } else {
+                parent = this.findMenuEntityByKeyValue(menu, 'title', curr);
+                // this.breadcrumbs.push(parent.title);
+            }
+            this.breadcrumbs.push(parent.title);
         }
 
+        this.menuItem = this.pathList[this.pathList.length - 2];
+        this.menuPage = this.pathList[this.pathList.length - 1];
+
+        // console.log('parent: ', parent);
+        // console.log('menuItem: ', this.menuItem);
+        // console.log('menuPage: ', this.menuPage);
+
+        let foundMenuItem = this.findMenuEntityByKeyValue(parent ? parent : menu, 'title', this.menuItem);
+
+        // console.log('foundMenuItem: ', foundMenuItem);
+
+        let foundMenuPage: any;
+        if (foundMenuItem) {
+            this.breadcrumbs.push(foundMenuItem.title);
+            foundMenuPage = this.findMenuEntityByKeyValue(foundMenuItem.items, 'title', this.menuPage);
+        }
+        // console.log('foundMenuPage: ', foundMenuPage);
+
         if (foundMenuPage) {
+            this.breadcrumbs.push(foundMenuPage.title);
             foundMenuPage.items.forEach((g) => {
                 this.pageGroupsList.push({
                     header: g.header,
@@ -78,7 +102,7 @@ export class MenuPageComponent implements OnInit {
                 });
             });
         }
-        console.log('setPageGroupsList Called');
+        // console.log('setPageGroupsList finished, pageGroupsList is: ', this.pageGroupsList);
     }
 
     // credit: https://stackoverflow.com/questions/15523514/find-by-key-deep-in-a-nested-array
@@ -95,7 +119,7 @@ export class MenuPageComponent implements OnInit {
             for (var prop in container) {
                 // console.log(prop + ': ' + container[prop]);
                 if (prop == key) {
-                    if (container[prop].replace(' ', '').toLowerCase() == value) {
+                    if (container[prop].replace(/ /g, '').toLowerCase() == value) {
                         return container;
                     }
                 }

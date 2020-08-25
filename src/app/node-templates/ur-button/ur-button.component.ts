@@ -6,12 +6,12 @@ import { Component, OnInit, Input } from '@angular/core';
     styleUrls: ['./ur-button.component.sass'],
 })
 export class UrButtonComponent implements OnInit {
-    text: string = 'defualt';
+    label: string = 'default';
     data: any;
 
     constructor() {}
 
     ngOnInit(): void {
-        this.text = this.data.label;
+        this.label = this.data.label;
     }
 }

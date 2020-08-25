@@ -18,6 +18,14 @@ module.exports = function (RED) {
             return;
         }
 
+        // menu-item tree stack (First In Last Out)
+        var menuItems = [];
+        menuItems.push(menuItem);
+        while (menuItem.config.menuItem) {
+            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
+            menuItems.push(menuItem);
+        }
+
         // var layout = config.layout || 'row-spread';
         // var angLayout = 'row';
         // var angLayoutAlign = 'space-between center';
@@ -40,7 +48,7 @@ module.exports = function (RED) {
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
-            menuItem: menuItem,
+            menuItems: menuItems,
             menuPage: menuPage,
             group: group,
             control: {
