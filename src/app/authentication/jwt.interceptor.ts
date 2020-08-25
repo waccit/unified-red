@@ -21,14 +21,17 @@ export class JwtInterceptor implements HttpInterceptor {
         request: HttpRequest<any>,
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
-        // add authorization header with jwt token if available
-        const token = this.authenticationService.tokenValue;
-        if (token) {
-            request = request.clone({
-                setHeaders: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+        let nodeRedApi = request.headers.get("Node-RED-API-Version");
+        if (!nodeRedApi) {
+            // add authorization header with jwt token if available
+            const token = this.authenticationService.tokenValue;
+            if (token) {
+                request = request.clone({
+                    setHeaders: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+            }
         }
         return next.handle(request);
     }

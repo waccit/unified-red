@@ -5,6 +5,7 @@ import { UrButtonComponent } from '../node-templates/ur-button/ur-button.compone
 import { UrTextInputComponent } from '../node-templates/ur-text-input/ur-text-input.component';
 import { UrTemplateComponent } from '../node-templates/ur-template/ur-template.component';
 import { UrAnimationComponent } from '../node-templates/ur-animation/ur-animation.component';
+import { UrScheduleComponent } from '../node-templates/ur-schedule/ur-schedule.component';
 
 @Injectable({
     providedIn: 'root',
@@ -23,7 +24,9 @@ export class WidgetService {
                     return new groupWidgets(UrTemplateComponent, widget);
                 case 'animation':
                     return new groupWidgets(UrAnimationComponent, widget);
-            }
+                case 'schedule':
+                    return new groupWidgets(UrScheduleComponent, widget);
+                }
         });
     }
 }
