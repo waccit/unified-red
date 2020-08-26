@@ -7,9 +7,17 @@ cd ~/.node-red
 npm install --save ~/git/unified-red
 ```
 
+## To unlink Unified-Red development folder
+
+```
+cd ~/.node-red/node_modules
+unlink unified-red
+```
+Unlinking is required prior to reinstalling or relinking Unified-Red
+
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--watch` flag to build automatically on a file save. Use the `--prod` flag for a production build.
 
 # Node-RED Configuration
 
