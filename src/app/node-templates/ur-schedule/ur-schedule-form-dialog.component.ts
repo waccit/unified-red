@@ -35,14 +35,49 @@ export class UrScheduleFormDialogComponent {
     title: string;
     form: FormGroup;
     data: any; // { start, end, values, type }
+    oldHoliday = '';
 
+    // select field options
     hours = [...Array(24).keys()];
     minutes = [...Array(60).keys()].map((i) => i.toString().padStart(2, '0'));
+    dates = [...Array(31).keys()].map((i) => (i + 1).toString());
+    weekdays = [
+        { value: '0', text: 'Sunday', short: 'Su' },
+        { value: '1', text: 'Monday', short: 'M' },
+        { value: '2', text: 'Tuesday', short: 'Tu' },
+        { value: '3', text: 'Wednesday', short: 'W' },
+        { value: '4', text: 'Thursday', short: 'Th' },
+        { value: '5', text: 'Friday', short: 'F' },
+        { value: '6', text: 'Saturday', short: 'Sa' },
+    ];
+    nth = [
+        { value: '1', text: '1st' },
+        { value: '2', text: '2nd' },
+        { value: '3', text: '3rd' },
+        { value: '4', text: '4th' },
+        { value: '5', text: '5th' },
+        // { value: 'L', text: 'Last' },
+    ];
+    months = [
+        { value: '1', text: 'Jan' },
+        { value: '2', text: 'Feb' },
+        { value: '3', text: 'Mar' },
+        { value: '4', text: 'Apr' },
+        { value: '5', text: 'May' },
+        { value: '6', text: 'Jun' },
+        { value: '7', text: 'Jul' },
+        { value: '8', text: 'Aug' },
+        { value: '9', text: 'Sep' },
+        { value: '10', text: 'Oct' },
+        { value: '11', text: 'Nov' },
+        { value: '12', text: 'Dec' },
+    ];
 
     mode = new FormControl('side');
     eventForm: FormGroup;
     isNewEvent = false;
     dialogTitle: string;
+    action: string;
     events = [];
 
     constructor(
@@ -50,37 +85,132 @@ export class UrScheduleFormDialogComponent {
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
         private formBuilder: FormBuilder
     ) {
-        console.log(dialogData);
-        this.title = dialogData.action === 'add' ? 'Edit Schedule' : 'New Schedule';
+        this.action = dialogData.action;
         this.data = dialogData.data;
-        this.form = this.formBuilder.group({
-            type: [this.data.type, Validators.required],
-            weekday: [this.data.start.weekday],
-            date: [this.data.start.date ? moment(Date.parse(this.data.start.date)).year(moment().year()) : null],
-            holiday: [this.data.start._pattern],
-        });
-        if (this.data.start) {
-            this.events.push({
-                id: this.events.length,
-                value: this.data.start.value,
-                hour: this.data.start.hour,
-                minute: this.data.start.minute?.toString().padStart(2, '0'),
+        this.title = this.action === 'add' ? 'New Schedule' : 'Edit Schedule';
+        if (this.data.events?.length) {
+            let r = {
+                repeat: null,
+                weekly: { weekday: null },
+                month: { type: null, date: null, weekdayOccurrence: null, weekday: null },
+                year: { type: null, month: null, date: null, weekdayOccurrence: null, weekday: null },
+            };
+            this.oldHoliday = this.data.events[0]._pattern || '';
+            if (this.oldHoliday) {
+                let [ sec, min, hour, date, month, weekday ] = this.oldHoliday.split(' ');
+                if (this.isWeeklyPattern(this.oldHoliday)) {
+                    r.repeat = 'weekly';
+                    r.weekly.weekday = weekday.split(',');
+                } else if (this.isMonthlyDatePattern(this.oldHoliday)) {
+                    r.repeat = 'monthly';
+                    r.month.type = 'date';
+                    r.month.date = date.split(',');
+                } else if (this.isMonthlyWeekdayPattern(this.oldHoliday)) {
+                    r.repeat = 'monthly';
+                    r.month.type = 'weekday';
+                    let w = weekday.split('#');
+                    if (w.length === 2) {
+                        r.month.weekday = w[0];
+                        r.month.weekdayOccurrence = w[1];
+                    }
+                } else if (this.isYearlyDatePattern(this.oldHoliday)) {
+                    r.repeat = 'yearly';
+                    r.year.type = 'date';
+                    r.year.date = date.split(',');
+                    r.year.month = month.split(',');
+                } else if (this.isYearlyWeekdayPattern(this.oldHoliday)) {
+                    r.repeat = 'yearly';
+                    r.year.type = 'weekday';
+                    r.year.month = month.split(',');
+                    let w = weekday.split('#');
+                    if (w.length === 2) {
+                        r.year.weekday = w[0];
+                        r.year.weekdayOccurrence = w[1];
+                    }
+                }
+            }
+
+            this.form = this.formBuilder.group({
+                type: [this.data.type, Validators.required],
+                weekday: [this.data.events[0].weekday],
+                date: [
+                    this.data.events[0].date
+                        ? moment(Date.parse(this.data.events[0].date)).year(moment().year())
+                        : null,
+                ],
+                repeat: [r.repeat],
+                repeatWeekdays: [r.weekly.weekday],
+                repeatMonthType: [r.month.type],
+                repeatMonthDate: [r.month.date],
+                repeatMonthWeekdayOccurrence: [r.month.weekdayOccurrence],
+                repeatMonthWeekday: [r.month.weekday],
+                repeatYearMonth: [r.year.month],
+                repeatYearType: [r.year.type],
+                repeatYearDate: [r.year.date],
+                repeatYearWeekdayOccurrence: [r.year.weekdayOccurrence],
+                repeatYearWeekday: [r.year.weekday],
             });
-        }
-        if (this.data.end) {
-            this.events.push({
-                id: this.events.length,
-                value: this.data.end.value,
-                hour: this.data.end.hour,
-                minute: this.data.end.minute?.toString().padStart(2, '0'),
+            this.events = this.sortChronologically(this.data.events).map((e, i) => {
+                e.id = i;
+                e.minute = e.minute.toString().padStart(2, '0');
+                return e;
             });
         }
         this.eventForm = this.createEventFormGroup(null);
     }
 
-    submit() {}
+    submit(addTo = null) {
+        return {
+            action: this.action,
+            ...this.form.getRawValue(),
+            holiday: this.generateHolidayPattern(),
+            events: this.events,
+            addTo: addTo,
+        };
+    }
+
+    delete() {
+        return {
+            action: 'delete',
+            ...this.form.getRawValue(),
+            events: this.events,
+        };
+    }
 
     public confirm(): void {}
+
+    generateHolidayPattern() {
+        let fc = this.form.controls;
+        if (fc.type.value !== 'holiday') {
+            return null;
+        }
+        let date, month, weekday;
+        if (fc.repeat.value === 'weekly') {
+            date = month = '*';
+            weekday = fc.repeatWeekdays.value;
+        } else if (fc.repeat.value === 'monthly') {
+            month = '*';
+            if (fc.repeatMonthType.value === 'date') {
+                date = fc.repeatMonthDate.value;
+                weekday = '*';
+            } else if (fc.repeatMonthType.value === 'weekday') {
+                date = '*';
+                weekday = fc.repeatMonthWeekday.value + '#' + fc.repeatMonthWeekdayOccurrence.value;
+            }
+        } else if (fc.repeat.value === 'yearly') {
+            month = fc.repeatYearMonth.value;
+            if (fc.repeatYearType.value === 'date') {
+                date = fc.repeatYearDate.value;
+                weekday = '*';
+            } else if (fc.repeatYearType.value === 'weekday') {
+                date = '*';
+                weekday = fc.repeatYearWeekday.value + '#' + fc.repeatYearWeekdayOccurrence.value;
+            }
+        }
+        let smh = this.oldHoliday ? this.oldHoliday.split(' ').slice(0, 3) : ["0", "0", "0"];
+        let newPattern = [...smh, date, month, weekday].join(' ');
+        return newPattern;
+    }
 
     drop(event: CdkDragDrop<string[]>) {
         moveItemInArray(this.events, event.previousIndex, event.currentIndex);
@@ -115,19 +245,21 @@ export class UrScheduleFormDialogComponent {
         });
     }
 
-    saveEvent() {
-        this.events.unshift(this.eventForm.value);
+    saveEvent(nav: any) {
+        this.events.push(this.eventForm.value);
         this.resetEventFormField();
+        nav.close();
     }
 
-    editEvent() {
-        const targetIdx = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
-        this.events[targetIdx] = this.eventForm.value;
+    editEvent(nav: any) {
+        let i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
+        this.events[i] = this.eventForm.value;
+        nav.close();
     }
 
     deleteEvent(nav: any) {
-        const targetIdx = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
-        this.events.splice(targetIdx, 1);
+        let i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
+        this.events.splice(i, 1);
         nav.close();
     }
 
@@ -142,5 +274,40 @@ export class UrScheduleFormDialogComponent {
             return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         };
         return S4() + S4();
+    }
+
+    private sortChronologically(scheduleArray) {
+        return scheduleArray.sort((a, b) => {
+            let hour = a.hour - b.hour;
+            if (hour === 0) {
+                return a.minute - b.minute;
+            }
+            return hour;
+        });
+    }
+
+    private isWeeklyPattern(pattern) {
+        /* Weekly expression e.g. 0 0 0 * * 0 */
+        return /([\*\d-,]+\s+){3}(\*\s+){2}([\d-,]+)$/.test(pattern);
+    }
+
+    private isMonthlyDatePattern(pattern) {
+        /* Monthly date expression e.g. 0 0 0 15 * */
+        return /([\*\d-,]+\s+){3}([\d-,]+|L)(\s+\*){2}$/.test(pattern);
+    }
+
+    private isMonthlyWeekdayPattern(pattern) {
+        /* Monthly weekday expression e.g. 0 0 0 * * 0#1 */
+        return /([\*\d-,]+\s+){3}(\*\s+){2}[\d-,]+(#\d|L)$/.test(pattern);
+    }
+
+    private isYearlyDatePattern(pattern) {
+        /* Yearly date expression e.g. 0 0 0 25 12 * */
+        return /([\*\d-,]+\s+){3}([\d-,]+|L)\s+[\d-,]+\s+\*$/.test(pattern);
+    }
+
+    private isYearlyWeekdayPattern(pattern) {
+        /* Yearly weekday expression e.g. 0 0 0 * 11 4#4 */
+        return /([\*\d-,]+\s+){3}\*\s+[\d-,]+\s+[\d-,]+(#\d|L)$/.test(pattern);
     }
 }

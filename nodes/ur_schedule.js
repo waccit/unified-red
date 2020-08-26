@@ -1,4 +1,5 @@
 var cron = require('node-cron');
+var moment = require('moment');
 var buildJob = null;
 
 module.exports = function (RED) {
@@ -101,13 +102,108 @@ module.exports = function (RED) {
             // pick the event closest to now
             let event = possibleEvents.length ? possibleEvents[possibleEvents.length-1] : null;
             return event;
-        }
+        };
 
         let secondsFromNow = function(x) {
             return new Date(new Date().getTime() + x * 1000); // in X seconds
         };
 
+        let explodeRange = function(exp) {
+            if (exp.indexOf('-') === -1) {
+                return exp;
+            }
+            let [a, b] = exp.split('-');
+            a = parseInt(a);
+            b = parseInt(b);
+            let start = Math.min(a, b);
+            let end = Math.max(a, b);
+            let range = [];
+            while (start <= end) {
+                range.push(start++);
+            }
+            return range.join(',');
+        };
+
+        let isNthWeekday = function(weekdayExp) {
+            let [day, week] = weekdayExp.split("#");
+            let weekdays = explodeRange(day).split(',');
+            for (let weekday of weekdays) {
+                weekday = parseInt(weekday);
+                let m = moment().date(week * 7 - 6); // go to nth week
+                if (m.weekday() > weekday) {
+                    m = m.add(7, 'days');
+                }
+                if (moment().diff(m.weekday(weekday), 'days') === 0) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        
+        let isLastWeekday = function(weekdayExp) {
+            let weekdays = explodeRange(weekdayExp.replace('L', '')).split(',');
+            for (let weekday of weekdays) {
+                let m = moment();
+                let origYear = m.year();
+                let origMonth = m.month();
+                m = m.add(1, 'months').date(1).weekday(weekday);
+                if (m.month() > origMonth || m.year() > origYear) {
+                    m = m.subtract(7, 'days');
+                }
+                if (moment().diff(m, 'days') === 0) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        
+        let isLastDate = function() {
+            let m = moment().add(1, 'months').date(1).subtract(1, 'days');
+            return moment().diff(m, 'days') === 0;
+        };
+
+        let correctForNthAndLastRules = function(schPattern) {
+            // check nth and last rules that node-cron currently does not support
+            if (schPattern) {
+                let pattern = schPattern.split(" ");
+                let date = pattern[3];
+                let weekday = pattern[5];
+                if (date === "L") {
+                    if (isLastDate()) { // if the last day, overwrite date field with today
+                        // console.log("scheduleHolidayJob lastDate");
+                        pattern[3] = moment().date();
+                        return pattern.join(" ");
+                    }
+                    return null;
+                }
+                if (weekday.indexOf("#") !== -1) {
+                    if (isNthWeekday(weekday)) { // if not the nth weekday, overwrite date field with today
+                        // console.log("scheduleHolidayJob nth weekday");
+                        pattern[5] = moment().day();
+                        return pattern.join(" ");
+                    }
+                    return null;
+                }
+                if (weekday.indexOf("L") !== -1) {
+                    if (isLastWeekday(weekday)) { // if not the last weekday, overwrite date field with today
+                        // console.log("scheduleHolidayJob last weekday");
+                        pattern[5] = moment().day();
+                        return pattern.join(" ");
+                    }
+                    return null;
+                }
+            }
+            return schPattern;
+        };
+
         let scheduleHolidayJob = function(sch, time) {
+            // check nth and last rules that node-cron currently does not support
+            let correctedPattern = correctForNthAndLastRules(sch.pattern);
+            if (!correctedPattern) {
+                return;
+            }
+            sch.pattern = correctedPattern;
+
             if (RED.settings.verbose) { 
                 node.log("scheduleHolidayJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
             }
@@ -141,6 +237,13 @@ module.exports = function (RED) {
         };
 
         let schedulePriorityScheduleJobs = function(sch, type, time) {
+            // check nth and last rules that node-cron currently does not support
+            let correctedPattern = correctForNthAndLastRules(sch.pattern);
+            if (!correctedPattern) {
+                return;
+            }
+            sch.pattern = correctedPattern;
+            
             // activate date or holiday schedule at beginning of day (unless time overriden)
             let startPattern = setCronTime(sch.pattern, time ? time.getHours() : 0, time ? time.getMinutes() : 0, time ? time.getSeconds() : 0);
             let startJob = cron.schedule(startPattern, setPrioritySchedule.bind({ event: sch, type: type }));
@@ -279,7 +382,8 @@ module.exports = function (RED) {
                 values: config.values,
                 weekdays: config.weekdays,
                 dates: config.dates,
-                holidays: this.holidays
+                holidays: this.holidays,
+                holidaysId: config.holidays
             }
         });
 

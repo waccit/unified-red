@@ -28,13 +28,7 @@
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Weekday</mat-label>
                         <select matNativeControl formControlName="weekday" required>
-                            <option value="0">Sunday</option>
-                            <option value="1">Monday</option>
-                            <option value="2">Tuesday</option>
-                            <option value="3">Wednesday</option>
-                            <option value="4">Thursday</option>
-                            <option value="5">Friday</option>
-                            <option value="6">Saturday</option>
+                            <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
                     </mat-form-field>
                 </div>
@@ -51,14 +45,113 @@
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'holiday'">
                     <mat-form-field class="example-full-width" appearance="outline">
-                        <mat-label>Holiday</mat-label>
-                        <input matInput formControlName="holiday">
-                        <mat-error *ngIf="form.get('holiday').hasError('required')">
-                            Please select date
-                        </mat-error>
+                        <mat-label>Repeat</mat-label>
+                        <select matNativeControl formControlName="repeat">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
                     </mat-form-field>
                 </div>
             </div>
+
+            <!-- weekly recurrence -->
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'weekly'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <mat-button-toggle-group formControlName="repeatWeekdays" multiple class="ur-schedule-weekday-picker">
+                        <mat-button-toggle *ngFor="let i of weekdays" [value]="i.value">{{ i.short }}</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+            <!-- end weekly recurrence -->
+
+            <!-- monthly recurrence -->
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'monthly'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>By</mat-label>
+                        <select matNativeControl formControlName="repeatMonthType">
+                            <option value="date">Date</option>
+                            <option value="weekday">Weekday</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'monthly' && form.controls.repeatMonthType.value === 'date'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <mat-button-toggle-group formControlName="repeatMonthDate" multiple class="ur-schedule-month-date-picker">
+                        <mat-button-toggle *ngFor="let i of dates" [value]="i">{{ i }}</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'monthly' && form.controls.repeatMonthType.value === 'weekday'">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>on the</mat-label>
+                        <select matNativeControl formControlName="repeatMonthWeekdayOccurrence">
+                            <option *ngFor="let i of nth" [value]="i.value">{{ i.text }}</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <select matNativeControl formControlName="repeatMonthWeekday">
+                            <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <!-- end monthly recurrence -->
+
+            <!-- yearly recurrence -->
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <mat-button-toggle-group formControlName="repeatYearMonth" multiple class="ur-schedule-year-month-picker">
+                        <mat-button-toggle *ngFor="let i of months" [value]="i.value">{{ i.text }}</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>By</mat-label>
+                        <select matNativeControl formControlName="repeatYearType">
+                            <option value="date">Date</option>
+                            <option value="weekday">Weekday</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+            </div>
+            
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly' && form.controls.repeatYearType.value === 'date'">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <mat-button-toggle-group formControlName="repeatYearDate" multiple class="ur-schedule-month-date-picker">
+                        <mat-button-toggle *ngFor="let i of dates" [value]="i">{{ i }}</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+
+            <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly' && form.controls.repeatYearType.value === 'weekday'">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>on the</mat-label>
+                        <select matNativeControl formControlName="repeatYearWeekdayOccurrence">
+                            <option *ngFor="let i of nth" [value]="i.value">{{ i.text }}</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <select matNativeControl formControlName="repeatYearWeekday">
+                            <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <!-- end yearly recurrence -->
 
             <div class="row">
                 <div class="col-md-12 col-sm-12">
@@ -81,8 +174,8 @@
                                                     <h2 class="header-title">{{dialogTitle}}</h2>
                                                     <div class="header-close m-l-0">
                                                         <button mat-icon-button *ngIf="!isNewEvent" (click)="deleteEvent(sidenav)" matTooltip="Delete Event"><mat-icon>delete</mat-icon></button>
-                                                        <button mat-icon-button *ngIf="isNewEvent" (click)="saveEvent()" matTooltip="Save Event"><mat-icon>save</mat-icon></button>
-                                                        <button mat-icon-button *ngIf="!isNewEvent" (click)="editEvent()" matTooltip="Edit Event"><mat-icon>save</mat-icon></button>
+                                                        <button mat-icon-button *ngIf="isNewEvent" (click)="saveEvent(sidenav)" matTooltip="Save Event"><mat-icon>save</mat-icon></button>
+                                                        <button mat-icon-button *ngIf="!isNewEvent" (click)="editEvent(sidenav)" matTooltip="Edit Event"><mat-icon>save</mat-icon></button>
                                                         <button mat-icon-button (click)="closeSlider(sidenav)"><mat-icon>close</mat-icon></button>
                                                     </div>
                                                 </div>
@@ -147,8 +240,30 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
-                            [mat-dialog-close]="form.getRawValue()" (click)="confirm()">Save</button>
-                        <button mat-raised-button color="warn" (click)="dialogRef.close()" tabindex="-1">Cancel</button>
+                            [mat-dialog-close]="submit()" (click)="confirm()">Save</button>
+                        <button mat-raised-button (click)="dialogRef.close()" tabindex="-1">Cancel</button>
+
+                        <button mat-icon-button [matMenuTriggerFor]="eventMoreMenu" [disabled]="!form.valid"
+                            [hidden]="form.controls.type.value !== 'weekday'">
+                            <mat-icon>more_horiz</mat-icon>
+                        </button>
+                        <mat-menu #eventMoreMenu="matMenu">
+                            <button mat-menu-item [mat-dialog-close]="submit('everyday')">
+                                <span>Add to everyday</span>
+                            </button>
+                            <button mat-menu-item [mat-dialog-close]="submit('m-f')">
+                                <span>Add to M-F</span>
+                            </button>
+                            <button mat-menu-item [mat-dialog-close]="submit('tu-f')">
+                                <span>Add to Tu-F</span>
+                            </button>
+                            <button mat-menu-item [mat-dialog-close]="submit('sa-su')">
+                                <span>Add to Sa-Su</span>
+                            </button>
+                        </mat-menu>
+
+                        <button mat-raised-button color="warn" class="float-right" *ngIf="action !== 'add'"
+                            [mat-dialog-close]="delete()" tabindex="-1">Delete</button>
                     </div>
                 </div>
             </div>
