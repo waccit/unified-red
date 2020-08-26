@@ -45,7 +45,7 @@ export class NodeRedApiService {
         return this.tokenSubject.value.access_token;
     }
 
-    deployNode(node) {
+    deployNodes(nodeIds: string[], replaceFunc: Function) {
         try {
             let headers = new HttpHeaders({
                 "Node-RED-API-Version": "v2",
@@ -55,10 +55,8 @@ export class NodeRedApiService {
                 if (data.flows) {
                     // replace existing node with new node
                     data.flows = data.flows.map(existing => {
-                        if (existing.id === node.id) {
-                            console.log("deployNode existing", existing);
-                            console.log("deployNode new", node);
-                            // return node;
+                        if (nodeIds.indexOf(existing.id) !== -1) {
+                            return replaceFunc(existing);
                         }
                         return existing;
                     });

@@ -1,10 +1,13 @@
 import { Component, ViewChild } from '@angular/core';
-import { FullCalendarComponent, CalendarOptions, compareByFieldSpec } from '@fullcalendar/angular';
-import { BaseNode } from '../ur-base-node';
+import { MatDialog } from '@angular/material/dialog';
+import { FullCalendarComponent, CalendarOptions } from '@fullcalendar/angular';
 import * as parser from 'cron-parser';
+import * as moment from 'moment';
+import { BaseNode } from '../ur-base-node';
 import { UrScheduleFormDialogComponent } from './ur-schedule-form-dialog.component';
 import { WebSocketService, SnackbarService, NodeRedApiService } from '../../services';
-import { MatDialog } from '@angular/material/dialog';
+
+declare const $: any;
 
 @Component({
     selector: 'app-ur-schedule',
@@ -20,16 +23,33 @@ export class UrScheduleComponent extends BaseNode {
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,dayGridDay,listWeek'
+            right: 'dayGridMonth,timeGridWeek,dayGridDay',
+        },
+        views: {
+            timeGridWeek: {
+                allDaySlot: false,
+            },
+        },
+        slotLabelFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: false,
+            hour12: false,
+        },
+        eventTimeFormat: {
+            hour: 'numeric',
+            minute: '2-digit',
+            meridiem: false,
+            hour12: false,
         },
         events: [],
         editable: true,
         weekends: true,
-         // Important: Bind all event handlers to UrScheduleComponent
+        // Important: Bind all event handlers to UrScheduleComponent
         dateClick: this.handleDateClick.bind(this),
         eventClick: this.handleEventClick.bind(this),
-        eventResize: this.handleEventResize.bind(this),
-        eventDrop: this.handleEventDrop.bind(this),
+        eventChange: this.handleEventChange.bind(this),
+        datesSet: this.renderDateRange.bind(this),
     };
 
     dirty = false;
@@ -38,19 +58,15 @@ export class UrScheduleComponent extends BaseNode {
         protected webSocketService: WebSocketService,
         public dialog: MatDialog,
         private snackbar: SnackbarService,
-        private red : NodeRedApiService
+        private red: NodeRedApiService
     ) {
         super(webSocketService);
     }
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
-        console.log(this.data);
-        this.calendarOptions.events = [
-            ...this.buildWeekdaySchedules(),
-            ...this.buildDateSchedules(),
-            ...this.buildHolidaySchedules(),
-        ];
+        this.calendarLoadSchedules();
+        this.runTests();
     }
 
     updateValue(data: any) {
@@ -59,7 +75,7 @@ export class UrScheduleComponent extends BaseNode {
         }
     }
 
-    sortChronologically(scheduleArray) {
+    private sortChronologically(scheduleArray) {
         return scheduleArray.sort((a, b) => {
             let hour = a.hour - b.hour;
             if (hour === 0) {
@@ -69,7 +85,16 @@ export class UrScheduleComponent extends BaseNode {
         });
     }
 
-    buildWeekdaySchedules() {
+    private calendarLoadSchedules() {
+        this.calendarOptions.events = [
+            ...this.buildWeekdaySchedules(),
+            ...this.buildDateSchedules(),
+            ...this.buildHolidaySchedules(),
+        ];
+        this.renderInactiveEvents();
+    }
+
+    private buildWeekdaySchedules() {
         let events = [];
         if (this.data && this.data.weekdays) {
             let weekdaySchedules = [
@@ -79,35 +104,37 @@ export class UrScheduleComponent extends BaseNode {
                 /* Wednesday */ [],
                 /* Thursday  */ [],
                 /* Friday    */ [],
-                /* Saturday  */ []
+                /* Saturday  */ [],
             ];
             for (let sch of this.data.weekdays) {
                 try {
                     if (!isNaN(sch.weekday)) {
-                        weekdaySchedules[ parseInt(sch.weekday) ].push(sch);
+                        weekdaySchedules[parseInt(sch.weekday)].push(sch);
                     }
                 } catch (err) {
                     console.error(err);
                 }
             }
-            for (let i = 0; i < weekdaySchedules.length; i++) {
+            for (let weekdaySch of weekdaySchedules) {
                 try {
-                    weekdaySchedules[i] = this.sortChronologically(weekdaySchedules[i]);
-                    for (let j = 0; j < weekdaySchedules[i].length; j+=2) {
+                    this.sortChronologically(weekdaySch);
+                    for (let j = 0; j < weekdaySch.length; j += 2) {
                         try {
-                            let start = weekdaySchedules[i][j];
-                            let end = weekdaySchedules[i][j+1];
+                            let start = weekdaySch[j];
+                            let end = weekdaySch[j + 1];
                             let weekday = parseInt(start.weekday);
                             let event = {
                                 title: start.value,
                                 allDay: false,
-                                daysOfWeek: [ weekday ],
-                                groupId: "weekday"+weekday, // assign each weekday to a group so changes to a weekday are repeated every week
-                                startTime: `${ start.hour.padStart(2, "0") }:${ start.minute.padStart(2, "0") }:00`,
+                                daysOfWeek: [weekday],
+                                groupId: 'weekday' + weekday, // assign each weekday to a group so changes to a weekday are repeated every week
+                                startTime: `${start.hour.padStart(2, '0')}:${start.minute.padStart(2, '0')}:00`,
                                 // if no end event was defined, then set end to end of day
-                                endTime: end ? `${ end.hour.padStart(2, "0") }:${ end.minute.padStart(2, "0") }:00` : '23:59:59',
-                                classNames: ["ur-schedule-weekday-event"],
-                                schedule: { start: start, end: end, values: this.data.values, type: "weekday" }
+                                endTime: end
+                                    ? `${end.hour.padStart(2, '0')}:${end.minute.padStart(2, '0')}:00`
+                                    : '23:59:59',
+                                classNames: ['ur-schedule-weekday-event'],
+                                schedule: { start: start, end: end, values: this.data.values, type: 'weekday' },
                             };
                             events.push(event);
                         } catch (err) {
@@ -122,7 +149,7 @@ export class UrScheduleComponent extends BaseNode {
         return events;
     }
 
-    buildDateSchedules() {
+    private buildDateSchedules() {
         let events = [];
         if (this.data && this.data.dates) {
             let dateSchedules = {};
@@ -131,7 +158,7 @@ export class UrScheduleComponent extends BaseNode {
                 try {
                     let d = new Date(sch.date);
                     d.setFullYear(new Date().getFullYear()); // normalize key to current year
-                    let dateKey =  d.getTime();
+                    let dateKey = d.getTime();
                     if (!dateSchedules[dateKey]) {
                         dateSchedules[dateKey] = [];
                     }
@@ -143,11 +170,11 @@ export class UrScheduleComponent extends BaseNode {
 
             for (let dateKey in dateSchedules) {
                 try {
-                    dateSchedules[dateKey] = this.sortChronologically(dateSchedules[dateKey]);
-                    for (let j = 0; j < dateSchedules[dateKey].length; j+=2) {
+                    this.sortChronologically(dateSchedules[dateKey]);
+                    for (let j = 0; j < dateSchedules[dateKey].length; j += 2) {
                         try {
                             let start = dateSchedules[dateKey][j];
-                            let end = dateSchedules[dateKey][j+1];
+                            let end = dateSchedules[dateKey][j + 1];
                             let d = new Date(start.date);
                             let month = d.getMonth();
                             let date = d.getDate();
@@ -156,10 +183,11 @@ export class UrScheduleComponent extends BaseNode {
                                 allDay: false,
                                 start: new Date(year, month, date, start.hour, start.minute),
                                 // if no end event was defined, then set end to end of day
-                                end: end ? new Date(year, month, date, end.hour, end.minute) 
+                                end: end
+                                    ? new Date(year, month, date, end.hour, end.minute)
                                     : new Date(year, month, date, 23, 59, 59),
-                                classNames: ["ur-schedule-date-event"],
-                                schedule: { start: start, end: end, values: this.data.values, type: "date" }
+                                classNames: ['ur-schedule-date-event'],
+                                schedule: { start: start, end: end, values: this.data.values, type: 'date' },
                             };
                             events.push(event);
                         } catch (err) {
@@ -174,26 +202,28 @@ export class UrScheduleComponent extends BaseNode {
         return events;
     }
 
-    buildHolidaySchedules() {
+    private buildHolidaySchedules() {
         let events = [];
         let year = new Date().getFullYear();
-        var options = {
-            currentDate: new Date(year, 0, 1),
-            endDate: new Date(year+1, 0, 1),
-            iterator: true
-        };
+        let parserStartDate = new Date(year, 0, 1);
+        let parserEndDate = new Date(year + 1, 0, 1);
 
         if (this.data && this.data.holidays) {
             let holidaySchedules = {};
-            for (let sch of this.data.holidays) {
+            for (let holidaySch of this.data.holidays) {
                 try {
-                    let interval = parser.parseExpression(sch.pattern, options);
-                    let nextEvent : any;
-                    while (nextEvent = interval.next()) {
+                    let interval = parser.parseExpression(holidaySch.pattern, {
+                        currentDate: parserStartDate,
+                        endDate: parserEndDate,
+                        iterator: true,
+                    });
+                    let nextEvent: any;
+                    while ((nextEvent = interval.next())) {
+                        let sch = { ... holidaySch }; //clone schedule
                         sch.date = nextEvent.value.toDate();
                         let d = nextEvent.value.toDate();
                         d.setHours(0, 0, 0, 0);
-                        let dateKey =  d.getTime();
+                        let dateKey = d.getTime();
                         if (!holidaySchedules[dateKey]) {
                             holidaySchedules[dateKey] = [];
                         }
@@ -209,11 +239,11 @@ export class UrScheduleComponent extends BaseNode {
 
             for (let dateKey in holidaySchedules) {
                 try {
-                    holidaySchedules[dateKey] = this.sortChronologically(holidaySchedules[dateKey]);
-                    for (let j = 0; j < holidaySchedules[dateKey].length; j+=2) {
+                    this.sortChronologically(holidaySchedules[dateKey]);
+                    for (let j = 0; j < holidaySchedules[dateKey].length; j += 2) {
                         try {
                             let start = holidaySchedules[dateKey][j];
-                            let end = holidaySchedules[dateKey][j+1];
+                            let end = holidaySchedules[dateKey][j + 1];
                             let d = new Date(start.date);
                             let month = d.getMonth();
                             let date = d.getDate();
@@ -222,10 +252,11 @@ export class UrScheduleComponent extends BaseNode {
                                 allDay: false,
                                 start: new Date(year, month, date, start.hour, start.minute),
                                 // if no end event was defined, then set end to end of day
-                                end: end ? new Date(year, month, date, end.hour, end.minute) 
+                                end: end
+                                    ? new Date(year, month, date, end.hour, end.minute)
                                     : new Date(year, month, date, 23, 59, 59),
-                                classNames: ["ur-schedule-holiday-event"],
-                                schedule: { start: start, end: end, values: this.data.values, type: "holiday" }
+                                classNames: ['ur-schedule-holiday-event'],
+                                schedule: { start: start, end: end, values: this.data.values, type: 'holiday' },
                             };
                             events.push(event);
                         } catch (err) {
@@ -240,99 +271,455 @@ export class UrScheduleComponent extends BaseNode {
         return events;
     }
 
-    handleDateClick(data) {
-        console.log("handleDateClick", data);
+    private handleDateClick(data) {
+        // console.log('handleDateClick', data);
         let dialogData = {
-            data: { start: null, end: null, values: this.data.values, type: "weekday" },
-            action: 'add'
+            data: { type: 'weekday', values: this.data.values, events: [] },
+            action: 'add',
         };
         // if click was on week grid, then assume the user wants to add a weekday schedule,
-        // if click was on the day/month grid, then assume the user wants to add a date schedule. 
+        // if click was on the day/month grid, then assume the user wants to add a date schedule.
         switch (data.view.type) {
-            case "timeGridWeek":
-                dialogData.data.type = "weekday";
-                dialogData.data.start = {
+            case 'timeGridWeek':
+                dialogData.data.type = 'weekday';
+                dialogData.data.events.push({
                     weekday: data.date.getDay(),
                     value: this.data.values[0]?.name,
                     hour: data.date.getHours(),
-                    minute: data.date.getMinutes().toString().padStart(2, "0")
-                };
+                    minute: data.date.getMinutes().toString().padStart(2, '0'),
+                });
                 break;
-            case "dayGridDay":
-            case "dayGridMonth":
-                dialogData.data.type = "date";
-                dialogData.data.start = {
+            case 'dayGridDay':
+            case 'dayGridMonth':
+                dialogData.data.type = 'date';
+                dialogData.data.events.push({
                     date: data.date.toString(),
                     value: this.data.values[0]?.name,
                     hour: data.date.getHours(),
-                    minute: data.date.getMinutes().toString().padStart(2, "0")
-                };
+                    minute: data.date.getMinutes().toString().padStart(2, '0'),
+                });
                 break;
         }
         this.dialog
             .open(UrScheduleFormDialogComponent, { data: dialogData })
             .afterClosed()
             .subscribe((result) => {
-                console.log("add response", result);
+                // console.log('add response', result);
                 if (result) {
                     this.dirty = true;
-                    // this.roleService.update(row.level, result).subscribe(
-                    //     (data) => {
-                    //         this.snackbar.success('Added user successfully!');
-                    //         this.refreshTable();
-                    //     },
-                    //     (error) => {
-                    //         this.snackbar.error(error);
-                    //     }
-                    // );
+                    switch (result.type) {
+                        case 'weekday': this.addWeekdaySchedulesFromDialog(result); break;
+                        case 'date': this.addDateSchedulesFromDialog(result); break;
+                        case 'holiday': this.addHolidaySchedulesFromDialog(result); break;
+                    }
+                    this.calendarLoadSchedules();
                 }
             });
     }
 
-    handleEventClick(data) {
-        console.log("handleEventClick", data);
+    private handleEventClick(data) {
+        // console.log('handleEventClick', data);
+        // console.log('this.data', this.data);
+        let orig = data?.event?.extendedProps?.schedule;
+        // console.log('event extendedProps', orig);
+
+        let diaglogData = { type: orig.type, values: orig.values, events: [] };
+        // collect all events for the selected weekday/date/holiday
+        switch (orig?.type) {
+            case 'weekday':
+                diaglogData.events = this.data.weekdays.filter(e => e.weekday === orig.start.weekday);
+                break;
+            case 'date':
+                diaglogData.events = this.data.dates.filter(e => e.date === orig.start.date);
+                break;
+            case 'holiday':
+                let origCron = orig.start.pattern.split(' ');
+                if (origCron.length >= 5) {
+                    diaglogData.events = this.data.holidays.filter(e => {
+                        let eCron = e.pattern.split(' ');
+                        if (eCron.length < 5) {
+                            return false;
+                        }
+                        return /* date */ eCron[3] === origCron[3] && 
+                            /* month */ eCron[4] === origCron[4] && 
+                            /* day */ eCron[5] === origCron[5];
+                    });
+                }
+                break;
+        }
+
         this.dialog
-            .open(UrScheduleFormDialogComponent, { data: { data: data.event.extendedProps.schedule, action: 'edit' }})
+            .open(UrScheduleFormDialogComponent, { data: { data: diaglogData, action: 'edit' } })
             .afterClosed()
             .subscribe((result) => {
-                console.log("edit response", result);
+                // console.log('edit response', result);
                 if (result) {
-                    this.dirty = true;
-                    // this.roleService.update(row.level, result).subscribe(
-                    //     (data) => {
-                    //         this.snackbar.success('Edited role successfully!');
-                    //         this.refreshTable();
-                    //     },
-                    //     (error) => {
-                    //         this.snackbar.error(error);
-                    //     }
-                    // );
+                    let updated = false;
+
+                    let purgeOldEvent = function(arr, prop) {
+                        let startLength = arr.length;
+                        arr = arr.filter(sch => sch[prop] !== orig.start[prop]);
+                        // if anything removed, flag updated
+                        if (startLength !== arr.length) {
+                            updated = true;
+                        }
+                        return arr;
+                    };
+
+                    // in all cases (edit or delete), remove original events
+                    switch (orig?.type) {
+                        case 'weekday': this.data.weekdays = purgeOldEvent(this.data.weekdays, 'weekday'); break;
+                        case 'date': this.data.dates = purgeOldEvent(this.data.dates, 'date'); break;
+                        case 'holiday': this.data.holidays = purgeOldEvent(this.data.holidays, '_pattern'); break;
+                    }
+
+                    if (result.action === "edit") {
+                        // add new events returned from dialog
+                        switch (result.type) {
+                            case 'weekday':
+                                if (this.addWeekdaySchedulesFromDialog(result)) {
+                                    updated = true;
+                                }
+                                break;
+                            case 'date':
+                                if (this.addDateSchedulesFromDialog(result)) {
+                                    updated = true;
+                                }
+                                break;
+                            case 'holiday':
+                                if (this.addHolidaySchedulesFromDialog(result)) {
+                                    updated = true;
+                                }
+                                break;
+                        }
+                    }
+
+                    if (updated) {
+                        this.dirty = true;
+                        this.calendarLoadSchedules();
+                    }
                 }
             });
     }
 
-    handleEventResize(data) {
-        console.log("handleEventResize", data);
-        this.dirty = true;
-        // data.event.start;
-        // data.event.end;
-        // data.oldEvent.start;
-        // data.oldEvent.end;
-    }
+    private handleEventChange(fc) {
+        let updated = false;
 
-    handleEventDrop(data) {
-        console.log("handleEventDrop", data);
-        this.dirty = true;
-        // data.event;
-        // data.oldEvent;
+        let orig = fc.oldEvent?.extendedProps?.schedule;
+        if (orig?.type === 'weekday') {
+            for (let sch of this.data.weekdays) {
+                if (this.isWeekdayScheduleMatch(sch, orig.start)) {
+                    this.updateWeekdaySchedule(sch, fc.event.start);
+                    updated = true;
+                } else if (this.isWeekdayScheduleMatch(sch, orig.end)) {
+                    this.updateWeekdaySchedule(sch, fc.event.end);
+                    updated = true;
+                }
+            }
+        } else if (orig?.type === 'date') {
+            for (let sch of this.data.dates) {
+                if (this.isDateScheduleMatch(sch, orig.start)) {
+                    this.updateDateSchedule(sch, fc.event.start);
+                    updated = true;
+                } else if (this.isDateScheduleMatch(sch, orig.end)) {
+                    this.updateDateSchedule(sch, fc.event.end);
+                    updated = true;
+                }
+            }
+        } else if (orig?.type === 'holiday') {
+            if (moment(fc.event.start).diff(moment(fc.oldEvent.start), 'days') !== 0) {
+                // holiday event dragged onto different day
+                console.error("Cannot drag holiday to a different day. Please edit the holiday's repeat rule.");
+                fc.revert();
+                return;
+            }
+            for (let sch of this.data.holidays) {
+                if (this.isHolidayScheduleMatch(sch, orig.start)) {
+                    this.updateHolidaySchedule(sch, fc.event.start);
+                    updated = true;
+                } else if (this.isHolidayScheduleMatch(sch, orig.end)) {
+                    this.updateHolidaySchedule(sch, fc.event.end);
+                    updated = true;
+                }
+            }
+        }
+        if (updated) {
+            this.dirty = true;
+            this.calendarLoadSchedules();
+        }
     }
 
     deploy() {
-        this.red.deployNode(this.data).subscribe((reeponse: any) => {
-            console.log("ur-schedule deploy", reeponse);
-            if (reeponse?.rev) {
-                this.snackbar.success('Deployed successfully!');
+        let nodesToReplace = [this.data.id, this.data.holidaysId];
+        this.red
+            .deployNodes(nodesToReplace, (existing) => {
+                switch (existing.id) {
+                    case this.data.holidaysId:
+                        existing.events = this.data.holidays;
+                        break;
+                    case this.data.id:
+                        existing.dates = this.data.dates;
+                        existing.weekdays = this.data.weekdays;
+                        break;
+                }
+                return existing;
+            })
+            .subscribe((response: any) => {
+                if (response?.rev) {
+                    this.snackbar.success('Deployed successfully!');
+                }
+            });
+    }
+
+    private renderDateRange() {
+        this.renderInactiveEvents();
+    }
+
+    private renderInactiveEvents() {
+        setTimeout(() => {
+            // clear any previous inactive flags
+            $('.ur-schedule-weekday-event.inactive, .ur-schedule-date-event.inactive').removeClass('inactive');
+
+            let events = $('.fc-timegrid-col, .fc-daygrid-day');
+            // within week or month/day view, check for any events with weekday and date/holiday schedules and flag weekday events as inactive
+            events
+                .has('.ur-schedule-weekday-event')
+                .has('.ur-schedule-date-event, .ur-schedule-holiday-event')
+                .find('.ur-schedule-weekday-event')
+                .addClass('inactive');
+
+            // within week or month/day view, check for any events with date and holiday schedules and flag date events as inactive
+            events
+                .has('.ur-schedule-date-event')
+                .has('.ur-schedule-holiday-event')
+                .find('.ur-schedule-date-event')
+                .addClass('inactive');
+        }, 50); //short delay to allow DOM to complete rendering in certain edge cases
+    }
+
+    private addWeekdaySchedulesFromDialog(result) {
+        let added = false;
+        for (let event of result.events) {
+            let weekday = parseInt(result.weekday);
+            let weekdays = [ weekday ];
+            if (result.addTo) {
+                switch (result.addTo) {
+                    case "everyday": weekdays = [ 0, 1, 2, 3, 4, 5, 6 ]; break;
+                    case "m-f": weekdays = [ ...new Set([1, 2, 3, 4, 5, weekday]) ]; break;
+                    case "tu-f": weekdays = [ ...new Set([2, 3, 4, 5, weekday]) ]; break;
+                    case "sa-su": weekdays = [ ...new Set([0, 6, weekday]) ]; break;
+                }
             }
-        });
+            for (let weekday of weekdays) {
+                let date = moment().day(weekday).hour(event.hour).minute(event.minute);
+                let sch = { weekday: '', value: event.value, hour: '', minute: '', pattern: '' };
+                sch = this.updateWeekdaySchedule(sch, date);
+                this.data.weekdays.push(sch);
+                added = true;
+            }
+        }
+        return added;
+    }
+
+    private addDateSchedulesFromDialog(result) {
+        let added = false;
+        for (let event of result.events) {
+            let date = result.date;
+            date.hour(event.hour).minute(event.minute);
+            let sch = { date: '', value: event.value, hour: '', minute: '', pattern: '' };
+            sch = this.updateDateSchedule(sch, date);
+            this.data.dates.push(sch);
+            added = true;
+        }
+        return added;
+    }
+
+    private addHolidaySchedulesFromDialog(result) {
+        let added = false;
+        for (let event of result.events) {
+            let pattern = result.holiday;
+            let name = this.buildHolidayName(result);
+            let date = moment().hour(event.hour).minute(event.minute);
+            let sch = this.updateHolidaySchedule({
+                name: name,
+                value: event.value,
+                hour: '',
+                minute: '',
+                pattern: pattern
+            }, date);
+            this.data.holidays.push(sch);
+            added = true;
+        }
+        return added;
+    }
+
+    private updateWeekdaySchedule(sch, dateObj) {
+        let date = moment(dateObj);
+        sch.weekday = date.format('d');
+        sch.hour = date.format('H');
+        sch.minute = date.format('m');
+        sch.pattern = date.format('0 m H * * d');
+        return sch;
+    }
+
+    private updateDateSchedule(sch, dateObj) {
+        let date = moment(dateObj);
+        sch.date = date.format('MM/DD');
+        sch.hour = date.format('H');
+        sch.minute = date.format('m');
+        sch.pattern = date.format('0 m H D M *');
+        return sch;
+    }
+
+    private updateHolidaySchedule(sch, dateObj) {
+        let date = moment(dateObj);
+        sch.hour = date.format('H');
+        sch.minute = date.format('m');
+        sch._pattern = sch.pattern;
+        sch.pattern = date.format('0 m H ') + sch.pattern.split(' ').slice(3).join(' ');
+        return sch;
+    }
+
+    private buildHolidayName(result) {
+        let nth = [
+            { value: '1', text: '1st' },
+            { value: '2', text: '2nd' },
+            { value: '3', text: '3rd' },
+            { value: '4', text: '4th' },
+            { value: '5', text: '5th' },
+            // { value: 'L', text: 'Last' },
+        ];
+        let arr = function(a) {
+            return Array.isArray(a) ? a : [ a ];
+        }
+
+        if (result) {
+            let m = moment();
+            if (result.repeat === "yearly") {
+                if (result.repeatYearType === "date") {
+                    let month = arr(result.repeatYearMonth).map(w => m.month(parseInt(w)-1).format("MMM")).join(', ');
+                    let date = arr(result.repeatYearDate).join(",");
+                    return `${month} ${date}`;
+                }
+                else if (result.repeatYearType === "weekday") {
+                    let month = m.month(parseInt(result.repeatYearMonth)-1).format("MMM");
+                    let weekday = m.weekday(result.repeatYearWeekday).format("ddd");
+                    let occ = nth.filter(i => i.value === result.repeatYearWeekdayOccurrence)[0].text;
+                    return `${occ} ${weekday} of ${month}`;
+                }
+            }
+            else if (result.repeat === "monthly") {
+                if (result.repeatMonthType === "date") {
+                    let date = arr(result.repeatMonthDate).join(",");
+                    return `Day ${date} of every month`;
+                }
+                else if (result.repeatMonthType === "weekday") {
+                    let weekday = m.weekday(result.repeatMonthWeekday).format("ddd");
+                    let occ = nth.filter(i => i.value === result.repeatMonthWeekdayOccurrence).toString();
+                    return `${occ} ${weekday} of every month`;
+                }
+            }
+            else if (result.repeat === "weekly") {
+                let weekday = arr(result.repeatWeekdays).map(w => m.weekday(w).format("ddd")).join(', ');
+                return `Every ${weekday}`;
+            }
+            return result.repeat + " " + result.holiday.split(' ').slice(3).join(' ');
+        }
+        return "Unknown";
+    }
+
+    private isScheduleMatch(a, b) {
+        return !!a && !!b && a.hour === b.hour && a.minute === b.minute && a.value === b.value;
+    }
+
+    private isWeekdayScheduleMatch(a, b) {
+        return a?.weekday === b?.weekday && this.isScheduleMatch(a, b);
+    }
+
+    private isDateScheduleMatch(a, b) {
+        return a?.date === b?.date && this.isScheduleMatch(a, b);
+    }
+
+    private isHolidayScheduleMatch(a, b) {
+        return a?._pattern === b?._pattern && this.isScheduleMatch(a, b);
+    }
+
+    private runTests() {
+        let opt = {
+            currentDate: new Date(2020, 0, 1),
+            endDate: new Date(2021, 0, 1),
+            iterator: true,
+        };
+
+        let tests = [
+            // { cron: "0 0/30 14 * * *", desc: "Fire every 30 minutes starting at 2pm and ending at 2:59pm, every day" }, //passes
+            // { cron: "0 0/30 14,18 * * *", desc: "Fire every 30 minutes starting at 2pm and ending at 2:59pm, AND at 6pm and ending at 6:59pm, every day" }, //passes
+            // { cron: "0 0-5 14 * * *", desc: "Fire every minute starting at 2pm and ending at 2:05pm, every day" }, //passes
+            // { cron: "0 10,44 14 * 3 3", desc: "Fire at 2:10pm and at 2:44pm every Wednesday in the month of March." }, //passes
+            // { cron: "0 15 10 * * 1-5", desc: "Fire at 10:15am every Monday, Tuesday, Wednesday, Thursday and Friday" }, //passes
+            // { cron: "0 15 10 15 * *", desc: "Fire at 10:15am on the 15th day of every month" }, //passes
+            // { cron: "0 15 10 L * *", desc: "Fire at 10:15am on the last day of every month" }, //*** fails ***
+            // { cron: "0 15 10 * * 5L", desc: "Fire at 10:15am on the last Friday of every month" }, //*** fails ***
+            // { cron: "0 15 10 * * 5#3", desc: "Fire at 10:15am on the third Friday of every month" }, //passes
+        ];
+
+        for (let test of tests) {
+            try {
+                let interval = parser.parseExpression(test.cron, opt);
+                let nextEvent: any;
+                let count = 0;
+                console.log(test.cron, test.desc);
+                while ((nextEvent = interval.next()) && count < 10) {
+                    console.log(nextEvent.value.toDate());
+                    count++;
+                    if (nextEvent.done || count >= 10) {
+                        break;
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }        
     }
 }
+
+/*
+* (“all values”) - used to select all values within a field. For example, “*” in the minute field 
+means “every minute”.
+
+- - used to specify ranges. For example, “10-12” in the hour field means “the hours 10, 11 and 12”.
+
+, - used to specify additional values. For example, “MON,WED,FRI” in the day-of-week field means 
+“the days Monday, Wednesday, and Friday”.
+
+/ - used to specify increments. For example, “0/15” in the seconds field means “the seconds 0, 15, 
+30, and 45”. And “5/15” in the seconds field means “the seconds 5, 20, 35, and 50”. You can also 
+specify ‘/’ after the ‘’ character - in this case ‘’ is equivalent to having ‘0’ before the ‘/’. 
+‘1/3’ in the day-of-month field means “fire every 3 days starting on the first day of the month”.
+
+L (“last”) - has different meaning in each of the two fields in which it is allowed. For example, 
+the value “L” in the day-of-month field means “the last day of the month” - day 31 for January, day
+28 for February on non-leap years. If used in the day-of-week field by itself, it simply means “7” 
+or “SAT”. But if used in the day-of-week field after another value, it means “the last xxx day of 
+the month” - for example “6L” means “the last friday of the month”. You can also specify an offset 
+from the last day of the month, such as “L-3” which would mean the third-to-last day of the calendar 
+month. When using the ‘L’ option, it is important not to specify lists, or ranges of values, as 
+you’ll get confusing/unexpected results.
+
+W (“weekday”) - used to specify the weekday (Monday-Friday) nearest the given day. As an example, 
+if you were to specify “15W” as the value for the day-of-month field, the meaning is: “the nearest 
+weekday to the 15th of the month”. So if the 15th is a Saturday, the trigger will fire on Friday 
+the 14th. If the 15th is a Sunday, the trigger will fire on Monday the 16th. If the 15th is a 
+Tuesday, then it will fire on Tuesday the 15th. However if you specify “1W” as the value for 
+day-of-month, and the 1st is a Saturday, the trigger will fire on Monday the 3rd, as it will not 
+‘jump’ over the boundary of a month’s days. The ‘W’ character can only be specified when the 
+day-of-month is a single day, not a range or list of days.
+
+The 'L' and 'W' characters can also be combined in the day-of-month field to yield 'LW', which 
+translates to *"last weekday of the month"*.
+
+# - used to specify “the nth” XXX day of the month. For example, the value of “6#3” in the 
+day-of-week field means “the third Friday of the month” (day 6 = Friday and “#3” = the 3rd one in 
+the month). Other examples: “2#1” = the first Monday of the month and “4#5” = the fifth Wednesday 
+of the month. Note that if you specify “#5” and there is not 5 of the given day-of-week in the 
+month, then no firing will occur that month.
+
+*/

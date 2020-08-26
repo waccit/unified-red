@@ -13,6 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatMenuModule } from '@angular/material/menu';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -43,6 +45,8 @@ import { UrScheduleFormDialogComponent } from './ur-schedule/ur-schedule-form-di
         MatInputModule,
         MatIconModule,
         MatButtonModule,
+        MatButtonToggleModule,
+        MatMenuModule,
         MatDialogModule,
         MatSelectModule,
         MatDatepickerModule,
