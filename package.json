@@ -43,8 +43,8 @@
         "nodes": {
             "ur_base": "nodes/ur_base.js",
             "ur_button": "nodes/ur_button.js",
-            "ur_tab": "nodes/ur_tab.js",
-            "ur_subtab": "nodes/ur_subtab.js",
+            "ur_menu_item": "nodes/ur_menu_item.js",
+            "ur_menu_page": "nodes/ur_menu_page.js",
             "ur_group": "nodes/ur_group.js",
             "ur_text": "nodes/ur_text.js",
             "ur_text_input": "nodes/ur_text_input.js",

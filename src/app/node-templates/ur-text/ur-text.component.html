@@ -1,5 +1,5 @@
-<div class="card">
-    <div class="body" [ngClass]="'bg-' + getBgColor()">
+<div #container class="card">
+    <div class="body" [class]="'bg-' + getBgColor()">
         <div class="preloader pl-size-m" *ngIf="!text">
             <div class="spinner-layer">
                 <div class="circle-clipper left">

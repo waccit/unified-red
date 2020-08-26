@@ -15,7 +15,7 @@ const routes: Routes = [
                 pathMatch: 'full',
             },
             {
-                path: ':menuItem/:menuPage',
+                path: '**',
                 component: MenuPageComponent,
             },
         ],

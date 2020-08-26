@@ -2,8 +2,8 @@
     "ur_group": {
         "label": {
             "name": "Name",
-            "tab": "Tab",
-            "subtab": "Subtab",
+            "menuItem": "Menu Item",
+            "menuPage": "Menu Page",
             "width": "Width",
             "widthLg": "lg",
             "widthMd": "md",

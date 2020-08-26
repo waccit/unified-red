@@ -9,7 +9,7 @@ module.exports = function (RED) {
             widthMd: config.widthMd || '6',
             widthSm: config.widthSm || '12',
             order: config.order || 0,
-            subtab: config.subtab,
+            menuPage: config.menuPage,
             collapse: config.collapse || false,
         };
         if (!this.config.hasOwnProperty('disp')) {

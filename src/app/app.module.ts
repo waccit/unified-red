@@ -49,11 +49,13 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { MenuEntityComponent } from './layout/sidebar/menu-entity/menu-entity.component';
 
-FullCalendarModule.registerPlugins([ // register FullCalendar plugins
+FullCalendarModule.registerPlugins([
+    // register FullCalendar plugins
     dayGridPlugin,
     timeGridPlugin,
-    interactionPlugin
+    interactionPlugin,
 ]);
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
@@ -66,6 +68,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         AppComponent,
         HeaderComponent,
         PageLoaderComponent,
+        MenuEntityComponent,
         SidebarComponent,
         RightSidebarComponent,
         Page500Component,
@@ -100,7 +103,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         MatMenuModule,
         NgxMaskModule.forRoot(),
         NgIdleModule.forRoot(),
-        FullCalendarModule
+        FullCalendarModule,
     ],
     providers: [
         { provide: LocationStrategy, useClass: HashLocationStrategy },
