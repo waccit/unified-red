@@ -9,13 +9,21 @@ module.exports = function (RED) {
         if (!group) {
             return;
         }
-        var subtab = RED.nodes.getNode(group.config.subtab);
-        if (!subtab) {
+        var menuPage = RED.nodes.getNode(group.config.menuPage);
+        if (!menuPage) {
             return;
         }
-        var tab = RED.nodes.getNode(subtab.config.tab);
-        if (!tab) {
+        var menuItem = RED.nodes.getNode(menuPage.config.menuItem);
+        if (!menuItem) {
             return;
+        }
+
+        // menu-item tree stack (First In Last Out)
+        var menuItems = [];
+        menuItems.push(menuItem);
+        while (menuItem.config.menuItem) {
+            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
+            menuItems.push(menuItem);
         }
 
         if (!config.width) {
@@ -27,8 +35,8 @@ module.exports = function (RED) {
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
-            tab: tab,
-            subtab: subtab,
+            menuItems: menuItems,
+            menuPage: menuPage,
             group: group,
             control: {
                 type: 'animation',

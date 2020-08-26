@@ -37,9 +37,9 @@ export class SidebarComponent implements OnInit {
     }
 
     @HostListener('window:resize', ['$event'])
-    windowResizecall(event) {
+    windowResizeCall(event) {
         this.setMenuHeight();
-        this.checkStatuForResize(false);
+        this.checkStatusForResize(false);
     }
 
     @HostListener('document:mousedown', ['$event'])
@@ -62,13 +62,6 @@ export class SidebarComponent implements OnInit {
             this.renderer.addClass(event.target, 'toggled');
         }
     }
-    callSubMenuToggle(element: any) {
-        if (element === this.showSubMenu) {
-            this.showSubMenu = '0';
-        } else {
-            this.showSubMenu = element;
-        }
-    }
 
     ngOnInit() {
         this.menuService.menu.subscribe((menu: RouteInfo[]) => {
@@ -81,7 +74,7 @@ export class SidebarComponent implements OnInit {
     initLeftSidebar() {
         //Set menu height
         this.setMenuHeight();
-        this.checkStatuForResize(true);
+        this.checkStatusForResize(true);
     }
 
     setMenuHeight() {
@@ -98,7 +91,7 @@ export class SidebarComponent implements OnInit {
     isOpen() {
         return this.bodyTag.classList.contains('overlay-open');
     }
-    checkStatuForResize(firstTime) {
+    checkStatusForResize(firstTime) {
         if (window.innerWidth < 1170) {
             this.renderer.addClass(this.document.body, 'ls-closed');
         } else {
