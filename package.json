@@ -50,6 +50,7 @@
             "ur_text_input": "nodes/ur_text_input.js",
             "ur_template": "nodes/ur_template.js",
             "ur_animation": "nodes/ur_animation.js",
+            "ur_table": "nodes/ur_table.js",
             "ur_pagerduty_config": "nodes/ur_pagerduty_config.js",
             "ur_pagerduty": "nodes/ur_pagerduty.js",
             "ur_schedule": "nodes/ur_schedule.js",

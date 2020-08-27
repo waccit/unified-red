@@ -1,0 +1,50 @@
+<div *ngIf="!pivot" class="body table-responsive">
+    <table class="table table-bordered table-hover mat-elevation-z8 w-100 table-striped">
+        <thead>
+            <th  *ngFor="let c of config"> {{ c.label  }}</th>
+        </thead>
+        <tbody>
+            <tr *ngFor="let point of points">
+                <ng-container *ngIf="dataSource[point.name]">
+                    <ng-container *ngFor="let c of config">
+                        <ng-container *ngIf="c.formatType !== 'link'">
+                            <td> {{ dataSource[point.name][c.display] }} </td>
+                        </ng-container>
+                        <ng-container *ngIf="c.formatType == 'link'">
+                            <td><a href="{{ dataSource[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div *ngIf="pivot" class="body table-responsive">
+    <table class="table table-bordered table-hover mat-elevation-z8 w-100 table-striped">
+        <!-- <thead>
+            <th>Label</th>
+            <th *ngFor="let point of points">{{point.name}}</th>
+        </thead> -->
+        <tbody>
+            <tr *ngFor="let c of config">
+                <th>{{ c.label }}</th>
+                <!-- <ng-container *ngFor="let data of dataPivot"> -->
+                    <ng-container *ngFor="let point of points">
+                        <ng-container *ngIf="c.formatType !== 'link'">
+                            <td> {{ dataSource[point.name][c.display] }} </td>
+                        </ng-container>
+                        <ng-container *ngIf="c.formatType == 'link'">
+                            <td><a href="{{ dataSource[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                        </ng-container>
+                    <!-- <ng-container *ngIf="data.topic.includes(c.param)"> -->
+                        <!-- <td *ngIf="c.display.includes('topic') && c.formatType !== 'link'"> {{ data.topic }} </td>
+                        <td *ngIf="c.display.includes('payload') && c.formatType !== 'link'"> {{ data.payload }} </td>
+                        <td *ngIf="c.display.includes('topic') && c.formatType == 'link'"><a class="" href="{{data.topic}}">{{ data.topic }}</a></td>
+                        <td *ngIf="c.display.includes('payload') && c.formatType == 'link'"><a class="" href="{{data.payload}}">{{ data.payload }}</a></td> -->
+                    </ng-container>
+                <!-- </ng-container > -->
+            </tr>
+        </tbody>
+    </table>
+</div>
