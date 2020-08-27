@@ -358,7 +358,7 @@ export class UrScheduleComponent extends BaseNode {
 
                     let purgeOldEvent = function(arr, prop) {
                         let startLength = arr.length;
-                        arr = arr.filter(sch => sch[prop] !== orig.start[prop]);
+                        arr = arr.filter(sch => sch[prop] !== orig.start[prop] && sch[prop] !== orig.end[prop]);
                         // if anything removed, flag updated
                         if (startLength !== arr.length) {
                             updated = true;
@@ -615,7 +615,7 @@ export class UrScheduleComponent extends BaseNode {
                 }
                 else if (result.repeatMonthType === "weekday") {
                     let weekday = m.weekday(result.repeatMonthWeekday).format("ddd");
-                    let occ = nth.filter(i => i.value === result.repeatMonthWeekdayOccurrence).toString();
+                    let occ = nth.filter(i => i.value === result.repeatMonthWeekdayOccurrence)[0].text;
                     return `${occ} ${weekday} of every month`;
                 }
             }
