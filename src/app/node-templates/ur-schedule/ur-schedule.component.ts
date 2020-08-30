@@ -358,7 +358,7 @@ export class UrScheduleComponent extends BaseNode {
 
                     let purgeOldEvent = function(arr, prop) {
                         let startLength = arr.length;
-                        arr = arr.filter(sch => sch[prop] !== orig.start[prop] && sch[prop] !== orig.end[prop]);
+                        arr = arr.filter(sch => sch[prop] !== orig.start[prop] && (!orig.end || sch[prop] !== orig.end[prop]));
                         // if anything removed, flag updated
                         if (startLength !== arr.length) {
                             updated = true;
