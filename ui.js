@@ -625,49 +625,21 @@ function addControl(menu_items, menu_page, page_group, control) {
         var menuItemsStack = [...menu_items];
         var menuItemsPath = '';
 
+        let parent = null;
+        let isRoot;
+        let currMenuItem;
+
         while (menuItemsStack.length > 0) {
-            let parent = null;
-            let isRoot = menuItemsStack.length === menu_items.length;
-            let isYoungest = menuItemsStack.length === 1;
-            let currMenuItem = menuItemsStack.pop();
+            isRoot = menuItemsStack.length === menu_items.length;
+            currMenuItem = menuItemsStack.pop();
             menuItemsPath += currMenuItem.config.pathName + '/';
 
-            if (currMenuItem.config.menuItem) {
-                parent = findMenuItemById(menu, currMenuItem.config.menuItem);
-            }
-
             if (isRoot) {
-                let found = find(menu, function (curr) {
-                    return curr.id === currMenuItem.id;
+                foundMenuItem = find(menu, function (mi) {
+                    return mi.id === currMenuItem.id;
                 });
-
-                let temp = {
-                    id: currMenuItem.id,
-                    isRoot: isRoot,
-                    isYoungest: isYoungest,
-                    order: parseFloat(currMenuItem.config.order),
-                    disabled: currMenuItem.config.disabled,
-                    hidden: currMenuItem.config.hidden,
-                    items: [],
-                    // Atrio sidebarItems properties:
-                    path: '',
-                    title: currMenuItem.config.name,
-                    icon: currMenuItem.config.icon,
-                    class: 'menu-toggle',
-                    groupTitle: false,
-                    submenu: [],
-                };
-
-                if (!found) {
-                    menu.push(temp);
-                } else {
-                    foundMenuItem = found;
-                }
-
-                continue;
-            }
-
-            if (parent) {
+            } else {
+                parent = findMenuItemById(menu, currMenuItem.config.menuItem);
                 foundMenuItem = find(parent.items, function (mi) {
                     return mi.id == currMenuItem.id;
                 });
@@ -677,7 +649,6 @@ function addControl(menu_items, menu_page, page_group, control) {
                 foundMenuItem = {
                     id: currMenuItem.id,
                     isRoot: isRoot,
-                    isYoungest: isYoungest,
                     order: parseFloat(currMenuItem.config.order),
                     disabled: currMenuItem.config.disabled,
                     hidden: currMenuItem.config.hidden,
@@ -690,13 +661,20 @@ function addControl(menu_items, menu_page, page_group, control) {
                     groupTitle: false,
                     submenu: [],
                 };
-                parent.items.push(foundMenuItem);
-                parent.submenu.push(foundMenuItem);
-                parent.items.sort(itemSorter);
-                parent.submenu.sort(itemSorter);
+
+                if (parent) {
+                    parent.items.push(foundMenuItem);
+                    parent.submenu.push(foundMenuItem);
+                    parent.items.sort(itemSorter);
+                    parent.submenu.sort(itemSorter);
+                } else {
+                    menu.push(foundMenuItem);
+                    menu.sort(itemSorter);
+                }
             }
 
             if (foundMenuItem && needsUpdate(foundMenuItem, currMenuItem)) {
+                console.log('needs update!');
                 var updatedMenuItem = {
                     id: currMenuItem.id,
                     isRoot: currMenuItem.isRoot,
@@ -714,8 +692,12 @@ function addControl(menu_items, menu_page, page_group, control) {
                     submenu: foundMenuItem.submenu,
                 };
 
-                parent.items.splice(parent.items.indexOf(foundMenuItem), 1, updatedMenuItem);
-                parent.submenu.splice(parent.items.indexOf(foundMenuItem), 1, updatedMenuItem);
+                if (parent) {
+                    parent.items.splice(parent.items.indexOf(foundMenuItem), 1, updatedMenuItem);
+                    parent.submenu.splice(parent.items.indexOf(foundMenuItem), 1, updatedMenuItem);
+                } else {
+                    menu.splice(menu.indexOf(foundMenuItem), 1, updatedMenuItem);
+                }
                 foundMenuItem = updatedMenuItem;
                 pathNeedsUpdate = true;
             }
