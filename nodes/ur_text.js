@@ -26,25 +26,25 @@ module.exports = function (RED) {
             menuItems.push(menuItem);
         }
 
-        // var layout = config.layout || 'row-spread';
-        // var angLayout = 'row';
-        // var angLayoutAlign = 'space-between center';
-        // if (layout === 'row-spread') {
-        //     angLayout = 'row';
-        //     angLayoutAlign = 'space-between center';
-        // } else if (layout === 'row-left') {
-        //     angLayout = 'row';
-        //     angLayoutAlign = 'start center';
-        // } else if (layout === 'row-center') {
-        //     angLayout = 'row';
-        //     angLayoutAlign = 'center center';
-        // } else if (layout === 'row-right') {
-        //     angLayout = 'row';
-        //     angLayoutAlign = 'end center';
-        // } else if (layout === 'col-center') {
-        //     angLayout = 'column';
-        //     angLayoutAlign = 'center center';
-        // }
+        var layout = config.layout || 'row-spread';
+        var angLayout = 'row';
+        var angLayoutAlign = 'space-between center';
+        if (layout === 'row-spread') {
+            angLayout = 'row';
+            angLayoutAlign = 'space-between center';
+        } else if (layout === 'row-left') {
+            angLayout = 'row';
+            angLayoutAlign = 'start center';
+        } else if (layout === 'row-center') {
+            angLayout = 'row';
+            angLayoutAlign = 'center center';
+        } else if (layout === 'row-right') {
+            angLayout = 'row';
+            angLayoutAlign = 'end center';
+        } else if (layout === 'col-center') {
+            angLayout = 'column';
+            angLayoutAlign = 'center center';
+        }
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
@@ -59,8 +59,8 @@ module.exports = function (RED) {
                 format: config.format,
                 width: config.width || 12,
                 // height: config.height || 1,
-                // layout: angLayout,
-                // layoutAlign: angLayoutAlign,
+                layout: angLayout,
+                layoutAlign: angLayoutAlign,
             },
             convert: function (value) {
                 if (value !== undefined) {
