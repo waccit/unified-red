@@ -21,9 +21,11 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         this.webSocketService.emit('ui-replay-state', {});
 
         // Add send event to jQuery element
-        this.container.on('send', (evt, msg) => {
-            this.send(msg);
-        });
+        if (this.container) {
+            this.container.on('send', (evt, msg) => {
+                this.send(msg);
+            });
+        }
     }
 
     ngOnDestroy(): void {

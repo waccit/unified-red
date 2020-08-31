@@ -15,6 +15,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -55,6 +56,7 @@ import { UrScheduleFormDialogComponent } from './ur-schedule/ur-schedule-form-di
         MatRadioModule,
         MatSlideToggleModule,
         MatSidenavModule,
+        MatTooltipModule,
         FullCalendarModule,
         PerfectScrollbarModule,
         DragDropModule,
