@@ -11,7 +11,7 @@
                             <td> {{ dataSource[point.name][c.display] }} </td>
                         </ng-container>
                         <ng-container *ngIf="c.formatType == 'link'">
-                            <td><a href="{{ dataSource[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                            <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
                         </ng-container>
                     </ng-container>
                 </ng-container>
@@ -29,21 +29,14 @@
         <tbody>
             <tr *ngFor="let c of config">
                 <th>{{ c.label }}</th>
-                <!-- <ng-container *ngFor="let data of dataPivot"> -->
-                    <ng-container *ngFor="let point of points">
-                        <ng-container *ngIf="c.formatType !== 'link'">
-                            <td> {{ dataSource[point.name][c.display] }} </td>
-                        </ng-container>
-                        <ng-container *ngIf="c.formatType == 'link'">
-                            <td><a href="{{ dataSource[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
-                        </ng-container>
-                    <!-- <ng-container *ngIf="data.topic.includes(c.param)"> -->
-                        <!-- <td *ngIf="c.display.includes('topic') && c.formatType !== 'link'"> {{ data.topic }} </td>
-                        <td *ngIf="c.display.includes('payload') && c.formatType !== 'link'"> {{ data.payload }} </td>
-                        <td *ngIf="c.display.includes('topic') && c.formatType == 'link'"><a class="" href="{{data.topic}}">{{ data.topic }}</a></td>
-                        <td *ngIf="c.display.includes('payload') && c.formatType == 'link'"><a class="" href="{{data.payload}}">{{ data.payload }}</a></td> -->
+                <ng-container *ngFor="let point of points">
+                    <ng-container *ngIf="c.formatType !== 'link'">
+                        <td> {{ dataSource[point.name][c.display] }} </td>
                     </ng-container>
-                <!-- </ng-container > -->
+                    <ng-container *ngIf="c.formatType == 'link'">
+                        <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                    </ng-container>
+                </ng-container>
             </tr>
         </tbody>
     </table>

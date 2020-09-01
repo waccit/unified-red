@@ -49,7 +49,7 @@
                     //label input
                     $('<input/>', { class: "node-input-field-label", type: "text", placeholder: "label", style: "margin-left: 5px; width: 15%;" }).appendTo(row).val(field.label);
                     //format select
-                    var optionLink = {value: "link", label: "Link", hasValue: false};
+                    var optionLink = {value: "link", label: "Link", hasValue: true};
                     var optionText = {value: "fText", label: "Text", hasValue: true};
                     $('<input/>', { class:'node-input-field-format', type: "text", style: "margin-left: 5px; width: 15%;"}).appendTo(row).val(field.format).change().typedInput({
                         default: field.formatType,
@@ -105,8 +105,6 @@
                     unit : container.find(".node-input-field-unit").val(),
                 };
                 node.fields.push(c);
-                // console.log('type', container.find("input.node-input-field-device"));
-                // console.log('c', c);
             });
             //check for pivot
             ($("#node-input-cts").is(":checked")) ? this.pivot = 1 : this.pivot = 0;
