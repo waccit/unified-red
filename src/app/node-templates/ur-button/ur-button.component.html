@@ -1,1 +1,6 @@
-<button mat-raised-button class="w-100" color="primary" style="white-space: normal;">{{ label }}</button>
+<button mat-raised-button class="w-100" [color]="!data.bgcolor ? 'primary' : ''" [style.color]="data.color"
+    [style.background-color]="data.bgcolor" style="white-space: normal;" (click)="send(null)" #tooltip="matTooltip"
+    [matTooltip]="data.tooltip" matTooltipPosition="below">
+    <mat-icon class="mr-2" *ngIf="data.icon">{{ data.icon }}</mat-icon>
+    {{ label }}
+</button>

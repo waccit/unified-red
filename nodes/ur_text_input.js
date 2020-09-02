@@ -33,7 +33,7 @@ module.exports = function (RED) {
             group: group,
             forwardInputMessages: config.passthru,
             control: {
-                type: config.delay <= 0 ? 'text-input-CR' : 'text-input',
+                type: 'text-input',
                 label: config.label,
                 tooltip: config.tooltip,
                 mode: config.mode,
@@ -43,7 +43,13 @@ module.exports = function (RED) {
                 width: config.width || 12,
                 // height: config.height || 1,
             },
-            beforeSend: function (msg) {
+            beforeSend: function (msg, fromUI) {
+                if (fromUI && fromUI.hasOwnProperty('msg') && fromUI.msg !== null) {
+                    var om = fromUI.msg;
+                    om.socketid = fromUI.socketid;
+                    om.topic = config.topic || msg.topic;
+                    return om;
+                }
                 if (config.mode === 'time') {
                     if (typeof msg.payload === 'string') {
                         msg.payload = Date.parse(msg.payload);

@@ -60,6 +60,9 @@ $holidateEventColor: tomato;
     .mat-button-toggle {
         width: 61px;
     }
+    .mat-button-toggle-checked {
+        @extend .bg-indigo;
+    }
 }
 
 .ur-schedule-month-date-picker {
@@ -69,6 +72,9 @@ $holidateEventColor: tomato;
     .mat-button-toggle {
         width: 40px;
     }
+    .mat-button-toggle-checked {
+        @extend .bg-indigo;
+    }
 }
 
 .ur-schedule-year-month-picker {
@@ -77,5 +83,8 @@ $holidateEventColor: tomato;
     margin-bottom: 1.34375em;
     .mat-button-toggle {
         width: 46.6px;
+    }
+    .mat-button-toggle-checked {
+        @extend .bg-indigo;
     }
 }
