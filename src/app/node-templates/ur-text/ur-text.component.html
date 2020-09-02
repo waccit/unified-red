@@ -1,6 +1,6 @@
 <div #container class="card">
-    <div class="body" [class]="'bg-' + getBgColor()">
-        <div class="preloader pl-size-m" *ngIf="!text">
+    <div class="body"> <!-- [class]="'bg-' + getBgColor()" -->
+        <!-- <div class="preloader pl-size-m" *ngIf="!text">
             <div class="spinner-layer">
                 <div class="circle-clipper left">
                     <div class="circle"></div>
@@ -9,10 +9,38 @@
                     <div class="circle"></div>
                 </div>
             </div>
+        </div> -->
+        <div class="content" *ngIf="data.layout === 'row' && data.layoutAlign === 'space-between center'">
+            <div class="row">
+                <div class="col-6 text-left">{{ label }}</div>
+                <div class="col-6 text-right">{{ text }}</div>
+            </div>
         </div>
-        <div class="content">
-            <h3>{{ text }}</h3>
-            <p>{{ label }}</p>
+        <div class="content" *ngIf="data.layout === 'row' && data.layoutAlign === 'start center'">
+            <div class="row">
+                <div class="col-6 text-left">{{ label }}</div>
+                <div class="col-6 text-left">{{ text }}</div>
+            </div>
+        </div>
+        <div class="content" *ngIf="data.layout === 'row' && data.layoutAlign === 'center center'">
+            <div class="row">
+                <div class="col-6 text-center">{{ label }}</div>
+                <div class="col-6 text-center">{{ text }}</div>
+            </div>
+        </div>
+        <div class="content" *ngIf="data.layout === 'row' && data.layoutAlign === 'end center'">
+            <div class="row">
+                <div class="col-6 text-right">{{ label }}</div>
+                <div class="col-6 text-right">{{ text }}</div>
+            </div>
+        </div>
+        <div class="content" *ngIf="data.layout === 'column' && data.layoutAlign === 'center center'">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h3>{{ label }}</h3>
+                    <p>{{ text }}</p>        
+                </div>
+            </div>
         </div>
     </div>
 </div>

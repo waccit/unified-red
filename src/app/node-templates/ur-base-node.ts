@@ -18,19 +18,20 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                 this.updateValue(msg);
             }
         });
+        this.webSocketService.emit('ui-replay-state', {});
 
         // Add send event to jQuery element
-        this.container.on('send', (evt, msg) => {
-            this.send(msg);
-        });
+        if (this.container) {
+            this.container.on('send', (evt, msg) => {
+                this.send(msg);
+            });
+        }
     }
 
     ngOnDestroy(): void {
         if (this._wsSubscription) {
             this._wsSubscription.unsubscribe();
         }
-
-        // console.log(this.data.type + ' destroyed');
     }
 
     get container() {
@@ -60,5 +61,16 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         if (this.nodeId) {
             this.webSocketService.emit({ id: this.nodeId, msg: msg });
         }
+    }
+
+    format(data) {
+        let ret = data;
+        let expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
+        if (expression.length >= 2) {
+            for (let part of expression[1].split('.')) {
+                ret = ret[part];
+            }
+        }
+        return ret;
     }
 }

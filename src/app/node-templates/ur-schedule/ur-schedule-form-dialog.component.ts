@@ -5,6 +5,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import * as moment from 'moment';
+import { HolidayValidator } from './schedule.validators';
 
 export const UR_SCHEDULE_DATE_FORMATS = {
     parse: {
@@ -149,6 +150,9 @@ export class UrScheduleFormDialogComponent {
                 repeatYearDate: [r.year.date],
                 repeatYearWeekdayOccurrence: [r.year.weekdayOccurrence],
                 repeatYearWeekday: [r.year.weekday],
+            },
+            {
+                validator: HolidayValidator(),
             });
             this.events = this.sortChronologically(this.data.events).map((e, i) => {
                 e.id = i;

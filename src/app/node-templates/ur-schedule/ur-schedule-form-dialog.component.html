@@ -22,6 +22,9 @@
                             <option value="date">Date</option>
                             <option value="holiday">Holiday</option>
                         </select>
+                        <mat-error *ngIf="form.get('type').hasError('required')">
+                            Please select an event type
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'weekday'">
@@ -30,27 +33,33 @@
                         <select matNativeControl formControlName="weekday" required>
                             <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
+                        <mat-error *ngIf="form.get('weekday').hasError('required')">
+                            Please select a weekday
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'date'">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Date</mat-label>
-                        <input matInput [matDatepicker]="picker" formControlName="date" placeholder="mm/dd" mask="00/00">
+                        <input matInput [matDatepicker]="picker" formControlName="date" placeholder="mm/dd" mask="00/00" required>
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker touchUi></mat-datepicker>
                         <mat-error *ngIf="form.get('date').hasError('required')">
-                            Please select date
+                            Please select a date
                         </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'holiday'">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Repeat</mat-label>
-                        <select matNativeControl formControlName="repeat">
+                        <select matNativeControl formControlName="repeat" required>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeat').hasError('required')">
+                            Please select a repeat option
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
@@ -58,9 +67,12 @@
             <!-- weekly recurrence -->
             <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'weekly'">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <mat-button-toggle-group formControlName="repeatWeekdays" multiple class="ur-schedule-weekday-picker">
+                    <mat-button-toggle-group formControlName="repeatWeekdays" multiple class="ur-schedule-weekday-picker" required>
                         <mat-button-toggle *ngFor="let i of weekdays" [value]="i.value">{{ i.short }}</mat-button-toggle>
                     </mat-button-toggle-group>
+                    <mat-error *ngIf="form.get('repeatWeekdays').hasError('required')">
+                        Please select one or more weekdays
+                    </mat-error>
                 </div>
             </div>
             <!-- end weekly recurrence -->
@@ -70,36 +82,49 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>By</mat-label>
-                        <select matNativeControl formControlName="repeatMonthType">
+                        <select matNativeControl formControlName="repeatMonthType" required>
                             <option value="date">Date</option>
                             <option value="weekday">Weekday</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeatMonthType').hasError('required')">
+                            Please select an option
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
 
             <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'monthly' && form.controls.repeatMonthType.value === 'date'">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <mat-button-toggle-group formControlName="repeatMonthDate" multiple class="ur-schedule-month-date-picker">
+                    <mat-button-toggle-group formControlName="repeatMonthDate" multiple class="ur-schedule-month-date-picker" required>
                         <mat-button-toggle *ngFor="let i of dates" [value]="i">{{ i }}</mat-button-toggle>
                     </mat-button-toggle-group>
+                    <mat-error *ngIf="form.get('repeatMonthDate').hasError('required')">
+                        Please select one or more dates
+                    </mat-error>
                 </div>
             </div>
 
             <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'monthly' && form.controls.repeatMonthType.value === 'weekday'">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
-                        <mat-label>on the</mat-label>
-                        <select matNativeControl formControlName="repeatMonthWeekdayOccurrence">
+                        <mat-label>On the</mat-label>
+                        <select matNativeControl formControlName="repeatMonthWeekdayOccurrence" required>
                             <option *ngFor="let i of nth" [value]="i.value">{{ i.text }}</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeatMonthWeekdayOccurrence').hasError('required')">
+                            Please select an occurrence
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
-                        <select matNativeControl formControlName="repeatMonthWeekday">
+                        <mat-label>Weekday</mat-label>
+                        <select matNativeControl formControlName="repeatMonthWeekday" required>
                             <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeatMonthWeekday').hasError('required')">
+                            Please select a weekday
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
@@ -108,9 +133,12 @@
             <!-- yearly recurrence -->
             <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly'">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <mat-button-toggle-group formControlName="repeatYearMonth" multiple class="ur-schedule-year-month-picker">
+                    <mat-button-toggle-group formControlName="repeatYearMonth" multiple class="ur-schedule-year-month-picker" required>
                         <mat-button-toggle *ngFor="let i of months" [value]="i.value">{{ i.text }}</mat-button-toggle>
                     </mat-button-toggle-group>
+                    <mat-error *ngIf="form.get('repeatYearMonth').hasError('required')">
+                        Please select a one or more months
+                    </mat-error>
                 </div>
             </div>
 
@@ -118,36 +146,49 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>By</mat-label>
-                        <select matNativeControl formControlName="repeatYearType">
+                        <select matNativeControl formControlName="repeatYearType" required>
                             <option value="date">Date</option>
                             <option value="weekday">Weekday</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeatYearType').hasError('required')">
+                            Please select an option
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>
             
             <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly' && form.controls.repeatYearType.value === 'date'">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                    <mat-button-toggle-group formControlName="repeatYearDate" multiple class="ur-schedule-month-date-picker">
+                    <mat-button-toggle-group formControlName="repeatYearDate" multiple class="ur-schedule-month-date-picker" required>
                         <mat-button-toggle *ngFor="let i of dates" [value]="i">{{ i }}</mat-button-toggle>
                     </mat-button-toggle-group>
+                    <mat-error *ngIf="form.get('repeatYearDate').hasError('required')">
+                        Please select one or more dates
+                    </mat-error>
                 </div>
             </div>
 
             <div class="row" *ngIf="form.controls.type.value === 'holiday' && form.controls.repeat.value === 'yearly' && form.controls.repeatYearType.value === 'weekday'">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
-                        <mat-label>on the</mat-label>
-                        <select matNativeControl formControlName="repeatYearWeekdayOccurrence">
+                        <mat-label>On the</mat-label>
+                        <select matNativeControl formControlName="repeatYearWeekdayOccurrence" required>
                             <option *ngFor="let i of nth" [value]="i.value">{{ i.text }}</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeatYearWeekdayOccurrence').hasError('required')">
+                            Please select an occurrence
+                        </mat-error>
                     </mat-form-field>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
-                        <select matNativeControl formControlName="repeatYearWeekday">
+                        <mat-label>Weekday</mat-label>
+                        <select matNativeControl formControlName="repeatYearWeekday" required>
                             <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
+                        <mat-error *ngIf="form.get('repeatYearWeekday').hasError('required')">
+                            Please select a weekday
+                        </mat-error>
                     </mat-form-field>
                 </div>
             </div>

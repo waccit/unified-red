@@ -1,17 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component } from '@angular/core';
+import { BaseNode } from '../ur-base-node';
 
 @Component({
     selector: 'app-ur-button',
     templateUrl: './ur-button.component.html',
     styleUrls: ['./ur-button.component.sass'],
 })
-export class UrButtonComponent implements OnInit {
-    label: string = 'default';
-    data: any;
-
-    constructor() {}
-
-    ngOnInit(): void {
-        this.label = this.data.label;
-    }
+export class UrButtonComponent extends BaseNode {
 }
