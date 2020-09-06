@@ -6,6 +6,7 @@
 cd ~/.node-red
 npm install --save ~/git/unified-red
 ```
+NOTE: When manually installing unified-red, the folder cannot be installed in node_modules.
 
 ## To unlink Unified-Red development folder
 
