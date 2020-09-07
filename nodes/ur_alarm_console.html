@@ -1,0 +1,48 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_alarm_console', {
+        category: 'unified-red',
+        color: '#FFCC66',
+        defaults: {
+            // group: { type: 'ur_group', required: true },
+            // order: { value: 0 },
+            // width: { value: 12 },
+            // height: { value: 0 },
+            // config: { type: 'ur_alarm_console_config', required: true },
+            name: { value: '' }
+        },
+        inputs: 1,
+        outputs: 1,
+        align: 'right',
+        icon: "font-awesome/fa-list-alt",
+        paletteLabel: 'alarm console',
+        label: function () {
+            return this.name || 'Alarm Console';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            // $('#node-input-size').elementSizer({
+            //     width: '#node-input-width',
+            // });
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_alarm_console">
+    <!-- <div class="form-row">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width">
+        <button class="editor-button" id="node-input-size"></button>
+    </div> -->
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+</script>
+<script type="text/html" data-help-name="ur_alarm_console">
+</script>
