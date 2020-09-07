@@ -60,7 +60,7 @@ export class UserTableComponent implements OnInit {
             });
     }
 
-    editCall(row) {
+    editUser(row) {
         this.dialog
             .open(UserFormDialogComponent, { data: { data: row, action: 'edit' } })
             .afterClosed()
@@ -74,7 +74,7 @@ export class UserTableComponent implements OnInit {
             });
     }
 
-    deleteItem(row) {
+    deleteUser(row) {
         this.dialog
             .open(UserDeleteDialogComponent, { data: row })
             .afterClosed()
