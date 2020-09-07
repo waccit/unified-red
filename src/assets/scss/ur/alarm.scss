@@ -1,0 +1,51 @@
+.ur-alarm-console {
+    .fas {
+        font-size: 20px;
+    }
+    mat-row.active-unack-critical {
+        background-color: #ef5350;
+    }
+    mat-row.active-unack-alert {
+        background-color: #ffc107;
+    }
+    mat-row.active-unack-warning {
+        background-color: #fcf8e3;
+    }
+    // mat-row.active-unack-info {
+    // }
+    mat-row.active-ack-critical mat-cell {
+        color: #d50000;
+    }
+    mat-row.active-ack-alert mat-cell {
+        color: #ff8f00;
+    }
+    mat-row.active-ack-warning  mat-cell {
+        color: #8a6d3b;
+    }
+    // mat-row.active-ack-info {
+    // }
+    mat-row.inactive {
+        background-color: #eeeeee;
+        mat-cell {
+            color: #aaaaaa;
+        }
+    }
+
+    .mat-column-severity {
+        flex: 0 0 60px;
+        text-align: center;
+        justify-content:center;
+    }
+    .mat-column-name, .mat-column-topic {
+        flex: 0 0 25% !important;
+        width: 25% !important;
+    }
+    .mat-column-acktime, .mat-column-timestamp {
+        white-space: nowrap;
+        flex: 0 0 150px;
+    }
+    .mat-column-actions {
+        display: flex;
+        justify-content: flex-end;
+    }
+}
