@@ -4,18 +4,28 @@ const alarmService = require('./alarm.service');
 const authorize = require('../authorize');
 const Role = require('../users/role.model');
 
-router.get('/',         authorize(Role.Level01), getAll);
-router.get('/:id',      authorize(Role.Level01), getById);
-router.put('/:id',      authorize(Role.Level01), update);
-router.get('/ack/:id',  authorize(Role.Level01), ackById);
-router.post('/ack/',    authorize(Role.Level01), ackByTopic);
-router.delete('/:id',   authorize(Role.Level01), _delete);
+router.get('/',                     authorize(Role.Level01), getAll);
+router.get('/recent/:state/:limit', authorize(Role.Level01), getRecent);
+router.get('/:id',                  authorize(Role.Level01), getById);
+router.put('/:id',                  authorize(Role.Level01), update);
+router.get('/ack/:id',              authorize(Role.Level01), ackById);
+router.post('/ack/',                authorize(Role.Level01), ackByTopic);
+router.delete('/:id',               authorize(Role.Level01), _delete);
 
 module.exports = router;
 
 function getAll(req, res, next) {
     alarmService
         .getAll()
+        .then((alarms) => res.json(alarms))
+        .catch((err) => next(err));
+}
+
+function getRecent(req, res, next) {
+    let state = req.params.state.toString().toLowerCase() === "active";
+    let limit = parseInt(req.params.limit);
+    alarmService
+        .getRecent(state, limit)
         .then((alarms) => res.json(alarms))
         .catch((err) => next(err));
 }

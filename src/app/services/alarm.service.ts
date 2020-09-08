@@ -10,6 +10,14 @@ export class AlarmService {
         return this.http.get<Alarm[]>(`/api/alarms`);
     }
 
+    getRecentActive(limit: number) {
+        return this.http.get<Alarm[]>(`/api/alarms/recent/active/${limit}`);
+    }
+
+    getRecentInctive(limit: number) {
+        return this.http.get<Alarm[]>(`/api/alarms/recent/inactive/${limit}`);
+    }
+
     delete(id: string) {
         return this.http.delete(`/api/alarms/${id}`);
     }

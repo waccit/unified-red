@@ -4,6 +4,7 @@ const Alarm = db.Alarm;
 
 module.exports = {
     getAll,
+    getRecent,
     getById,
     create,
     update,
@@ -14,6 +15,10 @@ module.exports = {
 
 async function getAll() {
     return await Alarm.find();
+}
+
+async function getRecent(state, limit) {
+    return await Alarm.find({ "state" : state }, null, { sort: { "timestamp": -1 }, limit: limit });
 }
 
 async function getById(id) {
