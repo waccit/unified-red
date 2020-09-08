@@ -84,7 +84,7 @@
                                         <button mat-icon-button class="btn-tbl-edit btn-tbl-ack" (click)="ackAlarm(row)" *ngIf="row.ackreq && !row.acktime">
                                             <mat-icon aria-label="Acknowledge" class="col-white">check</mat-icon>
                                         </button>
-                                        <button mat-icon-button class="btn-tbl-edit" (click)="deleteAlarm(row)">
+                                        <button mat-icon-button class="btn-tbl-edit" (click)="deleteAlarm(row)" *ngIf="isAdmin">
                                             <mat-icon aria-label="Delete" class="col-white">delete</mat-icon>
                                         </button>
                                     </mat-cell>
