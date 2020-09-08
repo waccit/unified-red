@@ -4,16 +4,25 @@
     }
     mat-row.active-unack-critical {
         background-color: #ef5350;
+        mat-cell {
+            color: rgba(255,255,255,.87);
+        }
     }
     mat-row.active-unack-alert {
         background-color: #ffc107;
+        mat-cell {
+            color: rgba(0,0,0,.87);
+        }
     }
     mat-row.active-unack-warning {
         background-color: #fcf8e3;
+        mat-cell {
+            color: rgba(0,0,0,.87);
+        }
     }
     // mat-row.active-unack-info { }
     mat-row.active-ack-critical mat-cell {
-        color: #d50000;
+        color: #ff5252;
     }
     mat-row.active-ack-alert mat-cell {
         color: #ff8f00;
@@ -69,5 +78,13 @@
     }
     .msg-user {
         height: 34px !important;
+    }
+}
+
+body.dark {
+    .ur-alarm-console {
+        mat-row.active-ack-warning  mat-cell {
+            color: #FFF9C4;
+        }
     }
 }

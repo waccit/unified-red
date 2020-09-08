@@ -5,8 +5,8 @@ import { MatSort } from '@angular/material/sort';
 import { fromEvent, Subscription } from 'rxjs';
 
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { WebSocketService, SnackbarService, AlarmService } from '../../services';
-import { AlarmDataSource } from '../../data';
+import { WebSocketService, SnackbarService, AlarmService, AuthenticationService } from '../../services';
+import { AlarmDataSource, Role } from '../../data';
 
 @Component({
 	selector: 'app-alarm-console',
@@ -18,6 +18,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
     displayedColumns = ['severity', 'name', 'topic', 'value', 'state', 'acktime', 'timestamp', 'actions'];
 	dataSource: AlarmDataSource;
 	private _wsSubscription: Subscription;
+	isAdmin = false;
 	
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -26,7 +27,8 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 	constructor(
 		private webSocketService: WebSocketService,
 		private alarmService: AlarmService,
-		private snackbar: SnackbarService
+		private snackbar: SnackbarService,
+		private authenticationService: AuthenticationService,
 	) {}
 
 	ngOnInit(): void {
@@ -44,6 +46,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 			}
 		});
 		this.refreshData();
+		this.isAdmin = this.authenticationService.getUserRole() === Role.Level10;
 	}
 
 	ngOnDestroy(): void {
