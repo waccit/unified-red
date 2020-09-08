@@ -26,6 +26,10 @@ async function getById(id) {
 }
 
 async function create(alarmParam) {
+    let prevAlarm = await Alarm.findOne({ "topic" : alarmParam.topic }, null, { sort: { "timestamp": -1 }});
+    if (prevAlarm && prevAlarm.state === alarmParam.state) {
+        throw 'Duplicate alarm for ' + alarmParam.topic;
+    }
     const alarm = new Alarm(alarmParam);
     await alarm.save();
     socketio.emit('ur-alarm-update', { "action": "create", "payload": alarm });
