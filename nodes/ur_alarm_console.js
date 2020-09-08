@@ -50,6 +50,7 @@ module.exports = function (RED) {
                 return;
             }
 
+            node.status({});
             if (msg.payload.action == "ack") {
                 if (msg.payload.id) {
                     alarmService.ackById(msg.payload.id).catch(node.error);
@@ -65,7 +66,15 @@ module.exports = function (RED) {
                     "state": msg.payload.state,
                     "ackreq": !!msg.payload.ackreq,
                 };
-                alarmService.create(alarm).catch(node.error); 
+                alarmService.create(alarm)
+                    .then(alarm => {
+                        node.send({ "topic": alarm.topic, "payload": alarm});
+                        node.status({ fill: "green", shape: "dot", text: "sent: " + alarm.topic });
+                    })
+                    .catch(err => {
+                        node.status({ fill: "red", shape: "dot", text: err });
+                        node.error(err);
+                    }); 
             }
         });
     }
