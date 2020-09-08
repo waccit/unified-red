@@ -15,7 +15,7 @@ import { AlarmDataSource } from '../../data';
 	providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
 })
 export class AlarmConsoleComponent implements OnInit, OnDestroy {
-    displayedColumns = ['severity', 'name', 'topic', 'value', 'acktime', 'timestamp', 'actions'];
+    displayedColumns = ['severity', 'name', 'topic', 'value', 'state', 'acktime', 'timestamp', 'actions'];
 	dataSource: AlarmDataSource;
 	private _wsSubscription: Subscription;
 	
@@ -34,7 +34,6 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 			if (msg && msg.payload) {
 				if (msg.action === "create") {
 					this.dataSource.add(msg.payload);
-					this.snackbar.error(msg.payload.name + ' alarm');
 				}
 				else if (msg.action === "update") {
 					this.dataSource.update(msg.payload.id, msg.payload);
@@ -67,7 +66,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
     }
 
 	ackAlarm(row) {
-		this.alarmService.ackById(row.id).subscribe(alarms => {
+		this.alarmService.ackByTopic(row.topic).subscribe(alarms => {
 			this.snackbar.success(row.name + ' acknowleged');
 		});
 	}

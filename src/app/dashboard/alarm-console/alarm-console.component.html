@@ -57,9 +57,19 @@
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Value</mat-header-cell>
                                     <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
                                 </ng-container>
+                                <ng-container matColumnDef="state">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>State</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">
+                                        <span class="badge badge-dark" *ngIf="row.state">active</span>
+                                        <span class="badge badge-light" *ngIf="!row.state">inactive</span>
+                                        <span class="badge badge-light" *ngIf="row.acktime">ack</span>
+                                        <span class="badge badge-danger" *ngIf="row.ackreq && !row.acktime">unack</span>
+                                    </mat-cell>
+                                </ng-container>
                                 <ng-container matColumnDef="acktime">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Acknowledged</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.acktime | date: 'MM/dd/yyyy HH:mm:ss' }}
+                                    <mat-cell *matCellDef="let row">
+                                        <!-- {{row.acktime | date: 'MM/dd/yyyy HH:mm:ss' }} -->
                                     </mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="timestamp">
@@ -71,7 +81,7 @@
                                 <ng-container matColumnDef="actions">
                                     <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
                                     <mat-cell *matCellDef="let row; let i=index;">
-                                        <button mat-icon-button class="btn-tbl-edit" (click)="ackAlarm(row)" *ngIf="row.ackreq && !row.acktime">
+                                        <button mat-icon-button class="btn-tbl-edit btn-tbl-ack" (click)="ackAlarm(row)" *ngIf="row.ackreq && !row.acktime">
                                             <mat-icon aria-label="Acknowledge" class="col-white">check</mat-icon>
                                         </button>
                                         <button mat-icon-button class="btn-tbl-edit" (click)="deleteAlarm(row)">
