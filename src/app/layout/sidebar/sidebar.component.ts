@@ -6,7 +6,6 @@ import { MenuService } from '../../services/menu.service';
 import { RouteInfo } from './sidebar.metadata';
 // import { ROUTES } from './sidebar-items';
 
-declare const Waves: any;
 @Component({
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
