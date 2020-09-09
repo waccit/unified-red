@@ -406,13 +406,12 @@
             return RED._('unified-red/ur_base:ur_base.' + x);
         }
 
-        var menuPageDatas; // Layout editing menu_page data
         var oldSpacer; // Spacer not needed after editing
 
         var widthChange; // Group width change
         var widgetMove; // Move widget event
         var widgetResize; // Change widget event
-        var widgetDrag; // Drag wiget eevnt
+        var widgetDrag; // Drag widget event
 
         var MAX_GROUP_WIDTH = 12; // The maximum width is 12
 
@@ -620,7 +619,7 @@
                         }
 
                         // If there is no dashboard node, ensure we create it after
-                        // initialising
+                        // initializing
                         var noDashboardNode = globalDashboardNode === null;
 
                         // set up theme state
@@ -1474,7 +1473,7 @@
 
                     if (!listStates.hasOwnProperty(groupNode.id) || !listStates[groupNode.id]) {
                         content.hide();
-                        chevron.css({ 'transform': 'rotatate(-90deg)' });
+                        chevron.css({ 'transform': 'rotate(-90deg)' });
                         content.addClass('nr-db-sb-collapsed');
                         listStates[groupNode.id] = false;
                     } else {
@@ -2255,7 +2254,7 @@
 
                         editor.on('input', function () {
                             // Check for any changes on the editor object
-                            // i.e. has the theme been customised compared
+                            // i.e. has the theme been customized compared
                             // to what is stored
                             var editorObject = JSON.parse(editor.getValue());
                             // var objectsEqual = true;
@@ -2403,7 +2402,7 @@
                                     menuItemLists[node.menuItem].editableList('addItem', {
                                         node: node,
                                         child: true,
-                                        chidren: [],
+                                        children: [],
                                     });
                                 }
                             } else if (node.type === 'ur_menu_page') {
@@ -2659,8 +2658,8 @@
                             }
                             delete menuPageLists[node.id];
                         } else if (node.type === 'ur_group') {
-                            if (menuPageLists[node.menuPage.id] && listElements[node.id]) {
-                                menuPageLists[node.menuPage.id].editableList(
+                            if (menuPageLists[node.menuPage] && listElements[node.id]) {
+                                menuPageLists[node.menuPage].editableList(
                                     'removeItem',
                                     listElements[node.id].data('data')
                                 );
@@ -3019,11 +3018,11 @@
 </script>
 
 <script type="text/html" data-template-name="ur_base">
-    <div class='form-row'>
-        This <i>ur_base</i> node is the main node that all<br/>other dashboard widget nodes communicate to.<br/>
-        <br/>One instance is required to support the dashboard.<br/>
-        <br/>If you have no dashboard you can delete this node.<br/>
-        It will be re-created automatically if required.<br/>
+    <div class="form-row">
+        This <i>ur_base</i> node is the main node that all<br />other dashboard widget nodes communicate to.<br />
+        <br />One instance is required to support the dashboard.<br />
+        <br />If you have no dashboard you can delete this node.<br />
+        It will be re-created automatically if required.<br />
     </div>
 </script>
 
