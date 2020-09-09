@@ -24,7 +24,36 @@ async function getAll(limit) {
 }
 
 async function getSummary(limit) {
-    return await Alarm.find({}, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
+    return await Alarm.mapReduce({
+        map: function() {
+            emit(this.topic, {
+                severity: this.severity,
+                name: this.name,
+                topic: this.topic,
+                value: this.value,
+                state: this.state,
+                ackreq: this.ackreq,
+                timestamp: this.timestamp,
+                acktime: this.acktime || 0,
+                unackActive: this.state && !this.acktime ? 1 : 0
+            });
+        },
+        reduce: function(k, v) {
+            return v.reduce((prev, curr, index, array) => {
+                    var latest = curr.timestamp >= prev.timestamp ? curr : prev;
+                    latest.unackActive = prev.unackActive + curr.unackActive;
+                    return latest;
+                }
+            );
+        },
+        finalize: function(k, v) {
+            if (v.acktime === 0) {
+                delete v.acktime;
+            }
+            return v;
+        },
+        limit: maxLimit(limit)
+    });
 }
 
 async function getRecent(state, limit) {

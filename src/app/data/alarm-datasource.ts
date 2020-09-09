@@ -21,8 +21,8 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
     }
 
     loadSummary() {
-        this.alarmService.getSummary().subscribe(data => {
-            this.alarms = data;
+        this.alarmService.getSummary().subscribe((data:any) => {
+            this.alarms = data.results.map(v => v.value);
             this.alarmsSubject.next(this.alarms);
         });
     }

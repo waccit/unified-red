@@ -94,6 +94,6 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 			case 'summary': this.dataSource.loadSummary(); break;
 			case 'history': this.dataSource.loadHistory(); break;
 		}
+		this.paginator.firstPage();
 	}
-	
 }
