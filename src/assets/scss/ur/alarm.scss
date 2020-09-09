@@ -1,4 +1,4 @@
-.ur-alarm-console {
+app-alarm-console {
     .fas {
         font-size: 20px;
     }
@@ -59,6 +59,9 @@
     .btn-tbl-ack {
         background-color: #3f51b5;
     }
+    .header-buttons .mat-button-toggle-label-content {
+        line-height: 40px;
+    }
 }
 
 .ur-menu-recent-alarm {
@@ -81,7 +84,7 @@
     }
 }
 
-.ur-alarm-dialog {
+app-alarm-dialog {
     .ur-alarm-console {
         width: 600px;
     }

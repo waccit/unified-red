@@ -13,14 +13,25 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
 
     constructor(private alarmService: AlarmService, paginator: MatPaginator, sort: MatSort) {
         super(paginator, sort);
-        this.alarmService.getAll().subscribe(data => {
+        this.loadSummary();
+    }
+
+    dataSource() {
+        return this.alarmsSubject;
+    }
+
+    loadSummary() {
+        this.alarmService.getSummary().subscribe(data => {
             this.alarms = data;
             this.alarmsSubject.next(this.alarms);
         });
     }
 
-    dataSource() {
-        return this.alarmsSubject;
+    loadHistory() {
+        this.alarmService.getAll().subscribe(data => {
+            this.alarms = data;
+            this.alarmsSubject.next(this.alarms);
+        });
     }
 
     add(item: Alarm) {

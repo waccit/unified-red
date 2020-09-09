@@ -44,7 +44,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
                 this.setupInactivityMonitor(user.sessionInactivity);
             }
         });
-        this.alarmService.getRecentActive(10).subscribe(alarms => {
+        this.alarmService.getRecentActive().subscribe(alarms => {
             this.recentAlarms = alarms;
         });
     }

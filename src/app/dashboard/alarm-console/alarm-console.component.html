@@ -23,6 +23,12 @@
                                     <div class="col-4">
                                         <ul class="header-buttons">
                                             <li>
+                                                <mat-button-toggle-group class="m-r-20" #viewElem="matButtonToggleGroup" [value]="view" (change)="changeView(viewElem.value)">
+                                                    <mat-button-toggle value="summary">Summary</mat-button-toggle>
+                                                    <mat-button-toggle value="history">History</mat-button-toggle>
+                                                </mat-button-toggle-group>
+                                            </li>
+                                            <li>
                                                 <div class="icon-button-demo">
                                                     <button mat-mini-fab color="primary" (click)="refreshData()">
                                                         <mat-icon class="col-white">refresh</mat-icon>
@@ -36,7 +42,7 @@
                             <!-- <div class="spinner-container" *ngIf="dataSource.loading | async">
                                 <mat-spinner></mat-spinner>
                             </div> -->
-                            <mat-table #table [dataSource]="dataSource" matSort matSortActive="timestamp" matSortDirection="desc" class="mat-cell ur-alarm-console">
+                            <mat-table #table [dataSource]="dataSource" matSort matSortActive="timestamp" matSortDirection="desc" class="mat-cell">
                                 <ng-container matColumnDef="severity">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header></mat-header-cell>
                                     <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">

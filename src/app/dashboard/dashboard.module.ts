@@ -18,6 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSortModule } from '@angular/material/sort';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
     declarations: [
@@ -38,6 +39,7 @@ import { MatSortModule } from '@angular/material/sort';
         MatTooltipModule,
         MatIconModule,
         MatButtonModule,
+        MatButtonToggleModule,
         MatPaginatorModule,
         MatTableModule,
         MatSortModule,

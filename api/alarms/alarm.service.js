@@ -4,6 +4,7 @@ const Alarm = db.Alarm;
 
 module.exports = {
     getAll,
+    getSummary,
     getRecent,
     getById,
     getByTopic,
@@ -14,20 +15,28 @@ module.exports = {
     delete: _delete
 };
 
-async function getAll() {
-    return await Alarm.find();
+function maxLimit(l) {
+    return l ? parseInt(l) : 10000;
+}
+
+async function getAll(limit) {
+    return await Alarm.find({}, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
+}
+
+async function getSummary(limit) {
+    return await Alarm.find({}, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
 }
 
 async function getRecent(state, limit) {
-    return await Alarm.find({ "state" : state }, null, { sort: { "timestamp": -1 }, limit: limit });
+    return await Alarm.find({ "state" : !!state }, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
 }
 
 async function getById(id) {
     return await Alarm.findById(id);
 }
 
-async function getByTopic(topic) {
-    return await Alarm.find({ "topic" : topic });
+async function getByTopic(topic, limit) {
+    return await Alarm.find({ "topic" : topic }, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
 }
 
 async function create(alarmParam) {
