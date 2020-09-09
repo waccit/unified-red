@@ -38,14 +38,19 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
         this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
 			if (msg && msg.payload) {
-				if (msg.action === "create") {
-					this.dataSource.add(msg.payload);
+				if (this.view === "history") {
+					if (msg.action === "create") {
+						this.dataSource.add(msg.payload);
+					}
+					else if (msg.action === "update") {
+						this.dataSource.update(msg.payload.id, msg.payload);
+					}
+					else if (msg.action === "delete") {
+						this.dataSource.delete(msg.payload.id);
+					}
 				}
-				else if (msg.action === "update") {
-					this.dataSource.update(msg.payload.id, msg.payload);
-				}
-				else if (msg.action === "delete") {
-					this.dataSource.delete(msg.payload.id);
+				else if (this.view === "summary") {
+					this.refreshData();
 				}
 			}
 		});
