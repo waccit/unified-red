@@ -25,6 +25,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
     @ViewChild('filter', { static: true }) filter: ElementRef;
+	view = "summary";
 
 	constructor(
 		private webSocketService: WebSocketService,
@@ -85,5 +86,14 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 
 	openAlarmDialog(row) {
         this.dialog.open(AlarmDialogComponent, { data: row });
-    }
+	}
+
+	changeView(view) {
+		this.view = view;
+		switch(this.view) {
+			case 'summary': this.dataSource.loadSummary(); break;
+			case 'history': this.dataSource.loadHistory(); break;
+		}
+	}
+	
 }

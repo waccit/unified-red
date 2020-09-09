@@ -4,8 +4,9 @@ const alarmService = require('./alarm.service');
 const authorize = require('../authorize');
 const Role = require('../users/role.model');
 
-router.get('/',                     authorize(Role.Level01), getAll);
-router.get('/recent/:state/:limit', authorize(Role.Level01), getRecent);
+router.get('/all/',                 authorize(Role.Level01), getAll);
+router.get('/summary/',             authorize(Role.Level01), getSummary);
+router.get('/recent/:state/',       authorize(Role.Level01), getRecent);
 router.get('/:id',                  authorize(Role.Level01), getById);
 router.post('/topic/',              authorize(Role.Level01), getByTopic);
 router.put('/:id',                  authorize(Role.Level01), update);
@@ -17,16 +18,22 @@ module.exports = router;
 
 function getAll(req, res, next) {
     alarmService
-        .getAll()
+        .getAll(req.query.limit)
+        .then((alarms) => res.json(alarms))
+        .catch((err) => next(err));
+}
+
+function getSummary(req, res, next) {
+    alarmService
+        .getSummary(req.query.limit)
         .then((alarms) => res.json(alarms))
         .catch((err) => next(err));
 }
 
 function getRecent(req, res, next) {
     let state = req.params.state.toString().toLowerCase() === "active";
-    let limit = parseInt(req.params.limit);
     alarmService
-        .getRecent(state, limit)
+        .getRecent(state, req.query.limit)
         .then((alarms) => res.json(alarms))
         .catch((err) => next(err));
 }
@@ -40,7 +47,7 @@ function getById(req, res, next) {
 
 function getByTopic(req, res, next) {
     alarmService
-        .getByTopic(req.body.topic)
+        .getByTopic(req.body.topic, req.body.limit)
         .then((alarm) => (alarm ? res.json(alarm) : res.sendStatus(404)))
         .catch((err) => next(err));
 }

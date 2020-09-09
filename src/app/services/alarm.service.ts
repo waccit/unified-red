@@ -1,21 +1,33 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Alarm } from '../data';
 
 @Injectable({ providedIn: 'root' })
 export class AlarmService {
     constructor(private http: HttpClient) {}
 
-    getAll() {
-        return this.http.get<Alarm[]>(`/api/alarms`);
+    getAll(limit: number = 10000) {
+        let params = new HttpParams();
+        params = params.append('limit', limit+'');
+        return this.http.get<Alarm[]>(`/api/alarms/all/`, { params: params });
     }
 
-    getRecentActive(limit: number) {
-        return this.http.get<Alarm[]>(`/api/alarms/recent/active/${limit}`);
+    getSummary(limit: number = 10000) {
+        let params = new HttpParams();
+        params = params.append('limit', limit+'');
+        return this.http.get<Alarm[]>(`/api/alarms/summary/`, { params: params });
     }
 
-    getRecentInctive(limit: number) {
-        return this.http.get<Alarm[]>(`/api/alarms/recent/inactive/${limit}`);
+    getRecentActive(limit: number = 10) {
+        let params = new HttpParams();
+        params = params.append('limit', limit+'');
+        return this.http.get<Alarm[]>(`/api/alarms/recent/active/`, { params: params });
+    }
+
+    getRecentInctive(limit: number = 10) {
+        let params = new HttpParams();
+        params = params.append('limit', limit+'');
+        return this.http.get<Alarm[]>(`/api/alarms/recent/inactive/`, { params: params });
     }
 
     delete(id: string) {
@@ -26,8 +38,8 @@ export class AlarmService {
         return this.http.get<Alarm>(`/api/alarms/${id}`);
     }
 
-    getByTopic(topic: string) {
-        return this.http.post<Alarm[]>(`/api/alarms/topic/`, { "topic": topic });
+    getByTopic(topic: string, limit: number = 10000) {
+        return this.http.post<Alarm[]>(`/api/alarms/topic/`, { "topic": topic, "limit": limit });
     }
 
     update(id: string, alarm: any) {
