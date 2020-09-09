@@ -10,7 +10,7 @@ export class WebSocketService {
     socket: any;
 
     constructor() {
-        this.socket = io('http://localhost:1880', { path: '/ui/socket.io' });
+        this.socket = io(window.location.origin, { path: '/ui/socket.io' });
     }
 
     // connect(onUiLoaded: Function, replaydone: Function) {
