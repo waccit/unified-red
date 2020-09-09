@@ -39,7 +39,7 @@
                             <mat-table #table [dataSource]="dataSource" matSort matSortActive="timestamp" matSortDirection="desc" class="mat-cell ur-alarm-console">
                                 <ng-container matColumnDef="severity">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header></mat-header-cell>
-                                    <mat-cell *matCellDef="let row">
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">
                                         <i class="fas fa-exclamation-triangle" *ngIf="row.severity === 'warning'" aria-label="Warning"></i>
                                         <i class="fas fa-exclamation-circle" *ngIf="row.severity === 'alert'" aria-label="Alert"></i>
                                         <i class="fas fa-fire" *ngIf="row.severity === 'critical'" aria-label="Critical"></i>
@@ -47,19 +47,19 @@
                                 </ng-container>
                                 <ng-container matColumnDef="name">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.name}}</mat-cell>
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">{{row.name}}</mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="topic">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Topic</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.topic}}</mat-cell>
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">{{row.topic}}</mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="value">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Value</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">{{row.value}}</mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="state">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>State</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">
                                         <span class="badge badge-dark" *ngIf="row.state">active</span>
                                         <span class="badge badge-light" *ngIf="!row.state">inactive</span>
                                         <span class="badge badge-light" *ngIf="row.acktime">ack</span>
@@ -68,13 +68,14 @@
                                 </ng-container>
                                 <ng-container matColumnDef="acktime">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Acknowledged</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">
-                                        <!-- {{row.acktime | date: 'MM/dd/yyyy HH:mm:ss' }} -->
+                                    <mat-cell *matCellDef="let row" class="mat-column-timestamp-small" (click)="openAlarmDialog(row)">
+                                        {{row.acktime | date: 'MM/dd/yyyy HH:mm:ss' }}
                                     </mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="timestamp">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Timestamp</mat-header-cell>
-                                    <mat-cell *matCellDef="let row">{{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
+                                    <mat-cell *matCellDef="let row" class="mat-column-timestamp-small" (click)="openAlarmDialog(row)">
+                                        {{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
                                     </mat-cell>
                                 </ng-container>
                                 <!-- actions -->
