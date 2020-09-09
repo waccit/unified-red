@@ -5,4 +5,5 @@ export * from './user.model';
 export * from './role.model';
 export * from './roleName.model';
 export * from './alarm-datasource';
+export * from './alarmdialog-datasource';
 export * from './alarm.model';

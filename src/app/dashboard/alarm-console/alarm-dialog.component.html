@@ -1,0 +1,83 @@
+<div class="addContainer ur-alarm-dialog">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 p-l-10 font-17">{{data.name}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <div class="row mt-2">
+            <div class="col-12">
+                <table class="table table-sm table-borderless">
+                    <tr>
+                        <td>Topic:</td>
+                        <td>{{data.topic}}</td>
+                        <td rowspan="2" style="vertical-align: middle; text-align: right;">
+                            <button mat-raised-button color="primary" (click)="ackAlarm()">Acknowledge</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Severity:</td>
+                        <td><span class="badge">{{data.severity}}</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12 mb-2">
+                <mat-table #table [dataSource]="dataSource" matSort matSortActive="timestamp" matSortDirection="desc" class="mat-cell ur-alarm-console">
+                    <ng-container matColumnDef="severity">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header></mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <i class="fas fa-exclamation-triangle" *ngIf="row.severity === 'warning'" aria-label="Warning"></i>
+                            <i class="fas fa-exclamation-circle" *ngIf="row.severity === 'alert'" aria-label="Alert"></i>
+                            <i class="fas fa-fire" *ngIf="row.severity === 'critical'" aria-label="Critical"></i>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="timestamp">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Timestamp</mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            {{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="value">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Value</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="state">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>State</mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            <span class="badge badge-dark" *ngIf="row.state">active</span>
+                            <span class="badge badge-light" *ngIf="!row.state">inactive</span>
+                            <span class="badge badge-light" *ngIf="row.acktime">ack</span>
+                            <span class="badge badge-danger" *ngIf="row.ackreq && !row.acktime">unack</span>
+                        </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="acktime">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Acknowledged</mat-header-cell>
+                        <mat-cell *matCellDef="let row">
+                            {{row.acktime | date: 'MM/dd/yyyy HH:mm:ss' }}
+                        </mat-cell>
+                    </ng-container>
+                    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: displayedColumns;" matRipple>
+                    </mat-row>
+                </mat-table>
+
+                <div class="no-results" [style.display]="dataSource.renderedData.length == 0 ? '' : 'none'">
+                    No results
+                </div>
+                <mat-paginator #paginator [length]="dataSource.filteredData.length" [pageIndex]="0"
+                    [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]">
+                </mat-paginator>
+            </div>
+        </div>
+
+    </div>
+</div>

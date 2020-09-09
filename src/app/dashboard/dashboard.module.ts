@@ -11,6 +11,7 @@ import { MenuPageComponent } from './menu-page/menu-page.component';
 import { MenuPageDirective } from '../directives/menu-page.directive';
 import { HomePageComponent } from './home-page/home-page.component';
 import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
+import { AlarmDialogComponent } from './alarm-console/alarm-dialog.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +28,7 @@ import { MatSortModule } from '@angular/material/sort';
         MenuPageComponent,
         HomePageComponent,
         AlarmConsoleComponent,
+        AlarmDialogComponent,
     ],
     imports: [
         CommonModule,

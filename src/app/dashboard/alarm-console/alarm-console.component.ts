@@ -7,6 +7,8 @@ import { fromEvent, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WebSocketService, SnackbarService, AlarmService, AuthenticationService } from '../../services';
 import { AlarmDataSource, Role } from '../../data';
+import { MatDialog } from '@angular/material/dialog';
+import { AlarmDialogComponent } from './alarm-dialog.component';
 
 @Component({
 	selector: 'app-alarm-console',
@@ -29,6 +31,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 		private alarmService: AlarmService,
 		private snackbar: SnackbarService,
 		private authenticationService: AuthenticationService,
+		public dialog: MatDialog,
 	) {}
 
 	ngOnInit(): void {
@@ -80,4 +83,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 		});
 	}
 
+	openAlarmDialog(row) {
+        this.dialog.open(AlarmDialogComponent, { data: row });
+    }
 }
