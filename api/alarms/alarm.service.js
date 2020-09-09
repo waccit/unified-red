@@ -6,6 +6,7 @@ module.exports = {
     getAll,
     getRecent,
     getById,
+    getByTopic,
     create,
     update,
     ackById,
@@ -25,9 +26,13 @@ async function getById(id) {
     return await Alarm.findById(id);
 }
 
+async function getByTopic(topic) {
+    return await Alarm.find({ "topic" : topic });
+}
+
 async function create(alarmParam) {
     let prevAlarm = await Alarm.findOne({ "topic" : alarmParam.topic }, null, { sort: { "timestamp": -1 }});
-    if (prevAlarm && prevAlarm.state === alarmParam.state) {
+    if (prevAlarm && prevAlarm.severity === alarmParam.severity && prevAlarm.state === alarmParam.state) {
         throw 'Duplicate alarm for ' + alarmParam.topic;
     }
     const alarm = new Alarm(alarmParam);
@@ -47,7 +52,8 @@ async function update(id, alarmParam) {
     return alarm;
 }
 
-async function _ack(query) {
+async function _ack(query) {    
+    query["$or"] = [ { "acktime" : { "$exists": false } }, { "acktime": 0 } ];
     let alarms = await Alarm.find(query);
     if (!alarms) {
         throw 'Alarm(s) not found';
