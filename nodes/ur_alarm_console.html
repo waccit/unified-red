@@ -1,0 +1,57 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_alarm_console', {
+        category: 'unified-red',
+        color: '#FFCC66',
+        defaults: {
+            name: { value: '' },
+            topic: { value: '["glp/0/+/fb/alarm/#"]', required: true, validate: RED.validators.typedInput("topicType") },
+            topicType: { value: "json" },
+            severitycritical: { value: true },
+            severityalert: { value: true },
+            severitywarning: { value: true },
+            severityinfo: { value: true },
+        },
+        inputs: 1,
+        outputs: 1,
+        align: 'left',
+        icon: "font-awesome/fa-list-alt",
+        paletteLabel: 'alarm console',
+        label: function () {
+            return this.name || 'Alarm Console';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            $("#node-input-topic").typedInput({ default: this.topicType || 'json', types: [ 'msg','flow','global','str', 'json' ] });
+        },
+        oneditsave: function() {
+            this.topicType = $("#node-input-topic").typedInput('type');
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_alarm_console">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_alarm_console.label.name"></span></label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-filter"></i> <span data-i18n="ur_alarm_console.label.topic"></span></label>
+        <input type="text" id="node-input-topic" style="width: 70%"/>
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-level-up"></i> <span data-i18n="ur_alarm_console.label.severity"></span></label>
+        <input type="checkbox" id="node-input-severitycritical" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto; padding-right:20px" for="node-input-severitycritical"><span data-i18n="ur_alarm_console.label.critical"></span></label></input>
+        <input type="checkbox" id="node-input-severityalert" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto; padding-right:20px" for="node-input-severityalert"><span data-i18n="ur_alarm_console.label.alert"></span></label></input>
+        <input type="checkbox" id="node-input-severitywarning" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto; padding-right:20px" for="node-input-severitywarning"><span data-i18n="ur_alarm_console.label.warning"></span></label></input>
+        <input type="checkbox" id="node-input-severityinfo" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto;" for="node-input-severityinfo"><span data-i18n="ur_alarm_console.label.info"></span></label></input>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_alarm_console">
+</script>

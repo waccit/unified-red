@@ -5,12 +5,14 @@ import {
     ElementRef,
     OnInit,
     Renderer2,
-    HostListener,
+    OnDestroy,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { RightSidebarService } from '../../services/rightsidebar.service';
-import { AuthenticationService, CurrentUserService, SnackbarService } from '../../services/';
+import { AuthenticationService, CurrentUserService, SnackbarService, AlarmService, WebSocketService } from '../../services/';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
+import { Alarm } from '../../data';
+import { Subscription } from 'rxjs';
 
 const document: any = window.document;
 
@@ -19,7 +21,10 @@ const document: any = window.document;
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.sass'],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+    newalarm = false;
+    recentAlarms : Alarm[] = [];
+    private _wsSubscription: Subscription;
     
     constructor(
         @Inject(DOCUMENT) private document: Document,
@@ -30,62 +35,44 @@ export class HeaderComponent implements OnInit {
         private authenticationService: AuthenticationService,
         private currentUserService: CurrentUserService,
         private idle: Idle,
-        private snackbar: SnackbarService
+        private snackbar: SnackbarService,
+        private alarmService: AlarmService,
+        private webSocketService: WebSocketService,
     ) {
         this.currentUserService.currentUser.subscribe(user => { 
             if (user) {
                 this.setupInactivityMonitor(user.sessionInactivity);
             }
         });
+        this.alarmService.getRecentActive().subscribe(alarms => {
+            this.recentAlarms = alarms;
+        });
     }
 
-    notifications: Object[] = [
-        {
-            userImg: 'assets/images/user/user1.jpg',
-            userName: 'Sarah Smith',
-            time: '14 mins ago',
-            message: 'Please check your mail',
-        },
-        {
-            userImg: 'assets/images/user/user2.jpg',
-            userName: 'Airi Satou',
-            time: '22 mins ago',
-            message: 'Work Completed !!!',
-        },
-        {
-            userImg: 'assets/images/user/user3.jpg',
-            userName: 'John Doe',
-            time: '3 hours ago',
-            message: 'kindly help me for code.',
-        },
-        {
-            userImg: 'assets/images/user/user4.jpg',
-            userName: 'Ashton Cox',
-            time: '5 hours ago',
-            message: 'Lets break for lunch...',
-        },
-        {
-            userImg: 'assets/images/user/user5.jpg',
-            userName: 'Sarah Smith',
-            time: '14 mins ago',
-            message: 'Please check your mail',
-        },
-        {
-            userImg: 'assets/images/user/user6.jpg',
-            userName: 'Airi Satou',
-            time: '22 mins ago',
-            message: 'Work Completed !!!',
-        },
-        {
-            userImg: 'assets/images/user/user7.jpg',
-            userName: 'John Doe',
-            time: '3 hours ago',
-            message: 'kindly help me for code.',
-        },
-    ];
-
-    ngOnInit() {
+    ngOnInit(): void {
         this.setStartupStyles();
+        this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
+			if (msg && msg.payload) {
+				if (msg.action === "create") {
+                    this.recentAlarms.unshift(msg.payload);
+                    this.recentAlarms.pop();
+                    this.snackbar.error(msg.payload.name + ' alarm');
+                    this.newalarm = true;
+				}
+				else if (msg.action === "update") {
+                    this.recentAlarms = this.recentAlarms.map(a => a.id === msg.payload.id ? msg.payload : a);
+				}
+				else if (msg.action === "delete") {
+                    this.recentAlarms = this.recentAlarms.filter(a => a.id !== msg.payload.id);
+				}
+			}
+		});
+    }
+
+    ngOnDestroy(): void {
+        if (this._wsSubscription) {
+            this._wsSubscription.unsubscribe();
+        }
     }
 
     setStartupStyles() {

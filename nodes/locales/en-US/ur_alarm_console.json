@@ -1,0 +1,14 @@
+{
+    "ur_alarm_console": {
+        "label": {
+            "category": "unified-red",
+            "name": "Name",
+            "topic": "Topic Filter",
+            "severity": "Severity Filter",
+            "critical": "Critical",
+            "alert": "Alert",
+            "warning": "Warning",
+            "info": "Info"
+        }
+    }
+}
