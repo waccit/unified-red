@@ -26,6 +26,10 @@ export class AlarmService {
         return this.http.get<Alarm>(`/api/alarms/${id}`);
     }
 
+    getByTopic(topic: string) {
+        return this.http.post<Alarm[]>(`/api/alarms/topic/`, { "topic": topic });
+    }
+
     update(id: string, alarm: any) {
         return this.http.put<Alarm>(`/api/alarms/${id}`, alarm);
     }
