@@ -56,7 +56,14 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
         let node = this;
         let valid = true;
-        let ontimer, offtimer;
+        let ontimer = { "critical": null, "alert": null, "warning": null, "info": null };
+        let offtimer = { "critical": null, "alert": null, "warning": null, "info": null };
+        let nodeStatus = {
+            "critical": { "ontimer": null, "offtimer": null },
+            "alert": { "ontimer": null, "offtimer": null },
+            "warning": { "ontimer": null, "offtimer": null },
+            "info": { "ontimer": null, "offtimer": null }
+        };
 
         this.rules = config.rules || { "critical": [], "alert": [], "warning": [], "info": [] };
         this.lastState = { "critical": false, "alert": false, "warning": false, "info": false };
@@ -193,14 +200,16 @@ module.exports = function(RED) {
             }
         };
 
-        let clearOnTimer = function() {
-            clearTimeout(ontimer);
-            ontimer = null;
+        let clearOnTimer = function(severity) {
+            clearTimeout(ontimer[severity]);
+            ontimer[severity] = null;
+            nodeStatus[severity].ontimer = null;
         };
 
-        let clearOffTimer = function() {
-            clearTimeout(offtimer);
-            offtimer = null;
+        let clearOffTimer = function(severity) {
+            clearTimeout(offtimer[severity]);
+            offtimer[severity] = null;
+            nodeStatus[severity].offtimer = null;
         };
 
         let sendAlarm = (msg, startValue) => {
@@ -231,36 +240,54 @@ module.exports = function(RED) {
             }
         };
 
-        let updateNodeStatus = function(severity, delaySec) {
-            let time = "";
-            if (delaySec) {
-                let d = new Date();
-                d.setSeconds(d.getSeconds() + node.delayon);
-                time = " @ " +  d.toLocaleTimeString();
+        let updateNodeStatus = function() {
+            let status = { fill: "red", shape: "dot", text: "" };
+            status.text = severities.filter(s => node.lastState[s] || nodeStatus[s].ontimer || nodeStatus[s].offtimer).map(s => {
+                if (nodeStatus[s].ontimer) {
+                    let d = new Date();
+                    d.setSeconds(d.getSeconds() + nodeStatus[s].ontimer);
+                    return s + " @ " +  d.toLocaleTimeString();
+                }
+                if (nodeStatus[s].offtimer) {
+                    status.shape = "ring";
+                    let d = new Date();
+                    d.setSeconds(d.getSeconds() + nodeStatus[s].offtimer);
+                    return "no " + s + " @ " +  d.toLocaleTimeString();
+                }
+                return s;
+            }).join(', ');
+            if (!status.text) {
+                status.text = "inactive";
+                status.fill = "grey";
             }
-            node.status({ fill: severity === "inactive" ? "grey" : "red", shape: "dot", text: severity + time });
+            node.status(status);
         };
 
         let fireWithDelay = function(msg) {
             let startValue = msg.payload.value;
             if (msg.payload.state) {
-                if (!ontimer) {
-                    clearOffTimer();
-                    updateNodeStatus(msg.payload.severity, node.delayon);
+                if (!ontimer[msg.payload.severity]) {
+                    clearOffTimer(msg.payload.severity);
+                    nodeStatus[msg.payload.severity].ontimer = node.delayon;
+                    updateNodeStatus();
                     // run on timer
-                    ontimer = setTimeout(() => {
+                    ontimer[msg.payload.severity] = setTimeout(() => {
                         sendAlarm(msg, startValue);
-                        clearOnTimer();
+                        clearOnTimer(msg.payload.severity);
+                        updateNodeStatus();
                     }, node.delayon * 1000);
+
                 }
             } else {
-                if (!offtimer) {
-                    clearOnTimer();
-                    updateNodeStatus("inactive", node.delayoff);
+                if (!offtimer[msg.payload.severity]) {
+                    clearOnTimer(msg.payload.severity);
+                    nodeStatus[msg.payload.severity].offtimer = node.delayoff;
+                    updateNodeStatus();
                     // run off timer
-                    offtimer = setTimeout(() => {
+                    offtimer[msg.payload.severity] = setTimeout(() => {
                         sendAlarm(msg, startValue);
-                        clearOffTimer();
+                        clearOffTimer(msg.payload.severity);
+                        updateNodeStatus();
                     }, node.delayoff * 1000);
                 }
             }
@@ -304,8 +331,6 @@ module.exports = function(RED) {
                 }
             }
 
-            let activeAlarms = severities.filter(s => node.lastState[s]);
-            updateNodeStatus(activeAlarms.length ? activeAlarms.join(', ') : "inactive");
             node.previousValue = node.presentValue;
         }
 
@@ -341,6 +366,8 @@ module.exports = function(RED) {
         this.on('input', function(msg) {
             processMessageQueue(msg);
         });
+
+        updateNodeStatus();
     }
 
     RED.nodes.registerType("ur_alarm", AlarmNode);

@@ -34,7 +34,7 @@ export class RolesTableComponent implements OnInit {
         this.dataSource = new RoleDataSource(this.roleService, this.paginator, this.sort);
     }
 
-    editCall(row) {
+    editRole(row) {
         this.dialog
             .open(RoleFormDialogComponent, { data: { data: row } })
             .afterClosed()

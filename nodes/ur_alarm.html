@@ -2,6 +2,7 @@
 Modeled after Node-RED's Switch core node.
 -->
 <script type="text/javascript">
+(function() {
     // convert to i18 text
     function c_(x) {
         return RED._("unified-red/ur_alarm:ur_alarm." + x);
@@ -15,19 +16,19 @@ Modeled after Node-RED's Switch core node.
         {v:"lte",t:"<=",kind:'V'},
         {v:"gt",t:">",kind:'V'},
         {v:"gte",t:">=",kind:'V'},
-        {v:"hask",t:"ur_alarm.rules.hask",kind:'V'},
-        {v:"btwn",t:"ur_alarm.rules.btwn",kind:'V'},
-        {v:"cont",t:"ur_alarm.rules.cont",kind:'V'},
-        {v:"regex",t:"ur_alarm.rules.regex",kind:'V'},
-        {v:"true",t:"ur_alarm.rules.true",kind:'V'},
-        {v:"false",t:"ur_alarm.rules.false",kind:'V'},
-        {v:"null",t:"ur_alarm.rules.null",kind:'V'},
-        {v:"nnull",t:"ur_alarm.rules.nnull",kind:'V'},
-        {v:"istype",t:"ur_alarm.rules.istype",kind:'V'},
-        {v:"empty",t:"ur_alarm.rules.empty",kind:'V'},
-        {v:"nempty",t:"ur_alarm.rules.nempty",kind:'V'},
-        {v:"jsonata_exp",t:"ur_alarm.rules.exp",kind:'O'},
-        {v:"else",t:"ur_alarm.rules.else",kind:'O'}
+        {v:"hask",t:"rules.hask",kind:'V'},
+        {v:"btwn",t:"rules.btwn",kind:'V'},
+        {v:"cont",t:"rules.cont",kind:'V'},
+        {v:"regex",t:"rules.regex",kind:'V'},
+        {v:"true",t:"rules.true",kind:'V'},
+        {v:"false",t:"rules.false",kind:'V'},
+        {v:"null",t:"rules.null",kind:'V'},
+        {v:"nnull",t:"rules.nnull",kind:'V'},
+        {v:"istype",t:"rules.istype",kind:'V'},
+        {v:"empty",t:"rules.empty",kind:'V'},
+        {v:"nempty",t:"rules.nempty",kind:'V'},
+        {v:"jsonata_exp",t:"rules.exp",kind:'O'},
+        {v:"else",t:"rules.else",kind:'O'}
     ];
 
     RED.nodes.registerType('ur_alarm', {
@@ -125,13 +126,13 @@ Modeled after Node-RED's Switch core node.
                 var group0 = $('<optgroup/>', { label: "value rules" }).appendTo(selectField);
                 for (var d in operators) {
                     if(operators[d].kind === 'V') {
-                        group0.append($("<option>").val(operators[d].v).text(/^ur_alarm/.test(operators[d].t) ? c_(operators[d].t) : operators[d].t));
+                        group0.append($("<option>").val(operators[d].v).text(/^rules/.test(operators[d].t) ? c_(operators[d].t) : operators[d].t));
                     }
                 }
 
                 for (var d in operators) {
                     if(operators[d].kind === 'O') {
-                        selectField.append($("<option>").val(operators[d].v).text(/^ur_alarm/.test(operators[d].t) ? c_(operators[d].t) : operators[d].t));
+                        selectField.append($("<option>").val(operators[d].v).text(/^rules/.test(operators[d].t) ? c_(operators[d].t) : operators[d].t));
                     }
                 }
 
@@ -333,6 +334,7 @@ Modeled after Node-RED's Switch core node.
             this.propertyType = $("#node-input-property").typedInput('type');
         }
     });
+})();
 </script>
 
 <script type="text/html" data-template-name="ur_alarm">
