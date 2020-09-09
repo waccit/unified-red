@@ -88,6 +88,15 @@ app-alarm-dialog {
     .ur-alarm-console {
         width: 600px;
     }
+    .mat-column-severity {
+        flex: 0 0 50px;
+        text-align: center;
+        justify-content:center;
+    }
+    .mat-column-timestamp-small {
+        flex: 0 0 100px;
+        font-size: 0.85em;
+    }
     mat-header-cell {
         flex-direction: column;
         justify-content: center;

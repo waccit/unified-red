@@ -14,23 +14,14 @@
     <div mat-dialog-content>
         <div class="row mt-2">
             <div class="col-12">
-                <table class="table table-sm table-borderless">
-                    <tr>
-                        <td>Topic:</td>
-                        <td>{{data.topic}}</td>
-                        <td rowspan="2" style="vertical-align: middle; text-align: right;">
-                            <button mat-raised-button color="primary" (click)="ackAlarm()">Acknowledge</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Severity:</td>
-                        <td><span class="badge">{{data.severity}}</span></td>
-                    </tr>
-                </table>
+                <mat-form-field class="example-full-width" appearance="outline">
+                    <mat-label>Topic</mat-label>
+                    <input matInput [value]="data.topic" readonly>
+                </mat-form-field>
             </div>
         </div>
-        <div class="row mt-2">
-            <div class="col-12 mb-2">
+        <div class="row">
+            <div class="col-12">
                 <mat-table #table [dataSource]="dataSource" matSort matSortActive="timestamp" matSortDirection="desc" class="mat-cell ur-alarm-console">
                     <ng-container matColumnDef="severity">
                         <mat-header-cell *matHeaderCellDef mat-sort-header></mat-header-cell>
@@ -42,13 +33,13 @@
                     </ng-container>
                     <ng-container matColumnDef="timestamp">
                         <mat-header-cell *matHeaderCellDef mat-sort-header>Timestamp</mat-header-cell>
-                        <mat-cell *matCellDef="let row">
+                        <mat-cell *matCellDef="let row" class="mat-column-timestamp-small">
                             {{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
                         </mat-cell>
                     </ng-container>
                     <ng-container matColumnDef="value">
                         <mat-header-cell *matHeaderCellDef mat-sort-header>Value</mat-header-cell>
-                        <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
+                        <mat-cell *matCellDef="let row">{{ (row.value | number) || row.value }}</mat-cell>
                     </ng-container>
                     <ng-container matColumnDef="state">
                         <mat-header-cell *matHeaderCellDef mat-sort-header>State</mat-header-cell>
@@ -60,8 +51,8 @@
                         </mat-cell>
                     </ng-container>
                     <ng-container matColumnDef="acktime">
-                        <mat-header-cell *matHeaderCellDef mat-sort-header>Acknowledged</mat-header-cell>
-                        <mat-cell *matCellDef="let row">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Ack</mat-header-cell>
+                        <mat-cell *matCellDef="let row" class="mat-column-timestamp-small">
                             {{row.acktime | date: 'MM/dd/yyyy HH:mm:ss' }}
                         </mat-cell>
                     </ng-container>
@@ -74,8 +65,16 @@
                     No results
                 </div>
                 <mat-paginator #paginator [length]="dataSource.filteredData.length" [pageIndex]="0"
-                    [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]">
+                    [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]">
                 </mat-paginator>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                <div class="example-button-row">
+                    <button mat-raised-button color="primary" (click)="ackAlarm()">Acknowledge</button>
+                    <button mat-raised-button color="warn" (click)="dialogRef.close()" tabindex="-1">Cancel</button>
+                </div>
             </div>
         </div>
 

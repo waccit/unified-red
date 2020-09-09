@@ -53,7 +53,10 @@
                                 </ng-container>
                                 <ng-container matColumnDef="name">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">{{row.name}}</mat-cell>
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">
+                                        {{row.name}}
+                                        <span class="badge badge-primary m-l-10" *ngIf="row.unackActive && row.unackActive > 1">{{row.unackActive}}</span>
+                                    </mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="topic">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Topic</mat-header-cell>
@@ -61,7 +64,7 @@
                                 </ng-container>
                                 <ng-container matColumnDef="value">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>Value</mat-header-cell>
-                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">{{row.value}}</mat-cell>
+                                    <mat-cell *matCellDef="let row" (click)="openAlarmDialog(row)">{{ (row.value | number) || row.value }}</mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="state">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header>State</mat-header-cell>
