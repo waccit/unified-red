@@ -56,7 +56,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 				if (msg.action === "create") {
                     this.recentAlarms.unshift(msg.payload);
                     this.recentAlarms.pop();
-                    this.snackbar.error(msg.payload.name + ' alarm');
+                    this.snackbar.error(msg.payload.name + ' alarm', null, 5000);
                     this.newalarm = true;
 				}
 				else if (msg.action === "update") {
