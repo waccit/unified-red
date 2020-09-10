@@ -34,6 +34,23 @@ To include static files (CSS, JS, image, etc), please set the following paramete
 
 `httpStatic: "./node_modules/unified-red/static/",`
 
+# SmartServer IoT Node-RED Configuration
+
+## SmartServer IoT's Apollo Node-RED settings.js
+
+`/usr/bin/apollo/node-red/config/settings.js`
+
+## Security
+
+To apply Unified user authentication to the Node-RED editor, please set the following parameter in your Node-RED settings.js file:
+
+`adminAuth: require("/media/sdcard/unified-red/admin-auth"),`
+
+## Static Files
+
+`httpStatic: "/media/sdcard/unified-red/static/",`
+
+
 # Old Angular CLI notes:
 
 ## Development server
