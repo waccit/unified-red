@@ -73,10 +73,6 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
             });
     }
 	
-	send(msg: any) {
-		this.webSocketService.emit({ id: "nodeId", msg: msg });
-    }
-
 	ackAlarm(row) {
 		this.alarmService.ackByTopic(row.topic).subscribe(alarms => {
 			this.snackbar.success(row.name + ' acknowleged');
