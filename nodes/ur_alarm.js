@@ -72,6 +72,7 @@ module.exports = function(RED) {
         this.delayon = parseInt(config.delayon) || 0;
         this.delayoff = parseInt(config.delayoff) || 0;
         this.checkall = config.checkall || "true";
+        this.ackreq = config.ackreq;
         this.presentValue = null;
         this.previousValue = null;
         this.property = config.property;
@@ -237,6 +238,7 @@ module.exports = function(RED) {
             }
 
             if (send) {
+                msg.payload.ackreq = node.ackreq;
                 node.send(msg);
                 node.lastState[msg.payload.severity] = msg.payload.state;
             }

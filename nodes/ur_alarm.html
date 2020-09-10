@@ -46,7 +46,8 @@ Modeled after Node-RED's Switch core node.
                 warning: [],
                 info: [],
             } },
-            checkall: { value: "true", required: true }
+            checkall: { value: "true", required: true },
+            ackreq: { value: "false" },
         },
         inputs: 1,
         outputs: 1,
@@ -360,6 +361,10 @@ Modeled after Node-RED's Switch core node.
             <option value="true" data-i18n="ur_alarm.label.checkall"></option>
             <option value="false" data-i18n="ur_alarm.label.stopfirst"></option>
         </select>
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-ackreq" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto;" for="node-input-ackreq"><span data-i18n="ur_alarm.label.ackreq"></span></label></input>
     </div>
     <div class="form-row node-input-critical-container-row">
         <label for="node-input-critical-container" style="width: 100%"><span data-i18n="ur_alarm.label.critical"></span></label>
