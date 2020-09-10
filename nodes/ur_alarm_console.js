@@ -1,9 +1,12 @@
 module.exports = function (RED) {
     const alarmService = require('../api/alarms/alarm.service');
 
+
     function AlarmConsoleNode(config) {
         RED.nodes.createNode(this, config);
         let node = this;
+        this.inhibit = false;
+        this.inhibitTimer = null;
         this.topic = config.topic;
         this.topicType = config.topicType || "json";
         let severityFilter = {
@@ -14,6 +17,41 @@ module.exports = function (RED) {
             "failover": false
         };
 
+        let checkInhibit = function(msg) {
+            if (msg.hasOwnProperty("inhibit")) {
+                try {
+                    let inhibit = msg.inhibit.toString().toLowerCase().trim();
+                    if (inhibit === "0" || inhibit === "false") {
+                        node.inhibit = false;
+                        node.status({});
+                        clearTimeout(node.inhibitTimer);
+                        node.inhibitTimer = null;
+                    } else if (inhibit === "true") {
+                        node.inhibit = true;
+                        node.status({ fill: "grey", shape: "dot", text: "inhibited" });
+                        clearTimeout(node.inhibitTimer);
+                        node.inhibitTimer = null;
+                    } else if (!isNaN(inhibit)) {
+                        inhibit = parseInt(inhibit);
+                        if (inhibit > 0) {
+                            node.inhibit = true;
+                            let d = new Date();
+                            d.setSeconds(d.getSeconds() + inhibit);
+                            node.status({ fill: "grey", shape: "dot", text: "inhibited until " + d.toLocaleString() });
+                            node.inhibitTimer = setTimeout(() => { // clear inhibit after timer elapses
+                                node.inhibit = false;
+                                node.status({});
+                            }, inhibit * 1000);
+                        }
+                    }
+                }
+                catch (e) {
+                    node.warn(e);
+                }
+            }
+            return node.inhibit;
+        };
+    
         let buildTopicFilter = function(msg) {
             let topicFilter = RED.util.evaluateNodeProperty(node.topic, node.topicType, node, msg);
             if (!Array.isArray(topicFilter)) {
@@ -37,7 +75,8 @@ module.exports = function (RED) {
         }
 
         node.on('input', function(msg) {
-            if (!msg.topic || !msg.payload || // invalid message object
+            if (checkInhibit(msg) ||
+                !msg.topic || !msg.payload || // invalid message object
                 !severityFilter[msg.payload.severity || "failover"]) { // filter severity
                 return;
             }
