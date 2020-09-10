@@ -8,4 +8,5 @@ export interface Alarm {
     acktime?: Date;
     ackreq?: boolean;
     timestamp?: Date;
+    unackActive?: number;
 }
