@@ -54,10 +54,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
 			if (msg && msg.payload) {
 				if (msg.action === "create") {
-                    this.recentAlarms.unshift(msg.payload);
-                    this.recentAlarms.pop();
-                    this.snackbar.error(msg.payload.name + ' alarm', null, 5000);
-                    this.newalarm = true;
+                    if (msg.payload.state) { // active alarms only
+                        this.recentAlarms.unshift(msg.payload);
+                        this.recentAlarms.pop();
+                        this.snackbar.error(msg.payload.name + ' alarm', null, 5000);
+                        this.newalarm = true;
+                    }
 				}
 				else if (msg.action === "update") {
                     this.recentAlarms = this.recentAlarms.map(a => a.id === msg.payload.id ? msg.payload : a);
