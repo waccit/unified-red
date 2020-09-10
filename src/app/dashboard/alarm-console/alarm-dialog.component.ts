@@ -49,7 +49,8 @@ export class AlarmDialogComponent implements OnInit, OnDestroy {
 
     ackAlarm() {
 		this.alarmService.ackByTopic(this.data.topic).subscribe(alarms => {
-			this.snackbar.success(this.data.name + ' acknowleged');
+            this.snackbar.success(this.data.name + ' acknowleged');
+            this.dialogRef.close();
 		});
 	}
 }
