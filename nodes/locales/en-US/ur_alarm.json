@@ -16,7 +16,8 @@
             "stopfirst": "stopping after first match",
             "previous": "previous value",
             "and": "and",
-            "ignorecase": "ignore case"
+            "ignorecase": "ignore case",
+            "ackreq": "Acknowledgement required"
         },
         "rules": {
             "hask": "has key",
