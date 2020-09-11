@@ -300,10 +300,11 @@ function add(opt) {
             if (msg.hasOwnProperty('enabled')) {
                 toEmit.disabled = !msg.enabled;
             }
-            toEmit.id = toStore.id = opt.node.id;
+            toEmit.socketid = toEmit.id = toStore.id = opt.node.id;
             //toEmit.socketid = msg.socketid; // dcj mu
             // Emit and Store the data
             //if (settings.verbose) { console.log("UI-EMIT",JSON.stringify(toEmit)); }
+            toEmit.samy = "toEmit"; //sa:debug
             emitSocket(updateValueEventName, toEmit);
             if (opt.persistantFrontEndValue) {
                 replayMessages[opt.node.id] = toStore;
@@ -522,6 +523,12 @@ function init(server, app, log, redSettings) {
         socket.on('ui-params', function (p) {
             delete p.socketid;
             params = p;
+        });
+        socket.on('join', function(room) {
+            socket.join(room);
+        });
+        socket.on('leave', function(room) {
+            socket.leave(room);
         });
     });
 }
