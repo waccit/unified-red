@@ -13,6 +13,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     constructor(protected webSocketService: WebSocketService) {}
 
     ngAfterViewInit(): void {
+        this.webSocketService.join(this.nodeId);
         this._wsSubscription = this.webSocketService.listen('update-value').subscribe((msg: any) => {
             if (msg && msg.id && this.nodeId == msg.id) {
                 this.updateValue(msg);
@@ -32,6 +33,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         if (this._wsSubscription) {
             this._wsSubscription.unsubscribe();
         }
+        this.webSocketService.leave(this.nodeId);
     }
 
     get container() {

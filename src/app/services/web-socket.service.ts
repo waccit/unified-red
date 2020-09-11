@@ -63,4 +63,12 @@ export class WebSocketService {
     //     this.socket.removeListener(eventName, handler);
     //     this.socket.off(eventName, handler)
     // }
+
+    join(room: string) {
+        this.socket.emit("join", room);
+    }
+
+    leave(room: string) {
+        this.socket.emit("leave", room);
+    }
 }
