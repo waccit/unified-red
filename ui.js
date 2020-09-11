@@ -45,7 +45,7 @@ ev.setMaxListeners(0);
 
 // default manifest.json to be returned as required.
 var mani = {
-    name: 'unified-RED Dashboard',
+    name: 'Unified-RED Dashboard',
     short_name: 'Dashboard',
     description: 'A dashboard for Node-RED',
     start_url: './#/0',
@@ -472,7 +472,7 @@ function init(server, app, log, redSettings) {
         app.use(errorHandler);
     });
 
-    log.info('Dashboard version ' + urVersion + ' started at ' + fullPath);
+    log.info('Unified-RED Dashboard version ' + urVersion + ' started at ' + fullPath);
 
     io.on('connection', function (socket) {
         //   console.log("ui io.on connection: ", socket);
