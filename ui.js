@@ -304,7 +304,6 @@ function add(opt) {
             //toEmit.socketid = msg.socketid; // dcj mu
             // Emit and Store the data
             //if (settings.verbose) { console.log("UI-EMIT",JSON.stringify(toEmit)); }
-            toEmit.samy = "toEmit"; //sa:debug
             emitSocket(updateValueEventName, toEmit);
             if (opt.persistantFrontEndValue) {
                 replayMessages[opt.node.id] = toStore;
