@@ -76,7 +76,6 @@ export class ProfileComponent implements OnInit {
                 for (let item of menu) {
                     this.getMenuPagePaths(item);
                 }
-                console.log('menuPages', this.menuPages);
             }
         });
         this.filteredMenuPages = this.homepage.valueChanges.pipe(
@@ -105,7 +104,7 @@ export class ProfileComponent implements OnInit {
             .update(this.userId, this.settingsForm.value)
             .pipe(first())
             .subscribe(
-                (data: User) => {
+                () => { // data: User
                     this.snackbar.success('Account settings successfully saved!');
                 },
                 (error) => {
@@ -122,7 +121,7 @@ export class ProfileComponent implements OnInit {
             .login(this.username, this.uf.password.value)
             .pipe(first())
             .subscribe(
-                (data) => {
+                () => { // data
                     this.userService
                         .update(this.userId, { username: this.uf.username.value })
                         .pipe(first())
@@ -150,7 +149,7 @@ export class ProfileComponent implements OnInit {
             .login(this.username, this.pf.password.value)
             .pipe(first())
             .subscribe(
-                (data) => {
+                () => { // data
                     this.userService
                         .update(this.userId, { password: this.pf.newPassword.value })
                         .pipe(first())
