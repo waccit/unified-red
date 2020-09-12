@@ -31,8 +31,11 @@ export class UrFormComponent extends BaseNode {
     }
 
     submit() {
-        for (let topic in this.data.formValue) {
-            this.send({ "topic": topic, "payload": this.data.formValue[topic] });
+        for (let elem of this.data.options) {
+            let payload = this.data.formValue[elem.topic]
+            if (payload !== "") { // send only if form element has a value
+                this.send({ "topic": elem.outtopic || elem.topic, "payload": payload });
+            }
         }
         this.snackbar.success('Saved!');
     }

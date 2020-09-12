@@ -51,10 +51,9 @@ module.exports = function (RED) {
                 if (fromUI && fromUI.hasOwnProperty('msg') && fromUI.msg !== null) {
                     var om = fromUI.msg;
                     om.socketid = fromUI.socketid;
-                    om.topic = config.topic || fromUI.msg.topic;
+                    om.topic = fromUI.msg.topic;
                     return om;
                 }
-                msg.topic = config.topic || msg.topic;
             },
         });
         node.on('close', done);
