@@ -25,10 +25,8 @@ export function MustMatch(controlName: string, matchingControlName: string) {
     };
 }
 
-export const PasswordStrengthValidator = function (
-    control: AbstractControl
-): ValidationErrors | null {
-    let value: string = control.value || '';
+export function PasswordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+    const value: string = control.value || '';
     if (!value) {
         return null;
     }

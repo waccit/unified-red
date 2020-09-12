@@ -67,13 +67,13 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
             // server-side map reduce
             // this.alarmService.getSummary().subscribe((data:any) => {
             //     this.alarms = data.results.map(v => v.value);
-            //     this.alarmsSubject.next(this.alarms);
+            //     this.alarmsSsubject.next(this.alarms);
             // });
 
             // client-side map reduce: opting for client-side map reduce to prevent server loading
-            let result = {};
-            for (let alarm of this.alarms) {
-                let topic = alarm.topic;
+            const result = {};
+            for (const alarm of this.alarms) {
+                const topic = alarm.topic;
                 if (!result[topic]) {
                     result[topic] = [];
                 }
@@ -90,26 +90,28 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
                 });
             }
 
-            let reduceFunc = function(prev, curr) {
-                var latest = curr.timestamp >= prev.timestamp ? curr : prev;
+            const reduceFunc = (prev, curr) => {
+                const latest = curr.timestamp >= prev.timestamp ? curr : prev;
                 latest.unackActive = prev.unackActive + curr.unackActive;
                 return latest;
             };
 
-            for (let topic in result) {
-                let reduced = result[topic].reduce(reduceFunc);
-                 // only include alarms that are active or unack'd alarms 
-                if (reduced.state || reduced.unackActive) {
-                    if (reduced.acktime === 0) { // remove acktime field if no timestamp set
-                        delete reduced.acktime;
+            for (const topic in result) {
+                if (result.hasOwnProperty(topic)) {
+                    const reduced = result[topic].reduce(reduceFunc);
+                    // only include alarms that are active or unack'd alarms
+                    if (reduced.state || reduced.unackActive) {
+                        if (reduced.acktime === 0) { // remove acktime field if no timestamp set
+                            delete reduced.acktime;
+                        }
+                        result[topic] = reduced;
                     }
-                    result[topic] = reduced;
-                }
-                else {
-                    delete result[topic];
+                    else {
+                        delete result[topic];
+                    }
                 }
             }
-            let summaryData : Alarm[] = Object.values(result);
+            const summaryData : Alarm[] = Object.values(result);
             this.alarmsSubject.next(summaryData);
         } else { // history mode
             this.alarmsSubject.next(this.alarms);

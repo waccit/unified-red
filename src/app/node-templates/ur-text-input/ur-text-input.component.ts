@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { Subject, fromEvent, BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -8,14 +8,14 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     templateUrl: './ur-text-input.component.html',
     styleUrls: ['./ur-text-input.component.sass'],
 })
-export class UrTextInputComponent extends BaseNode {
+export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     valueSubject = new BehaviorSubject('');
     delay: number;
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
 
-        this.delay = parseInt(this.data.delay);
+        this.delay = parseInt(this.data.delay, 10);
         if (this.delay > 0) {
             this.valueSubject
                 .asObservable()
@@ -36,7 +36,7 @@ export class UrTextInputComponent extends BaseNode {
     keyup(value: string) {
         this.valueSubject.next(value);
     }
-    
+
     change(value: string) {
         this.valueSubject.next(value);
         this.send({ payload: value });

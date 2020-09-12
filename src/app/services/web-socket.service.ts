@@ -65,10 +65,10 @@ export class WebSocketService {
     // }
 
     join(room: string) {
-        this.socket.emit("join", room);
+        this.socket.emit('join', room);
     }
 
     leave(room: string) {
-        this.socket.emit("leave", room);
+        this.socket.emit('leave', room);
     }
 }

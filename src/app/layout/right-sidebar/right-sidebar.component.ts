@@ -11,12 +11,12 @@ import { AuthenticationService } from '../../services/';
     styleUrls: ['./right-sidebar.component.sass'],
 })
 export class RightSidebarComponent implements OnInit {
-    selectedBgColor: string = 'black';
+    selectedBgColor = 'black';
     maxHeight: string;
     maxWidth: string;
-    showpanel: boolean = false;
-    showSettings: boolean = false;
-    isOpenSidebar: boolean = false;
+    showpanel = false;
+    showSettings = false;
+    isOpenSidebar = false;
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
@@ -50,7 +50,7 @@ export class RightSidebarComponent implements OnInit {
 
     selectTheme(e) {
         this.selectedBgColor = e;
-        var prevTheme = this.elementRef.nativeElement
+        const prevTheme = this.elementRef.nativeElement
             .querySelector('.right-sidebar .demo-choose-skin li.actived')
             .getAttribute('data-theme');
         this.renderer.removeClass(this.document.body, 'theme-' + prevTheme);
@@ -67,18 +67,18 @@ export class RightSidebarComponent implements OnInit {
         this.renderer.removeClass(this.document.body, 'logo-black');
         this.renderer.addClass(this.document.body, 'menu_light');
         this.renderer.addClass(this.document.body, 'logo-white');
-        var menu_option = 'menu_light';
+        const menuOption = 'menu_light';
         localStorage.setItem('choose_logoheader', 'logo-white');
-        localStorage.setItem('menu_option', menu_option);
+        localStorage.setItem('menu_option', menuOption);
     }
     darkSidebarBtnClick() {
         this.renderer.removeClass(this.document.body, 'menu_light');
         this.renderer.removeClass(this.document.body, 'logo-white');
         this.renderer.addClass(this.document.body, 'menu_dark');
         this.renderer.addClass(this.document.body, 'logo-black');
-        var menu_option = 'menu_dark';
+        const menuOption = 'menu_dark';
         localStorage.setItem('choose_logoheader', 'logo-black');
-        localStorage.setItem('menu_option', menu_option);
+        localStorage.setItem('menu_option', menuOption);
     }
     lightThemeBtnClick() {
         this.renderer.removeClass(this.document.body, 'dark');
@@ -89,12 +89,12 @@ export class RightSidebarComponent implements OnInit {
         this.renderer.addClass(this.document.body, 'submenu-closed');
         this.renderer.addClass(this.document.body, 'menu_light');
         this.renderer.addClass(this.document.body, 'logo-white');
-        var theme = 'light';
-        var menu_option = 'menu_light';
+        const theme = 'light';
+        const menuOption = 'menu_light';
         localStorage.setItem('choose_logoheader', 'logo-white');
         localStorage.setItem('choose_skin', 'theme-black');
         localStorage.setItem('theme', theme);
-        localStorage.setItem('menu_option', menu_option);
+        localStorage.setItem('menu_option', menuOption);
     }
     darkThemeBtnClick() {
         this.renderer.removeClass(this.document.body, 'light');
@@ -106,16 +106,16 @@ export class RightSidebarComponent implements OnInit {
         this.renderer.addClass(this.document.body, 'menu_dark');
         this.renderer.addClass(this.document.body, 'logo-black');
 
-        var theme = 'dark';
-        var menu_option = 'menu_dark';
+        const theme = 'dark';
+        const menuOption = 'menu_dark';
         localStorage.setItem('choose_logoheader', 'logo-black');
         localStorage.setItem('choose_skin', 'theme-black');
         localStorage.setItem('theme', theme);
-        localStorage.setItem('menu_option', menu_option);
+        localStorage.setItem('menu_option', menuOption);
     }
 
     setRightSidebarWindowHeight() {
-        var height = window.innerHeight - 137;
+        const height = window.innerHeight - 137;
         this.maxHeight = height + '';
         this.maxWidth = '500px';
     }

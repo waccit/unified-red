@@ -53,7 +53,7 @@ export abstract class GenericDataSource<T> extends DataSource<T> {
                     return searchStr.indexOf(this.filter.toLowerCase()) !== -1;
                 });
                 // Sort filtered data
-                let sortedData = this.sortData(this.filteredData.slice());
+                const sortedData = this.sortData(this.filteredData.slice());
                 // Grab the page's slice of the data
                 const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
                 this.renderedData = sortedData.splice(startIndex, this.paginator.pageSize);
@@ -66,8 +66,8 @@ export abstract class GenericDataSource<T> extends DataSource<T> {
             return data;
         }
         return data.sort((a, b) => {
-            let propertyA = a[this.sort.active];
-            let propertyB = b[this.sort.active];
+            const propertyA = a[this.sort.active];
+            const propertyB = b[this.sort.active];
             const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
             const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
             return (valueA < valueB ? -1 : 1) * (this.sort.direction === 'asc' ? 1 : -1);

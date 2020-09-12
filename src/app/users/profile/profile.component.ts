@@ -134,7 +134,7 @@ export class ProfileComponent implements OnInit {
                         .update(this.userId, { password: this.pf.newPassword.value })
                         .pipe(first())
                         .subscribe(
-                            (data: User) => {
+                            () => { // data: User
                                 this.snackbar.success('Password successfully changed!');
                             },
                             (error) => {

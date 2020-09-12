@@ -21,7 +21,7 @@ export class JwtInterceptor implements HttpInterceptor {
         request: HttpRequest<any>,
         next: HttpHandler
     ): Observable<HttpEvent<any>> {
-        let nodeRedApi = request.headers.get("Node-RED-API-Version");
+        const nodeRedApi = request.headers.get('Node-RED-API-Version');
         if (!nodeRedApi) {
             // add authorization header with jwt token if available
             const token = this.authenticationService.tokenValue;
