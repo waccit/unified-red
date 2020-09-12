@@ -12,7 +12,6 @@ import {
     RouterStateSnapshot,
 } from '@angular/router';
 import { AuthenticationService } from '../services/';
-import { Role } from '../data';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
@@ -24,9 +23,8 @@ export class AuthGuard implements CanActivate {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
         if (this.authenticationService.tokenValue) {
             let userRole = this.authenticationService.getUserRole();
-            console.log("auth guard route.data.roles", route.data.roles, "auth guard userRole", userRole);
+            // console.log("auth guard route.data.roles", route.data.roles, "auth guard userRole", userRole);
             if (route.data.roles && userRole < route.data.roles) {
-                // console.log("auth guard forbidden");
                 // role not authorised so redirect to forbidden
                 this.router.navigate(['/403-forbidden']);
                 return false;

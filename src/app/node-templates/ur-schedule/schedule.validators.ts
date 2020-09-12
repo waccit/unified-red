@@ -27,10 +27,6 @@ export function HolidayValidator() {
         repeatYearWeekday.setErrors(null);
 
         if (repeat.value === "weekly") {
-            console.log(
-                "\nrepeat:", formGroup.controls.repeat.value,
-                "\nrepeatWeekdays:", formGroup.controls.repeatWeekdays.value,
-            );
             if (!repeatWeekdays.value || !repeatWeekdays.value.length) {
                 repeatWeekdays.setErrors({ required: true });
             }

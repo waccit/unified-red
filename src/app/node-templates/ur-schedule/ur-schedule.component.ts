@@ -66,7 +66,6 @@ export class UrScheduleComponent extends BaseNode {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.calendarLoadSchedules();
-        this.runTests();
     }
 
     updateValue(data: any) {
