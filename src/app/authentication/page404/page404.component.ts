@@ -11,7 +11,7 @@ export class Page404Component implements OnInit {
     constructor() {}
 
     ngOnInit() {
-        var loginformcenter =
+        const loginformcenter =
             ($(window).height() - $('.login100-form').height()) / 2 - 34;
         $('.login100-form').css('margin-top', loginformcenter);
     }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService } from '../../services';
 
@@ -7,7 +7,7 @@ import { WebSocketService, SnackbarService } from '../../services';
     templateUrl: './ur-form.component.html',
     styleUrls: ['./ur-form.component.sass'],
 })
-export class UrFormComponent extends BaseNode {
+export class UrFormComponent extends BaseNode implements AfterViewInit {
     private originalValues = {};
 
     constructor(protected webSocketService: WebSocketService, private snackbar: SnackbarService,) {
@@ -31,10 +31,10 @@ export class UrFormComponent extends BaseNode {
     }
 
     submit() {
-        for (let elem of this.data.options) {
-            let payload = this.data.formValue[elem.topic]
-            if (payload !== "") { // send only if form element has a value
-                this.send({ "topic": elem.outtopic || elem.topic, "payload": payload });
+        for (const elem of this.data.options) {
+            const payload = this.data.formValue[elem.topic]
+            if (payload !== '') { // send only if form element has a value
+                this.send({ topic: elem.outtopic || elem.topic, payload });
             }
         }
         this.snackbar.success('Saved!');
@@ -47,7 +47,7 @@ export class UrFormComponent extends BaseNode {
     precision(value, precision) {
         try {
             if (value && !isNaN(value) && precision && !isNaN(precision)) {
-                return parseFloat(value).toFixed(parseInt(precision));
+                return parseFloat(value).toFixed(parseInt(precision, 10));
             }
         } catch (e) {}
         return value;

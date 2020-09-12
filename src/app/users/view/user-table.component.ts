@@ -48,7 +48,7 @@ export class UserTableComponent implements OnInit {
 
     addNew() {
         this.dialog
-            .open(UserFormDialogComponent, { data: { data: <User>{}, action: 'add' } })
+            .open(UserFormDialogComponent, { data: { data: {} as User, action: 'add' } })
             .afterClosed()
             .subscribe((result) => {
                 if (result) {

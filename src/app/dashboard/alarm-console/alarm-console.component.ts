@@ -21,11 +21,11 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 	dataSource: AlarmDataSource;
 	private _wsSubscription: Subscription;
 	isAdmin = false;
-	
+
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
     @ViewChild('filter', { static: true }) filter: ElementRef;
-	view = "summary";
+	view = 'summary';
 
 	constructor(
 		private webSocketService: WebSocketService,
@@ -38,18 +38,18 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 	ngOnInit(): void {
         this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
 			if (msg && msg.payload) {
-				if (this.view === "history") {
-					if (msg.action === "create") {
+				if (this.view === 'history') {
+					if (msg.action === 'create') {
 						this.dataSource.add(msg.payload);
 					}
-					else if (msg.action === "update") {
+					else if (msg.action === 'update') {
 						this.dataSource.update(msg.payload.id, msg.payload);
 					}
-					else if (msg.action === "delete") {
+					else if (msg.action === 'delete') {
 						this.dataSource.delete(msg.payload.id);
 					}
 				}
-				else if (this.view === "summary") {
+				else if (this.view === 'summary') {
 					this.refreshData();
 				}
 			}
@@ -72,7 +72,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
                 this.dataSource.filter = this.filter.nativeElement.value;
             });
     }
-	
+
 	ackAlarm(row) {
 		this.alarmService.ackByTopic(row.topic).subscribe(alarms => {
 			this.snackbar.success(row.name + ' acknowleged');

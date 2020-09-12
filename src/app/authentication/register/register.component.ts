@@ -70,7 +70,7 @@ export class RegisterComponent implements OnInit {
         if (this.registerForm.invalid) {
             return;
         }
-        this.registerForm.value['role'] = Role.Level10; //Make first user to an admin
+        this.registerForm.value.role = Role.Level10; // Make first user to an admin
         this.userService
             .register(this.registerForm.value)
             .pipe(first())

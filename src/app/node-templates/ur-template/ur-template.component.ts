@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 
 declare var $: any;
@@ -7,7 +7,7 @@ declare var $: any;
     templateUrl: './ur-template.component.html',
     styleUrls: ['./ur-template.component.sass'],
 })
-export class UrTemplateComponent extends BaseNode {
+export class UrTemplateComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         if (!this.data || !this.data.format) {
@@ -18,15 +18,15 @@ export class UrTemplateComponent extends BaseNode {
     }
 
     private appendHtml() {
-        let that = this;
+        const that = this;
         // Escape any funky symbols in the node ID
-        let nodeId = this.nodeId.replace(/(\W)/g, '\\\\$1');
+        const nodeId = this.nodeId.replace(/(\W)/g, '\\\\$1');
         // Substite any $node references in the template code
-        let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
+        const html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         this.container.html($(html));
         // process any elements with request topic attributes
         this.container.find('input[request], select[request]').change(function () {
-            let msg = {
+            const msg = {
                 topic: $(this).attr('request'),
                 payload: $(this).val(),
             };
@@ -38,7 +38,7 @@ export class UrTemplateComponent extends BaseNode {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
             // process any elements with feedback topic attributes
-            let elements = this.container.find(`[feedback='${data.msg.topic}']`);
+            const elements = this.container.find(`[feedback='${data.msg.topic}']`);
             elements.filter('input, select').val(data.msg.payload);
             elements.not('img, input, select').html(data.msg.payload);
         }

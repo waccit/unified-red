@@ -10,7 +10,7 @@ export class SnackbarService {
             duration: action ? null : duration,
             verticalPosition: 'bottom',
             horizontalPosition: 'center',
-            panelClass: panelClass,
+            panelClass,
         });
     }
 

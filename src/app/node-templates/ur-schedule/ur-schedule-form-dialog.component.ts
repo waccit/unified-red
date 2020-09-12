@@ -90,7 +90,7 @@ export class UrScheduleFormDialogComponent {
         this.data = dialogData.data;
         this.title = this.action === 'add' ? 'New Schedule' : 'Edit Schedule';
         if (this.data.events?.length) {
-            let r = {
+            const r = {
                 repeat: null,
                 weekly: { weekday: null },
                 month: { type: null, date: null, weekdayOccurrence: null, weekday: null },
@@ -98,7 +98,7 @@ export class UrScheduleFormDialogComponent {
             };
             this.oldHoliday = this.data.events[0]._pattern || '';
             if (this.oldHoliday) {
-                let [ sec, min, hour, date, month, weekday ] = this.oldHoliday.split(' ');
+                const [ sec, min, hour, date, month, weekday ] = this.oldHoliday.split(' ');
                 if (this.isWeeklyPattern(this.oldHoliday)) {
                     r.repeat = 'weekly';
                     r.weekly.weekday = weekday.split(',');
@@ -109,7 +109,7 @@ export class UrScheduleFormDialogComponent {
                 } else if (this.isMonthlyWeekdayPattern(this.oldHoliday)) {
                     r.repeat = 'monthly';
                     r.month.type = 'weekday';
-                    let w = weekday.split('#');
+                    const w = weekday.split('#');
                     if (w.length === 2) {
                         r.month.weekday = w[0];
                         r.month.weekdayOccurrence = w[1];
@@ -123,7 +123,7 @@ export class UrScheduleFormDialogComponent {
                     r.repeat = 'yearly';
                     r.year.type = 'weekday';
                     r.year.month = month.split(',');
-                    let w = weekday.split('#');
+                    const w = weekday.split('#');
                     if (w.length === 2) {
                         r.year.weekday = w[0];
                         r.year.weekdayOccurrence = w[1];
@@ -169,7 +169,7 @@ export class UrScheduleFormDialogComponent {
             ...this.form.getRawValue(),
             holiday: this.generateHolidayPattern(),
             events: this.events,
-            addTo: addTo,
+            addTo,
         };
     }
 
@@ -184,11 +184,13 @@ export class UrScheduleFormDialogComponent {
     public confirm(): void {}
 
     generateHolidayPattern() {
-        let fc = this.form.controls;
+        const fc = this.form.controls;
         if (fc.type.value !== 'holiday') {
             return null;
         }
-        let date, month, weekday;
+        let date;
+        let month;
+        let weekday;
         if (fc.repeat.value === 'weekly') {
             date = month = '*';
             weekday = fc.repeatWeekdays.value;
@@ -211,8 +213,8 @@ export class UrScheduleFormDialogComponent {
                 weekday = fc.repeatYearWeekday.value + '#' + fc.repeatYearWeekdayOccurrence.value;
             }
         }
-        let smh = this.oldHoliday ? this.oldHoliday.split(' ').slice(0, 3) : ["0", "0", "0"];
-        let newPattern = [...smh, date, month, weekday].join(' ');
+        const smh = this.oldHoliday ? this.oldHoliday.split(' ').slice(0, 3) : ['0', '0', '0'];
+        const newPattern = [...smh, date, month, weekday].join(' ');
         return newPattern;
     }
 
@@ -256,13 +258,13 @@ export class UrScheduleFormDialogComponent {
     }
 
     editEvent(nav: any) {
-        let i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
+        const i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
         this.events[i] = this.eventForm.value;
         nav.close();
     }
 
     deleteEvent(nav: any) {
-        let i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
+        const i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
         this.events.splice(i, 1);
         nav.close();
     }
@@ -282,7 +284,7 @@ export class UrScheduleFormDialogComponent {
 
     private sortChronologically(scheduleArray) {
         return scheduleArray.sort((a, b) => {
-            let hour = a.hour - b.hour;
+            const hour = a.hour - b.hour;
             if (hour === 0) {
                 return a.minute - b.minute;
             }
