@@ -31,6 +31,11 @@
                                         *ngIf="settingsForm.get('email').hasError('required') || settingsForm.get('email').touched">
                                         Please enter a valid email address</mat-error>
                                 </mat-form-field>
+                                <mat-form-field class="example-full-width" appearance="fill">
+                                    <mat-label>Home Page</mat-label>
+                                    <input matInput formControlName="homepage">
+                                    <mat-icon matSuffix>home</mat-icon>
+                                </mat-form-field>
                                 <!-- <div class="form-group">
                                     <mat-checkbox class="example-margin">Profile Visibility For Everyone
                                     </mat-checkbox>
