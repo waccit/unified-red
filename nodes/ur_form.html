@@ -45,8 +45,8 @@
             function generateOption(i, option) {
                 var container = $('<li/>', { style: "margin:0; padding:5px 0px; border-bottom:1px solid #ccc;" });
                 var row = $('<div/>').appendTo(container);
-                var row2 = $('<div/>', { style: "padding-top:5px; padding-left:22px;" }).appendTo(container);
-                var row3 = $('<div/>', { style: "padding-top:5px; padding-left:22px; display: none;" }).appendTo(container);
+                var rowOptions = $('<div/>', { style: "padding-top:5px; padding-left:22px;" }).appendTo(container);
+                var rowOutTopic = $('<div/>', { style: "padding-top:5px; padding-left:22px; display: none;" }).appendTo(container);
 
                 $('<i style="cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>').appendTo(row);
 
@@ -88,11 +88,42 @@
                     }
                     typeField.append($("<option>").attr('value', this.val).text(this.text).prop('selected', isSelected));
                 });
-                
-                let optionsStr = option.options && isNaN(option.options) ? Object.entries(option.options).map(o => o[0] + ':' + o[1]).join(', ') : option.options;
-                optionsStr ? row2.show() : row2.hide();
-                var optionsLabel = $('<label>', { style: "width:60px;" }).text(option.options && isNaN(option.options) ? "Options" : "Rows").appendTo(row2);
-                var optionsField = $('<input/>', { class: "node-input-option-options", type: "text", style: "width:87%;", placeholder: 'Options e.g. number of rows or option key pairs', value: optionsStr }).appendTo(row2);
+
+                let setOptions = function (optionType, labelElem, inputElem, row) {
+                    let value = "";
+                    let text = "Options";
+                    let placeholder = "";
+                    switch (optionType) {
+                        case "multiline":
+                            value = Object.entries(option.options).map(o => o[0] + ':' + o[1]).join(', ');
+                            text = "Rows";
+                            placeholder = "Options e.g. rows:3";
+                            row.show();
+                            break;
+                        case "text":
+                        case "number":
+                            value = Object.entries(option.options).map(o => o[0] + ':' + o[1]).join(', ');
+                            placeholder = "Options e.g. units:%, precision:1";
+                            row.show();
+                            break;
+                        case "select": 
+                            value = Object.entries(option.options).map(o => o[0] + ':' + o[1]).join(', ');
+                            text = "Options";
+                            placeholder = "Options e.g. label1:value1, label2:value2";
+                            row.show();
+                            break;
+                        default:
+                            row.hide();
+                            break;
+                    }
+                    labelElem.text(text);
+                    inputElem.attr("placeholder", placeholder);
+                    inputElem.val(value);
+                };
+
+                var optionsLabel = $('<label>', { style: "width:60px;" }).appendTo(rowOptions);
+                var optionsField = $('<input/>', { class: "node-input-option-options", type: "text", style: "width:87%;" }).appendTo(rowOptions);
+                setOptions(option.type, optionsLabel, optionsField, rowOptions);
 
                 var deletespan = $('<div/>', { style: "display:inline-block; width:8%;" }).appendTo(row);
                 var deleteButton = $('<a/>', { href: "#", class: "editor-button", style: "font-size:1.3em; left:45%; position:relative;" }).appendTo(deletespan);
@@ -102,30 +133,14 @@
                 var moreButton = $('<a/>', { href: "#", class: "editor-button", style: "font-size:1.3em; left:45%; position:relative;" }).appendTo(morespan);
                 $('<i/>', { class: "fa fa-caret-down" }).appendTo(moreButton);
 
-                option.outtopic ? row3.show() : row3.hide();
-                $('<label>', { style: "width:60px;" }).text("Output").appendTo(row3);
-                var outtopicField = $('<input/>', { class: "node-input-option-outtopic", type: "text", style: "width:87%;", placeholder: 'Output topic', value: option.outtopic }).appendTo(row3);
+                option.outtopic ? rowOutTopic.show() : rowOutTopic.hide();
+                $('<label>', { style: "width:60px;" }).text("Output").appendTo(rowOutTopic);
+                var outtopicField = $('<input/>', { class: "node-input-option-outtopic", type: "text", style: "width:87%;", placeholder: 'Output topic', value: option.outtopic }).appendTo(rowOutTopic);
 
                 typeField.change(function (e) {
-                    if (e.target.value === 'multiline') {
-                        row2.show();
-                        if (!optionsField[0].value || isNaN(optionsField[0].value)) {
-                            optionsField[0].value = 3;
-                            optionsLabel.text("Rows");
-                        }
-                    }
-                    else if (e.target.value === 'select') {
-                        row2.show();
-                        if (!optionsField[0].value || !isNaN(optionsField[0].value)) {
-                            optionsField[0].value = 'label1=value1, label2:value2';
-                            optionsLabel.text("Options");
-                        }
-                    } else {
-                        optionsField.val(undefined)
-                        option.options = null;
-                        row2.hide();
-                    }
-                })
+                    option.options = "";
+                    setOptions(e.target.value, optionsLabel, optionsField, rowOptions);
+                });
 
                 deleteButton.click(function () {
                     container.find(".node-input-option-topic").removeAttr('required')
@@ -136,7 +151,7 @@
                 });
 
                 moreButton.click(function () {
-                    row3.show();
+                    rowOutTopic.show();
                 });
 
                 $("#node-input-option-container").append(container);
@@ -172,7 +187,7 @@
                     options: option.find(".node-input-option-options").val(),
                     outtopic: option.find(".node-input-option-outtopic").val()
                 };
-                if (o.type === 'select') {
+                if (o.type === 'text' || o.type === 'number' || o.type === 'multiline' || o.type === 'select') {
                     o.options = o.options.trim().split(/\s*,\s*/g).reduce((a,b) => {
                         var v = b.split(/\s*[:=]\s*/);
                         a[v[0]] = v[1];
