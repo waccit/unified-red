@@ -33,8 +33,12 @@
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Home Page</mat-label>
-                                    <input matInput formControlName="homepage">
+                                    <input matInput [formControl]="homepage" placeholder="any path after #, e.g. /d/centralplant"
+                                        [matAutocomplete]="auto">
                                     <mat-icon matSuffix>home</mat-icon>
+                                    <mat-autocomplete #auto="matAutocomplete">
+                                        <mat-option *ngFor="let page of filteredMenuPages | async" [value]="page">{{ page }}</mat-option>
+                                    </mat-autocomplete>
                                 </mat-form-field>
                                 <!-- <div class="form-group">
                                     <mat-checkbox class="example-margin">Profile Visibility For Everyone
