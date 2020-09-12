@@ -10,10 +10,10 @@
             width: { value: 12 },
             height: { value: 0 },
             options: {
-                value: [{ value: '', label: '', type: '', required: true }], validate: function (value) {
+                value: [{ topic: '', label: '', type: '', outtopic: '' }], validate: function (value) {
                     if (value.length) {
                         for (var i = 0; i < value.length; i++) {
-                            if (!value[i].value) {
+                            if (!value[i].topic) {
                                 return false;
                             }
                         }
@@ -27,8 +27,7 @@
             formValue: { value: {} },
             payload: { value: '' },
             submit: { value: "submit" },
-            cancel: { value: "cancel" },
-            topic: { value: '' }
+            cancel: { value: "cancel" }
         },
         inputs: 1,
         outputs: 1,
@@ -40,30 +39,22 @@
             if ($("#node-input-submit").val() === null) { $("#node-input-submit").val("submit"); }
             if ($("#node-input-cancel").val() === null) { $("#node-input-cancel").val("cancel"); }
             $("#node-input-size").elementSizer({
-                width: "#node-input-width",
-                // height: "#node-input-height",
-                // group: "#node-input-group"
+                width: "#node-input-width"
             });
 
-            this.resizeRule = function (option, newWidth) {
-                //option.find(".node-input-option-type").width(newWidth);
-                //  option.find(".node-input-option-label").width(newWidth);
-                //  option.find(".node-input-option-value").width(newWidth);
-            }
-
             function generateOption(i, option) {
-                var container = $('<li/>', { style: "margin:0; padding:8px 0px 0px; border-bottom:1px solid #ccc;" });
+                var container = $('<li/>', { style: "margin:0; padding:5px 0px; border-bottom:1px solid #ccc;" });
                 var row = $('<div/>').appendTo(container);
-                var row2 = $('<div/>', { style: "padding-top:5px; padding-left:175px;" }).appendTo(container);
-                var row3 = $('<div/>', { style: "padding-top:5px; padding-left:120px;" }).appendTo(container);
+                var row2 = $('<div/>', { style: "padding-top:5px; padding-left:22px;" }).appendTo(container);
+                var row3 = $('<div/>', { style: "padding-top:5px; padding-left:22px; display: none;" }).appendTo(container);
 
                 $('<i style="cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>').appendTo(row);
 
-                var labelField = $('<input/>', { class: "node-input-option-label", type: "text", style: "margin-left:7px; width:20%;", placeholder: 'e.g. Name', value: option.label }).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
-                var valueClass = "node-input-option-value"
-                if (!option.value) { valueClass = "node-input-option-value input-error"; }
-                var valueField = $('<input/>', { class: valueClass, type: "text", style: "margin-left:7px; width:20%;", placeholder: 'e.g. name', value: option.value }).appendTo(row);//.typedInput({default:'str',types:['str','num','bool']});
-                valueField.keyup(function () {
+                var labelField = $('<input/>', { class: "node-input-option-label", type: "text", style: "margin-left:7px; width:20%;", placeholder: 'label', value: option.label }).appendTo(row);
+                var topicClass = "node-input-option-topic"
+                if (!option.topic) { topicClass = "node-input-option-topic input-error"; }
+                var topicField = $('<input/>', { class: topicClass, type: "text", style: "margin-left:7px; width:38%;", placeholder: 'topic', value: option.topic }).appendTo(row);
+                topicField.keyup(function () {
                     if ($(this).val() && $(this).hasClass('input-error')) {
                         $(this).removeClass('input-error')
                     }
@@ -74,8 +65,8 @@
                     }
 
                 });
-                // var typeField = $('<input/>',{class:"node-input-option-type",type:"text",style:"margin-left: 7px; width: 135px;", placeholder: 'Type', value:option.type}).appendTo(row).typedInput({default:'str',types:['str', 'num']});
-                var typeField = $('<select/>', { class: "node-input-option-type", type: "text", style: "margin-left:7px; width:16%" }).appendTo(row);//.typedInput({default:'str',types:['str', 'num']});
+                
+                var typeField = $('<select/>', { class: "node-input-option-type", type: "text", style: "margin-left:7px; width:16%" }).appendTo(row);
 
                 var arr = [
                     { val: "text", text: 'Text' },
@@ -85,6 +76,7 @@
                     { val: "password", text: 'Password' },
                     { val: "checkbox", text: 'Checkbox' },
                     { val: "switch", text: 'Switch' },
+                    { val: "select", text: 'Select' },
                     { val: "date", text: 'Date' }
                 ];
 
@@ -96,39 +88,55 @@
                     }
                     typeField.append($("<option>").attr('value', this.val).text(this.text).prop('selected', isSelected));
                 });
+                
+                let optionsStr = option.options && isNaN(option.options) ? Object.entries(option.options).map(o => o[0] + ':' + o[1]).join(', ') : option.options;
+                optionsStr ? row2.show() : row2.hide();
+                var optionsLabel = $('<label>', { style: "width:60px;" }).text(option.options && isNaN(option.options) ? "Options" : "Rows").appendTo(row2);
+                var optionsField = $('<input/>', { class: "node-input-option-options", type: "text", style: "width:87%;", placeholder: 'Options e.g. number of rows or option key pairs', value: optionsStr }).appendTo(row2);
 
-                //var labelForRequried = $('<span/>',{style:"margin: 10px;"}).text('Required').appendTo(row);
-                var requiredContainer = $('<div/>', { style: "display:inline-block; height:34px; width:13%; vertical-align: middle" }).appendTo(row);
-                var requiredInnerContainer = $('<div/>', { style: "left:35%; position:relative; width:30px" }).appendTo(requiredContainer);
-                var reqRow = $("<label />", { class: "switch", style: "top:10px; width:30px;" }).appendTo(requiredInnerContainer);
-                //var required = $('<input/>',{class:"node-input-option-required",style:"margin: 5px;width:19%",type:"checkbox", checked:option.required}).appendTo(row);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
-                var required = $('<input/>', { class: "node-input-option-required", type: "checkbox", checked: option.required, style: "vertical-align:top;" }).appendTo(reqRow);//labelForRequried);//.typedInput({default:'str',types:['str', 'num']});
-                var reqDiv = $("<div />", { class: "slider round" }).appendTo(reqRow);
-                var vis = option.rows ? 'visible' : 'hidden';
-                var rowsField = $('<input/>', { class: "node-input-option-rows", type: "number", style: "width:10%;", placeholder: 'Rows', value: option.rows }).css('visibility', vis).appendTo(row);
-
-                var finalspan = $('<div/>', { style: "display:inline-block; width:5%;" }).appendTo(row);
-                var deleteButton = $('<a/>', { href: "#", class: "editor-button", style: "font-size:1.3em; left:45%; position:relative;" }).appendTo(finalspan);
+                var deletespan = $('<div/>', { style: "display:inline-block; width:8%;" }).appendTo(row);
+                var deleteButton = $('<a/>', { href: "#", class: "editor-button", style: "font-size:1.3em; left:45%; position:relative;" }).appendTo(deletespan);
                 $('<i/>', { class: "fa fa-trash-o" }).appendTo(deleteButton);
 
-                typeField.change(function (e) {
-                    if (e.target.value != 'multiline') {
-                        rowsField.val(undefined)
-                        option.rows = null;
-                        rowsField.css('visibility', 'hidden')
-                    } else {
-                        rowsField.css('visibility', 'visible')
-                        if (!rowsField[0].value) rowsField[0].value = 3;
-                    }
+                var morespan = $('<div/>', { style: "display:inline-block; width:8%;" }).appendTo(row);
+                var moreButton = $('<a/>', { href: "#", class: "editor-button", style: "font-size:1.3em; left:45%; position:relative;" }).appendTo(morespan);
+                $('<i/>', { class: "fa fa-caret-down" }).appendTo(moreButton);
 
+                option.outtopic ? row3.show() : row3.hide();
+                $('<label>', { style: "width:60px;" }).text("Output").appendTo(row3);
+                var outtopicField = $('<input/>', { class: "node-input-option-outtopic", type: "text", style: "width:87%;", placeholder: 'Output topic', value: option.outtopic }).appendTo(row3);
+
+                typeField.change(function (e) {
+                    if (e.target.value === 'multiline') {
+                        row2.show();
+                        if (!optionsField[0].value || isNaN(optionsField[0].value)) {
+                            optionsField[0].value = 3;
+                            optionsLabel.text("Rows");
+                        }
+                    }
+                    else if (e.target.value === 'select') {
+                        row2.show();
+                        if (!optionsField[0].value || !isNaN(optionsField[0].value)) {
+                            optionsField[0].value = 'label1=value1, label2:value2';
+                            optionsLabel.text("Options");
+                        }
+                    } else {
+                        optionsField.val(undefined)
+                        option.options = null;
+                        row2.hide();
+                    }
                 })
 
                 deleteButton.click(function () {
-                    container.find(".node-input-option-value").removeAttr('required')
+                    container.find(".node-input-option-topic").removeAttr('required')
                     container.css({ "background": "#fee" });
                     container.fadeOut(300, function () {
                         $(this).remove();
                     });
+                });
+
+                moreButton.click(function () {
+                    row3.show();
                 });
 
                 $("#node-input-option-container").append(container);
@@ -158,23 +166,21 @@
             options.each(function (i) {
                 var option = $(this);
                 var o = {
-                    label: option.find(".node-input-option-label").val(),//typedInput('value'),
-                    value: option.find(".node-input-option-value").val(),//typedInput('value'),
-                    type: option.find(".node-input-option-type").val(),//typedInput('value')
-                    required: option.find(".node-input-option-required").is(':checked'),
-                    rows: parseInt(option.find(".node-input-option-rows").val())
+                    label: option.find(".node-input-option-label").val(),
+                    topic: option.find(".node-input-option-topic").val(),
+                    type: option.find(".node-input-option-type").val(),
+                    options: option.find(".node-input-option-options").val(),
+                    outtopic: option.find(".node-input-option-outtopic").val()
                 };
-                // o.value= o.value||o.label||(o.type+"_"+i);
-                node.formValue[o.value] = o.type == "checkbox" || o.type == "switch" ? false : "";
+                if (o.type === 'select') {
+                    o.options = o.options.trim().split(/\s*,\s*/g).reduce((a,b) => {
+                        var v = b.split(/\s*[:=]\s*/);
+                        a[v[0]] = v[1];
+                        return a;
+                    }, {});
+                }
+                node.formValue[o.topic] = o.type == "checkbox" || o.type == "switch" ? false : "";
                 node.options.push(o);
-            });
-        },
-        oneditresize: function () {
-            var options = $("#node-input-option-container").children();
-            var newWidth = ($("#node-input-option-container").width() - 175) / 2;
-            var node = this;
-            options.each(function (i) {
-                node.resizeRule($(this), newWidth);
             });
         }
     });
@@ -250,6 +256,10 @@ input:checked + .slider:before {
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
         <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
         <input type="text" id="node-input-label" placeholder="optional label">
     </div>
@@ -259,12 +269,9 @@ input:checked + .slider:before {
           <div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:10px; padding-buttom:10px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
               <div style="width:94%; display:inline-block; margin-left:27px">
                 <div style="width:20%; text-align:center; float:left;">Label</div>
-                <div style="width:20%; text-align:center; float:left; margin-left:9px">Name</div>
+                <div style="width:38%; text-align:center; float:left; margin-left:9px">Topic</div>
                 <div style="margin-left:7px; width:16%; text-align:center; float:left; margin-left:9px">Type</div>
-                <div style="width:16%; text-align:center; float:left;">Required</div>
-                <div style="width:10%; text-align:center; float:left;">Rows</div>
-                <div style="width:12%; text-align:center; float:left;">Remove</div>
-              </div>
+            </div>
           </div>
           <div id="node-input-option-container-div" style=" height: 257px; padding: 5px; overflow-y:scroll;">
             <ol id="node-input-option-container" style=" list-style-type:none; margin: 0;"></ol>
@@ -280,14 +287,6 @@ input:checked + .slider:before {
         <span style="margin-left:16px"><i class="fa fa-thumbs-o-down"></i></span>
         <input type="text" id="node-input-cancel" placeholder="cancel button text" style="width:35%;">
     </div>
-    <div class="form-row">
-        <label for="node-input-topic"><i class="fa fa-tasks"></i> Topic</label>
-        <input type="text" id="node-input-topic" placeholder="optional msg.topic">
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name">
-    </div>
 </script>
 
 <script type="text/html" data-help-name="ur_form">
@@ -297,12 +296,11 @@ input:checked + .slider:before {
     <p>Each element contains following components:</p>
     <ul>
         <li> <b>Label</b> : Value that will be the label of the element in the user interface</li>
-        <li> <b>Name</b> : Represents the key (variable name) in the <code>msg.payload</code> in which the value of the corresponding element present</li>
+        <li> <b>Topic</b> : Represents the topic assocated with <code>msg.payload</code></li>
         <li> <b>Type</b> : Drop drown option to select the type of input element</li>
-        <li> <b>Required</b> : On switching on the user has to supply the value before submitting</li>
-        <li> <b>Rows</b> : number of UI rows for multiline text input</li>
+        <li> <b>Options</b> : for multiline, number of UI rows for multiline text input. for select, list of options label:value pairs.</li>
+        <li> <b>Output Topic</b> : used to override the <code>msg.topic</code> property.</p>
         <li> <b>Delete</b> : To remove the current element form the form</li>
     </ul>
-    <p>Optionally the <b>Topic</b> field can be used to set the <code>msg.topic</code> property.</p>
     <p>The Cancel button can be hidden by setting it's value to be blank "".</p>
 </script>
