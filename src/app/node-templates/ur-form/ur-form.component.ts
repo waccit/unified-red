@@ -16,6 +16,7 @@ export class UrFormComponent extends BaseNode {
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
+        console.log(this.data);
         this.originalValues = { ... this.data.formValue };
     }
 
@@ -42,5 +43,14 @@ export class UrFormComponent extends BaseNode {
 
     reset() {
         this.data.formValue = { ... this.originalValues };
+    }
+
+    precision(value, precision) {
+        try {
+            if (value && !isNaN(value) && precision && !isNaN(precision)) {
+                return parseFloat(value).toFixed(parseInt(precision));
+            }
+        } catch (e) {}
+        return value;
     }
 }
