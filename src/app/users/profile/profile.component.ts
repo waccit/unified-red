@@ -32,6 +32,7 @@ export class ProfileComponent implements OnInit {
             firstName: ['', Validators.required],
             lastName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
+            homepage: ['']
         });
         this.usernameForm = this.formBuilder.group({
             username: ['', Validators.required],
@@ -55,6 +56,7 @@ export class ProfileComponent implements OnInit {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    homepage: user.homepage || '',
                 });
                 this.usernameForm.setValue({
                     username: user.username,
