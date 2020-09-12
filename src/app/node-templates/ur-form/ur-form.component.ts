@@ -16,7 +16,6 @@ export class UrFormComponent extends BaseNode {
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
-        console.log(this.data);
         this.originalValues = { ... this.data.formValue };
     }
 
