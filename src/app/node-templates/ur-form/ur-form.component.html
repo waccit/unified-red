@@ -1,0 +1,45 @@
+<div class="example-container">
+    <div *ngIf="data.label" class="font-weight-bold p-b-10 p-l-10 font-17">{{ data.label }}</div>
+    <div *ngFor="let field of data.options">
+        <mat-form-field class="example-full-width" appearance="outline"
+            *ngIf="field.type !== 'multiline' && field.type !== 'checkbox' && field.type !== 'select' && field.type !== 'switch'">
+            <mat-label>{{ field.label }}</mat-label>
+            <span matPrefix *ngIf="field.type === 'email'">
+                <mat-icon class="mr-2">email</mat-icon>
+            </span>
+            <input matInput [type]="field.type" [value]="precision(data.formValue[field.topic], field.options.precision)"
+                (change)="valueChange(field.topic, $event.target.value)" />
+            <span matSuffix *ngIf="field.options.units">{{ field.options.units }}</span>
+        </mat-form-field>
+
+        <mat-form-field class="example-full-width" appearance="outline" *ngIf="field.type === 'multiline'">
+            <mat-label>{{ field.label }}</mat-label>
+            <textarea matInput [rows]="field.options.rows" [value]="data.formValue[field.topic]"
+                (change)="valueChange(field.topic, $event.target.value)"></textarea>
+        </mat-form-field>
+
+        <mat-form-field class="example-full-width" appearance="outline" *ngIf="field.type === 'select'">
+            <mat-label>{{ field.label }}</mat-label>
+            <select matNativeControl [value]="data.formValue[field.topic]"
+                (change)="valueChange(field.topic, $event.target.value)">
+                <option *ngFor="let opt of field.options | keyvalue" [value]="opt.value">{{ opt.key }}</option>
+            </select>
+        </mat-form-field>
+
+        <mat-checkbox *ngIf="field.type === 'checkbox'" [checked]="data.formValue[field.topic]"
+            (change)="valueChange(field.topic, $event.checked)" class="example-margin mb-3"
+            color="primary">{{ field.label }}</mat-checkbox>
+
+        <mat-slide-toggle *ngIf="field.type === 'switch'" [checked]="data.formValue[field.topic]"
+            (change)="valueChange(field.topic, $event.checked)" class="example-margin mb-3"
+            color="primary">{{ field.label }}</mat-slide-toggle>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="example-button-row">
+            <button mat-raised-button color="primary" (click)="submit()">{{ data.submit }}</button>
+            <button mat-raised-button color="warn" (click)="reset()" *ngIf="data.cancel">{{ data.cancel }}</button>
+        </div>
+    </div>
+</div>

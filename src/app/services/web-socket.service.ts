@@ -10,7 +10,7 @@ export class WebSocketService {
     socket: any;
 
     constructor() {
-        this.socket = io('http://localhost:1880', { path: '/ui/socket.io' });
+        this.socket = io(window.location.origin, { path: '/ui/socket.io' });
     }
 
     // connect(onUiLoaded: Function, replaydone: Function) {
@@ -63,4 +63,12 @@ export class WebSocketService {
     //     this.socket.removeListener(eventName, handler);
     //     this.socket.off(eventName, handler)
     // }
+
+    join(room: string) {
+        this.socket.emit('join', room);
+    }
+
+    leave(room: string) {
+        this.socket.emit('leave', room);
+    }
 }

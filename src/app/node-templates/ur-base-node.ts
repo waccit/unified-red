@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 declare var $: any;
 
 export class BaseNode implements AfterViewInit, OnDestroy {
-    label: string = 'default';
+    label = 'default';
     private _data: any;
     private _wsSubscription: Subscription;
     @ViewChild('container', { static: true }) private _container: ElementRef;
@@ -13,8 +13,9 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     constructor(protected webSocketService: WebSocketService) {}
 
     ngAfterViewInit(): void {
+        this.webSocketService.join(this.nodeId);
         this._wsSubscription = this.webSocketService.listen('update-value').subscribe((msg: any) => {
-            if (msg && msg.id && this.nodeId == msg.id) {
+            if (msg && msg.id && this.nodeId === msg.id) {
                 this.updateValue(msg);
             }
         });
@@ -32,6 +33,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         if (this._wsSubscription) {
             this._wsSubscription.unsubscribe();
         }
+        this.webSocketService.leave(this.nodeId);
     }
 
     get container() {
@@ -59,15 +61,15 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     send(msg: any) {
         if (this.nodeId) {
-            this.webSocketService.emit({ id: this.nodeId, msg: msg });
+            this.webSocketService.emit({ id: this.nodeId, msg });
         }
     }
 
     format(data) {
         let ret = data;
-        let expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
+        const expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
         if (expression.length >= 2) {
-            for (let part of expression[1].split('.')) {
+            for (const part of expression[1].split('.')) {
                 ret = ret[part];
             }
         }

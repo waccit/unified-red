@@ -13,8 +13,8 @@ export class UserDataSource extends GenericDataSource<User> {
     constructor(private userService: UserService, private roleService: RoleService, paginator: MatPaginator, sort: MatSort) {
         super(paginator, sort);
         // build custom role name lookup array
-        this.roleService.getAll().pipe(first()).subscribe(roles => { 
-            for (let r of roles) {
+        this.roleService.getAll().pipe(first()).subscribe(roles => {
+            for (const r of roles) {
                 this.customRoleNames[r.level] = r.name;
             }
         });

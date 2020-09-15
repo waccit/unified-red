@@ -28,6 +28,7 @@ import { UrAnimationComponent } from './ur-animation/ur-animation.component';
 import { UrTableComponent } from './ur-table/ur-table.component';
 import { UrScheduleComponent } from './ur-schedule/ur-schedule.component';
 import { UrScheduleFormDialogComponent } from './ur-schedule/ur-schedule-form-dialog.component';
+import { UrFormComponent } from './ur-form/ur-form.component';
 
 @NgModule({
     declarations: [
@@ -38,7 +39,8 @@ import { UrScheduleFormDialogComponent } from './ur-schedule/ur-schedule-form-di
         UrAnimationComponent,
         UrScheduleComponent,
         UrScheduleFormDialogComponent,
-        UrTableComponent
+        UrTableComponent,
+        UrFormComponent,
     ],
     imports: [
         CommonModule,

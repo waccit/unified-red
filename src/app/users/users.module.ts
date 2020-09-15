@@ -21,6 +21,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { RolesTableComponent } from './roles/roles-table.component';
 import { RoleFormDialogComponent } from './roles/role-form-dialog.component';
 
@@ -50,6 +51,7 @@ import { RoleFormDialogComponent } from './roles/role-form-dialog.component';
         MatSortModule,
         MatProgressSpinnerModule,
         MatSlideToggleModule,
+        MatAutocompleteModule,
     ],
 })
 export class UsersModule {}

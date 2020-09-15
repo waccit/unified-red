@@ -38,7 +38,7 @@ export class ResetPasswordComponent implements OnInit {
         );
 
         this.route.params.subscribe((params) => {
-            this.resetToken = params['resetToken'];
+            this.resetToken = params.resetToken;
         });
     }
     get f() {

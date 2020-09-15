@@ -15,11 +15,11 @@ export class NodeRedApiService {
 
     login(username, password) {
         try {
-            let headers = new HttpHeaders({
-                "Node-RED-API-Version": "v2",
-                "Content-Type": "application/x-www-form-urlencoded"
+            const headers = new HttpHeaders({
+                'Node-RED-API-Version': 'v2',
+                'Content-Type': 'application/x-www-form-urlencoded'
             });
-            let body = new URLSearchParams();
+            const body = new URLSearchParams();
             body.set('client_id', 'node-red-editor');
             body.set('grant_type', 'password');
             body.set('scope', '');
@@ -45,11 +45,11 @@ export class NodeRedApiService {
         return this.tokenSubject.value.access_token;
     }
 
-    deployNodes(nodeIds: string[], replaceFunc: Function) {
+    deployNodes(nodeIds: string[], replaceFunc: (node: any) => any ) {
         try {
-            let headers = new HttpHeaders({
-                "Node-RED-API-Version": "v2",
-                "Authorization": `Bearer ${this.accessToken}`
+            const headers = new HttpHeaders({
+                'Node-RED-API-Version': 'v2',
+                Authorization: `Bearer ${this.accessToken}`
             });
             return this.http.get('/flows', { headers }).pipe(concatMap((data: any) => {
                 if (data.flows) {
@@ -60,12 +60,11 @@ export class NodeRedApiService {
                         }
                         return existing;
                     });
-                    let headers = new HttpHeaders({
-                        "Node-RED-API-Version": "v2",
-                        "Node-RED-Deployment-Type": "nodes", // important: tells node red only to update the changed nodes
-                        "Authorization": `Bearer ${this.accessToken}`
-                    });
-                    return this.http.post('/flows', data, { headers });
+                    return this.http.post('/flows', data, { headers: new HttpHeaders({
+                        'Node-RED-API-Version': 'v2',
+                        'Node-RED-Deployment-Type': 'nodes', // important: tells node red only to update the changed nodes
+                        Authorization: `Bearer ${this.accessToken}`
+                    }) });
                 }
             }));
         }

@@ -19,6 +19,7 @@ const schema = new Schema({
     resetToken: { type: String },
     sessionExpiration: { type: Number },
     sessionInactivity: { type: Number },
+    homepage: { type: String },
 });
 
 schema.set('toJSON', {

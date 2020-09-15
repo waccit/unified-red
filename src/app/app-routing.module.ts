@@ -1,14 +1,13 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './authentication/auth.guard';
-import { DemoComponent } from './dashboard/demo/demo.component';
 import { Page404Component } from './authentication/page404/page404.component';
-import { MenuPageComponent } from './dashboard/menu-page/menu-page.component';
+import { HomePageComponent } from './dashboard/home-page/home-page.component';
 
 const routes: Routes = [
     {
         path: '',
-        component: DemoComponent,
+        component: HomePageComponent,
         pathMatch: 'full',
         canActivate: [AuthGuard],
     },
