@@ -9,7 +9,7 @@ export class AlarmDialogDataSource extends GenericDataSource<Alarm> {
     constructor(private topic: string, private alarmService: AlarmService, paginator: MatPaginator, sort: MatSort) {
         super(paginator, sort);
     }
-    
+
     dataSource() {
         return this.alarmService.getByTopic(this.topic);
     }

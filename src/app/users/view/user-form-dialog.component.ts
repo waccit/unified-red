@@ -34,7 +34,7 @@ export class UserFormDialogComponent {
         if (this.action === 'edit') {
             this.data = this.dialogData.data;
             this.title = 'Edit ' + this.data.username;
-            let roleLevel = this.roles.find(r => r.name === this.data.role).level;
+            const roleLevel = this.roles.find(r => r.name === this.data.role).level;
             this.form = this.formBuilder.group({
                 enabled: [this.data.enabled],
                 username: [this.data.username, [Validators.required, Validators.minLength(3)]],
@@ -42,13 +42,13 @@ export class UserFormDialogComponent {
                 lastName: [this.data.lastName, Validators.required],
                 role: [roleLevel, Validators.required],
                 email: [this.data.email, [Validators.required, Validators.email, Validators.minLength(5)]],
-                expirationDate: [this.data.expirationDate], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
+                expirationDate: [this.data.expirationDate], // [formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
                 sessionExpiration: [this.data.sessionExpiration || ''],
                 sessionInactivity: [this.data.sessionInactivity || ''],
         });
         } else {
             this.title = 'New User';
-            this.data = <User>{};
+            this.data = ({} as User);
             this.form = this.formBuilder.group(
                 {
                     enabled: [false],
@@ -57,7 +57,7 @@ export class UserFormDialogComponent {
                     lastName: ['', Validators.required],
                     role: ['', Validators.required],
                     email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
-                    expirationDate: [null], //[formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
+                    expirationDate: [null], // [formatDate(this.data.expirationDate, 'MM/dd/yyyy', 'en')],
                     password: ['', [Validators.required, Validators.minLength(8), PasswordStrengthValidator]],
                     cpassword: ['', Validators.required],
                     sessionExpiration: [30],

@@ -5,28 +5,28 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class SnackbarService {
     constructor(private snackbar: MatSnackBar) {}
 
-    default(message: string, action = '', panelClass?) {
+    default(message: string, action = '', panelClass?, duration = 2000) {
         this.snackbar.open(message, action, {
-            duration: action ? null : 2000,
+            duration: action ? null : duration,
             verticalPosition: 'bottom',
             horizontalPosition: 'center',
-            panelClass: panelClass,
+            panelClass,
         });
     }
 
-    info(message: string, action = '') {
-        this.default(message, action, 'snackbar-info');
+    info(message: string, action = '', duration = 2000) {
+        this.default(message, action, 'snackbar-info', duration);
     }
 
-    success(message: string, action = '') {
-        this.default(message, action, 'snackbar-success');
+    success(message: string, action = '', duration = 2000) {
+        this.default(message, action, 'snackbar-success', duration);
     }
 
-    warning(message: string, action = '') {
-        this.default(message, action, 'snackbar-warning');
+    warning(message: string, action = '', duration = 2000) {
+        this.default(message, action, 'snackbar-warning', duration);
     }
 
-    error(message: string, action = '') {
-        this.default(message, action, 'snackbar-danger');
+    error(message: string, action = '', duration = 2000) {
+        this.default(message, action, 'snackbar-danger', duration);
     }
 }

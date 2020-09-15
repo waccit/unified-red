@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
-import { DemoComponent } from './demo/demo.component';
 import { GroupComponent } from './group/group.component';
 import { GroupDirective } from '../directives/group.directive';
 import { MenuPageComponent } from './menu-page/menu-page.component';
@@ -24,7 +23,6 @@ import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
     declarations: [
-        DemoComponent,
         GroupComponent,
         GroupDirective,
         MenuPageDirective,

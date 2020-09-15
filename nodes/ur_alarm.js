@@ -65,11 +65,14 @@ module.exports = function(RED) {
             "info": { "ontimer": null, "offtimer": null }
         };
 
+        this.inhibit = false;
+        this.inhibitTimer = null;
         this.rules = config.rules || { "critical": [], "alert": [], "warning": [], "info": [] };
         this.lastState = { "critical": false, "alert": false, "warning": false, "info": false };
         this.delayon = parseInt(config.delayon) || 0;
         this.delayoff = parseInt(config.delayoff) || 0;
         this.checkall = config.checkall || "true";
+        this.ackreq = config.ackreq;
         this.presentValue = null;
         this.previousValue = null;
         this.property = config.property;
@@ -235,6 +238,7 @@ module.exports = function(RED) {
             }
 
             if (send) {
+                msg.payload.ackreq = node.ackreq;
                 node.send(msg);
                 node.lastState[msg.payload.severity] = msg.payload.state;
             }
@@ -361,9 +365,47 @@ module.exports = function(RED) {
                 node.error(err, nextMsg);
             }
             processMessageQueue();
-        }
+        };
+
+        let checkInhibit = function(msg) {
+            if (msg.hasOwnProperty("inhibit")) {
+                try {
+                    let inhibit = msg.inhibit.toString().toLowerCase().trim();
+                    if (inhibit === "0" || inhibit === "false") {
+                        node.inhibit = false;
+                        node.status({});
+                        clearTimeout(node.inhibitTimer);
+                        node.inhibitTimer = null;
+                    } else if (inhibit === "true") {
+                        node.inhibit = true;
+                        node.status({ fill: "grey", shape: "dot", text: "inhibited" });
+                        clearTimeout(node.inhibitTimer);
+                        node.inhibitTimer = null;
+                    } else if (!isNaN(inhibit)) {
+                        inhibit = parseInt(inhibit);
+                        if (inhibit > 0) {
+                            node.inhibit = true;
+                            let d = new Date();
+                            d.setSeconds(d.getSeconds() + inhibit);
+                            node.status({ fill: "grey", shape: "dot", text: "inhibited until " + d.toLocaleString() });
+                            node.inhibitTimer = setTimeout(() => { // clear inhibit after timer elapses
+                                node.inhibit = false;
+                                node.status({});
+                            }, inhibit * 1000);
+                        }
+                    }
+                }
+                catch (e) {
+                    node.warn(e);
+                }
+            }
+            return node.inhibit;
+        };
 
         this.on('input', function(msg) {
+            if (checkInhibit(msg)) {
+                return;
+            }
             processMessageQueue(msg);
         });
 

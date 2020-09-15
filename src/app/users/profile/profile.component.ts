@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { first } from 'rxjs/operators';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { first, map, startWith } from 'rxjs/operators';
 import { AuthenticationService, SnackbarService, CurrentUserService, UserService } from '../../services';
 import { MustMatch, PasswordStrengthValidator } from '../../authentication/register/password.validators';
 import { User } from '../../data/';
+import { MenuService } from '../../services/menu.service';
+import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
+import { Observable } from 'rxjs';
 
 @Component({
     selector: 'app-profile',
@@ -18,13 +21,17 @@ export class ProfileComponent implements OnInit {
     chide = true;
     private userId: string;
     private username: string;
+    menuPages: string[] = [];
+    filteredMenuPages: Observable<string[]>;
+    homepage = new FormControl();
 
     constructor(
         private formBuilder: FormBuilder,
         private userService: UserService,
         private currentUserService: CurrentUserService,
         private authenticationService: AuthenticationService,
-        private snackbar: SnackbarService
+        private snackbar: SnackbarService,
+        private menuService: MenuService
     ) {}
 
     ngOnInit() {
@@ -32,6 +39,7 @@ export class ProfileComponent implements OnInit {
             firstName: ['', Validators.required],
             lastName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email, Validators.minLength(5)]],
+            homepage: this.homepage,
         });
         this.usernameForm = this.formBuilder.group({
             username: ['', Validators.required],
@@ -55,6 +63,7 @@ export class ProfileComponent implements OnInit {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    homepage: user.homepage || '',
                 });
                 this.usernameForm.setValue({
                     username: user.username,
@@ -62,6 +71,17 @@ export class ProfileComponent implements OnInit {
                 });
             }
         });
+        this.menuService.menu.subscribe((menu) => {
+            if (menu && menu.length) {
+                for (let item of menu) {
+                    this.getMenuPagePaths(item);
+                }
+            }
+        });
+        this.filteredMenuPages = this.homepage.valueChanges.pipe(
+            startWith(''),
+            map((value) => this._filter(value))
+        );
     }
 
     get sf() {
@@ -84,7 +104,7 @@ export class ProfileComponent implements OnInit {
             .update(this.userId, this.settingsForm.value)
             .pipe(first())
             .subscribe(
-                (data: User) => {
+                () => { // data: User
                     this.snackbar.success('Account settings successfully saved!');
                 },
                 (error) => {
@@ -101,7 +121,7 @@ export class ProfileComponent implements OnInit {
             .login(this.username, this.uf.password.value)
             .pipe(first())
             .subscribe(
-                (data) => {
+                () => { // data
                     this.userService
                         .update(this.userId, { username: this.uf.username.value })
                         .pipe(first())
@@ -129,12 +149,13 @@ export class ProfileComponent implements OnInit {
             .login(this.username, this.pf.password.value)
             .pipe(first())
             .subscribe(
-                (data) => {
+                () => { // data
                     this.userService
                         .update(this.userId, { password: this.pf.newPassword.value })
                         .pipe(first())
                         .subscribe(
-                            (data: User) => {
+                            () => {
+                                // data: User
                                 this.snackbar.success('Password successfully changed!');
                             },
                             (error) => {
@@ -146,5 +167,20 @@ export class ProfileComponent implements OnInit {
                     this.snackbar.error(error);
                 }
             );
+    }
+
+    private getMenuPagePaths(page: RouteInfo) {
+        if (page.isMenuPage) {
+            this.menuPages.push(page.path);
+        } else {
+            for (let sub of page.submenu) {
+                this.getMenuPagePaths(sub);
+            }
+        }
+    }
+
+    private _filter(value: string): string[] {
+        const filterValue = value.toLowerCase();
+        return this.menuPages.filter((option) => option.toLowerCase().includes(filterValue));
     }
 }

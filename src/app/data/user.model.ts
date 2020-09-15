@@ -17,4 +17,5 @@ export interface User {
     createdDate?: Date;
     sessionExpiration?: number;
     sessionInactivity?: number;
+    homepage?: string;
 }

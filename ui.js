@@ -45,7 +45,7 @@ ev.setMaxListeners(0);
 
 // default manifest.json to be returned as required.
 var mani = {
-    name: 'unified-RED Dashboard',
+    name: 'Unified-RED Dashboard',
     short_name: 'Dashboard',
     description: 'A dashboard for Node-RED',
     start_url: './#/0',
@@ -300,7 +300,7 @@ function add(opt) {
             if (msg.hasOwnProperty('enabled')) {
                 toEmit.disabled = !msg.enabled;
             }
-            toEmit.id = toStore.id = opt.node.id;
+            toEmit.socketid = toEmit.id = toStore.id = opt.node.id;
             //toEmit.socketid = msg.socketid; // dcj mu
             // Emit and Store the data
             //if (settings.verbose) { console.log("UI-EMIT",JSON.stringify(toEmit)); }
@@ -471,7 +471,7 @@ function init(server, app, log, redSettings) {
         app.use(errorHandler);
     });
 
-    log.info('Dashboard version ' + urVersion + ' started at ' + fullPath);
+    log.info('Unified-RED Dashboard version ' + urVersion + ' started at ' + fullPath);
 
     io.on('connection', function (socket) {
         //   console.log("ui io.on connection: ", socket);
@@ -522,6 +522,12 @@ function init(server, app, log, redSettings) {
         socket.on('ui-params', function (p) {
             delete p.socketid;
             params = p;
+        });
+        socket.on('join', function(room) {
+            socket.join(room);
+        });
+        socket.on('leave', function(room) {
+            socket.leave(room);
         });
     });
 }
