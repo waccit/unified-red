@@ -1135,8 +1135,7 @@
                     }).appendTo(titleRow);
 
                     // make & add icon
-                    let icon = 'fa-object-group';
-                    $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-item-icon fa ' + icon }).appendTo(titleRow);
+                    $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-item-icon fa fa-folder-o' }).appendTo(titleRow);
 
                     // add hide & disable
                     let hide = item.node.hidden ? ' nr-db-sb-title-hidden' : '';
@@ -1308,7 +1307,8 @@
                     }).appendTo(titleRow);
 
                     // icon
-                    $('<i class="nr-db-sb-icon nr-db-sb-menu-page-icon fa fa-folder-o"></i>').appendTo(titleRow);
+                    let icon = menuPageNode.isDynamic ? 'files-o' : 'file-o';
+                    $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-page-icon fa fa-' + icon }).appendTo(titleRow);
 
                     // title
                     let title = $('<span class="nr-db-sb-title">')
