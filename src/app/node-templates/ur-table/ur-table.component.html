@@ -30,7 +30,7 @@
             <tr *ngFor="let c of config">
                 <th>{{ c.label }}</th>
                 <ng-container *ngFor="let point of points">
-                    <ng-container *ngIf="c.formatType !== 'link'">
+                    <ng-container *ngIf="c.formatType !== 'link' && point.name.includes(c.param)">
                         <td> {{ dataSource[point.name][c.display] }} </td>
                     </ng-container>
                     <ng-container *ngIf="c.formatType == 'link'">
