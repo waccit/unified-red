@@ -99,9 +99,14 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     private evaluate(exp:any, value?:any) {
         try {
             if (typeof value !== 'undefined') {
-                switch (typeof value) {
-                    case 'object': value = '(' + JSON.stringify(value) + ')'; break;
-                    case 'string': value = '"' + value + '"'; break;
+                if (typeof value === 'object') {
+                    value = '(' + JSON.stringify(value) + ')';
+                }
+                else if (!isNaN(value)) {
+                    value = parseFloat(value);
+                }
+                else if (typeof value === 'string') {
+                    value = '"' + value + '"';
                 }
                 exp = exp.replace(/\{x\}/g, value);
             }
