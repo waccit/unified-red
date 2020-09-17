@@ -1,0 +1,399 @@
+<script type="text/javascript">
+    (function() {
+        // convert to i18 text
+        function c_(x) {
+            return RED._("unified-red/ur_compare:ur_compare." + x);
+        }
+    
+        let operators = [
+            {v:"eq",t:"==",kind:'V'},
+            {v:"neq",t:"!=",kind:'V'},
+            {v:"lt",t:"<",kind:'V'},
+            {v:"lte",t:"<=",kind:'V'},
+            {v:"gt",t:">",kind:'V'},
+            {v:"gte",t:">=",kind:'V'},
+            {v:"hask",t:"cond.hask",kind:'V'},
+            {v:"btwn",t:"cond.btwn",kind:'V'},
+            {v:"cont",t:"cond.cont",kind:'V'},
+            {v:"regex",t:"cond.regex",kind:'V'},
+            {v:"true",t:"cond.true",kind:'V'},
+            {v:"false",t:"cond.false",kind:'V'},
+            {v:"null",t:"cond.null",kind:'V'},
+            {v:"nnull",t:"cond.nnull",kind:'V'},
+            {v:"istype",t:"cond.istype",kind:'V'},
+            {v:"empty",t:"cond.empty",kind:'V'},
+            {v:"nempty",t:"cond.nempty",kind:'V'},
+            {v:"jsonata_exp",t:"cond.exp",kind:'O'}
+        ];
+
+        let variables = [];
+    
+        RED.nodes.registerType('ur_compare', {
+            category: 'unified-red',
+            color: '#E2D96E',
+            defaults: {
+                name: { value: "" },
+                topic: { value: "" },
+                topics: { value: [ { name: "", topic: "", property: "payload" } ] },
+                conditions: { value: [ { varA:"", t: "eq", varB1: "", varB1t: "str", db:"", dbt:"" } ] },
+                checkall: { value: "true", required: true },
+                latching: { value: "" },
+                outputs: { value:1 }
+            },
+            inputs: 1,
+            outputs: 1,
+            outputLabels: function(index) {
+                if (index === 0) {
+                    return "state";
+                }
+                let topicObj = this.topics[index-1];
+                if (topicObj && topicObj.name && topicObj.topic) {
+                    return topicObj.name + ": " + topicObj.topic;
+                }
+            },
+            align: 'left',
+            icon: "font-awesome/fa-cog",
+            paletteLabel: 'compare',
+            label: function() {
+                return this.name || "Compare";
+            },
+            labelStyle: function() {
+                return this.name ? "node_label_italic" : "";
+            },
+            oneditprepare: function() {
+                let node = this;
+                let varValueType = { value: "var", label: c_("label.var"), hasValue: true };
+                let dbNoValueType = { value: "", label: c_("label.dbno"), hasValue: false };
+                let dbHighValueType = { value: "high", label: c_("label.dbhigh"), hasValue: true };
+                let dbLowValueType = { value: "low", label: c_("label.dblow"), hasValue: true };
+                let dbMidValueType = { value: "mid", label: c_("label.dbmid"), hasValue: true };
+                let andLabel = c_("label.and");
+                let caseLabel = c_("label.ignorecase");
+    
+                variables = [];
+                let topicsContainer = $("#node-input-topics-container");
+                topicsContainer.css('min-height', '160px').css('min-width', '450px').editableList({
+                    addItem: function (container, i, opt) {
+                        let value = opt.topic || { name: "", topic: "", property: "payload" };
+                        variables.push(value.name);
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap'
+                        });
+                        let row = $('<div/>').appendTo(container);
+
+                        // variable name field
+                        $('<input/>', { class: "node-input-topics-name", type: "text", placeholder: "variable name", style: "margin-left: 5px; width: 21%;" }).appendTo(row).val(value.name)
+                            .change(function() {
+                                let newVarName = $(this).val();
+                                variables[i] = newVarName;
+                                $(".node-input-cond-varA [i="+i+"]").val(newVarName).text(newVarName);
+                            });
+                        if (!$(".node-input-cond-varA [i="+i+"]").length) {
+                            $(".node-input-cond-varA").append($("<option>").val(value.name).text(value.name).attr("i", i));
+                        }
+
+                        // topic field
+                        $('<input/>', { class: "node-input-topics-topic", type: "text", placeholder: "topic", style: "margin-left: 5px; width: 52%;" }).appendTo(row).val(value.topic);
+                        // property field
+                        $('<input/>', { class: "node-input-topics-property", type: "text", placeholder: "msg property", style: "margin-left: 5px; width: 24%;" }).appendTo(row).val(value.property);
+                    },
+                    sortable: true,
+                    removable: true
+                });
+
+                if (this.topics && this.topics.length) {
+                    for (let topic of this.topics) {
+                        topicsContainer.editableList('addItem', { topic: topic });
+                    }
+                }
+
+                let addCondition = function(container, i, opt) {
+                    if (!opt.hasOwnProperty('cond')) {
+                        opt.cond = {};
+                    }
+                    let cond = opt.cond;
+                    console.log("add", cond);
+                    if (!cond.hasOwnProperty('t')) {
+                        cond.t = 'eq';
+                    }
+                    if (!opt.hasOwnProperty('i')) {
+                        opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString();
+                    }
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
+                    let row = $('<div/>').appendTo(container);
+                    let row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
+                    // let row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
+
+                    let varAField = $('<select/>',{class:"node-input-cond-varA", style:"width:21%; margin-left: 5px;"}).appendTo(row);
+                    for (let i = 0; i < variables.length; i++) {
+                        let v = variables[i];
+                        varAField.append($("<option>").val(v).text(v).attr("i", i));
+                    }
+                    varAField.val(cond.varA);
+
+                    let selectField = $('<select/>',{class:"node-input-cond-op", style:"width:21%; margin-left: 5px; text-align: center;"}).appendTo(row);
+                    let group0 = $('<optgroup/>', { label: "value conditions" }).appendTo(selectField);
+                    for (let d in operators) {
+                        if(operators[d].kind === 'V') {
+                            group0.append($("<option>").val(operators[d].v).text(/^cond/.test(operators[d].t) ? c_(operators[d].t) : operators[d].t));
+                        }
+                    }
+                    for (let d in operators) {
+                        if(operators[d].kind === 'O') {
+                            selectField.append($("<option>").val(operators[d].v).text(/^cond/.test(operators[d].t) ? c_(operators[d].t) : operators[d].t));
+                        }
+                    }
+    
+                    function createValueField(){
+                        return $('<input/>',{class:"node-input-cond-varB1",type:"text",style:"margin-left: 5px; width: 40%;"}).appendTo(row).typedInput({default:'str',types:[varValueType,'flow','global','str','num','jsonata','env']});
+                    }
+        
+                    function createExpValueField(){
+                        return $('<input/>',{class:"node-input-cond-exp-varB1",type:"text",style:"margin-left: 5px; width: 55%;"}).appendTo(row).typedInput({default:'jsonata',types:['jsonata']});
+                    }
+    
+                    function createBtwnValueField(){
+                        return $('<input/>',{class:"node-input-cond-btwn-varB1",type:"text",style:"margin-left: 5px; width: 27%;"}).appendTo(row).typedInput({default:'num',types:[varValueType,'flow','global','str','num','jsonata','env']});
+                    }
+        
+                    function createBtwnValue2Field(){
+                        return $('<input/>',{class:"node-input-cond-btwn-varB2",type:"text",style:"margin-left:2px; width: 27%;"}).appendTo(row).typedInput({default:'num',types:[varValueType,'flow','global','str','num','jsonata','env']});
+                    }
+
+                    function createDeadbandField(){
+                        return $('<input/>',{class:"node-input-cond-deadband",type:"text",style:"margin-left: 5px; width: 14%;"}).appendTo(row).typedInput({default:'',types:[ dbNoValueType, dbHighValueType, dbMidValueType, dbLowValueType ]});
+                    }
+
+                    function createTypeValueField(){
+                        return $('<input/>',{class:"node-input-cond-type-varB1",type:"text",style:"margin-left: 5px; width: 55%;"}).appendTo(row).typedInput({default:'string',types:[
+                            {value:"string",label:RED._("common.type.string"),hasValue:false,icon:"red/images/typedInput/az.png"},
+                            {value:"number",label:RED._("common.type.number"),hasValue:false,icon:"red/images/typedInput/09.png"},
+                            {value:"boolean",label:RED._("common.type.boolean"),hasValue:false,icon:"red/images/typedInput/bool.png"},
+                            {value:"array",label:RED._("common.type.array"),hasValue:false,icon:"red/images/typedInput/json.png"},
+                            {value:"buffer",label:RED._("common.type.buffer"),hasValue:false,icon:"red/images/typedInput/bin.png"},
+                            {value:"object",label:RED._("common.type.object"),hasValue:false,icon:"red/images/typedInput/json.png"},
+                            {value:"json",label:RED._("common.type.jsonString"),hasValue:false,icon:"red/images/typedInput/json.png"},
+                            {value:"undefined",label:RED._("common.type.undefined"),hasValue:false},
+                            {value:"null",label:RED._("common.type.null"),hasValue:false}
+                        ]});
+                    }
+    
+                    let valueField = null;
+                    let numValueField = null;
+                    let expValueField = null;
+                    let btwnAndLabel = null;
+                    let btwnValueField = null;
+                    let btwnValue2Field = null;
+                    let typeValueField = null;
+                    let dbField = null;
+    
+                    let caseSensitive = $('<input/>',{class:"node-input-cond-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
+                    $('<label/>',{for:"node-input-cond-case-"+i,style:"margin-left: 3px;"}).text(caseLabel).appendTo(row2);
+                    selectField.on("change", function() {
+                        let type = selectField.val();
+                        if (valueField){
+                            valueField.typedInput('hide');
+                        }
+                        if (expValueField){
+                            expValueField.typedInput('hide');
+                        }
+                        if (numValueField){
+                            numValueField.typedInput('hide');
+                        }
+                        if (typeValueField){
+                            typeValueField.typedInput('hide');
+                        }
+                        if (btwnValueField){
+                            btwnValueField.typedInput('hide');
+                        }
+                        if (btwnValue2Field){
+                            btwnValue2Field.typedInput('hide');
+                        }
+                        if (dbField){
+                            dbField.typedInput('hide');
+                        }
+    
+                        if (type === "btwn") {
+                            if (!btwnValueField){
+                                btwnValueField = createBtwnValueField();
+                            }
+                            btwnValueField.typedInput('show');
+                        } else if (type === "jsonata_exp") {
+                            if (!expValueField){
+                                expValueField = createExpValueField();
+                            }
+                            expValueField.typedInput('show');
+                        } else if (type === "istype") {
+                            if (!typeValueField){
+                                typeValueField = createTypeValueField();
+                            }
+                            typeValueField.typedInput('show');
+                        } else if (! (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" )) {
+                            if (!valueField){
+                                valueField = createValueField();
+                            }
+                            valueField.typedInput('show');
+                        }
+                        if (type === "eq" || type === "neq" || type === "lt" || type === "lte" || type === "gt" || type === "gte") {
+                            if (!dbField){
+                                dbField = createDeadbandField();
+                            }
+                            dbField.typedInput('show');
+                        }
+                        if (type === "regex") {
+                            row2.show();
+                        } else if (type === "btwn") {
+                            row2.hide();
+                            if (!btwnValue2Field){
+                                btwnValue2Field = createBtwnValue2Field();
+                            }
+                            btwnValue2Field.typedInput('show');
+                        } else {
+                            row2.hide();
+                        }
+
+                    });
+                    selectField.val(cond.t);
+                    if (cond.t == "btwn") {
+                        if (!btwnValueField){
+                            btwnValueField = createBtwnValueField();
+                        }
+                        btwnValueField.typedInput('value',cond.varB1);
+                        btwnValueField.typedInput('type',cond.varB1t||'num');
+    
+                        if (!btwnValue2Field){
+                            btwnValue2Field = createBtwnValue2Field();
+                        }
+                        btwnValue2Field.typedInput('value',cond.varB2);
+                        btwnValue2Field.typedInput('type',cond.varB2t||'num');
+                    } else if (cond.t === "istype") {
+                        if (!typeValueField){
+                            typeValueField =createTypeValueField();
+                        }
+                        typeValueField.typedInput('value',cond.varB1t);
+                        typeValueField.typedInput('type',cond.varB1t);
+                    } else if (cond.t === "jsonata_exp") {
+                        if (!expValueField){
+                            expValueField = createExpValueField();
+                        }
+                        expValueField.typedInput('value',cond.varB1);
+                        expValueField.typedInput('type',cond.varB1t||'jsonata');
+                    } else if (typeof cond.varB1 != "undefined") {
+                        if (!valueField){
+                            valueField = createValueField();
+                        }
+                        valueField.typedInput('value',cond.varB1);
+                        valueField.typedInput('type',cond.varB1t||'str');
+                        if (!dbField){
+                            dbField = createDeadbandField();
+                        }
+                        dbField.typedInput('type',cond.dbt||'');
+                        dbField.typedInput('value', cond.db);
+                    }
+                    if (cond.case) {
+                        caseSensitive.prop('checked',true);
+                    } else {
+                        caseSensitive.prop('checked',false);
+                    }
+                    selectField.change();
+                };
+    
+                let condContainer = $("#node-input-conditions-container");
+                if (condContainer && condContainer.length && this.conditions) {
+                    condContainer.css('min-height','150px').css('min-width','450px').editableList({
+                        addItem: addCondition,
+                        sortable: true,
+                        removable: true
+                    });
+                    for (let i = 0; i < this.conditions.length; i++) {
+                        condContainer.editableList('addItem', { cond: this.conditions[i], i: i });
+                    }
+                }
+            },
+            oneditsave: function() {
+                let node = this;
+                node.conditions = [];
+                $("#node-input-conditions-container").editableList('items').each(function(i) {
+                    let row = $(this);
+                    let varA = row.find(".node-input-cond-varA").val();
+                    let type = row.find(".node-input-cond-op").val();
+                    let cond = { varA: varA, t: type };
+                    if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty")) {
+                        if (type === "btwn") {
+                            cond.varB1 = row.find(".node-input-cond-btwn-varB1").typedInput('value');
+                            cond.varB1t = row.find(".node-input-cond-btwn-varB1").typedInput('type');
+                            cond.varB2 = row.find(".node-input-cond-btwn-varB2").typedInput('value');
+                            cond.varB2t = row.find(".node-input-cond-btwn-varB2").typedInput('type');
+                        } else if (type === "istype") {
+                            cond.varB1 = row.find(".node-input-cond-type-varB1").typedInput('type');
+                            cond.varB1t = row.find(".node-input-cond-type-varB1").typedInput('type');
+                        } else if (type === "jsonata_exp") {
+                            cond.varB1 = row.find(".node-input-cond-exp-varB1").typedInput('value');
+                            cond.varB1t = row.find(".node-input-cond-exp-varB1").typedInput('type');
+                        } else {
+                            cond.varB1 = row.find(".node-input-cond-varB1").typedInput('value');
+                            cond.varB1t = row.find(".node-input-cond-varB1").typedInput('type');
+                            cond.db = row.find(".node-input-cond-deadband").typedInput('value');
+                            cond.dbt = row.find(".node-input-cond-deadband").typedInput('type');
+                        }
+                        if (type === "regex") {
+                            cond.case = row.find(".node-input-cond-case").prop("checked");
+                        }
+                    }
+                    console.log("save condition", cond);
+                    node.conditions.push(cond);
+                });
+
+                node.topics = [];
+                $("#node-input-topics-container").editableList('items').each(function(i) {
+                    let row = $(this);
+                    let topic = {
+                        name: row.find(".node-input-topics-name").val(),
+                        topic: row.find(".node-input-topics-topic").val(),
+                        property: row.find(".node-input-topics-property").val()
+                    };
+                    console.log("save topic", topic);
+                    node.topics.push(topic);
+                });
+
+                $("#node-input-outputs").val(node.topics.length + 1);
+            }
+        });
+    })();
+    </script>
+    
+    <script type="text/html" data-template-name="ur_compare">
+        <div class="form-row">
+            <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_compare.label.name"></span></label>
+            <input type="text" id="node-input-name">
+        </div>
+        <div class="form-row">
+            <label for="node-input-topic"><i class="fa fa-tag"></i> <span data-i18n="ur_compare.label.topic"></span></label>
+            <input type="text" id="node-input-topic">
+        </div>
+        <div class="form-row" style="padding-left: 105px;">
+            <input type="checkbox" id="node-input-latching" style="display: inline-block; width: auto; vertical-align: top;">
+            <label style="width: auto;" for="node-input-latching"><span data-i18n="ur_compare.label.latching"></span></label></input>
+        </div>
+        <div class="form-row node-input-topics-container-row">
+            <label for="node-input-topics-container" style="width: 100%"><span data-i18n="ur_compare.label.topics"></span></label>
+            <ol id="node-input-topics-container"></ol>
+            <input type="hidden" id="node-input-outputs"/>
+        </div>
+        <div class="form-row" style="padding-top:12px;">
+            <label for="node-input-checkall"><i class="fa fa-asterisk"></i> <span data-i18n="ur_compare.label.process"></span></label>
+            <select id="node-input-checkall" style="width: 70%">
+                <option value="true" data-i18n="ur_compare.label.checkall"></option>
+                <option value="false" data-i18n="ur_compare.label.stopfirst"></option>
+            </select>
+        </div>
+        <div class="form-row node-input-conditions-container-row">
+            <label for="node-input-conditions-container" style="width: 100%"><span data-i18n="ur_compare.label.conditions"></span></label>
+            <ol id="node-input-conditions-container"></ol>
+        </div>
+    </script>
+    
