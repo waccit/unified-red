@@ -34,8 +34,7 @@
             "head": "head",
             "index": "index between",
             "tail": "tail",
-            "exp": "JSONata exp",
-            "else": "otherwise"
+            "exp": "JSONata exp"
         }
     }
 }
