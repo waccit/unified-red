@@ -1307,8 +1307,21 @@
                     }).appendTo(titleRow);
 
                     // icon
-                    let icon = menuPageNode.isDynamic ? 'files-o' : 'file-o';
-                    $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-page-icon fa fa-' + icon }).appendTo(titleRow);
+                    // NB: include 2 icons and use CSS to switch (show/hide 1)
+                    let staticIcon = $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-page-icon fa fa-file-o' }).appendTo(
+                        titleRow
+                    );
+                    let dynamicIcon = $('<i>', {
+                        class: 'nr-db-sb-icon nr-db-sb-dynamic-page-icon fa fa-files-o',
+                    }).appendTo(titleRow);
+
+                    if (menuPageNode.isDynamic) {
+                        staticIcon.hide();
+                        dynamicIcon.show();
+                    } else {
+                        staticIcon.show();
+                        dynamicIcon.hide();
+                    }
 
                     // title
                     let title = $('<span class="nr-db-sb-title">')
@@ -2369,6 +2382,26 @@
                                     .text(node.name || node.id);
                                 if (node.type === 'ur_group') {
                                     refresh();
+                                } else if (node.type === 'ur_menu_page') {
+                                    if (node.isDynamic) {
+                                        listElements[node.id]
+                                            .children('.nr-db-sb-list-header')
+                                            .find('.nr-db-sb-menu-page-icon')
+                                            .hide();
+                                        listElements[node.id]
+                                            .children('.nr-db-sb-list-header')
+                                            .find('.nr-db-sb-dynamic-page-icon')
+                                            .show();
+                                    } else {
+                                        listElements[node.id]
+                                            .children('.nr-db-sb-list-header')
+                                            .find('.nr-db-sb-menu-page-icon')
+                                            .show();
+                                        listElements[node.id]
+                                            .children('.nr-db-sb-list-header')
+                                            .find('.nr-db-sb-dynamic-page-icon')
+                                            .hide();
+                                    }
                                 } else {
                                     if (node.hidden === true) {
                                         listElements[node.id]
