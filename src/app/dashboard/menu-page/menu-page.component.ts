@@ -71,7 +71,9 @@ export class MenuPageComponent implements OnInit {
                 parent = this.findMenuEntityByKeyValue(menu, 'title', curr);
                 // this.breadcrumbs.push(parent.title);
             }
-            this.breadcrumbs.push(parent.title);
+            if (parent) {
+                this.breadcrumbs.push(parent.title);
+            }
         }
 
         this.menuItem = this.pathList[this.pathList.length - 2];
