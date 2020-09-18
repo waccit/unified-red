@@ -13,7 +13,6 @@
 
 .list-group-item {
     @include border-radius(0);
-    @include transition(0.5s);
 }
 
 .list-group {
