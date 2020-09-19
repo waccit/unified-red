@@ -15,7 +15,12 @@
             "layout": "Layout",
             "angular": "Angular",
             "theme": "Theme",
-            "site": "Site"
+            "site": "Site",
+            "sitename": "Site Name",
+            "siteaddress": "Site Address",
+            "contactName": "Contact Name",
+            "contactEmail": "Contact Email Address",
+            "monitorServer": "Monitor Server URL"
         },
         "auto": "auto",
         "title": "Node-RED Dashboard",

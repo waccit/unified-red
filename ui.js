@@ -49,8 +49,8 @@ var mani = {
     short_name: 'Dashboard',
     description: 'A dashboard for Node-RED',
     start_url: './#/0',
-    background_color: '#910000',
-    theme_color: '#910000',
+    // background_color: '#910000',
+    // theme_color: '#910000',
     display: 'standalone',
     icons: [
         { src: 'icon192x192.png', sizes: '192x192', type: 'image/png' },
@@ -843,10 +843,10 @@ function addBaseConfig(config) {
     if (config) {
         baseConfiguration = config;
     }
-    mani.name = config.site ? config.site.name : 'Node-RED Dashboard';
-    mani.short_name = mani.name.replace('Node-RED', '').trim();
-    mani.background_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
-    mani.theme_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
+    mani.name = config.site ? config.site.name : 'Unified-RED Dashboard';
+    mani.short_name = mani.name.replace('Unified-RED', '').trim();
+    // mani.background_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
+    // mani.theme_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
     updateUi();
 }
 
