@@ -12,7 +12,6 @@ import { PageLoaderComponent } from './layout/page-loader/page-loader.component'
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { RightSidebarComponent } from './layout/right-sidebar/right-sidebar.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
-import { DynamicScriptLoaderService } from './services/dynamic-script-loader.service';
 import { RightSidebarService } from './services/rightsidebar.service';
 import {
     PerfectScrollbarModule,
@@ -111,7 +110,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
             provide: PERFECT_SCROLLBAR_CONFIG,
             useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
         },
-        DynamicScriptLoaderService,
         RightSidebarService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

@@ -48,8 +48,7 @@ module.exports = function(RED) {
         'hask': function(a, b) {
             return (typeof b !== "object" )  &&  a.hasOwnProperty(b+"");
         },
-        'jsonata_exp': function(a, b) { return (b === true); },
-        'else': function(a) { return a === true; }
+        'jsonata_exp': function(a, b) { return (b === true); }
     };
 
     function AlarmNode(config) {
@@ -174,18 +173,12 @@ module.exports = function(RED) {
         let checkRules = function(msg, severity) {
             try {
                 let results = 0;
-                let elseflag = true;
                 let rules = node.rules[severity];
                 for (let rule of rules) {
                     let v1 = getV1(msg, rule);
                     let v2 = getV2(msg, rule);
-                    if (rule.t === "else") {
-                        node.presentValue = elseflag; // TODO: why do this?
-                        elseflag = true;
-                    }
                     if (operators[rule.t](node.presentValue, v1, v2, rule.case, msg.parts)) {
                         results++;
-                        elseflag = false;
                         if (node.checkall === "false") { // logical OR
                             return true;
                         }

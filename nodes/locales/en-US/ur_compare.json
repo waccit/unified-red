@@ -1,25 +1,25 @@
 {
-    "ur_alarm": {
+    "ur_compare": {
         "label": {
             "category": "unified-red",
             "name": "Name",
             "value": "Value",
-            "delayon": "On Delay",
-            "delayoff": "Off Delay",
-            "severity": "Severity",
-            "critical": "Critical Conditions",
-            "alert": "Alert Conditions",
-            "warning": "Warning Conditions",
-            "info": "Info Conditions",
+            "topic": "Output Topic",
+            "topics": "Input Topics",
+            "conditions": "Conditions",
             "process": "Process by",
-            "checkall": "checking all rules",
+            "checkall": "checking all condition",
             "stopfirst": "stopping after first match",
-            "previous": "previous value",
             "and": "and",
             "ignorecase": "ignore case",
-            "ackreq": "Acknowledgement required"
+            "latching": "Latching",
+            "var": "var",
+            "dbno": "none",
+            "dbhigh": "+",
+            "dblow": "-",
+            "dbmid": "±"
         },
-        "rules": {
+        "cond": {
             "hask": "has key",
             "btwn": "is between",
             "cont": "contains",

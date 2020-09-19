@@ -1,5 +1,5 @@
-<div *ngIf="!pivot" class="body table-responsive">
-    <table class="table table-bordered table-hover mat-elevation-z8 w-100 table-striped">
+<div *ngIf="!pivot" class="table-responsive">
+    <table class="table table-bordered table-hover w-100 table-striped">
         <thead>
             <th  *ngFor="let c of config"> {{ c.label  }}</th>
         </thead>
@@ -20,8 +20,8 @@
     </table>
 </div>
 
-<div *ngIf="pivot" class="body table-responsive">
-    <table class="table table-bordered table-hover mat-elevation-z8 w-100 table-striped">
+<div *ngIf="pivot" class="table-responsive">
+    <table class="table table-bordered table-hover w-100 table-striped">
         <!-- <thead>
             <th>Label</th>
             <th *ngFor="let point of points">{{point.name}}</th>
@@ -30,7 +30,7 @@
             <tr *ngFor="let c of config">
                 <th>{{ c.label }}</th>
                 <ng-container *ngFor="let point of points">
-                    <ng-container *ngIf="c.formatType !== 'link'">
+                    <ng-container *ngIf="c.formatType !== 'link' && point.name.includes(c.param)">
                         <td> {{ dataSource[point.name][c.display] }} </td>
                     </ng-container>
                     <ng-container *ngIf="c.formatType == 'link'">
