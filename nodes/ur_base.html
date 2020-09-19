@@ -565,7 +565,7 @@
             category: 'config',
             defaults: {
                 name: {},
-                theme: {},
+                // theme: {},
                 site: {},
             },
             hasUsers: false,
@@ -636,13 +636,14 @@
                         // }
                         // themeState['base-font'] = { value: baseFontName };
 
-                        // var missingFields =
-                        //     !globalDashboardNode ||
+                        var missingFields =
+                            !globalDashboardNode ||
+                            !globalDashboardNode.site;
+                        // ||
                         //     !globalDashboardNode.theme ||
-                        //     !globalDashboardNode.site ||
                         //     !globalDashboardNode.site.sizes;
 
-                        // if (missingFields && createMissing) {
+                        if (missingFields && createMissing) {
                         //     var lightTheme = {
                         //         default: baseColor,
                         //         baseColor: baseColor,
@@ -666,26 +667,31 @@
                         //         oldThemeName = globalDashboardNode.theme;
                         //     }
 
-                        //     var theme = {
-                        //         name: oldThemeName || 'theme-light',
-                        //         lightTheme: lightTheme,
-                        //         darkTheme: darkTheme,
-                        //         customTheme: customTheme,
-                        //         themeState: themeState,
-                        //         angularTheme: aTheme,
-                        //     };
+                            // var theme = {
+                                // name: 'theme-light',
+                                // name: oldThemeName || 'theme-light',
+                                // lightTheme: lightTheme,
+                                // darkTheme: darkTheme,
+                                // customTheme: customTheme,
+                                // themeState: themeState,
+                                // angularTheme: aTheme,
+                            // };
 
                         //     var site_name = c_('site.title');
                         //     var site_date_format = c_('site.date-format');
-                        //     var site = {
-                        //         name: site_name,
-                        //         hideToolbar: 'false',
-                        //         allowSwipe: 'false',
-                        //         lockMenu: 'false',
-                        //         allowTempTheme: 'true',
-                        //         dateFormat: site_date_format,
-                        //         sizes: sizes,
-                        //     };
+                            var site = {
+                                name: '',
+                                address: '',
+                                contactName: '',
+                                contactEmail: '',
+                                monitorServer: 'https://urmon.wasocal.com'
+                                // hideToolbar: 'false',
+                                // allowSwipe: 'false',
+                                // lockMenu: 'false',
+                                // allowTempTheme: 'true',
+                                // dateFormat: site_date_format,
+                                // sizes: sizes,
+                            };
                         //     if (globalDashboardNode !== null) {
                         //         if (typeof globalDashboardNode.site !== 'undefined') {
                         //             site = {
@@ -705,25 +711,25 @@
                         //         }
                         //     }
 
-                        //     if (noDashboardNode) {
-                        //         globalDashboardNode = {
-                        //             id: RED.nodes.id(),
-                        //             _def: RED.nodes.getType('ur_base'),
-                        //             type: 'ur_base',
-                        //             site: site,
-                        //             theme: theme,
-                        //             users: [],
-                        //         };
-                        //         RED.nodes.add(globalDashboardNode);
-                        //     } else {
-                        //         globalDashboardNode['_def'] = RED.nodes.getType('ur_base');
-                        //         globalDashboardNode.site = site;
-                        //         globalDashboardNode.theme = theme;
-                        //         delete globalDashboardNode.name;
-                        //     }
-                        //     $('#nr-db-field-font').val(baseFontName);
-                        //     RED.nodes.dirty(true);
-                        // }
+                            if (noDashboardNode) {
+                                globalDashboardNode = {
+                                    id: RED.nodes.id(),
+                                    _def: RED.nodes.getType('ur_base'),
+                                    type: 'ur_base',
+                                    site: site,
+                                    // theme: theme,
+                                    users: [],
+                                };
+                                RED.nodes.add(globalDashboardNode);
+                            } else {
+                                globalDashboardNode['_def'] = RED.nodes.getType('ur_base');
+                                globalDashboardNode.site = site;
+                                // globalDashboardNode.theme = theme;
+                                delete globalDashboardNode.name;
+                            }
+                            // $('#nr-db-field-font').val(baseFontName);
+                            RED.nodes.dirty(true);
+                        }
                     }
                 }
 
@@ -836,10 +842,9 @@
                 // Site Tab
                 var divTitle = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
                 $('<div>')
-                    .html('<b>' + c_('label.title') + '</b>')
+                    .html('<b>' + c_('label.sitename') + '</b>')
                     .appendTo(divTitle);
-                $('<input type="text" id="nr-db-field-title">')
-                    .val(site_name)
+                $('<input type="text" id="nr-db-field-sitename">')
                     .css('width', '100%')
                     .on('change', function () {
                         if (!globalDashboardNode || globalDashboardNode.site.name !== $(this).val()) {
@@ -850,38 +855,98 @@
                     })
                     .appendTo(divTitle);
 
-                var divHideToolbar = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
+                var divAddress = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
                 $('<div>')
-                    .html('<b>' + c_('label.options') + '</b>')
-                    .appendTo(divHideToolbar);
-                $('<select id="nr-db-field-hideToolbar">')
+                    .html('<b>' + c_('label.siteaddress') + '</b>')
+                    .appendTo(divAddress);
+                $('<input type="text" id="nr-db-field-siteaddress" placeholder="123 Park Ave, New York, NY 10128">')
                     .css('width', '100%')
-                    .append($('<option>', { value: 'false', text: c_('title-bar.show'), selected: true }))
-                    .append($('<option>', { value: 'true', text: c_('title-bar.hide') }))
-                    .val('false')
                     .on('change', function () {
-                        if (!globalDashboardNode || globalDashboardNode.site.hideToolbar !== $(this).val()) {
+                        if (!globalDashboardNode || globalDashboardNode.site.address !== $(this).val()) {
                             ensureDashboardNode(true);
-                            globalDashboardNode.site.hideToolbar = $(this).val();
+                            globalDashboardNode.site.address = $(this).val();
                             RED.nodes.dirty(true);
                         }
                     })
-                    .appendTo(divHideToolbar);
+                    .appendTo(divAddress);
 
-                var divLockMenu = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
-                $('<select id="nr-db-field-lockMenu">')
+                var divContactName = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
+                $('<div>')
+                    .html('<b>' + c_('label.contactName') + '</b>')
+                    .appendTo(divContactName);
+                $('<input type="text" id="nr-db-field-contactName" placeholder="Name of customer or integrator">')
                     .css('width', '100%')
-                    .append($('<option>', { value: 'false', text: c_('lock.clicked'), selected: true }))
-                    .append($('<option>', { value: 'true', text: c_('lock.locked') }))
-                    .val('false')
                     .on('change', function () {
-                        if (!globalDashboardNode || globalDashboardNode.site.lockMenu !== $(this).val()) {
+                        if (!globalDashboardNode || globalDashboardNode.site.contactName !== $(this).val()) {
                             ensureDashboardNode(true);
-                            globalDashboardNode.site.lockMenu = $(this).val();
+                            globalDashboardNode.site.contactName = $(this).val();
                             RED.nodes.dirty(true);
                         }
                     })
-                    .appendTo(divLockMenu);
+                    .appendTo(divContactName);
+
+                var divContactEmail = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
+                $('<div>')
+                    .html('<b>' + c_('label.contactEmail') + '</b>')
+                    .appendTo(divContactEmail);
+                $('<input type="text" id="nr-db-field-contactEmail" placeholder="person.in.charge@customer.com">')
+                    .css('width', '100%')
+                    .on('change', function () {
+                        if (!globalDashboardNode || globalDashboardNode.site.contactEmail !== $(this).val()) {
+                            ensureDashboardNode(true);
+                            globalDashboardNode.site.contactEmail = $(this).val();
+                            RED.nodes.dirty(true);
+                        }
+                    })
+                    .appendTo(divContactEmail);
+
+                var divMonitorServer = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
+                $('<div>')
+                    .html('<b>' + c_('label.monitorServer') + '</b>')
+                    .appendTo(divMonitorServer);
+                $('<input type="text" id="nr-db-field-monitorServer" placeholder="https://urmon.wasocal.com">')
+                    .css('width', '100%')
+                    .on('change', function () {
+                        if (!globalDashboardNode || globalDashboardNode.site.monitorServer !== $(this).val()) {
+                            ensureDashboardNode(true);
+                            globalDashboardNode.site.monitorServer = $(this).val();
+                            RED.nodes.dirty(true);
+                        }
+                    })
+                    .appendTo(divMonitorServer);
+
+                // var divHideToolbar = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
+                // $('<div>')
+                //     .html('<b>' + c_('label.options') + '</b>')
+                //     .appendTo(divHideToolbar);
+                // $('<select id="nr-db-field-hideToolbar">')
+                //     .css('width', '100%')
+                //     .append($('<option>', { value: 'false', text: c_('title-bar.show'), selected: true }))
+                //     .append($('<option>', { value: 'true', text: c_('title-bar.hide') }))
+                //     .val('false')
+                //     .on('change', function () {
+                //         if (!globalDashboardNode || globalDashboardNode.site.hideToolbar !== $(this).val()) {
+                //             ensureDashboardNode(true);
+                //             globalDashboardNode.site.hideToolbar = $(this).val();
+                //             RED.nodes.dirty(true);
+                //         }
+                //     })
+                //     .appendTo(divHideToolbar);
+
+                // var divLockMenu = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
+                // $('<select id="nr-db-field-lockMenu">')
+                //     .css('width', '100%')
+                //     .append($('<option>', { value: 'false', text: c_('lock.clicked'), selected: true }))
+                //     .append($('<option>', { value: 'true', text: c_('lock.locked') }))
+                //     .val('false')
+                //     .on('change', function () {
+                //         if (!globalDashboardNode || globalDashboardNode.site.lockMenu !== $(this).val()) {
+                //             ensureDashboardNode(true);
+                //             globalDashboardNode.site.lockMenu = $(this).val();
+                //             RED.nodes.dirty(true);
+                //         }
+                //     })
+                //     .appendTo(divLockMenu);
 
                 var site_name = c_('site.title');
 
@@ -2182,75 +2247,80 @@
                         });
                     }
                     ensureDashboardNode(true);
+                    console.log("globalDashboardNode", globalDashboardNode);
                     if (globalDashboardNode) {
-                        $('#nr-db-field-title').val(globalDashboardNode.site.name);
-                        $('#nr-db-field-allowSwipe').val(globalDashboardNode.site.allowSwipe || 'false');
-                        $('#nr-db-field-allowTempTheme').val(globalDashboardNode.site.allowTempTheme || 'true');
-                        $('#nr-db-field-hideToolbar').val(globalDashboardNode.site.hideToolbar || 'false');
-                        $('#nr-db-field-dateFormat').val(globalDashboardNode.site.dateFormat);
+                        $('#nr-db-field-sitename').val(globalDashboardNode.site.name);
+                        $('#nr-db-field-siteaddress').val(globalDashboardNode.site.address);
+                        $('#nr-db-field-contactName').val(globalDashboardNode.site.contactName);
+                        $('#nr-db-field-contactEmail').val(globalDashboardNode.site.contactEmail);
+                        $('#nr-db-field-monitorServer').val(globalDashboardNode.site.monitorServer || 'https://urmon.wasocal.com');
+                        // $('#nr-db-field-allowSwipe').val(globalDashboardNode.site.allowSwipe || 'false');
+                        // $('#nr-db-field-allowTempTheme').val(globalDashboardNode.site.allowTempTheme || 'true');
+                        // $('#nr-db-field-hideToolbar').val(globalDashboardNode.site.hideToolbar || 'false');
+                        // $('#nr-db-field-dateFormat').val(globalDashboardNode.site.dateFormat);
 
-                        if (typeof globalDashboardNode.site.sizes !== 'object') {
-                            globalDashboardNode.site.sizes = sizes;
-                        }
-                        $('#nr-db-field-sx').val(globalDashboardNode.site.sizes.sx);
-                        $('#nr-db-field-sy').val(globalDashboardNode.site.sizes.sy);
-                        $('#nr-db-field-px').val(globalDashboardNode.site.sizes.px);
-                        $('#nr-db-field-py').val(globalDashboardNode.site.sizes.py);
-                        $('#nr-db-field-cx').val(globalDashboardNode.site.sizes.cx);
-                        $('#nr-db-field-cy').val(globalDashboardNode.site.sizes.cy);
-                        $('#nr-db-field-gx').val(globalDashboardNode.site.sizes.gx);
-                        $('#nr-db-field-gy').val(globalDashboardNode.site.sizes.gy);
+                        // if (typeof globalDashboardNode.site.sizes !== 'object') {
+                        //     globalDashboardNode.site.sizes = sizes;
+                        // }
+                        // $('#nr-db-field-sx').val(globalDashboardNode.site.sizes.sx);
+                        // $('#nr-db-field-sy').val(globalDashboardNode.site.sizes.sy);
+                        // $('#nr-db-field-px').val(globalDashboardNode.site.sizes.px);
+                        // $('#nr-db-field-py').val(globalDashboardNode.site.sizes.py);
+                        // $('#nr-db-field-cx').val(globalDashboardNode.site.sizes.cx);
+                        // $('#nr-db-field-cy').val(globalDashboardNode.site.sizes.cy);
+                        // $('#nr-db-field-gx').val(globalDashboardNode.site.sizes.gx);
+                        // $('#nr-db-field-gy').val(globalDashboardNode.site.sizes.gy);
 
-                        if (typeof globalDashboardNode.theme.angularTheme !== 'object') {
-                            globalDashboardNode.theme.angularTheme = aTheme;
-                        }
-                        $('#nr-db-field-angPrimary').val(globalDashboardNode.theme.angularTheme.primary || 'indigo');
-                        $('#nr-db-field-angAccents').val(globalDashboardNode.theme.angularTheme.accents || 'blue');
-                        $('#nr-db-field-angWarn').val(globalDashboardNode.theme.angularTheme.warn || 'red');
-                        $('#nr-db-field-angBackground').val(
-                            globalDashboardNode.theme.angularTheme.background || 'grey'
-                        );
-                        $('#nr-db-field-angLook').val(globalDashboardNode.theme.angularTheme.palette || 'light');
+                        // if (typeof globalDashboardNode.theme.angularTheme !== 'object') {
+                        //     globalDashboardNode.theme.angularTheme = aTheme;
+                        // }
+                        // $('#nr-db-field-angPrimary').val(globalDashboardNode.theme.angularTheme.primary || 'indigo');
+                        // $('#nr-db-field-angAccents').val(globalDashboardNode.theme.angularTheme.accents || 'blue');
+                        // $('#nr-db-field-angWarn').val(globalDashboardNode.theme.angularTheme.warn || 'red');
+                        // $('#nr-db-field-angBackground').val(
+                        //     globalDashboardNode.theme.angularTheme.background || 'grey'
+                        // );
+                        // $('#nr-db-field-angLook').val(globalDashboardNode.theme.angularTheme.palette || 'light');
 
-                        $('#nr-db-field-theme').val(globalDashboardNode.theme.name);
-                        $('#ui-sidebar-name').val(globalDashboardNode.theme.customTheme.name);
-                        if (globalDashboardNode.theme.name === 'theme-custom') {
-                            $('#custom-theme-library-container').show();
-                            $('#custom-theme-settings').show();
-                        } else {
-                            $('#custom-theme-library-container').hide();
-                            $('#custom-theme-settings').hide();
-                        }
-                        if ($('#nr-db-field-allowTempTheme').val() === 'none') {
-                            ulDashboardTabs.children().eq(2).addClass('hidden');
-                            ulDashboardTabs.children().eq(3).removeClass('hidden');
-                        } else {
-                            ulDashboardTabs.children().eq(2).removeClass('hidden');
-                            ulDashboardTabs.children().eq(3).addClass('hidden');
-                        }
+                        // $('#nr-db-field-theme').val(globalDashboardNode.theme.name);
+                        // $('#ui-sidebar-name').val(globalDashboardNode.theme.customTheme.name);
+                        // if (globalDashboardNode.theme.name === 'theme-custom') {
+                        //     $('#custom-theme-library-container').show();
+                        //     $('#custom-theme-settings').show();
+                        // } else {
+                        //     $('#custom-theme-library-container').hide();
+                        //     $('#custom-theme-settings').hide();
+                        // }
+                        // if ($('#nr-db-field-allowTempTheme').val() === 'none') {
+                        //     ulDashboardTabs.children().eq(2).addClass('hidden');
+                        //     ulDashboardTabs.children().eq(3).removeClass('hidden');
+                        // } else {
+                        //     ulDashboardTabs.children().eq(2).removeClass('hidden');
+                        //     ulDashboardTabs.children().eq(3).addClass('hidden');
+                        // }
 
                         //set colour start
-                        if (typeof globalDashboardNode.theme.name !== 'string') {
-                            globalDashboardNode.theme.name = 'theme-light';
-                        }
-                        var currentTheme = globalDashboardNode.theme.name.split('-')[1];
-                        var startingValue = globalDashboardNode.theme[currentTheme + 'Theme'].baseColor;
-                        setColourPickerColour('base-color', startingValue);
-                        $('#nr-db-field-font').val(globalDashboardNode.theme[currentTheme + 'Theme'].baseFont);
-                        generateColours(startingValue);
-                        if (
-                            globalDashboardNode.theme.name === 'theme-light' ||
-                            globalDashboardNode.theme.name === 'theme-dark'
-                        ) {
-                            addLightAndDarkResetButton('base-color', $('#base-settings-ul').children().first());
-                        }
+                        // if (typeof globalDashboardNode.theme.name !== 'string') {
+                        //     globalDashboardNode.theme.name = 'theme-light';
+                        // }
+                        // var currentTheme = globalDashboardNode.theme.name.split('-')[1];
+                        // var startingValue = globalDashboardNode.theme[currentTheme + 'Theme'].baseColor;
+                        // setColourPickerColour('base-color', startingValue);
+                        // $('#nr-db-field-font').val(globalDashboardNode.theme[currentTheme + 'Theme'].baseFont);
+                        // generateColours(startingValue);
+                        // if (
+                        //     globalDashboardNode.theme.name === 'theme-light' ||
+                        //     globalDashboardNode.theme.name === 'theme-dark'
+                        // ) {
+                        //     addLightAndDarkResetButton('base-color', $('#base-settings-ul').children().first());
+                        // }
 
                         if (editor === undefined) {
                             editor = RED.editor.createEditor({
                                 id: 'nr-db-field-format-editor',
                                 mode: 'ace/mode/javascript',
                                 value: JSON.stringify({
-                                    theme: globalDashboardNode.theme.themeState,
+                                    // theme: globalDashboardNode.theme.themeState,
                                     site: globalDashboardNode.site,
                                 }),
                             });
@@ -2307,43 +2377,47 @@
                             // }
 
                             //Update theme object if necessary
-                            if (
-                                JSON.stringify(editorObject.theme) !==
-                                JSON.stringify(globalDashboardNode.theme.themeState)
-                            ) {
-                                globalDashboardNode.theme.themeState = editorObject.theme;
-                                if ($('#ui-sidebar-name').val() !== globalDashboardNode.theme.customTheme.name) {
-                                    globalDashboardNode.theme.customTheme.name = $('#ui-sidebar-name').val();
-                                    globalDashboardNode.theme.customTheme.baseColor =
-                                        globalDashboardNode.theme.themeState['base-color'].value;
-                                    setColourPickerColour(
-                                        'base-color',
-                                        globalDashboardNode.theme.customTheme.baseColor
-                                    );
-                                    generateColours(globalDashboardNode.theme.themeState['base-color'].value);
-                                    RED.nodes.dirty(true);
-                                }
-                            }
-                            if (JSON.stringify(aTheme) !== JSON.stringify(globalDashboardNode.theme.angularTheme)) {
-                                globalDashboardNode.theme.angularTheme = aTheme;
-                            }
+                            // if (
+                            //     JSON.stringify(editorObject.theme) !==
+                            //     JSON.stringify(globalDashboardNode.theme.themeState)
+                            // ) {
+                            //     globalDashboardNode.theme.themeState = editorObject.theme;
+                            //     if ($('#ui-sidebar-name').val() !== globalDashboardNode.theme.customTheme.name) {
+                            //         globalDashboardNode.theme.customTheme.name = $('#ui-sidebar-name').val();
+                            //         globalDashboardNode.theme.customTheme.baseColor =
+                            //             globalDashboardNode.theme.themeState['base-color'].value;
+                            //         setColourPickerColour(
+                            //             'base-color',
+                            //             globalDashboardNode.theme.customTheme.baseColor
+                            //         );
+                            //         generateColours(globalDashboardNode.theme.themeState['base-color'].value);
+                            //         RED.nodes.dirty(true);
+                            //     }
+                            // }
+                            // if (JSON.stringify(aTheme) !== JSON.stringify(globalDashboardNode.theme.angularTheme)) {
+                            //     globalDashboardNode.theme.angularTheme = aTheme;
+                            // }
 
                             //Update site object if necessary
                             if (JSON.stringify(editorObject.site) !== JSON.stringify(globalDashboardNode.site)) {
                                 globalDashboardNode.site = editorObject.site;
-                                $('#nr-db-field-title').val(globalDashboardNode.site.name);
-                                $('#nr-db-field-hideToolbar').val(globalDashboardNode.site.hideToolbar);
-                                $('#nr-db-field-allowSwipe').val(globalDashboardNode.site.allowSwipe);
-                                $('#nr-db-field-allowTempTheme').val(globalDashboardNode.site.allowTempTheme);
-                                $('#nr-db-field-dateFormat').val(globalDashboardNode.site.dateFormat);
-                                $('#nr-db-field-sx').val(globalDashboardNode.site.sizes.sx);
-                                $('#nr-db-field-sy').val(globalDashboardNode.site.sizes.sy);
-                                $('#nr-db-field-px').val(globalDashboardNode.site.sizes.px);
-                                $('#nr-db-field-py').val(globalDashboardNode.site.sizes.py);
-                                $('#nr-db-field-gx').val(globalDashboardNode.site.sizes.gx);
-                                $('#nr-db-field-gy').val(globalDashboardNode.site.sizes.gy);
-                                $('#nr-db-field-cx').val(globalDashboardNode.site.sizes.cx);
-                                $('#nr-db-field-cy').val(globalDashboardNode.site.sizes.cy);
+                                $('#nr-db-field-sitename').val(globalDashboardNode.site.name);
+                                $('#nr-db-field-siteaddress').val(globalDashboardNode.site.address);
+                                $('#nr-db-field-contactName').val(globalDashboardNode.site.contactName);
+                                $('#nr-db-field-contactEmail').val(globalDashboardNode.site.contactEmail);
+                                $('#nr-db-field-monitorServer').val(globalDashboardNode.site.monitorServer || 'https://urmon.wasocal.com');
+                                // $('#nr-db-field-hideToolbar').val(globalDashboardNode.site.hideToolbar);
+                                // $('#nr-db-field-allowSwipe').val(globalDashboardNode.site.allowSwipe);
+                                // $('#nr-db-field-allowTempTheme').val(globalDashboardNode.site.allowTempTheme);
+                                // $('#nr-db-field-dateFormat').val(globalDashboardNode.site.dateFormat);
+                                // $('#nr-db-field-sx').val(globalDashboardNode.site.sizes.sx);
+                                // $('#nr-db-field-sy').val(globalDashboardNode.site.sizes.sy);
+                                // $('#nr-db-field-px').val(globalDashboardNode.site.sizes.px);
+                                // $('#nr-db-field-py').val(globalDashboardNode.site.sizes.py);
+                                // $('#nr-db-field-gx').val(globalDashboardNode.site.sizes.gx);
+                                // $('#nr-db-field-gy').val(globalDashboardNode.site.sizes.gy);
+                                // $('#nr-db-field-cx').val(globalDashboardNode.site.sizes.cx);
+                                // $('#nr-db-field-cy').val(globalDashboardNode.site.sizes.cy);
                                 RED.nodes.dirty(true);
                             }
                         });
