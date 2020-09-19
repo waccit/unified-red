@@ -34,6 +34,7 @@ export class UrTableComponent extends BaseNode {
 	name: string;
 	field: string;
 	device: string;
+	point: string;
 	config: configuration[];
 	devices: any[];
 	points: any[];
@@ -45,6 +46,7 @@ export class UrTableComponent extends BaseNode {
 	dataSource: {};
 	dataLink: {};
 	label: string;
+	regexIndex: RegExp;
 
 	ngOnInit(): void {
 		this.name = this.data.label;
@@ -55,6 +57,7 @@ export class UrTableComponent extends BaseNode {
 		this.dataSource = {};
 		this.dataLink = {};
 		this.regexPoints = /(\d+)(\_)/;
+		this.regexIndex = /(.*)(\_)(\d+)/;
 		this.ssiot = /([^\/]+)\/(if|fb)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)/; // OLD:/([^\/]+)\/(if|fb)\//;
 		// console.log('fields',this.config);
 	}
@@ -66,7 +69,7 @@ export class UrTableComponent extends BaseNode {
 			this.config.forEach(element => {
 				this.field = element.display;
 				this.device;
-				let point;
+				this.point;
 				let devIndex;
 				
 				try {
@@ -75,12 +78,17 @@ export class UrTableComponent extends BaseNode {
 						case 'webApp':
 							this.device = this.ssiot.exec(data.msg.topic)[3]; 
 							let nv = this.ssiot.exec(data.msg.topic)[5];
-							let instance = this.regexPoints.exec(nv)
+							let instance = this.regexPoints.exec(nv);
+							// console.log(instance)
 							if(instance){
-								point = this.device + instance[1];
+								this.point = this.device + instance[1];;
 								devIndex = instance[1];
+								// console.log('devIndex',devIndex);
 							}else{
-								point = this.device;
+								
+								devIndex = this.regexIndex.exec(nv)[1];
+								this.point = this.device + devIndex;
+								// console.log('devIndex',devIndex);
 							}
 						break;
 						case 'custom':
@@ -99,29 +107,29 @@ export class UrTableComponent extends BaseNode {
 					});
 					this.devices.sort(this.compareValues('name'));
 				}
-				// console.log('devices', this.devices);
-				found = this.points.find(v => v.name == point);
-				if (!found && (point !== undefined)) {
+				found = this.points.find(v => v.name == this.point);
+				if (!found && (this.point !== undefined)) {
 					this.points.push({
-						name: point,
+						name: this.point,
 					});
 					this.points.sort(this.compareValues('name'));
 				}
-				if (point) {
-					if (!this.dataSource[point]) {
-						this.dataSource[point] = {};
+				
+				if (this.point) {
+					if (!this.dataSource[this.point]) {
+						this.dataSource[this.point] = {};
 					}
-					if (!this.dataLink[point]) {
-						this.dataLink[point] = {};
+					if (!this.dataLink[this.point]) {
+						this.dataLink[this.point] = {};
 					}
 					if (data.msg.topic.includes(element.param) || element.formatType == 'link') {
 						if(element.formatType == 'link'){
 							if(devIndex){
-								this.dataSource[point][this.field] = element.param.replace('{x}',devIndex);
-								this.dataLink[point][this.field] = element.format.replace('{x}',devIndex);
+								this.dataSource[this.point][this.field] = element.param.replace('{x}',devIndex);
+								this.dataLink[this.point][this.field] = element.format.replace('{x}',devIndex);
 							}else{
-								this.dataSource[point][this.field] = element.param.replace('{x}',this.device);
-								this.dataLink[point][this.field] = element.format.replace('{x}',this.device);
+								this.dataSource[this.point][this.field] = element.param.replace('{x}',this.device);
+								this.dataLink[this.point][this.field] = element.format.replace('{x}',this.device);
 							}
 						}else{
 							let values = element.display.split('.');
@@ -131,9 +139,10 @@ export class UrTableComponent extends BaseNode {
 									result = result[ values[i] ];
 								}
 								switch(element.formatType){
-									case 'fText': this.dataSource[point][this.field] = this.sub(element.format, element.unit,result); break;
-									default: this.dataSource[point][this.field] = result; break;
+									case 'fText': this.dataSource[this.point][this.field] = this.sub(element.format, element.unit,result); break;
+									default: this.dataSource[this.point][this.field] = result; break;
 								}
+								// console.log('this.dataSource[this.point][this.field]', this.dataSource[this.point][this.field],'field', this.field, 'point', this.point);
 							}catch(e){}
 						}
 					}
@@ -174,7 +183,7 @@ export class UrTableComponent extends BaseNode {
             }
             return eval('(' + exp + '); ' + this.expressionGlobals);    
         } catch (error) {
-            console.log("Evaluate error:", error);
+            // console.log("Evaluate error:", error);
         }
 	}
 	
@@ -186,6 +195,7 @@ export class UrTableComponent extends BaseNode {
 	// parseInt( interpolate({x}, 0, 100, 1, 10) )
 	// Enumeration {"0": "Offline","1": "Cooling","2": "Economizer","3": "Reheat","4": "Heat","5": "Zero CFM","6": "Air Balance","7": "Forced Damper","8": "Forced CFM","9": "Forced Reheat","10": "Forced Setpoint","11": "Forced Damper and Reheat","12": "Forced Damper and Setpoint","13": "Forced Damper, Reheat, and Setpoint","14": "Forced CFM and Reheat","15": "Forced CFM and Setpoint","16": "Forced CFM, Reheat, and Setpoint","17": "Forced Reheat and Setpoint","18": "Morning Warm-Up","19": "Ventilation"}
     private sub(exp, unit, payload) {
+		// console.log('exp',exp, 'unit', unit, 'payload', payload)
 		let expObj;
 		let result;
 		try{

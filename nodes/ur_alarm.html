@@ -27,8 +27,7 @@ Modeled after Node-RED's Switch core node.
         {v:"istype",t:"rules.istype",kind:'V'},
         {v:"empty",t:"rules.empty",kind:'V'},
         {v:"nempty",t:"rules.nempty",kind:'V'},
-        {v:"jsonata_exp",t:"rules.exp",kind:'O'},
-        {v:"else",t:"rules.else",kind:'O'}
+        {v:"jsonata_exp",t:"rules.exp",kind:'O'}
     ];
 
     RED.nodes.registerType('ur_alarm', {
@@ -97,7 +96,7 @@ Modeled after Node-RED's Switch core node.
                 } else if (type === "istype") {
                     typeField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
-                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else") {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty") {
                         // valueField.hide();
                     } else {
                         valueField.typedInput("width",(newWidth-selectWidth-70));
@@ -221,7 +220,7 @@ Modeled after Node-RED's Switch core node.
                             typeValueField = createTypeValueField();
                         }
                         typeValueField.typedInput('show');
-                    } else if (! (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else" )) {
+                    } else if (! (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" )) {
                             if (!valueField){
                                 valueField = createValueField();
                             }
@@ -309,7 +308,7 @@ Modeled after Node-RED's Switch core node.
                     var ruleData = rule.data('data');
                     var type = rule.find("select").val();
                     var r = { t: type };
-                    if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else")) {
+                    if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty")) {
                         if (type === "btwn") {
                             r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
                             r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
