@@ -12,7 +12,7 @@
         oneditprepare: function () {
             let node = this;
             if (this.values == null) {
-                this.values = [ { name: "On", value: 1 }, { name: "Off", value: 0 } ];
+                this.values = [{ name: "On", value: 1 }, { name: "Off", value: 0 }];
             }
 
             $("#node-config-input-value-container").css('min-height', '160px').css('min-width', '450px').editableList({
@@ -65,7 +65,7 @@
                     // minute field
                     var minuteField = $('<select/>', { class: "node-config-input-event-minute", style: "margin-left: 5px; width: 10%;" }).appendTo(row);
                     for (let i = 0; i < 60; i++) {
-                        $("<option>").val(i).text(i < 10 ? "0"+i : i).appendTo(minuteField);
+                        $("<option>").val(i).text(i < 10 ? "0" + i : i).appendTo(minuteField);
                     }
                     minuteField.val(event.minute);
                 },
@@ -89,7 +89,7 @@
             // store values from editable list
             let values = $("#node-config-input-value-container").editableList('items');
             node.values = [];
-            values.each(function(i) {
+            values.each(function (i) {
                 let container = $(this);
                 let value = {
                     name: container.find(".node-config-input-value-name").val(),
@@ -101,7 +101,7 @@
             // store events from editable list
             let events = $("#node-config-input-event-container").editableList('items');
             node.events = [];
-            events.each(function(i) {
+            events.each(function (i) {
                 let container = $(this);
                 let event = {
                     name: container.find(".node-config-input-event-name").val(),

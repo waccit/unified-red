@@ -2,24 +2,49 @@
 Modeled after Node-RED's Switch core node.
  **/
 
-module.exports = function(RED) {
-
-    let severities = [ "critical", "alert", "warning", "info" ];
+module.exports = function (RED) {
+    let severities = ['critical', 'alert', 'warning', 'info'];
     let operators = {
-        'eq': function(a, b) { return a == b; },
-        'neq': function(a, b) { return a != b; },
-        'lt': function(a, b) { return a < b; },
-        'lte': function(a, b) { return a <= b; },
-        'gt': function(a, b) { return a > b; },
-        'gte': function(a, b) { return a >= b; },
-        'btwn': function(a, b, c) { return (a >= b && a <= c) || (a <= b && a >= c); },
-        'cont': function(a, b) { return (a + "").indexOf(b) != -1; },
-        'regex': function(a, b, c, d) { return (a + "").match(new RegExp(b,d?'i':'')); },
-        'true': function(a) { return a === true; },
-        'false': function(a) { return a === false; },
-        'null': function(a) { return (typeof a == "undefined" || a === null); },
-        'nnull': function(a) { return (typeof a != "undefined" && a !== null); },
-        'empty': function(a) {
+        'eq': function (a, b) {
+            return a == b;
+        },
+        'neq': function (a, b) {
+            return a != b;
+        },
+        'lt': function (a, b) {
+            return a < b;
+        },
+        'lte': function (a, b) {
+            return a <= b;
+        },
+        'gt': function (a, b) {
+            return a > b;
+        },
+        'gte': function (a, b) {
+            return a >= b;
+        },
+        'btwn': function (a, b, c) {
+            return (a >= b && a <= c) || (a <= b && a >= c);
+        },
+        'cont': function (a, b) {
+            return (a + '').indexOf(b) != -1;
+        },
+        'regex': function (a, b, c, d) {
+            return (a + '').match(new RegExp(b, d ? 'i' : ''));
+        },
+        'true': function (a) {
+            return a === true;
+        },
+        'false': function (a) {
+            return a === false;
+        },
+        'null': function (a) {
+            return typeof a == 'undefined' || a === null;
+        },
+        'nnull': function (a) {
+            return typeof a != 'undefined' && a !== null;
+        },
+        'empty': function (a) {
             if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
                 return a.length === 0;
             } else if (typeof a === 'object' && a !== null) {
@@ -27,7 +52,7 @@ module.exports = function(RED) {
             }
             return false;
         },
-        'nempty': function(a) {
+        'nempty': function (a) {
             if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
                 return a.length !== 0;
             } else if (typeof a === 'object' && a !== null) {
@@ -35,52 +60,63 @@ module.exports = function(RED) {
             }
             return false;
         },
-        'istype': function(a, b) {
-            if (b === "array") { return Array.isArray(a); }
-            else if (b === "buffer") { return Buffer.isBuffer(a); }
-            else if (b === "json") {
-                try { JSON.parse(a); return true; }   // or maybe ??? a !== null; }
-                catch(e) { return false;}
+        'istype': function (a, b) {
+            if (b === 'array') {
+                return Array.isArray(a);
+            } else if (b === 'buffer') {
+                return Buffer.isBuffer(a);
+            } else if (b === 'json') {
+                try {
+                    JSON.parse(a);
+                    return true;
+                } catch (e) {
+                    // or maybe ??? a !== null; }
+                    return false;
+                }
+            } else if (b === 'null') {
+                return a === null;
+            } else {
+                return typeof a === b && !Array.isArray(a) && !Buffer.isBuffer(a) && a !== null;
             }
-            else if (b === "null") { return a === null; }
-            else { return typeof a === b && !Array.isArray(a) && !Buffer.isBuffer(a) && a !== null; }
         },
-        'hask': function(a, b) {
-            return (typeof b !== "object" )  &&  a.hasOwnProperty(b+"");
+        'hask': function (a, b) {
+            return typeof b !== 'object' && a.hasOwnProperty(b + '');
         },
-        'jsonata_exp': function(a, b) { return (b === true); }
+        'jsonata_exp': function (a, b) {
+            return b === true;
+        },
     };
 
     function AlarmNode(config) {
         RED.nodes.createNode(this, config);
         let node = this;
         let valid = true;
-        let ontimer = { "critical": null, "alert": null, "warning": null, "info": null };
-        let offtimer = { "critical": null, "alert": null, "warning": null, "info": null };
+        let ontimer = { 'critical': null, 'alert': null, 'warning': null, 'info': null };
+        let offtimer = { 'critical': null, 'alert': null, 'warning': null, 'info': null };
         let nodeStatus = {
-            "critical": { "ontimer": null, "offtimer": null },
-            "alert": { "ontimer": null, "offtimer": null },
-            "warning": { "ontimer": null, "offtimer": null },
-            "info": { "ontimer": null, "offtimer": null }
+            'critical': { 'ontimer': null, 'offtimer': null },
+            'alert': { 'ontimer': null, 'offtimer': null },
+            'warning': { 'ontimer': null, 'offtimer': null },
+            'info': { 'ontimer': null, 'offtimer': null },
         };
 
         this.inhibit = false;
         this.inhibitTimer = null;
-        this.rules = config.rules || { "critical": [], "alert": [], "warning": [], "info": [] };
-        this.lastState = { "critical": false, "alert": false, "warning": false, "info": false };
+        this.rules = config.rules || { 'critical': [], 'alert': [], 'warning': [], 'info': [] };
+        this.lastState = { 'critical': false, 'alert': false, 'warning': false, 'info': false };
         this.delayon = parseInt(config.delayon) || 0;
         this.delayoff = parseInt(config.delayoff) || 0;
-        this.checkall = config.checkall || "true";
+        this.checkall = config.checkall || 'true';
         this.ackreq = config.ackreq;
         this.presentValue = null;
         this.previousValue = null;
         this.property = config.property;
-        this.propertyType = config.propertyType || "msg";
+        this.propertyType = config.propertyType || 'msg';
         if (this.propertyType === 'jsonata') {
             try {
                 this.property = RED.util.prepareJSONataExpression(this.property, this);
-            } catch(err) {
-                this.error(RED._("switch.errors.invalid-expr", { error: err.message }));
+            } catch (err) {
+                this.error(RED._('switch.errors.invalid-expr', { error: err.message }));
                 return;
             }
         }
@@ -95,11 +131,11 @@ module.exports = function(RED) {
                         if (!isNaN(Number(rule.v))) {
                             rule.v = Number(rule.v);
                         }
-                    } else if (rule.vt === "jsonata") {
+                    } else if (rule.vt === 'jsonata') {
                         try {
                             rule.v = RED.util.prepareJSONataExpression(rule.v, node);
-                        } catch(err) {
-                            this.error(RED._("switch.errors.invalid-expr", { error: err.message }));
+                        } catch (err) {
+                            this.error(RED._('switch.errors.invalid-expr', { error: err.message }));
                             valid = false;
                         }
                     }
@@ -112,8 +148,8 @@ module.exports = function(RED) {
                         } else if (rule.v2t === 'jsonata') {
                             try {
                                 rule.v2 = RED.util.prepareJSONataExpression(rule.v2, node);
-                            } catch(err) {
-                                this.error(RED._("switch.errors.invalid-expr", { error: err.message }));
+                            } catch (err) {
+                                this.error(RED._('switch.errors.invalid-expr', { error: err.message }));
                                 valid = false;
                             }
                         }
@@ -126,42 +162,40 @@ module.exports = function(RED) {
             return;
         }
 
-        let getV1 = function(msg, rule, hasParts) {
+        let getV1 = function (msg, rule, hasParts) {
             if (rule.vt === 'prev') {
                 return node.previousValue;
             } else if (rule.vt === 'jsonata') {
                 let exp = rule.v;
                 if (rule.t === 'jsonata_exp') {
                     if (hasParts) {
-                        exp.assign("I", msg.parts.index);
-                        exp.assign("N", msg.parts.count);
+                        exp.assign('I', msg.parts.index);
+                        exp.assign('N', msg.parts.count);
                     }
                 }
                 try {
                     return RED.util.evaluateJSONataExpression(exp, msg);
-                }
-                catch (err) {
-                    throw RED._("switch.errors.invalid-expr", { error: err.message });
+                } catch (err) {
+                    throw RED._('switch.errors.invalid-expr', { error: err.message });
                 }
             } else if (rule.vt === 'json') {
-                return "json"; // TODO: ?! invalid cae
+                return 'json'; // TODO: ?! invalid cae
             } else if (rule.vt === 'null') {
-                return  "null";
+                return 'null';
             } else {
                 return RED.util.evaluateNodeProperty(rule.v, rule.vt, node, msg);
             }
         };
-    
-        let getV2 = function(msg, rule) {
+
+        let getV2 = function (msg, rule) {
             let v2 = rule.v2;
             if (rule.v2t === 'prev') {
                 return node.previousValue;
             } else if (rule.v2t === 'jsonata') {
                 try {
                     return RED.util.evaluateJSONataExpression(rule.v2, msg);
-                }
-                catch (err) {
-                    throw RED._("switch.errors.invalid-expr", { error: err.message });
+                } catch (err) {
+                    throw RED._('switch.errors.invalid-expr', { error: err.message });
                 }
             } else if (typeof v2 !== 'undefined') {
                 return RED.util.evaluateNodeProperty(rule.v2, rule.v2t, node, msg);
@@ -170,7 +204,7 @@ module.exports = function(RED) {
             }
         };
 
-        let checkRules = function(msg, severity) {
+        let checkRules = function (msg, severity) {
             try {
                 let results = 0;
                 let rules = node.rules[severity];
@@ -179,30 +213,30 @@ module.exports = function(RED) {
                     let v2 = getV2(msg, rule);
                     if (operators[rule.t](node.presentValue, v1, v2, rule.case, msg.parts)) {
                         results++;
-                        if (node.checkall === "false") { // logical OR
+                        if (node.checkall === 'false') {
+                            // logical OR
                             return true;
                         }
-                    }
-                    else {
-                        if (node.checkall === "true") { // logical AND
+                    } else {
+                        if (node.checkall === 'true') {
+                            // logical AND
                             return false;
                         }
                     }
                 }
                 return !!results && results === rules.length;
-            }
-            catch (err) {
+            } catch (err) {
                 node.warn(err);
             }
         };
 
-        let clearOnTimer = function(severity) {
+        let clearOnTimer = function (severity) {
             clearTimeout(ontimer[severity]);
             ontimer[severity] = null;
             nodeStatus[severity].ontimer = null;
         };
 
-        let clearOffTimer = function(severity) {
+        let clearOffTimer = function (severity) {
             clearTimeout(offtimer[severity]);
             offtimer[severity] = null;
             nodeStatus[severity].offtimer = null;
@@ -216,7 +250,7 @@ module.exports = function(RED) {
                 return;
             }
 
-            // if no change of value after delay, then send message. 
+            // if no change of value after delay, then send message.
             // otherwise check rules again before sending message
             let send = false;
             if (node.presentValue === startValue) {
@@ -237,30 +271,33 @@ module.exports = function(RED) {
             }
         };
 
-        let updateNodeStatus = function() {
-            let status = { fill: "red", shape: "dot", text: "" };
-            status.text = severities.filter(s => node.lastState[s] || nodeStatus[s].ontimer || nodeStatus[s].offtimer).map(s => {
-                if (nodeStatus[s].ontimer) {
-                    let d = new Date();
-                    d.setSeconds(d.getSeconds() + nodeStatus[s].ontimer);
-                    return s + " @ " +  d.toLocaleTimeString();
-                }
-                if (nodeStatus[s].offtimer) {
-                    status.shape = "ring";
-                    let d = new Date();
-                    d.setSeconds(d.getSeconds() + nodeStatus[s].offtimer);
-                    return "no " + s + " @ " +  d.toLocaleTimeString();
-                }
-                return s;
-            }).join(', ');
+        let updateNodeStatus = function () {
+            let status = { fill: 'red', shape: 'dot', text: '' };
+            status.text = severities
+                .filter((s) => node.lastState[s] || nodeStatus[s].ontimer || nodeStatus[s].offtimer)
+                .map((s) => {
+                    if (nodeStatus[s].ontimer) {
+                        let d = new Date();
+                        d.setSeconds(d.getSeconds() + nodeStatus[s].ontimer);
+                        return s + ' @ ' + d.toLocaleTimeString();
+                    }
+                    if (nodeStatus[s].offtimer) {
+                        status.shape = 'ring';
+                        let d = new Date();
+                        d.setSeconds(d.getSeconds() + nodeStatus[s].offtimer);
+                        return 'no ' + s + ' @ ' + d.toLocaleTimeString();
+                    }
+                    return s;
+                })
+                .join(', ');
             if (!status.text) {
-                status.text = "inactive";
-                status.fill = "grey";
+                status.text = 'inactive';
+                status.fill = 'grey';
             }
             node.status(status);
         };
 
-        let fireWithDelay = function(msg) {
+        let fireWithDelay = function (msg) {
             let startValue = msg.payload.value;
             if (msg.payload.state) {
                 if (!ontimer[msg.payload.severity]) {
@@ -273,7 +310,6 @@ module.exports = function(RED) {
                         clearOnTimer(msg.payload.severity);
                         updateNodeStatus();
                     }, node.delayon * 1000);
-
                 }
             } else {
                 if (!offtimer[msg.payload.severity]) {
@@ -289,21 +325,19 @@ module.exports = function(RED) {
                 }
             }
         };
-    
-        let processMessage = function(msg) {
+
+        let processMessage = function (msg) {
             try {
                 if (node.propertyType === 'jsonata') {
                     try {
                         node.presentValue = RED.util.evaluateJSONataExpression(node.property, msg);
-                    }
-                    catch (err) {
-                        throw RED._("switch.errors.invalid-expr", { error: err.message });
+                    } catch (err) {
+                        throw RED._('switch.errors.invalid-expr', { error: err.message });
                     }
                 } else {
                     node.presentValue = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
                 }
-            }
-            catch (err) {
+            } catch (err) {
                 node.warn(err);
                 return;
             }
@@ -312,28 +346,28 @@ module.exports = function(RED) {
                 try {
                     let currentState = checkRules(msg, severity);
                     let lastState = node.lastState[severity];
-                    if (lastState !== currentState) { // alarm state has changed
+                    if (lastState !== currentState) {
+                        // alarm state has changed
                         let new_msg = RED.util.cloneMessage(msg);
                         new_msg.payload = {
-                            "name": node.name,
-                            "severity": severity,
-                            "value": node.presentValue,
-                            "state": currentState
+                            'name': node.name,
+                            'severity': severity,
+                            'value': node.presentValue,
+                            'state': currentState,
                         };
                         fireWithDelay(new_msg);
                     }
-                }
-                catch (err) {
+                } catch (err) {
                     node.warn(err);
                 }
             }
 
             node.previousValue = node.presentValue;
-        }
+        };
 
         let pendingMessages = [];
         let handlingMessage = false;
-        let processMessageQueue = function(msg) {
+        let processMessageQueue = function (msg) {
             if (msg) {
                 // A new message has arrived - add it to the message queue
                 pendingMessages.push(msg);
@@ -353,25 +387,24 @@ module.exports = function(RED) {
             handlingMessage = true;
             try {
                 processMessage(nextMsg);
-            }
-            catch (err) {
+            } catch (err) {
                 node.error(err, nextMsg);
             }
             processMessageQueue();
         };
 
-        let checkInhibit = function(msg) {
-            if (msg.hasOwnProperty("inhibit")) {
+        let checkInhibit = function (msg) {
+            if (msg.hasOwnProperty('inhibit')) {
                 try {
                     let inhibit = msg.inhibit.toString().toLowerCase().trim();
-                    if (inhibit === "0" || inhibit === "false") {
+                    if (inhibit === '0' || inhibit === 'false') {
                         node.inhibit = false;
                         node.status({});
                         clearTimeout(node.inhibitTimer);
                         node.inhibitTimer = null;
-                    } else if (inhibit === "true") {
+                    } else if (inhibit === 'true') {
                         node.inhibit = true;
-                        node.status({ fill: "grey", shape: "dot", text: "inhibited" });
+                        node.status({ fill: 'grey', shape: 'dot', text: 'inhibited' });
                         clearTimeout(node.inhibitTimer);
                         node.inhibitTimer = null;
                     } else if (!isNaN(inhibit)) {
@@ -380,22 +413,22 @@ module.exports = function(RED) {
                             node.inhibit = true;
                             let d = new Date();
                             d.setSeconds(d.getSeconds() + inhibit);
-                            node.status({ fill: "grey", shape: "dot", text: "inhibited until " + d.toLocaleString() });
-                            node.inhibitTimer = setTimeout(() => { // clear inhibit after timer elapses
+                            node.status({ fill: 'grey', shape: 'dot', text: 'inhibited until ' + d.toLocaleString() });
+                            node.inhibitTimer = setTimeout(() => {
+                                // clear inhibit after timer elapses
                                 node.inhibit = false;
                                 node.status({});
                             }, inhibit * 1000);
                         }
                     }
-                }
-                catch (e) {
+                } catch (e) {
                     node.warn(e);
                 }
             }
             return node.inhibit;
         };
 
-        this.on('input', function(msg) {
+        this.on('input', function (msg) {
             if (checkInhibit(msg)) {
                 return;
             }
@@ -405,5 +438,5 @@ module.exports = function(RED) {
         updateNodeStatus();
     }
 
-    RED.nodes.registerType("ur_alarm", AlarmNode);
-}
+    RED.nodes.registerType('ur_alarm', AlarmNode);
+};

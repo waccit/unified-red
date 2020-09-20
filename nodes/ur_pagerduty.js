@@ -7,20 +7,10 @@ module.exports = function (RED) {
         node.apikey = RED.nodes.getNode(config.apikey).apikey;
 
         node.on('input', function (msg, send, done) {
-            let name =
-                msg.payload && msg.payload.name ? msg.payload.name : node.name;
-            let source =
-                msg.payload && msg.payload.source
-                    ? msg.payload.source
-                    : config.source;
-            let severity =
-                msg.payload && msg.payload.severity
-                    ? msg.payload.severity
-                    : config.severity;
-            let apikey =
-                msg.payload && msg.payload.apikey
-                    ? msg.payload.apikey
-                    : node.apikey;
+            let name = msg.payload && msg.payload.name ? msg.payload.name : node.name;
+            let source = msg.payload && msg.payload.source ? msg.payload.source : config.source;
+            let severity = msg.payload && msg.payload.severity ? msg.payload.severity : config.severity;
+            let apikey = msg.payload && msg.payload.apikey ? msg.payload.apikey : node.apikey;
 
             if (apikey) {
                 let payload = {

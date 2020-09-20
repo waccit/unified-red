@@ -5,17 +5,7 @@
         defaults: {
             group: { type: 'ur_group', required: true },
             order: { value: 0 },
-            width: {
-                value: 12,
-                // validate: function (v) {
-                //     var width = v || 0;
-                //     var currentGroup = $('#node-input-group').val() || this.group;
-                //     var groupNode = RED.nodes.node(currentGroup);
-                //     var valid = !groupNode || +width <= +groupNode.width;
-                //     $('#node-input-size').toggleClass('input-error', !valid);
-                //     return valid;
-                // },
-            },
+            width: { value: 12 },
             height: { value: 0 },
             name: { value: '' },
             label: { value: 'text' },
@@ -79,36 +69,36 @@
     <div class="form-row">
         <label style="vertical-align: top"><i class="fa fa-th-large"></i> Layout</label>
         <div style="display:inline-block">
-        <input type="hidden" id="node-input-layout"><input type="hidden" id="node-input-layoutAlign">
-        <div>
-            <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-left">
-                <span class="nr-db-text-layout-label">label</span>
-                <span class="nr-db-text-layout-value">value</span>
-                <div class="nr-db-text-layout-checkbox"></div>
-            </a>
-            <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-center">
-                <span class="nr-db-text-layout-label">label</span>
-                <span class="nr-db-text-layout-value">value</span>
-                <div class="nr-db-text-layout-checkbox"></div>
-            </a>
-            <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-right">
-                <span class="nr-db-text-layout-label">label</span>
-                <span class="nr-db-text-layout-value">value</span>
-                <div class="nr-db-text-layout-checkbox"></div>
-            </a>
-        </div>
-        <div>
-            <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-spread">
-                <span class="nr-db-text-layout-label">label</span>
-                <span class="nr-db-text-layout-value">value</span>
-                <div class="nr-db-text-layout-checkbox"></div>
-            </a>
-            <a href="#" class="nr-db-text-layout nr-db-text-layout-col nr-db-text-layout-col-center">
-                <span class="nr-db-text-layout-label">label</span>
-                <span class="nr-db-text-layout-value">value</span>
-                <div class="nr-db-text-layout-checkbox"></div>
-            </a>
-        </div>
+            <input type="hidden" id="node-input-layout"><input type="hidden" id="node-input-layoutAlign">
+            <div>
+                <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-left">
+                    <span class="nr-db-text-layout-label">label</span>
+                    <span class="nr-db-text-layout-value">value</span>
+                    <div class="nr-db-text-layout-checkbox"></div>
+                </a>
+                <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-center">
+                    <span class="nr-db-text-layout-label">label</span>
+                    <span class="nr-db-text-layout-value">value</span>
+                    <div class="nr-db-text-layout-checkbox"></div>
+                </a>
+                <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-right">
+                    <span class="nr-db-text-layout-label">label</span>
+                    <span class="nr-db-text-layout-value">value</span>
+                    <div class="nr-db-text-layout-checkbox"></div>
+                </a>
+            </div>
+            <div>
+                <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-spread">
+                    <span class="nr-db-text-layout-label">label</span>
+                    <span class="nr-db-text-layout-value">value</span>
+                    <div class="nr-db-text-layout-checkbox"></div>
+                </a>
+                <a href="#" class="nr-db-text-layout nr-db-text-layout-col nr-db-text-layout-col-center">
+                    <span class="nr-db-text-layout-label">label</span>
+                    <span class="nr-db-text-layout-value">value</span>
+                    <div class="nr-db-text-layout-checkbox"></div>
+                </a>
+            </div>
         </div>
     </div>
     <div class="form-row">

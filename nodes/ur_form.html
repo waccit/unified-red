@@ -65,7 +65,7 @@
                     }
 
                 });
-                
+
                 var typeField = $('<select/>', { class: "node-input-option-type", type: "text", style: "margin-left:7px; width:16%" }).appendTo(row);
 
                 var arr = [
@@ -106,7 +106,7 @@
                             placeholder = "Options e.g. units:%, precision:1";
                             row.show();
                             break;
-                        case "select": 
+                        case "select":
                             value = Object.entries(option.options).map(o => o[0] + ':' + o[1]).join(', ');
                             text = "Options";
                             placeholder = "Options e.g. label1:value1, label2:value2";
@@ -188,7 +188,7 @@
                     outtopic: option.find(".node-input-option-outtopic").val()
                 };
                 if (o.type === 'text' || o.type === 'number' || o.type === 'multiline' || o.type === 'select') {
-                    o.options = o.options.trim().split(/\s*,\s*/g).reduce((a,b) => {
+                    o.options = o.options.trim().split(/\s*,\s*/g).reduce((a, b) => {
                         var v = b.split(/\s*[:=]\s*/);
                         a[v[0]] = v[1];
                         return a;
