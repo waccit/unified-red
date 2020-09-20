@@ -22,7 +22,9 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
             this.container.html('No animation code found');
             return;
         }
-        this.processImages();
+        if (this.access.read || this.data.accessBehavior !== 'hide') {
+            this.processImages();
+        }
     }
 
     private processImages() {

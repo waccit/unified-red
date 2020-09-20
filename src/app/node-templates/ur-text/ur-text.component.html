@@ -1,15 +1,5 @@
 <div #container class="card">
-    <div class="body"> <!-- [class]="'bg-' + getBgColor()" -->
-        <!-- <div class="preloader pl-size-m" *ngIf="!text">
-            <div class="spinner-layer">
-                <div class="circle-clipper left">
-                    <div class="circle"></div>
-                </div>
-                <div class="circle-clipper right">
-                    <div class="circle"></div>
-                </div>
-            </div>
-        </div> -->
+    <div class="body" *ngIf="access.read || data.accessBehavior !== 'hide'">
         <div class="content" *ngIf="data.layout === 'row' && data.layoutAlign === 'space-between center'">
             <div class="row">
                 <div class="col-6 text-left">{{ label }}</div>

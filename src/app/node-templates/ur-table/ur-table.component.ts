@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, AfterViewInit } from '@angular/core';
 import { WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
 
@@ -24,7 +24,7 @@ export interface configuration {
 	templateUrl: './ur-table.component.html',
 	styleUrls: ['./ur-table.component.sass']
 })
-export class UrTableComponent extends BaseNode {
+export class UrTableComponent extends BaseNode implements AfterViewInit {
 	private expressionGlobals = `
 		function interpolate(value, minIn, maxIn, minOut, maxOut) {
 			let out = minOut + (maxOut - minOut) * ((value - minIn) / (maxIn - minIn));
@@ -61,6 +61,12 @@ export class UrTableComponent extends BaseNode {
 		this.ssiot = /([^\/]+)\/(if|fb)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)/; // OLD:/([^\/]+)\/(if|fb)\//;
 		// console.log('fields',this.config);
 	}
+
+	ngAfterViewInit(): void {
+        super.ngAfterViewInit();
+        this.setupDatapointAccess();
+	}
+	
 	updateValue(data: any) {
 		super.updateValue(data);
 		if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {

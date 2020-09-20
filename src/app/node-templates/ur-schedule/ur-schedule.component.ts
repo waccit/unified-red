@@ -5,7 +5,7 @@ import * as parser from 'cron-parser';
 import * as moment from 'moment';
 import { BaseNode } from '../ur-base-node';
 import { UrScheduleFormDialogComponent } from './ur-schedule-form-dialog.component';
-import { WebSocketService, SnackbarService, NodeRedApiService } from '../../services';
+import { WebSocketService, SnackbarService, NodeRedApiService, CurrentUserService, RoleService } from '../../services';
 
 declare const $: any;
 
@@ -56,15 +56,18 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     constructor(
         protected webSocketService: WebSocketService,
+        protected currentUserService: CurrentUserService,
+        protected roleService: RoleService,
+        protected snackbar: SnackbarService,
         public dialog: MatDialog,
-        private snackbar: SnackbarService,
         private red: NodeRedApiService
     ) {
-        super(webSocketService);
+        super(webSocketService, currentUserService, roleService, snackbar);
     }
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
+        this.setupScheduleAccess();
         this.calendarLoadSchedules();
     }
 

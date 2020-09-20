@@ -411,6 +411,8 @@ module.exports = function (RED) {
                 dates: config.dates,
                 holidays: this.holidays,
                 holidaysId: config.holidays,
+                access: config.access || '',
+                accessBehavior: config.accessBehavior || 'disable'
             },
         });
 

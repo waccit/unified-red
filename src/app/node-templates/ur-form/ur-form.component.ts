@@ -1,6 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
-import { WebSocketService, SnackbarService } from '../../services';
+import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 
 @Component({
     selector: 'app-ur-form',
@@ -10,12 +10,9 @@ import { WebSocketService, SnackbarService } from '../../services';
 export class UrFormComponent extends BaseNode implements AfterViewInit {
     private originalValues = {};
 
-    constructor(protected webSocketService: WebSocketService, private snackbar: SnackbarService,) {
-        super(webSocketService);
-    }
-
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
+        this.setupDatapointAccess();
         this.originalValues = { ... this.data.formValue };
     }
 

@@ -27,6 +27,8 @@
 <img animated name="coil" src="/img/VAV/hwreheat/coil10.jpg" style="position: absolute;">`,
             },
             rules: { value: [{ img: '', topic: '', prop: 'vis', exp: '' }] },
+            access: { value: '' },
+            accessBehavior: { value: '' }
         },
         inputs: 1,
         outputs: 0,
@@ -262,50 +264,70 @@
 </script>
 
 <script type="text/html" data-template-name="ur_animation">
-       <style>
-           #node-input-viewport [animated] {
-               cursor: move;
-           }
-       </style>
+    <style>
+        #node-input-viewport [animated] {
+            cursor: move;
+        }
+    </style>
     <div class="form-row" id="template-row-group">
-           <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ur_animation.label.group"></span></label>
-           <input type="text" id="node-input-group">
-       </div>
-       <div class="form-row" id="template-row-size">
-           <label><i class="fa fa-object-group"></i> <span data-i18n="ur_animation.label.size"></span></label>
-           <input type="hidden" id="node-input-width">
-           <button class="editor-button" id="node-input-size"></button>
-       </div>
-       <div class="form-row">
-           <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_animation.label.name"></span></label>
-           <div style="display:inline-block; width:calc(100% - 105px)">
-               <input type="text" id="node-input-name">
-           </div>
-       </div>
-       <div class="form-row" style="margin-bottom:0px;">
-           <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ur_animation.label.template"></span></label>
-           <input type="hidden" id="node-input-format">
-           <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right"><i class="fa fa-expand"></i></button>
-       </div>
-       <div class="form-row node-text-editor-row">
-           <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor" ></div>
-       </div>
-       <div class="form-row" style="margin-bottom:0px;">
-           <label><i class="fa fa-eye"></i> <span data-i18n="ur_animation.label.viewport"></span></label>
-       </div>
-       <div class="form-row node-text-viewport-row">
-           <div style="display: table;">
-               <div style="display: table-cell;">
-                   <div id="node-input-viewport" class="node-text-viewport red-ui-editableList-border" style="position:relative; margin:auto;"></div>
-               </div>
-           </div>
-       </div>
-       <div class="form-row" style="margin-bottom:0px;">
-           <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="ur_animation.label.rules"></span></label>
-       </div>
-       <div class="form-row node-input-rule-container-row">
-           <ol id="node-input-rule-container"></ol>
-       </div>
+        <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ur_animation.label.group"></span></label>
+        <input type="text" id="node-input-group">
+    </div>
+    <div class="form-row" id="template-row-size">
+        <label><i class="fa fa-object-group"></i> <span data-i18n="ur_animation.label.size"></span></label>
+        <input type="hidden" id="node-input-width">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_animation.label.name"></span></label>
+        <div style="display:inline-block; width:calc(100% - 105px)">
+            <input type="text" id="node-input-name">
+        </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ur_animation.label.template"></span></label>
+        <input type="hidden" id="node-input-format">
+        <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right"><i class="fa fa-expand"></i></button>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor" ></div>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label><i class="fa fa-eye"></i> <span data-i18n="ur_animation.label.viewport"></span></label>
+    </div>
+    <div class="form-row node-text-viewport-row">
+        <div style="display: table;">
+            <div style="display: table-cell;">
+                <div id="node-input-viewport" class="node-text-viewport red-ui-editableList-border" style="position:relative; margin:auto;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="ur_animation.label.rules"></span></label>
+    </div>
+    <div class="form-row node-input-rule-container-row">
+        <ol id="node-input-rule-container"></ol>
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+         </select>
+         <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+         </select>
+    </div>
 </script>
 
 <script type="text/html" data-help-name="ur_animation">

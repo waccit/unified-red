@@ -61,6 +61,8 @@ module.exports = function (RED) {
                 // height: config.height || 1,
                 layout: angLayout,
                 layoutAlign: angLayoutAlign,
+                access: config.access || '',
+                accessBehavior: config.accessBehavior || 'disable'
             },
             convert: function (value) {
                 if (value !== undefined) {

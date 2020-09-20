@@ -1,16 +1,23 @@
 import { ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
-import { WebSocketService } from '../services';
+import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
+import { User } from '../data';
 
 declare var $: any;
 
 export class BaseNode implements AfterViewInit, OnDestroy {
     label = 'default';
+    access: any = {};
     private _data: any;
     private _wsSubscription: Subscription;
     @ViewChild('container', { static: true }) private _container: ElementRef;
 
-    constructor(protected webSocketService: WebSocketService) {}
+    constructor(
+        protected webSocketService: WebSocketService,
+        protected currentUserService: CurrentUserService,
+        protected roleService: RoleService,
+        protected snackbar: SnackbarService
+    ) {}
 
     ngAfterViewInit(): void {
         this.webSocketService.join(this.nodeId);
@@ -74,5 +81,34 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             }
         }
         return ret;
+    }
+
+    setupAccess(aclkey: string) {
+        this.currentUserService.currentUser.subscribe((user: User) => {
+            if (user) {
+                if (!this.data.access || this.data.access === '0') {
+                    this.access = this.roleService.getRoleAccess(aclkey, user.role);
+                }
+                else {
+                    this.access = this.roleService.overrideRoleAccess(aclkey, user.role, this.data.access);
+                }
+            }
+        });
+    }
+
+    setupDatapointAccess() {
+        this.setupAccess('datapoint');
+    }
+
+    setupScheduleAccess() {
+        this.setupAccess('schedules');
+    }
+
+    setupTrendsAccess() {
+        this.setupAccess('trends');
+    }
+
+    setupAlarmsAccess() {
+        this.setupAccess('alarms');
     }
 }

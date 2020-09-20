@@ -1,43 +1,45 @@
-<div *ngIf="!pivot" class="table-responsive">
-    <table class="table table-bordered table-hover w-100 table-striped">
-        <thead>
-            <th  *ngFor="let c of config"> {{ c.label  }}</th>
-        </thead>
-        <tbody>
-            <tr *ngFor="let point of points">
-                <ng-container *ngIf="dataSource[point.name]">
-                    <ng-container *ngFor="let c of config">
-                        <ng-container *ngIf="c.formatType !== 'link'">
+<ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
+    <div *ngIf="!pivot" class="table-responsive">
+        <table class="table table-bordered table-hover w-100 table-striped">
+            <thead>
+                <th  *ngFor="let c of config"> {{ c.label  }}</th>
+            </thead>
+            <tbody>
+                <tr *ngFor="let point of points">
+                    <ng-container *ngIf="dataSource[point.name]">
+                        <ng-container *ngFor="let c of config">
+                            <ng-container *ngIf="c.formatType !== 'link'">
+                                <td> {{ dataSource[point.name][c.display] }} </td>
+                            </ng-container>
+                            <ng-container *ngIf="c.formatType == 'link'">
+                                <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                            </ng-container>
+                        </ng-container>
+                    </ng-container>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div *ngIf="pivot" class="table-responsive">
+        <table class="table table-bordered table-hover w-100 table-striped">
+            <!-- <thead>
+                <th>Label</th>
+                <th *ngFor="let point of points">{{point.name}}</th>
+            </thead> -->
+            <tbody>
+                <tr *ngFor="let c of config">
+                    <th>{{ c.label }}</th>
+                    <ng-container *ngFor="let point of points">
+                        <ng-container *ngIf="c.formatType !== 'link' && point.name.includes(c.param)">
                             <td> {{ dataSource[point.name][c.display] }} </td>
                         </ng-container>
                         <ng-container *ngIf="c.formatType == 'link'">
                             <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
                         </ng-container>
                     </ng-container>
-                </ng-container>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div *ngIf="pivot" class="table-responsive">
-    <table class="table table-bordered table-hover w-100 table-striped">
-        <!-- <thead>
-            <th>Label</th>
-            <th *ngFor="let point of points">{{point.name}}</th>
-        </thead> -->
-        <tbody>
-            <tr *ngFor="let c of config">
-                <th>{{ c.label }}</th>
-                <ng-container *ngFor="let point of points">
-                    <ng-container *ngIf="c.formatType !== 'link' && point.name.includes(c.param)">
-                        <td> {{ dataSource[point.name][c.display] }} </td>
-                    </ng-container>
-                    <ng-container *ngIf="c.formatType == 'link'">
-                        <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
-                    </ng-container>
-                </ng-container>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</ng-template>
