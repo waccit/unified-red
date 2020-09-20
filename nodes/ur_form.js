@@ -43,6 +43,8 @@ module.exports = function (RED) {
                 formValue: config.formValue,
                 submit: config.submit,
                 cancel: config.cancel,
+                access: config.access || '',
+                accessBehavior: config.accessBehavior || 'disable'
             },
             beforeEmit: function (msg) {
                 return msg;

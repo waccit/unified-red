@@ -1,22 +1,28 @@
-<mat-form-field class="example-full-width" appearance="fill" *ngIf="data.mode !== 'tel'">
-    <mat-label>{{ label }}</mat-label>
-    <span matPrefix *ngIf="data.mode === 'email'">
-        <mat-icon class="mr-2">email</mat-icon>
-    </span>
-    <span matPrefix *ngIf="data.mode === 'color'">
-        <mat-icon class="mr-2">color_lens</mat-icon>
-    </span>
-    <input matInput [type]="data.mode" [value]="valueSubject.value"
-        (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
-        #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below" />
-</mat-form-field>
+<ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
+    <mat-form-field class="example-full-width" appearance="fill" *ngIf="data.mode !== 'tel'">
+        <mat-label>{{ label }}</mat-label>
+        <span matPrefix *ngIf="data.mode === 'email'">
+            <mat-icon class="mr-2">email</mat-icon>
+        </span>
+        <span matPrefix *ngIf="data.mode === 'color'">
+            <mat-icon class="mr-2">color_lens</mat-icon>
+        </span>
+        <input matInput [type]="data.mode"
+            [value]="access.read ? valueSubject.value : ''"
+            [disabled]="!access.write && data.accessBehavior === 'disable'" 
+            (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
+            #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below"/>
+    </mat-form-field>
 
-<mat-form-field class="example-full-width" appearance="fill" *ngIf="data.mode === 'tel'">
-    <mat-label>{{ label }}</mat-label>
-    <span matPrefix>
-        <mat-icon class="mr-2">phone</mat-icon>
-    </span>
-    <input matInput placeholder="EX: (435) 345-3454" mask="(000) 000-0000" [value]="valueSubject.value"
-        (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
-        #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below" />
-</mat-form-field>
+    <mat-form-field class="example-full-width" appearance="fill" *ngIf="data.mode === 'tel'">
+        <mat-label>{{ label }}</mat-label>
+        <span matPrefix>
+            <mat-icon class="mr-2">phone</mat-icon>
+        </span>
+        <input matInput placeholder="EX: (435) 345-3454" mask="(000) 000-0000"
+            [value]="access.read ? valueSubject.value : ''"
+            [disabled]="!access.write && data.accessBehavior === 'disable'" 
+            (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
+            #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below"/>
+    </mat-form-field>
+</ng-template>

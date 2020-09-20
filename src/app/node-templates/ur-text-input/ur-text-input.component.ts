@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Output, AfterViewInit } from '@angular/core';
+import { Component,AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
-import { Subject, fromEvent, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -14,6 +14,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
+        this.setupDatapointAccess();
 
         this.delay = parseInt(this.data.delay, 10);
         if (this.delay > 0) {

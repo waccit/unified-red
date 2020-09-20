@@ -14,6 +14,8 @@
             mode: { value: 'text', required: true },
             delay: { value: 300, validate: RED.validators.number() },
             topic: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' }
         },
         inputs: 1,
         outputs: 1,
@@ -88,6 +90,26 @@
        <div class="form-row">
            <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
            <input type="text" id="node-input-name">
+       </div>
+       <div class="form-row">
+           <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+           <select id="node-input-access" style="width: 35%">
+               <option value="">Default</option>
+               <option value="1">Level 1 Viewer</option>
+               <option value="2">Level 2 Limited Operator</option>
+               <option value="3">Level 3 Standard Operator</option>
+               <option value="4">Level 4 IT Operator</option>
+               <option value="5">Level 5 Security Operator</option>
+               <option value="6">Level 6 (reserved)</option>
+               <option value="7">Level 7 (reserved)</option>
+               <option value="8">Level 8 (reserved)</option>
+               <option value="9">Level 9 Tech</option>
+               <option value="10">Level 10 Admin</option>
+            </select>
+            <select id="node-input-accessBehavior" style="width: 35%">
+               <option value="hide">Show/Hide</option>
+               <option value="disable">Enable/Disable</option>
+            </select>
        </div>
        <div class="form-tips">Setting <b>Delay</b> to 0 waits for Enter or Tab key, to send input.</span></div>
 </script>

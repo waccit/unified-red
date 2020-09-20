@@ -45,6 +45,8 @@ module.exports = function (RED) {
                 height: hei,
                 format: config.format,
                 rules: config.rules,
+                access: config.access || '',
+                accessBehavior: config.accessBehavior || 'disable'
             },
             beforeEmit: function (msg) {
                 var properties = Object.getOwnPropertyNames(msg).filter(function (p) {

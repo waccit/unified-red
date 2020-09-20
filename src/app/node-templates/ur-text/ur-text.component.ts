@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 
 @Component({
@@ -6,8 +6,13 @@ import { BaseNode } from '../ur-base-node';
     templateUrl: './ur-text.component.html',
     styleUrls: ['./ur-text.component.sass'],
 })
-export class UrTextComponent extends BaseNode {
+export class UrTextComponent extends BaseNode implements AfterViewInit {
     text: any;
+
+    ngAfterViewInit(): void {
+        super.ngAfterViewInit();
+        this.setupDatapointAccess();
+    }
 
     updateValue(data: any) {
         super.updateValue(data);
@@ -15,8 +20,4 @@ export class UrTextComponent extends BaseNode {
             this.text = this.format(data);
         }
     }
-
-    // getBgColor(): string {
-    //     return localStorage.getItem('choose_skin_active') || 'orange';
-    // }
 }

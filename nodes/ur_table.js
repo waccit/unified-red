@@ -46,6 +46,8 @@ module.exports = function (RED) {
                     order: config.order,
                     fields: config.fields,
                     pivot: config.cts,
+                    access: config.access || '',
+                    accessBehavior: config.accessBehavior || 'disable'
                 },
                 beforeEmit: function (msg, value) {
                     return {msg: {
