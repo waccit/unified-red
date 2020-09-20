@@ -32,91 +32,93 @@ module.exports = function (RED) {
             menuItem = RED.nodes.getNode(menuItem.config.menuItem);
             menuItems.push(menuItem);
         }
-        
+
         /*
         HELPER FUCTIONS
         */
 
-        let setPrioritySchedule = function() {
-            if (RED.settings.verbose) { 
-                node.log("setPrioritySchedule for " + this.type);
+        let setPrioritySchedule = function () {
+            if (RED.settings.verbose) {
+                node.log('setPrioritySchedule for ' + this.type);
             }
             node.valuePriority[this.type] = true; // just make the value non-falsy. Later an actual schedule value will be applied.
         };
 
-        let clearPrioritySchedule = function() {
-            if (RED.settings.verbose) { 
-                node.log("clearPrioritySchedule for " + this.type);
+        let clearPrioritySchedule = function () {
+            if (RED.settings.verbose) {
+                node.log('clearPrioritySchedule for ' + this.type);
             }
             node.valuePriority[this.type] = null;
         };
 
-        let fireEvent = function() {
+        let fireEvent = function () {
             if (this.event && this.type) {
                 try {
                     // set value in priority object
                     let value = this.event.value;
-                    node.valuePriority[this.type] = config.values.find(v => v.name === value);
+                    node.valuePriority[this.type] = config.values.find((v) => v.name === value);
 
-                    if (node.valuePriority.holiday) { //prioritize holiday schedules over date schedules
+                    if (node.valuePriority.holiday) {
+                        //prioritize holiday schedules over date schedules
                         if (this.type === 'holiday' && node.valuePriority.holiday.value) {
-                            if (RED.settings.verbose) { 
-                                node.log("fireEvent " + this.type + " " + JSON.stringify(node.valuePriority.holiday));
+                            if (RED.settings.verbose) {
+                                node.log('fireEvent ' + this.type + ' ' + JSON.stringify(node.valuePriority.holiday));
                             }
                             node.send({ topic: config.topic, payload: node.valuePriority.holiday.value });
                         }
-                    }
-                    else if (node.valuePriority.date) { //prioritize date schedules over weekday schedules
+                    } else if (node.valuePriority.date) {
+                        //prioritize date schedules over weekday schedules
                         if (this.type === 'date' && node.valuePriority.date.value) {
-                            if (RED.settings.verbose) { 
-                                node.log("fireEvent " + this.type + " " + JSON.stringify(node.valuePriority.date));
+                            if (RED.settings.verbose) {
+                                node.log('fireEvent ' + this.type + ' ' + JSON.stringify(node.valuePriority.date));
                             }
                             node.send({ topic: config.topic, payload: node.valuePriority.date.value });
                         }
-                    }
-                    else if (node.valuePriority.weekday) {
+                    } else if (node.valuePriority.weekday) {
                         if (this.type === 'weekday' && node.valuePriority.weekday.value) {
-                            if (RED.settings.verbose) { 
-                                node.log("fireEvent " + this.type + " " + JSON.stringify(node.valuePriority.weekday));
+                            if (RED.settings.verbose) {
+                                node.log('fireEvent ' + this.type + ' ' + JSON.stringify(node.valuePriority.weekday));
                             }
                             node.send({ topic: config.topic, payload: node.valuePriority.weekday.value });
                         }
                     }
-                } catch(err) {
+                } catch (err) {
                     node.error(err);
                 }
             }
         };
 
-        let getLastFiredEvent = function(schedule) {
+        let getLastFiredEvent = function (schedule) {
             if (!schedule) {
                 return null;
             }
             let now = new Date().getTime();
-            let possibleEvents = schedule.filter(sch => {
-                try {
-                    let time = new Date();
-                    time.setHours(sch.hour, sch.minute, 0, 0);
-                    return now >= time.getTime();
-                } catch (ignore) {}
-                return false;
-            }).sort((a, b) => {
-                let hour = a.hour - b.hour;
-                if (hour === 0) {
-                    return a.minute - b.minute;
-                }
-                return hour;
-            });
+            let possibleEvents = schedule
+                .filter((sch) => {
+                    try {
+                        let time = new Date();
+                        time.setHours(sch.hour, sch.minute, 0, 0);
+                        return now >= time.getTime();
+                    } catch (ignore) {}
+                    return false;
+                })
+                .sort((a, b) => {
+                    let hour = a.hour - b.hour;
+                    if (hour === 0) {
+                        return a.minute - b.minute;
+                    }
+                    return hour;
+                });
             // pick the event closest to now
-            let event = possibleEvents.length ? possibleEvents[possibleEvents.length-1] : null;
+            let event = possibleEvents.length ? possibleEvents[possibleEvents.length - 1] : null;
             return event;
         };
 
-        let secondsFromNow = function(x) {
+        let secondsFromNow = function (x) {
             return new Date(new Date().getTime() + x * 1000); // in X seconds
         };
 
-        let explodeRange = function(exp) {
+        let explodeRange = function (exp) {
             if (exp.indexOf('-') === -1) {
                 return exp;
             }
@@ -132,8 +134,8 @@ module.exports = function (RED) {
             return range.join(',');
         };
 
-        let isNthWeekday = function(weekdayExp) {
-            let [day, week] = weekdayExp.split("#");
+        let isNthWeekday = function (weekdayExp) {
+            let [day, week] = weekdayExp.split('#');
             let weekdays = explodeRange(day).split(',');
             for (let weekday of weekdays) {
                 weekday = parseInt(weekday);
@@ -147,8 +149,8 @@ module.exports = function (RED) {
             }
             return false;
         };
-        
-        let isLastWeekday = function(weekdayExp) {
+
+        let isLastWeekday = function (weekdayExp) {
             let weekdays = explodeRange(weekdayExp.replace('L', '')).split(',');
             for (let weekday of weekdays) {
                 let m = moment();
@@ -164,39 +166,42 @@ module.exports = function (RED) {
             }
             return false;
         };
-        
-        let isLastDate = function() {
+
+        let isLastDate = function () {
             let m = moment().add(1, 'months').date(1).subtract(1, 'days');
             return moment().diff(m, 'days') === 0;
         };
 
-        let correctForNthAndLastRules = function(schPattern) {
+        let correctForNthAndLastRules = function (schPattern) {
             // check nth and last rules that node-cron currently does not support
             if (schPattern) {
-                let pattern = schPattern.split(" ");
+                let pattern = schPattern.split(' ');
                 let date = pattern[3];
                 let weekday = pattern[5];
-                if (date === "L") {
-                    if (isLastDate()) { // if the last day, overwrite date field with today
+                if (date === 'L') {
+                    if (isLastDate()) {
+                        // if the last day, overwrite date field with today
                         // console.log("scheduleHolidayJob lastDate");
                         pattern[3] = moment().date();
-                        return pattern.join(" ");
+                        return pattern.join(' ');
                     }
                     return null;
                 }
-                if (weekday.indexOf("#") !== -1) {
-                    if (isNthWeekday(weekday)) { // if not the nth weekday, overwrite date field with today
+                if (weekday.indexOf('#') !== -1) {
+                    if (isNthWeekday(weekday)) {
+                        // if not the nth weekday, overwrite date field with today
                         // console.log("scheduleHolidayJob nth weekday");
                         pattern[5] = moment().day();
-                        return pattern.join(" ");
+                        return pattern.join(' ');
                     }
                     return null;
                 }
-                if (weekday.indexOf("L") !== -1) {
-                    if (isLastWeekday(weekday)) { // if not the last weekday, overwrite date field with today
+                if (weekday.indexOf('L') !== -1) {
+                    if (isLastWeekday(weekday)) {
+                        // if not the last weekday, overwrite date field with today
                         // console.log("scheduleHolidayJob last weekday");
                         pattern[5] = moment().day();
-                        return pattern.join(" ");
+                        return pattern.join(' ');
                     }
                     return null;
                 }
@@ -204,7 +209,7 @@ module.exports = function (RED) {
             return schPattern;
         };
 
-        let scheduleHolidayJob = function(sch, time) {
+        let scheduleHolidayJob = function (sch, time) {
             // check nth and last rules that node-cron currently does not support
             let correctedPattern = correctForNthAndLastRules(sch.pattern);
             if (!correctedPattern) {
@@ -212,48 +217,53 @@ module.exports = function (RED) {
             }
             sch.pattern = correctedPattern;
 
-            if (RED.settings.verbose) { 
-                node.log("scheduleHolidayJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
+            if (RED.settings.verbose) {
+                node.log('scheduleHolidayJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: "holiday" }));
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'holiday' }));
             node.cronJobs.push(job);
         };
 
-        let scheduleDateJob = function(sch, time) {
-            if (RED.settings.verbose) { 
-                node.log("scheduleDateJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
+        let scheduleDateJob = function (sch, time) {
+            if (RED.settings.verbose) {
+                node.log('scheduleDateJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: "date" }));
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'date' }));
             node.cronJobs.push(job);
         };
 
-        let scheduleWeekdayJob = function(sch, time) {
-            if (RED.settings.verbose) { 
-                node.log("scheduleWeekdayJob " + JSON.stringify(sch) + " " + (time ? time.toLocaleString() : ''));
+        let scheduleWeekdayJob = function (sch, time) {
+            if (RED.settings.verbose) {
+                node.log('scheduleWeekdayJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: "weekday" }));
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'weekday' }));
             node.cronJobs.push(job);
         };
 
-        let schedulePriorityScheduleJobs = function(sch, type, time) {
+        let schedulePriorityScheduleJobs = function (sch, type, time) {
             // check nth and last rules that node-cron currently does not support
             let correctedPattern = correctForNthAndLastRules(sch.pattern);
             if (!correctedPattern) {
                 return;
             }
             sch.pattern = correctedPattern;
-            
+
             // activate date or holiday schedule at beginning of day (unless time overriden)
-            let startPattern = setCronTime(sch.pattern, time ? time.getHours() : 0, time ? time.getMinutes() : 0, time ? time.getSeconds() : 0);
+            let startPattern = setCronTime(
+                sch.pattern,
+                time ? time.getHours() : 0,
+                time ? time.getMinutes() : 0,
+                time ? time.getSeconds() : 0
+            );
             let startJob = cron.schedule(startPattern, setPrioritySchedule.bind({ event: sch, type: type }));
             node.cronJobs.push(startJob);
             // deactivate date or holiday schedule at end of day
@@ -266,9 +276,9 @@ module.exports = function (RED) {
         SCHEDULE MAGIC
         */
 
-        let buildSchedules = function() {
-            node.log("Building schedules...");
-            
+        let buildSchedules = function () {
+            node.log('Building schedules...');
+
             // stop and delete any existing cron jobs
             try {
                 for (let job of node.cronJobs) {
@@ -287,16 +297,16 @@ module.exports = function (RED) {
                         holidaySch._pattern = holidaySch.pattern;
                         holidaySch.pattern = setCronTime(holidaySch.pattern, holidaySch.hour, holidaySch.minute, '0');
                         scheduleHolidayJob(holidaySch);
-                        schedulePriorityScheduleJobs(holidaySch, "holiday");
+                        schedulePriorityScheduleJobs(holidaySch, 'holiday');
 
-                        // schedule recovery job: since we don't know if we're currently in a holiday, 
+                        // schedule recovery job: since we don't know if we're currently in a holiday,
                         // fire recovery for all holidays. Only today's holiday will fire anyways.
                         let scheduledTime = new Date();
-                        scheduledTime.setHours(holidaySch.hour,holidaySch.minute,0,0);
+                        scheduledTime.setHours(holidaySch.hour, holidaySch.minute, 0, 0);
                         if (new Date() > scheduledTime) {
                             scheduleHolidayJob(holidaySch, secondsFromNow(5));
                         }
-                        schedulePriorityScheduleJobs(holidaySch, "holiday", secondsFromNow(2));
+                        schedulePriorityScheduleJobs(holidaySch, 'holiday', secondsFromNow(2));
                     } catch (err) {
                         node.error(err);
                     }
@@ -311,27 +321,29 @@ module.exports = function (RED) {
                         // catalog date schedules to later find last (missed) event
                         let d = new Date(dateSch.date);
                         d.setFullYear(new Date().getFullYear()); // normalize key to current year
-                        let dateKey =  d.getTime();
+                        let dateKey = d.getTime();
                         if (!dateSchedules[dateKey]) {
                             dateSchedules[dateKey] = [];
                         }
                         dateSchedules[dateKey].push(dateSch);
 
                         // schedule job and "priority schedule" jobs
-                        dateSch.pattern = ["0", dateSch.minute, dateSch.hour, d.getDate(), d.getMonth()+1, "*"].join(" ");
+                        dateSch.pattern = ['0', dateSch.minute, dateSch.hour, d.getDate(), d.getMonth() + 1, '*'].join(
+                            ' '
+                        );
                         scheduleDateJob(dateSch);
-                        schedulePriorityScheduleJobs(dateSch, "date");
+                        schedulePriorityScheduleJobs(dateSch, 'date');
                     } catch (err) {
                         node.error(err);
                     }
                 }
                 // schedule recovery job: find last (missed event) and fire after 5 second delay
                 let today = new Date();
-                today.setHours(0,0,0,0);
-                let lastEvent = getLastFiredEvent(dateSchedules[ today.getTime() ]);
+                today.setHours(0, 0, 0, 0);
+                let lastEvent = getLastFiredEvent(dateSchedules[today.getTime()]);
                 if (lastEvent !== null) {
                     scheduleDateJob(lastEvent, secondsFromNow(5));
-                    schedulePriorityScheduleJobs(lastEvent, "date", secondsFromNow(2));
+                    schedulePriorityScheduleJobs(lastEvent, 'date', secondsFromNow(2));
                 }
             }
 
@@ -344,16 +356,23 @@ module.exports = function (RED) {
                     /* Wednesday */ [],
                     /* Thursday  */ [],
                     /* Friday    */ [],
-                    /* Saturday  */ []
+                    /* Saturday  */ [],
                 ];
                 for (let weekdaySch of config.weekdays) {
                     try {
                         if (!isNaN(weekdaySch.weekday)) {
                             // catalog weekday schedules to later find last (missed) event
-                            weekdaySchedules[ parseInt(weekdaySch.weekday) ].push(weekdaySch);
+                            weekdaySchedules[parseInt(weekdaySch.weekday)].push(weekdaySch);
 
                             // schedule job
-                            weekdaySch.pattern = ["0", weekdaySch.minute, weekdaySch.hour, "*", "*", weekdaySch.weekday].join(" ");
+                            weekdaySch.pattern = [
+                                '0',
+                                weekdaySch.minute,
+                                weekdaySch.hour,
+                                '*',
+                                '*',
+                                weekdaySch.weekday,
+                            ].join(' ');
                             scheduleWeekdayJob(weekdaySch);
                         }
                     } catch (err) {
@@ -362,7 +381,7 @@ module.exports = function (RED) {
                 }
                 // schedule recovery job: find last (missed event) and fire after 5 second delay
                 let today = new Date();
-                let lastEvent = getLastFiredEvent(weekdaySchedules[ today.getDay() ]);
+                let lastEvent = getLastFiredEvent(weekdaySchedules[today.getDay()]);
                 if (lastEvent !== null) {
                     scheduleWeekdayJob(lastEvent, secondsFromNow(5));
                 }
@@ -372,7 +391,7 @@ module.exports = function (RED) {
         buildSchedules();
         // rebuild schedules everyday at midnight
         if (!buildJob) {
-            buildJob = cron.schedule("0 0 0 * * *", buildSchedules);
+            buildJob = cron.schedule('0 0 0 * * *', buildSchedules);
         }
 
         var done = ui.add({
@@ -391,17 +410,17 @@ module.exports = function (RED) {
                 weekdays: config.weekdays,
                 dates: config.dates,
                 holidays: this.holidays,
-                holidaysId: config.holidays
-            }
+                holidaysId: config.holidays,
+            },
         });
 
         /*
-        * This function is called when the node is being stopped, for example when a new flow configuration is deployed.
-        */
+         * This function is called when the node is being stopped, for example when a new flow configuration is deployed.
+         */
         node.on('close', () => {
             // tear down all cron jobs
             if (RED.settings.verbose) {
-                this.log(RED._("schedule.stopped"));
+                this.log(RED._('schedule.stopped'));
             }
             for (let job of this.cronJobs) {
                 job.destroy();
