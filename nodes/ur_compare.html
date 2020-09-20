@@ -113,7 +113,6 @@
                         opt.cond = {};
                     }
                     let cond = opt.cond;
-                    console.log("add", cond);
                     if (!cond.hasOwnProperty('t')) {
                         cond.t = 'eq';
                     }
@@ -344,7 +343,6 @@
                             cond.case = row.find(".node-input-cond-case").prop("checked");
                         }
                     }
-                    console.log("save condition", cond);
                     node.conditions.push(cond);
                 });
 
@@ -356,7 +354,6 @@
                         topic: row.find(".node-input-topics-topic").val(),
                         property: row.find(".node-input-topics-property").val()
                     };
-                    console.log("save topic", topic);
                     node.topics.push(topic);
                 });
 
