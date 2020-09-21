@@ -20,7 +20,8 @@
             "siteaddress": "Site Address",
             "contactName": "Contact Name",
             "contactEmail": "Contact Email Address",
-            "monitorServer": "Monitor Server URL"
+            "monitorServer": "Monitor Server URL",
+            "files": "Files"
         },
         "auto": "auto",
         "title": "Node-RED Dashboard",

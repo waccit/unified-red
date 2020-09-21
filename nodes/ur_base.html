@@ -742,6 +742,7 @@
                 var ulDashboardTabs = $('<ul id="dashboard-tabs-list"></ul>').appendTo(divTab);
                 var layout_label = c_('label.layout');
                 var site_label = c_('label.site');
+                var files_label = c_('label.files');
                 // var theme_label = c_('label.theme');
                 // var angular_label = c_('label.angular');
                 var liLayoutTab = $(
@@ -754,6 +755,16 @@
                         site_label +
                         '</span></a></li>'
                 ).appendTo(ulDashboardTabs);
+                var liFilesTab = $(
+                    '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Files" style="width:80px;"><span>' +
+                        files_label +
+                        '</span></a></li>'
+                ).appendTo(ulDashboardTabs);
+                // var liThemeTab = $(
+                //     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Theme" style="width:80px;"><span>' +
+                //         theme_label +
+                //         '</span></a></li>'
+                // ).appendTo(ulDashboardTabs);
                 // var liThemeTab = $(
                 //     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Theme" style="width:80px;"><span>' +
                 //         theme_label +
@@ -796,6 +807,7 @@
                 // Dashboard Tab containers
                 var layoutTab = $('<div id="dashboard-layout" style="height:calc(100% - 48px)">').appendTo(form);
                 var siteTab = $('<div id="dashboard-site" style="display:none;">').appendTo(form);
+                var filesTab = $('<div id="dashboard-files" style="display:none;">').appendTo(form);
                 // var themeTab = $('<div id="dashboard-theme" style="display:none;">').appendTo(form);
                 // var angularTab = $('<div id="dashboard-angular" style="display:none;">').appendTo(form);
 
@@ -814,6 +826,13 @@
                         siteTab.hide();
                         // angularTab.hide();
                         layoutTab.show();
+                        filesTab.hide();
+                    } else if (selectedTab === 'Files') {
+                        // themeTab.hide();
+                        siteTab.hide();
+                        // angularTab.show();
+                        layoutTab.hide();
+                        filesTab.show();
                     } /* else if (selectedTab === 'Angular') {
                         themeTab.hide();
                         siteTab.hide();
@@ -831,6 +850,7 @@
                         }
                     } */ else {
                         layoutTab.hide();
+                        filesTab.hide();
                         // themeTab.hide();
                         // angularTab.hide();
                         siteTab.show();
@@ -949,6 +969,31 @@
                 //     .appendTo(divLockMenu);
 
                 var site_name = c_('site.title');
+
+                // Files Tab
+                $('<div id="filebrowser">').appendTo(filesTab);
+                var uploadForm = $('<form method="post" enctype="multipart/form-data">').appendTo(filesTab);
+                var filesInput = $('<input type="file" name="files" multiple>').appendTo(uploadForm);
+                var uploadSubmit = $('<input type="button" value="Upload">').appendTo(uploadForm);
+                uploadSubmit.click(function () {
+                    var formData = new FormData();
+                    for (var file of filesInput[0].files) {
+                        formData.append("files", file);
+                    }
+                    $.ajax({
+                        url: '/ur_base/filebrowser/upload/',
+                        type: 'post',
+                        enctype: 'multipart/form-data',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        cache: false,
+                        timeout: 600000,
+                        success: function(resp) {
+                            console.log("upload form success", resp);
+                        }
+                    });
+                });
 
                 //Layout Tab
                 var divTabs = $('<div>', { class: 'form-row', style: 'position:relative' }).appendTo(layoutTab);
@@ -3120,6 +3165,251 @@
                 });
             },
         });
+    })(jQuery);
+</script>
+
+<!-- File Browser -->
+<link href="./ur_base/css/jquery.filebrowser.min.css" rel="stylesheet"/>
+<style>
+    .browser-widget {
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .browser-widget .toolbar {
+        border-bottom: 1px solid #ccc;
+        background: #f0f0f0;
+        padding: 3px;
+        color: #555;
+    }
+    .browser-widget ul:not(.ui-menu) > li {
+        padding-top: 0;
+        text-align: left;
+        margin: 0;
+        width: 70px;
+        font-size: 14px;
+        background-position: 0;
+        color: #555;
+    }
+    .browser-widget .content {
+        overflow-y: scroll;
+        min-height: 450px;
+        height: auto;
+    }
+    .browser-widget .content ul:not(.ui-menu) > li {
+        display: list-item;
+        width: auto;
+    }
+    .browser-widget .content ul:not(.ui-menu) li.active {
+        background: #2979ff;
+        color: white;
+    }
+    .browser-widget .content ul:not(.ui-menu) li textarea {
+        min-height: 0;
+        height: 20px;
+        width: auto;
+        text-align: left;
+        padding: 0;
+        top: 4px;
+    }
+    .browser-widget ul:not(.ui-menu) li::before {
+        width: 24px;
+        height: 16px;
+        position: static;
+    }
+    .browser-widget .adress-bar input {
+        border: 1px solid #ddd;
+        padding-left: 8px;
+        font-size: 12px;
+    }
+    .browser-widget .adress-bar button {
+        text-indent: 0;
+        width: 20px;
+        background-position: 0;
+    }
+    .browser-widget .adress-bar button::before {
+        font-family: FontAwesome;
+        content: "\f015";
+    }
+    .browser-widget ul.labels li.back::before {
+        font-family: FontAwesome;
+        content: "\f060";
+    }
+    .browser-widget ul.labels li.up::before {
+        font-family: FontAwesome;
+        content: "\f148";
+    }
+    .browser-widget ul.labels li.refresh::before {
+        font-family: FontAwesome;
+        content: "\f021";
+    }
+    .browser-widget .content ul:not(.ui-menu) .drive::before {
+        font-family: FontAwesome;
+        content: "\f0a0";
+    }
+    .browser-widget .content ul:not(.ui-menu) .directory::before {
+        font-family: FontAwesome;
+        content: "\f114";
+    }
+    .browser-widget .content ul:not(.ui-menu) .file::before {
+        font-family: FontAwesome;
+        content: "\f016";
+    }
+    .browser-widget .content ul:not(.ui-menu) .txt::before {
+        font-family: FontAwesome;
+        content: "\f0f6";
+    }
+    .browser-widget .content ul:not(.ui-menu) .pdf::before {
+        font-family: FontAwesome;
+        content: "\f1c1";
+    }
+    .browser-widget .content ul:not(.ui-menu) .php::before,
+    .browser-widget .content ul:not(.ui-menu) .html::before,
+    .browser-widget .content ul:not(.ui-menu) .js::before,
+    .browser-widget .content ul:not(.ui-menu) .json::before,
+    .browser-widget .content ul:not(.ui-menu) .css::before {
+        font-family: FontAwesome;
+        content: "\f1c9";
+    }
+    .browser-widget .content ul:not(.ui-menu) .doc::before,
+    .browser-widget .content ul:not(.ui-menu) .docx::before {
+        font-family: FontAwesome;
+        content: "\f1c2";
+    }
+    .browser-widget .content ul:not(.ui-menu) .xls::before,
+    .browser-widget .content ul:not(.ui-menu) .xlsx::before {
+        font-family: FontAwesome;
+        content: "\f1c3";
+    }
+    .browser-widget .content ul:not(.ui-menu) .ppt::before,
+    .browser-widget .content ul:not(.ui-menu) .pptx::before {
+        font-family: FontAwesome;
+        content: "\f1c4";
+    }
+    .browser-widget .content ul:not(.ui-menu) .svg::before,
+    .browser-widget .content ul:not(.ui-menu) .jpg::before,
+    .browser-widget .content ul:not(.ui-menu) .jpeg::before,
+    .browser-widget .content ul:not(.ui-menu) .gif::before,
+    .browser-widget .content ul:not(.ui-menu) .bmp::before,
+    .browser-widget .content ul:not(.ui-menu) .png::before {
+        font-family: FontAwesome;
+        content: "\f1c5";
+    }
+    .browser-widget .content ul:not(.ui-menu) .md::before,
+    .browser-widget .content ul:not(.ui-menu) .markdown::before {
+        font-family: FontAwesome;
+        content: "\f0f6";
+    }
+
+
+</style>
+<script src="./ur_base/js/jquery.filebrowser.min.js"></script>
+<script>
+    (function ($) {
+        var root = null;
+
+        function copy(src, dest, remove) {
+            // find source file
+            var sourceContents = root;
+            browser.walk(src, function (part, last) {
+                var src = sourceContents[part];
+                if (last && remove) {
+                    delete sourceContents[part];
+                }
+                sourceContents = src;
+            });
+            // add dest file
+            var current = root;
+            var destFilename;
+            browser.walk(dest, function (part, last) {
+                if (!last) {
+                    current = current[part];
+                } else {
+                    destFilename = part;
+                }
+            });
+            current[destFilename] = sourceContents;
+
+            var defer = $.Deferred();
+            if (remove) {
+                $.post('./ur_base/filebrowser/rename/', { src: src, dest: dest }, function(result) {
+                    if (result === 'ok') {
+                        defer.resolve();
+                    }
+                });
+            }
+            else {
+                $.post('./ur_base/filebrowser/copy/', { src: src, dest: dest }, function(result) {
+                    if (result === 'ok') {
+                        defer.resolve();
+                    }
+                });
+            }
+            return defer.promise();
+        }
+
+        function upload(file, path) {
+            var current = root;
+            browser.walk(path, function (part) {
+                if (!current[part]) {
+                    current[part] = {}; // upload new directory
+                }
+                current = current[part];
+            });
+            current[file.name] = "new file " + file.name;
+            console.log("upload " + file.name + " to " + path + " directory");
+            var defer = $.Deferred();
+            $.post('./ur_base/filebrowser/upload/', { file: file, path: path }, function(result) {
+                if (result === 'ok') {
+                    defer.resolve();
+                }
+            });
+            return defer.promise();
+            // return $.when(true); // resolved promise
+        }
+
+        $("#filebrowser").browse({
+            root: "/",
+            separator: "/",
+            name: "filesystem",
+            refresh_timer: 0,
+            change: function() {
+                console.log("CHANGE!!!");
+                $.get('./ur_base/filebrowser/list/?refresh', function(data) {
+                    root = data;
+                });
+            },
+            upload: upload,
+            copy: copy,
+            rename: function(src, dest) {
+                return copy(src, dest, true);
+            },
+            dir: function(path, callback) {
+                let list = function() {
+                    var result = { files: [], dirs: [] };
+                    var current = root;
+                    browser.walk(path, function(file) {
+                        current = current[file];
+                    });
+                    for (let key in current) {
+                        if (current[key].mtime) {
+                            result.files.push(key);
+                        } else {
+                            result.dirs.push(key);
+                        }
+                    }
+                    callback(result);
+                };
+                if (root) {
+                    list();
+                } else {
+                    $.get('./ur_base/filebrowser/list/', function(data) {
+                        root = data;
+                        list();
+                    });
+                }
+            }
+        });
+        var browser = $("#filebrowser").eq(0).browse();
     })(jQuery);
 </script>
 
