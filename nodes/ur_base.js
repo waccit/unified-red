@@ -1,6 +1,8 @@
 module.exports = function (RED) {
     var ui = require('../ui')(RED);
     var path = require('path');
+    var fs = require('fs');
+    var multer = require('multer');
     var node;
     var set = RED.settings.ui || '{}';
     let monitor = require('../monitor');
@@ -136,5 +138,75 @@ module.exports = function (RED) {
                 }
             }
         });
+    });
+
+    let staticRoot = path.join(__dirname, '../static/');
+    const storage = multer.diskStorage({
+        destination: function (req, file, callback) {
+            callback(null, staticRoot);
+        },
+        filename: function (req, file, callback) {
+            callback(null, file.originalname);
+        },
+    });
+    const upload = multer({ storage: storage });
+
+    function traverseDir(dir) {
+        let files = {};
+        fs.readdirSync(dir).forEach(file => {
+            let fullPath = path.join(dir, file);
+            let stat = fs.lstatSync(fullPath);
+            if (stat.isDirectory()) {
+                files[file] = traverseDir(fullPath);
+            } else {
+                files[file] = { mtime: stat.mtime.toISOString(), size: stat.size };
+            }
+        });
+        return files;
+    }
+
+    let staticFiles = {};
+    try {
+        staticFiles = traverseDir(staticRoot);
+    }
+    catch (e) {}
+
+    RED.httpAdmin.get('/ur_base/filebrowser/list/', function (req, res) {
+        if (req.query.hasOwnProperty('refresh')) {
+            try {
+                staticFiles = traverseDir(staticRoot);
+            }
+            catch (e) {}
+        }
+        res.json(staticFiles);
+    });
+
+    RED.httpAdmin.post('/ur_base/filebrowser/copy/', function (req, res) {
+        console.log(req.body.src, req.body.dest);
+        let src = path.join(__dirname, '../static/', req.body.src);
+        let dest = path.join(__dirname, '../static/', req.body.dest);
+        fs.copyFile(src, dest, (err) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.send("ok");
+        });
+    });
+
+    RED.httpAdmin.post('/ur_base/filebrowser/rename/', function (req, res) {
+        let src = path.join(__dirname, '../static/', req.body.src);
+        let dest = path.join(__dirname, '../static/', req.body.dest);
+        fs.rename(src, dest, (err) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.send("ok");
+        });
+    });
+
+    RED.httpAdmin.post('/ur_base/filebrowser/upload/', upload.array('files'), function (req, res, next) {
+        res.send("ok");
     });
 };
