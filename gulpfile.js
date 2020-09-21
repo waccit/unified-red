@@ -93,6 +93,13 @@ function gridstack(done) {
         .pipe(sass({ outputStyle: 'compressed' }))
         .pipe(rename({ extname: '.min.css' }))
         .pipe(gulp.dest('src/assets/css'));
+    gulp.src(paths.npm + '/jquery.filebrowser/css/jquery.filebrowser.min.css').pipe(
+        gulp.dest('src/assets/css/')
+    );
+    gulp.src(paths.npm + '/jquery.filebrowser/js/jquery.filebrowser.min.js').pipe(
+        gulp.dest('src/assets/js/')
+    );
+
     done();
 }
 
