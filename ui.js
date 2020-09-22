@@ -919,16 +919,9 @@ function selfInstall(log, settings) {
             }
             fs.writeFileSync(settings.settingsFile, data, { encoding: 'utf8' });
 
-            // auto-restart
-            log.info('Installation complete. Restarting Node-RED in 5 seconds...');
+            // TODO: show shut down notice in open Node-RED editors
+            log.info('Installation complete. Shuttiing down Node-RED in 5 seconds...');
             setTimeout(function () {
-                process.on("exit", function () {
-                    require("child_process").spawn(process.argv.shift(), process.argv, {
-                        cwd: process.cwd(),
-                        detached : true,
-                        stdio: "inherit"
-                    });
-                });
                 process.exit();
             }, 5000);
         }
