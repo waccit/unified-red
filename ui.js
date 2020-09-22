@@ -769,6 +769,7 @@ function addControl(menu_items, menu_page, page_group, control) {
                 widthMd: page_group.config.widthMd,
                 widthSm: page_group.config.widthSm,
                 items: [],
+                access: page_group.config.access,
             };
             foundMenuPage.items.push(foundGroup);
         }

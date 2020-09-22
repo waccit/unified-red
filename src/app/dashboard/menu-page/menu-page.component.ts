@@ -2,12 +2,13 @@ import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRe
 import { MenuPageDirective } from '../../directives/menu-page.directive';
 import { GroupComponent } from '../group/group.component';
 import { pageGroups } from './page-groups';
-import { WebSocketService } from '../../services';
+import { CurrentUserService, RoleService, WebSocketService } from '../../services';
 import { WidgetService } from '../../services/widget.service';
 import { ActivatedRoute, UrlSegment } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
 import { MenuService } from '../../services/menu.service';
 import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
+import { User } from '../../data';
 
 @Component({
     selector: 'app-menu-page',
@@ -23,6 +24,7 @@ export class MenuPageComponent implements OnInit {
     private _menuSubscription: Subscription;
     breadcrumbs: string[];
     @ViewChild(MenuPageDirective, { static: true }) menuPageHost: MenuPageDirective;
+    private userRole: string;
 
     constructor(
         private route: ActivatedRoute,
@@ -31,26 +33,35 @@ export class MenuPageComponent implements OnInit {
         private widgetService: WidgetService,
         private menuService: MenuService,
         private viewContainerRef: ViewContainerRef,
-        private renderer2: Renderer2
+        private renderer2: Renderer2,
+        protected currentUserService: CurrentUserService,
+        protected roleService: RoleService,
     ) {}
 
     ngOnInit(): void {
         this.viewContainerRef = this.menuPageHost.viewContainerRef;
 
-        this.route.url.subscribe((segments: UrlSegment[]) => {
-            // this.breadcrumbs = [...segments.map((seg) => seg.path)];
-            this.menuItems = [...segments.map((seg) => seg.path).slice(0, segments.length - 1)];
-            this.pathList = [...segments.map((seg) => seg.path)];
-            this.menuPage = segments[segments.length - 1].path;
+        this.currentUserService.currentUser.subscribe((user: User) => {
+            if (user) {
+                this.userRole = user.role;
 
-            if (this._menuSubscription !== undefined) {
-                this._menuSubscription.unsubscribe();
+                this.route.url.subscribe((segments: UrlSegment[]) => {
+                    // this.breadcrumbs = [...segments.map((seg) => seg.path)];
+                    this.menuItems = [...segments.map((seg) => seg.path).slice(0, segments.length - 1)];
+                    this.pathList = [...segments.map((seg) => seg.path)];
+                    this.menuPage = segments[segments.length - 1].path;
+        
+                    if (this._menuSubscription !== undefined) {
+                        this._menuSubscription.unsubscribe();
+                    }
+        
+                    this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
+                        this.setPageGroupsList(menu);
+                        this.loadGroups();
+                    });
+                });
+
             }
-
-            this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
-                this.setPageGroupsList(menu);
-                this.loadGroups();
-            });
         });
     }
 
@@ -99,6 +110,7 @@ export class MenuPageComponent implements OnInit {
             foundMenuPage.items.forEach((g) => {
                 this.pageGroupsList.push({
                     header: g.header,
+                    access: g.access || '',
                     cols: { lg: g.widthLg, md: g.widthMd, sm: g.widthSm },
                     widgets: this.widgetService.getWidgets(g.items),
                 });
@@ -140,6 +152,17 @@ export class MenuPageComponent implements OnInit {
         this.viewContainerRef.clear();
 
         this.pageGroupsList.forEach((group) => {
+            let access: any;
+            if (!group.access || group.access === '0') {
+                access = this.roleService.getRoleAccess('datapoint', this.userRole);
+            }
+            else {
+                access = this.roleService.overrideRoleAccess('datapoint', this.userRole, group.access);
+            }
+            if (!access.read) {
+                return;
+            }
+
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(GroupComponent);
             const componentRef = this.viewContainerRef.createComponent(componentFactory);
 

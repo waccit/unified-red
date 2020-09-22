@@ -11,6 +11,7 @@ module.exports = function (RED) {
             order: config.order || 0,
             menuPage: config.menuPage,
             collapse: config.collapse || false,
+            access: config.access || '',
         };
         if (!this.config.hasOwnProperty('disp')) {
             this.config.disp = true;
