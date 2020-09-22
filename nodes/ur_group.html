@@ -19,6 +19,7 @@
             collapse: { value: false },
             disabled: { value: false },
             hidden: { value: false },
+            access: { value: '' },
         },
         sort: function (A, B) {
             if (A.menuPage !== B.menuPage) {
@@ -121,6 +122,22 @@
     </div>
     <div class="form-row" id="group-collapse-flag">
         <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse"> <label style="width:auto" for="node-config-input-collapse"><span data-i18n="ur_group.collapse-name"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-config-input-access" style="width: 70%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
     </div>
 </script>
 
