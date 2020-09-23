@@ -1,10 +1,15 @@
-<!-- Second level menu -->
 <ul class="ml-menu">
     <li
         *ngFor="let sidebarSubItem of sidebarItems"
         [class.activeSub]="showSubMenu === sidebarSubItem.title"
         [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'"
     >
+        <div *ngIf="sidebarSubItem.isMenuPage">
+            <a [routerLink]="[sidebarSubItem.path]">
+                {{ sidebarSubItem.title }}
+            </a>
+        </div>
+
         <div *ngIf="sidebarSubItem.submenu.length > 0">
             <a (click)="callSubMenuToggle(sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
                 {{ sidebarSubItem.title }}
@@ -18,12 +23,6 @@
                 "
                 [sidebarItems]="sidebarSubItem.submenu"
             ></app-menu-entity>
-        </div>
-
-        <div *ngIf="sidebarSubItem.submenu.length == 0">
-            <a [routerLink]="[sidebarSubItem.path]">
-                {{ sidebarSubItem.title }}
-            </a>
         </div>
     </li>
 </ul>

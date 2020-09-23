@@ -14,8 +14,8 @@ import { RouteInfo } from './sidebar.metadata';
 export class SidebarComponent implements OnInit {
     // @Input() sidebarItems: any[];
     sidebarItems: RouteInfo[];
-    showMenu: string = '';
-    showSubMenu: string = '';
+    showMenu = '';
+    showSubMenu = '';
     public innerHeight: any;
     public bodyTag: any;
     listMaxHeight: string;
@@ -71,17 +71,17 @@ export class SidebarComponent implements OnInit {
     }
 
     initLeftSidebar() {
-        //Set menu height
+        // Set menu height
         this.setMenuHeight();
         this.checkStatusForResize(true);
     }
 
     setMenuHeight() {
         this.innerHeight = window.innerHeight;
-        var height = this.innerHeight - this.headerHeight;
+        const height = this.innerHeight - this.headerHeight;
         this.listMaxHeight = height + '';
         this.listMaxWidth = '500px';
-        //Scroll active menu item when page load, if option set = true
+        // Scroll active menu item when page load, if option set = true
         /*  if ($.MyAdmin.options.leftSideBar.scrollActiveItemWhenPageLoad) {
           var activeItemOffsetTop = $('.menu .list li.active')[0].offsetTop
           if (activeItemOffsetTop > 150) $el.slimscroll({ scrollTo: activeItemOffsetTop + 'px' });
@@ -99,7 +99,7 @@ export class SidebarComponent implements OnInit {
     }
 
     mouseHover(e) {
-        let body = this.elementRef.nativeElement.closest('body');
+        const body = this.elementRef.nativeElement.closest('body');
 
         if (body.classList.contains('submenu-closed')) {
             this.renderer.addClass(this.document.body, 'side-closed-hover');
@@ -107,7 +107,7 @@ export class SidebarComponent implements OnInit {
         }
     }
     mouseOut(e) {
-        let body = this.elementRef.nativeElement.closest('body');
+        const body = this.elementRef.nativeElement.closest('body');
 
         if (body.classList.contains('side-closed-hover')) {
             this.renderer.removeClass(this.document.body, 'side-closed-hover');

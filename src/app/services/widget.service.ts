@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { groupWidgets } from '../dashboard/group/group-widget';
+import { GroupWidgets } from '../dashboard/group/group-widget';
 import { UrTextComponent } from '../node-templates/ur-text/ur-text.component';
 import { UrButtonComponent } from '../node-templates/ur-button/ur-button.component';
 import { UrTextInputComponent } from '../node-templates/ur-text-input/ur-text-input.component';
@@ -17,22 +17,22 @@ export class WidgetService {
         return widgetsList.map((widget) => {
             switch (widget.type) {
                 case 'text':
-                    return new groupWidgets(UrTextComponent, widget);
+                    return new GroupWidgets(UrTextComponent, widget);
                 case 'button':
-                    return new groupWidgets(UrButtonComponent, widget);
+                    return new GroupWidgets(UrButtonComponent, widget);
                 case 'text-input':
-                    return new groupWidgets(UrTextInputComponent, widget);
+                    return new GroupWidgets(UrTextInputComponent, widget);
                 case 'template':
-                    return new groupWidgets(UrTemplateComponent, widget);
+                    return new GroupWidgets(UrTemplateComponent, widget);
                 case 'animation':
-                    return new groupWidgets(UrAnimationComponent, widget);
+                    return new GroupWidgets(UrAnimationComponent, widget);
                 case 'schedule':
-                    return new groupWidgets(UrScheduleComponent, widget);
+                    return new GroupWidgets(UrScheduleComponent, widget);
                 case 'table':
-                    return new groupWidgets(UrTableComponent, widget);
+                    return new GroupWidgets(UrTableComponent, widget);
                 case 'form':
-                    return new groupWidgets(UrFormComponent, widget);
-                }
+                    return new GroupWidgets(UrFormComponent, widget);
+            }
         });
     }
 }

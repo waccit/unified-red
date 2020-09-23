@@ -9,7 +9,7 @@ import {
     Renderer2,
 } from '@angular/core';
 import { GroupDirective } from '../../directives/group.directive';
-import { groupWidgets } from './group-widget';
+import { GroupWidgets } from './group-widget';
 
 @Component({
     selector: 'app-group',
@@ -19,7 +19,7 @@ import { groupWidgets } from './group-widget';
 export class GroupComponent implements OnInit, OnDestroy {
     header: string;
     cols: string;
-    widgets: groupWidgets[];
+    widgets: GroupWidgets[];
     @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
 
     constructor(
@@ -47,8 +47,8 @@ export class GroupComponent implements OnInit, OnDestroy {
                 const componentRef = this.viewContainerRef.createComponent(componentFactory);
                 componentRef.instance.data = widget.data;
                 // componentRef.instance.text = widget.text;
-                let colWidth = widget.data.width !== 0 ? widget.data.width : 12;
-                let colClass = 'col-' + colWidth;
+                const colWidth = widget.data.width !== 0 ? widget.data.width : 12;
+                const colClass = 'col-' + colWidth;
                 this.renderer2.addClass(componentRef.location.nativeElement, colClass);
             });
         }

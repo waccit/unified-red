@@ -1,5 +1,5 @@
-import { groupWidgets } from '../group/group-widget';
+import { GroupWidgets } from '../group/group-widget';
 
-export class pageGroups {
-    constructor(public header: string, public access: string, public cols: any, public widgets: groupWidgets[]) {}
+export class PageGroups {
+    constructor(public header: string, public access: string, public cols: any, public widgets: GroupWidgets[]) {}
 }
