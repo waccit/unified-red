@@ -58,11 +58,14 @@ module.exports = function (RED) {
                 order: config.order,
                 format: config.format,
                 width: config.width || 12,
+                instanceNum: config.instanceNum || '',
+                instance: config.instance || {},
                 // height: config.height || 1,
                 layout: angLayout,
                 layoutAlign: angLayoutAlign,
+                topicPattern: config.topicPattern || '',
                 access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable'
+                accessBehavior: config.accessBehavior || 'disable',
             },
             convert: function (value) {
                 if (value !== undefined) {

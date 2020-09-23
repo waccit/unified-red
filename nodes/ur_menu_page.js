@@ -12,6 +12,9 @@ module.exports = function (RED) {
             // icon: config.icon || 'ti-folder',
             disabled: config.disabled || false,
             hidden: config.hidden || false,
+            isDynamic: config.isDynamic || false,
+            expression: config.expression || '',
+            instances: this.instances || config.instances || [],
         };
         if (!this.config.hasOwnProperty('disp')) {
             this.config.disp = true;

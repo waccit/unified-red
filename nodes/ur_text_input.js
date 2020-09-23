@@ -42,8 +42,9 @@ module.exports = function (RED) {
                 value: '',
                 width: config.width || 12,
                 // height: config.height || 1,
+                topicPattern: config.topicPattern || '',
                 access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable'
+                accessBehavior: config.accessBehavior || 'disable',
             },
             beforeSend: function (msg, fromUI) {
                 if (fromUI && fromUI.hasOwnProperty('msg') && fromUI.msg !== null) {
