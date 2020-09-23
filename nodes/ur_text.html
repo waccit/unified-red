@@ -11,8 +11,9 @@
             label: { value: 'text' },
             format: { value: '{{msg.payload}}' },
             layout: { value: 'row-spread' },
+            topicPattern: { value: '' },
             access: { value: '' },
-            accessBehavior: { value: '' }
+            accessBehavior: { value: '' },
         },
         inputs: 1,
         outputs: 0,
@@ -20,7 +21,7 @@
         icon: 'ur_text.png',
         paletteLabel: 'text',
         label: function () {
-            return this.name || (~this.label.indexOf('{{') ? null : this.label) || 'text';
+            return this.name || (~this.label.indexOf('/{/{') ? null : this.label) || 'text';
         },
         labelStyle: function () {
             return this.name ? 'node_label_italic' : '';
@@ -46,6 +47,12 @@
                     e.preventDefault();
                 });
             });
+
+            // if (this.menuPage.isDynamic) {
+            //     $('#topic-pattern').show();
+            // } else {
+            //     $('#topic-pattern').hide();
+            // }
         },
     });
 </script>
@@ -53,25 +60,25 @@
 <script type="text/html" data-template-name="ur_text">
     <div class="form-row">
         <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
-        <input type="text" id="node-input-group">
+        <input type="text" id="node-input-group" />
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> Size</label>
-        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-width" />
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
         <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
-        <input type="text" id="node-input-label">
+        <input type="text" id="node-input-label" />
     </div>
     <div class="form-row">
         <label for="node-input-format"><i class="fa fa-i-cursor"></i> Value format</label>
-        <input type="text" id="node-input-format" placeholder="{{msg.payload}}">
+        <input type="text" id="node-input-format" placeholder="{{msg.payload}}" />
     </div>
     <div class="form-row">
         <label style="vertical-align: top"><i class="fa fa-th-large"></i> Layout</label>
         <div style="display:inline-block">
-            <input type="hidden" id="node-input-layout"><input type="hidden" id="node-input-layoutAlign">
+            <input type="hidden" id="node-input-layout" /><input type="hidden" id="node-input-layoutAlign" />
             <div>
                 <a href="#" class="nr-db-text-layout nr-db-text-layout-row nr-db-text-layout-row-left">
                     <span class="nr-db-text-layout-label">label</span>
@@ -105,7 +112,13 @@
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name">
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
     </div>
     <div class="form-row">
         <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
@@ -228,15 +241,30 @@
 <script type="text/html" data-help-name="ur_text">
     <p>Will display a non-editable text field on the user interface.</p>
     <p>Each received <code>msg.payload</code> will update the text based on the provided <b>Value Format</b>.</p>
-    <p>The <b>Value Format</b> field can be used to change the displayed format and can contain valid HTML and
-    <a href="https://scotch.io/tutorials/all-about-the-built-in-angularjs-filters" target="_blank">Angular filters</a>.</p>
-    <p>For example: <code>{{value | uppercase}} &amp;deg;</code> will uppercase the payload text and add the degree symbol.</p>
-    <p>The label can also be set by a message property by setting
-    the field to the name of the property, for example <code>{{msg.topic}}</code>.</p>
-    <p>The following icon fonts are also available: <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
-        <i>(e.g. 'check', 'close')</i> or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a>
-        <i>(e.g. 'fa-fire')</i>, or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
-        You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.</p>
-    <p>The widget also has a class of <code>nr-dashboard-widget-{the_widget_label_with_underscores}</code> which can be used for additional
-        styling if required. You may need to use the <i>!important</i> flag to override the theme.</p>
+    <p>
+        The <b>Value Format</b> field can be used to change the displayed format and can contain valid HTML and
+        <a href="https://scotch.io/tutorials/all-about-the-built-in-angularjs-filters" target="_blank"
+            >Angular filters</a
+        >.
+    </p>
+    <p>
+        For example: <code>{{value | uppercase}} &amp;deg;</code> will uppercase the payload text and add the degree
+        symbol.
+    </p>
+    <p>
+        The label can also be set by a message property by setting the field to the name of the property, for example
+        <code>{{msg.topic}}</code>.
+    </p>
+    <p>
+        The following icon fonts are also available:
+        <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
+        <i>(e.g. 'check', 'close')</i> or a
+        <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i>,
+        or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>. You
+        can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
+    </p>
+    <p>
+        The widget also has a class of <code>nr-dashboard-widget-{the_widget_label_with_underscores}</code> which can be
+        used for additional styling if required. You may need to use the <i>!important</i> flag to override the theme.
+    </p>
 </script>

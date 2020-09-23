@@ -1,4 +1,4 @@
-<script type='text/javascript'>
+<script type="text/javascript">
     RED.nodes.registerType('ur_table', {
         category: 'unified-red',
         color: 'rgb(63, 173, 181)',
@@ -10,10 +10,25 @@
                 value: 0,
             },
             height: { value: 0 },
-            fields: { value: [{ label: "", format: "", formatType: "", display: "", device: "", deviceType: "", param: "", unit: "", unitType: ""}] },
+            fields: {
+                value: [
+                    {
+                        label: '',
+                        format: '',
+                        formatType: '',
+                        display: '',
+                        device: '',
+                        deviceType: '',
+                        param: '',
+                        unit: '',
+                        unitType: '',
+                    },
+                ],
+            },
             cts: { value: false },
+            topicPattern: { value: '' },
             access: { value: '' },
-            accessBehavior: { value: '' }
+            accessBehavior: { value: '' },
         },
         inputs: 1,
         outputs: 0,
@@ -22,11 +37,11 @@
         label: function () {
             return this.name || 'table';
         },
-        labelStyle: function() {
-            return this.name?"node_label_italic":"";
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
-            if(RED.nodes.getType('ur_group')) {
+            if (RED.nodes.getType('ur_group')) {
                 $('.form-tips').hide();
             } else {
                 $('.form-row').hide();
@@ -34,101 +49,146 @@
             $('#node-input-size').elementSizer({
                 width: '#node-input-width',
             });
-            $('#node-input-field-container').css('min-height','150px').css('min-width','950px').editableList({
-                addItem: function(container, index, opt) {
-                    if (!opt.hasOwnProperty('field')) {
-                        opt.field = {};
-                    }
-                    var field = opt.field;
-                    if (!field.hasOwnProperty('prop')) {
-                        field.prop = 'vis';
-                    }
-                    container.css({
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap'
-                    });
-                    var row = $('<div/>').appendTo(container);
-                    //label input
-                    $('<input/>', { class: "node-input-field-label", type: "text", placeholder: "label", style: "margin-left: 5px; width: 15%;" }).appendTo(row).val(field.label);
-                    //format select
-                    var optionLink = {value: "link", label: "Link", hasValue: true};
-                    var optionText = {value: "fText", label: "Text", hasValue: true};
-                    $('<input/>', { class:'node-input-field-format', type: "text", style: "margin-left: 5px; width: 15%;"}).appendTo(row).val(field.format).change().typedInput({
-                        default: field.formatType,
-                        typeField: $('<input/>', { class:'.node-input-field-formatType',  type: "hidden"}),
-                        types: [optionText, optionLink],
-                    });
-                    // Units select
-                    var optionNothing = {value: "nothing", label: "No Units", hasValue: false};
-                    var optionUnit = {value: "unit", label: "Units", hasValue: true};
-                    $('<input/>', { class:'node-input-field-unit', type: "text", style: "margin-left: 5px; width: 15%;"}).appendTo(row).val(field.unit).change().typedInput({
-                        default: field.unitType,
-                        typeField: $('<input/>', { class:'.node-input-field-unitType',  type: "hidden"}),
-                        types: [optionNothing, optionUnit],
-                    });
-                    //display input
-                    $('<input/>', { class: "node-input-field-display", type: "text", placeholder: "display", style: "margin-left: 5px; width: 15%;" }).appendTo(row).val(field.display);
-                    //Regex Select
-                    var optionWebApp = {value:"webApp", label: "Smart Server IoT", hasValue:false};
-                    var optionCustom = {value:"custom", label: "Custom", hasValue: true};
-                    $('<input/>', { class:'node-input-field-device', type: "text", style: "margin-left: 5px; width: 15%;"}).appendTo(row).val(field.device).change().typedInput({
-                        default: field.deviceType,
-                        typeField: $('<input/>', { class:'.node-input-field-deviceType',  type: "hidden"}),
-                        types: [optionWebApp, optionCustom],
-                    });
-                    //param input
-                    $('<input/>', { class: "node-input-field-param", type: "text", placeholder: "param", style: "margin-left: 5px; width: 15%;" }).appendTo(row).val(field.param);
-                },
-                sortable: true,
-                removable: true,
-                addButton: true,
-            });
+            $('#node-input-field-container')
+                .css('min-height', '150px')
+                .css('min-width', '950px')
+                .editableList({
+                    addItem: function (container, index, opt) {
+                        if (!opt.hasOwnProperty('field')) {
+                            opt.field = {};
+                        }
+                        var field = opt.field;
+                        if (!field.hasOwnProperty('prop')) {
+                            field.prop = 'vis';
+                        }
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                        });
+                        var row = $('<div/>').appendTo(container);
+                        //label input
+                        $('<input/>', {
+                            class: 'node-input-field-label',
+                            type: 'text',
+                            placeholder: 'label',
+                            style: 'margin-left: 5px; width: 15%;',
+                        })
+                            .appendTo(row)
+                            .val(field.label);
+                        //format select
+                        var optionLink = { value: 'link', label: 'Link', hasValue: true };
+                        var optionText = { value: 'fText', label: 'Text', hasValue: true };
+                        $('<input/>', {
+                            class: 'node-input-field-format',
+                            type: 'text',
+                            style: 'margin-left: 5px; width: 15%;',
+                        })
+                            .appendTo(row)
+                            .val(field.format)
+                            .change()
+                            .typedInput({
+                                default: field.formatType,
+                                typeField: $('<input/>', { class: '.node-input-field-formatType', type: 'hidden' }),
+                                types: [optionText, optionLink],
+                            });
+                        // Units select
+                        var optionNothing = { value: 'nothing', label: 'No Units', hasValue: false };
+                        var optionUnit = { value: 'unit', label: 'Units', hasValue: true };
+                        $('<input/>', {
+                            class: 'node-input-field-unit',
+                            type: 'text',
+                            style: 'margin-left: 5px; width: 15%;',
+                        })
+                            .appendTo(row)
+                            .val(field.unit)
+                            .change()
+                            .typedInput({
+                                default: field.unitType,
+                                typeField: $('<input/>', { class: '.node-input-field-unitType', type: 'hidden' }),
+                                types: [optionNothing, optionUnit],
+                            });
+                        //display input
+                        $('<input/>', {
+                            class: 'node-input-field-display',
+                            type: 'text',
+                            placeholder: 'display',
+                            style: 'margin-left: 5px; width: 15%;',
+                        })
+                            .appendTo(row)
+                            .val(field.display);
+                        //Regex Select
+                        var optionWebApp = { value: 'webApp', label: 'Smart Server IoT', hasValue: false };
+                        var optionCustom = { value: 'custom', label: 'Custom', hasValue: true };
+                        $('<input/>', {
+                            class: 'node-input-field-device',
+                            type: 'text',
+                            style: 'margin-left: 5px; width: 15%;',
+                        })
+                            .appendTo(row)
+                            .val(field.device)
+                            .change()
+                            .typedInput({
+                                default: field.deviceType,
+                                typeField: $('<input/>', { class: '.node-input-field-deviceType', type: 'hidden' }),
+                                types: [optionWebApp, optionCustom],
+                            });
+                        //param input
+                        $('<input/>', {
+                            class: 'node-input-field-param',
+                            type: 'text',
+                            placeholder: 'param',
+                            style: 'margin-left: 5px; width: 15%;',
+                        })
+                            .appendTo(row)
+                            .val(field.param);
+                    },
+                    sortable: true,
+                    removable: true,
+                    addButton: true,
+                });
             // $("#node-input-field-container").editableList('addItems', this.fields);
             for (let i = 0; i < this.fields.length; i++) {
-                $("#node-input-field-container").editableList('addItem', { field: this.fields[i] });
+                $('#node-input-field-container').editableList('addItem', { field: this.fields[i] });
             }
         },
-        oneditsave: function() {
-            let fields = $("#node-input-field-container").editableList('items');
+        oneditsave: function () {
+            let fields = $('#node-input-field-container').editableList('items');
             let node = this;
             node.fields = [];
             fields.each(function (i) {
                 let container = $(this);
 
                 let c = {
-                    label : container.find(".node-input-field-label").val(),
-                    format : container.find(".node-input-field-format").val(),
-                    formatType : container.find(".node-input-field-format").typedInput('type'),
-                    display : container.find(".node-input-field-display").val(),
-                    deviceType : container.find(".node-input-field-device").typedInput('type'),
-                    device : container.find(".node-input-field-device").val(),
-                    param : container.find(".node-input-field-param").val(),
-                    unitType : container.find(".node-input-field-unit").typedInput('type'),
-                    unit : container.find(".node-input-field-unit").val(),
+                    label: container.find('.node-input-field-label').val(),
+                    format: container.find('.node-input-field-format').val(),
+                    formatType: container.find('.node-input-field-format').typedInput('type'),
+                    display: container.find('.node-input-field-display').val(),
+                    deviceType: container.find('.node-input-field-device').typedInput('type'),
+                    device: container.find('.node-input-field-device').val(),
+                    param: container.find('.node-input-field-param').val(),
+                    unitType: container.find('.node-input-field-unit').typedInput('type'),
+                    unit: container.find('.node-input-field-unit').val(),
                 };
                 node.fields.push(c);
             });
             //check for pivot
-            ($("#node-input-cts").is(":checked")) ? this.pivot = 1 : this.pivot = 0;
-                
+            $('#node-input-cts').is(':checked') ? (this.pivot = 1) : (this.pivot = 0);
         },
-        oneditresize: function(size) {
-            var rows = $("#dialog-form>div:not(.node-input-field-container-row)");
+        oneditresize: function (size) {
+            var rows = $('#dialog-form>div:not(.node-input-field-container-row)');
             var height = size.height;
-            for (var i=0; i<rows.length; i++) {
+            for (var i = 0; i < rows.length; i++) {
                 height -= $(rows[i]).outerHeight(true);
             }
-            var editorRow = $("#dialog-form>div.node-input-field-container-row");
-            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            var editorRow = $('#dialog-form>div.node-input-field-container-row');
+            height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
 
-            $("#node-input-field-container").editableList('height',height);
-        }
+            $('#node-input-field-container').editableList('height', height);
+        },
     });
 </script>
 
-
-
-<script type='text/html' data-template-name='ur_table'>
+<script type="text/html" data-template-name="ur_table">
     <div class='form-row' id='table-row-group'>
         <label for='node-input-group'>
             <i class='fa fa-table'></i> Group</span>
@@ -157,6 +217,12 @@
         </div>
         <!-- <ol id="node-input-field-container"></ol> -->
     </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
     <div class="form-row">
         <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
         <select id="node-input-access" style="width: 35%">
@@ -179,7 +245,6 @@
     </div>
 </script>
 
-
 <script type="text/html" data-help-name="ur_table">
     <p>The table widget can will generate a table element.</p>
     <p>This node can be used to create a dynamic table that the appearence
@@ -188,8 +253,8 @@
     <p>
         <ul>
             <li><b>Label</b>
-                Is the field header label (row label when pivoted). 
-                It's a simple static string and we display it on the web 
+                Is the field header label (row label when pivoted).
+                It's a simple static string and we display it on the web
                 page exactly as provided.
             </li>
             <li><b>Format</b>
@@ -198,17 +263,17 @@
                 link, etc.
             </li>
             <li><b>Display</b>
-                Defines what part of the message to display -- 
+                Defines what part of the message to display --
                 topic or payload.
             </li>
-            
+
             <li><b>Device Filter</b>
                 Defines how we filter for each device
-                -- compares the topic to a predefined regex expression 
-                this is where the magic happens to associate message 
+                -- compares the topic to a predefined regex expression
+                this is where the magic happens to associate message
                 data with the device been inputed.
             </li>
-            
+
             <li><b>Parameter</b> Provides point defenitions to be filtered into the table rows or element in payload (i.e. "payload.element").</li>
         </ul>
     </p>

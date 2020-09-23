@@ -16,6 +16,47 @@
             collapse: { value: false },
             disabled: { value: false },
             hidden: { value: false },
+            isDynamic: { value: false },
+            expression: {
+                value: '',
+                validate: function (v) {
+                    if (!this.isDynamic) {
+                        return true;
+                    } else {
+                        let expression = v || '';
+                        let validLen = v.length > 0;
+                        let validExp = v.toLowerCase().includes('{x}');
+                        let valid = validLen && validExp;
+
+                        if (!validLen) {
+                            $('#length-invalid').css({ display: 'block' });
+                        } else {
+                            $('#length-invalid').css({ display: 'none' });
+                        }
+
+                        if (!validExp) {
+                            $('#expression-invalid').css({ display: 'block' });
+                        } else {
+                            $('#expression-invalid').css({ display: 'none' });
+                        }
+
+                        $('#node-config-input-expression').toggleClass('input-error', !valid);
+
+                        return valid;
+                    }
+                },
+            },
+            instances: {
+                value: [{ name: '', number: '' }],
+                // validate: function (v) {
+                //     if (this.isDynamic) {
+                //         console.log('v: ', v);
+                //         return v.valid;
+                //     } else {
+                //         return true;
+                //     }
+                // },
+            },
         },
         sort: function (A, B) {
             if (A.menuItem !== B.menuItem) {
@@ -46,19 +87,6 @@
         },
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
-            // $("#node-input-size").elementSizer({
-            //     width: "#node-config-input-width",
-            //     auto: false
-            // });
-            // $("#node-config-input-disp").on("change", function() {
-            //     if ($("#node-config-input-disp").is(":checked")) {
-            //         $("#subtab-collapse-flag").show();
-            //     }
-            //     else {
-            //         $("#subtab-collapse-flag").hide();
-            //         $("#node-config-input-collapse").prop("checked",false);
-            //     }
-            // });
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
                 var active = i.hasClass('fa-toggle-on');
@@ -96,52 +124,289 @@
             } else {
                 $('#node-config-input-hidden-label').text(c_ur_menu_page('label.visible'));
             }
+
+            $('#node-config-input-isDynamic-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var disabled = i.hasClass('fa-toggle-off');
+                var newCls = 'fa fa-toggle-' + (disabled ? 'on' : 'off');
+                i.attr('class', newCls);
+                $('#node-config-input-isDynamic').prop('checked', disabled);
+
+                var newTxt = c_ur_menu_page(disabled ? 'label.enabled' : 'label.disabled');
+                $('#node-config-input-isDynamic-label').text(newTxt);
+
+                // if disabled toggle "on"
+                if (disabled) {
+                    $('#instance-expression').show();
+                    $('#instances-map').show();
+                } else {
+                    $('#instance-expression').hide();
+                    $('#instances-map').hide();
+                }
+
+                var info = $('#node-config-input-isDynamic-info');
+                var done = disabled ? info.show() : info.hide();
+            });
+            if (this.isDynamic) {
+                $('#node-config-input-isDynamic-btn').click();
+            } else {
+                $('#node-config-input-isDynamic-label').text(c_ur_menu_page('label.disabled'));
+                $('#instance-expression').hide();
+                $('#instances-map').hide();
+            }
+
+            let explodeRange = function (exp) {
+                if (exp.indexOf('-') === -1) {
+                    return exp;
+                }
+                let [a, b] = exp.split('-');
+                a = parseInt(a);
+                b = parseInt(b);
+                let start = Math.min(a, b);
+                let end = Math.max(a, b);
+                let range = [];
+                while (start <= end) {
+                    range.push(start++);
+                }
+                return range.join(',');
+            };
+
+            $('#node-config-input-instances-list')
+                .css('min-height', '150px')
+                .editableList({
+                    sortable: true,
+                    removable: true,
+                    addButton: true,
+                    addItem: function (container, index, opt) {
+                        if (!opt.hasOwnProperty('instance')) {
+                            opt.instance = {};
+                        }
+
+                        let instance = opt.instance;
+
+                        let rawInstanceNames = instance.name;
+                        let rawInstanceNums = instance.number;
+                        let instanceNames = [];
+                        let instanceNums = [];
+
+                        if (rawInstanceNames && rawInstanceNames.length > 0) {
+                            rawInstanceNames = rawInstanceNames.split(/[ ,]+/).filter((x) => x);
+                            for (let i = 0; i < rawInstanceNames.length; i++) {
+                                let tempName = explodeRange(rawInstanceNames[i]).split(',');
+                                if (tempName.length !== 0) {
+                                    instanceNames = instanceNames.concat(tempName);
+                                }
+                            }
+                        }
+
+                        if (rawInstanceNums && rawInstanceNums.length > 0) {
+                            rawInstanceNums = rawInstanceNums.split(/[ ,]+/).filter((x) => x);
+                            for (let i = 0; i < rawInstanceNums.length; i++) {
+                                let tempNum = explodeRange(rawInstanceNums[i]).split(',');
+                                instanceNums = instanceNums.concat(tempNum);
+                            }
+                        }
+
+                        container.css({
+                            overflow: 'hidden',
+                            whitespace: 'nowrap',
+                        });
+
+                        var row = $('<div/>')
+                            .css({ display: 'flex', 'justify-content': 'space-evenly' })
+                            .appendTo(container);
+
+                        var instNameField = $('<input/>', {
+                            class: 'node-config-input-instance-name',
+                            id: 'instance-name-' + index,
+                            type: 'text',
+                            style: 'width: 47%',
+                            placeholder: 'instance name',
+                        })
+                            .appendTo(row)
+                            .val(instance.name);
+
+                        var instNumField = $('<input/>', {
+                            class: 'node-config-input-instance-number',
+                            id: 'instance-number-' + index,
+                            type: 'text',
+                            style: 'width: 47%',
+                            placeholder: 'instance number',
+                        })
+                            .appendTo(row)
+                            .val(instance.number);
+
+                        let valid = instanceNames.length === instanceNums.length;
+                        instNameField.toggleClass('input-error', !valid);
+                        instNumField.toggleClass('input-error', !valid);
+
+                        if (instanceNames.length === 0) {
+                            instNameField.addClass('input-error');
+                        }
+
+                        if (instanceNums.length === 0) {
+                            instNumField.addClass('input-error');
+                        }
+
+                        instNameField.on('change keyup paste', function () {
+                            rawInstanceNames = instNameField.val();
+                            instanceNames = [];
+                            if (rawInstanceNames && rawInstanceNames.length > 0) {
+                                rawInstanceNames = rawInstanceNames.split(/[ ,]+/).filter((x) => x);
+                                for (let i = 0; i < rawInstanceNames.length; i++) {
+                                    let tempName = explodeRange(rawInstanceNames[i]).split(',');
+                                    if (tempName.length !== 0) {
+                                        instanceNames = instanceNames.concat(tempName);
+                                    }
+                                }
+                            }
+                            let valid = instanceNames.length === instanceNums.length && instanceNames.length > 0;
+                            instNameField.toggleClass('input-error', !valid);
+                            instNumField.toggleClass('input-error', !valid);
+                        });
+
+                        instNumField.on('change keyup paste', function () {
+                            rawInstanceNums = instNumField.val();
+                            instanceNums = [];
+                            if (rawInstanceNums && rawInstanceNums.length > 0) {
+                                rawInstanceNums = rawInstanceNums.split(/[ ,]+/).filter((x) => x);
+                                for (let i = 0; i < rawInstanceNums.length; i++) {
+                                    let tempNum = explodeRange(rawInstanceNums[i]).split(',');
+                                    instanceNums = instanceNums.concat(tempNum);
+                                }
+                            }
+                            let valid = instanceNames.length === instanceNums.length && instanceNames.length > 0;
+                            instNameField.toggleClass('input-error', !valid);
+                            instNumField.toggleClass('input-error', !valid);
+                        });
+                    },
+                });
+
+            for (let i = 0; i < this.instances.length; i++) {
+                $('#node-config-input-instances-list').editableList('addItem', { instance: this.instances[i] });
+            }
         },
         oneditsave: function () {
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
+            this.isDynamic = $('#node-config-input-isDynamic').prop('checked');
+
+            let instances = $('#node-config-input-instances-list').editableList('items');
+            let node = this;
+            node.instances = [];
+            console.log('instances: ', instances);
+            instances.each(function (inst) {
+                let container = $(this);
+                let i = {
+                    name: container.find('.node-config-input-instance-name').val(),
+                    number: container.find('.node-config-input-instance-number').val(),
+                };
+                node.instances.push(i);
+            });
         },
     });
 </script>
 
 <script type="text/html" data-template-name="ur_menu_page">
     <div class="form-row">
-        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_menu_page.label.name"></span></label>
-        <input type="text" id="node-config-input-name">
-    </div>
-    <!-- <div class="form-row">
-        <label for="node-config-input-icon"><i class="fa fa-file-image-o"></i><span data-i18n="ur_menu_page.label.icon"></span></label>
-        <input type="text" id="node-config-input-icon">
-    </div> -->
-    <div class="form-row">
-        <label for="node-config-input-menuItem"><i class="fa fa-table"></i> <span data-i18n="ur_menu_page.label.menuItem"></span></label>
-        <input type="text" id="node-config-input-menuItem">
+        <label for="node-config-input-name"
+            ><i class="fa fa-tag"></i> <span data-i18n="ur_menu_page.label.name"></span
+        ></label>
+        <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-disabled-btn"><i class="fa fa-ban"></i><span data-i18n="ur_menu_page.label.state"></span></label>
-        <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;"><i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span></button>
-        <input type="checkbox" id="node-config-input-disabled" style="display: none;">
-        <span id="node-config-input-disabled-info" data-i18n="[html]ur_menu_page.info.disabled" style="display: none;"></span>
+        <label for="node-config-input-menuItem"
+            ><i class="fa fa-table"></i> <span data-i18n="ur_menu_page.label.menuItem"></span
+        ></label>
+        <input type="text" id="node-config-input-menuItem" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-hidden-btn"><i class="fa fa-eye-slash"></i><span data-i18n="ur_menu_page.label.navmenu"></span></label>
-        <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;"><i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span></button>
-        <input type="checkbox" id="node-config-input-hidden" style="display:none;">
-        <span id="node-config-input-hidden-info" data-i18n="[html]ur_menu_page.info.hidden" style="display:none;"></span>
+        <label for="node-config-input-disabled-btn"
+            ><i class="fa fa-ban"></i> <span data-i18n="ur_menu_page.label.state"></span
+        ></label>
+        <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-disabled" style="display: none;" />
+        <span
+            id="node-config-input-disabled-info"
+            data-i18n="[html]ur_menu_page.info.disabled"
+            style="display: none;"
+        ></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-hidden-btn"
+            ><i class="fa fa-eye-slash"></i> <span data-i18n="ur_menu_page.label.navmenu"></span
+        ></label>
+        <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-hidden" style="display:none;" />
+        <span
+            id="node-config-input-hidden-info"
+            data-i18n="[html]ur_menu_page.info.hidden"
+            style="display:none;"
+        ></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-isDynamic-btn" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-clone" style="margin-right: 5px"></i>
+            <span data-i18n="ur_menu_page.label.dynamic-page"></span
+        ></label>
+        <button id="node-config-input-isDynamic-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-off"></i> <span id="node-config-input-isDynamic-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-isDynamic" style="display:none;" />
+        <span
+            id="node-config-input-isDynamic-info"
+            data-i18n="[html]ur_menu_page.info.isDynamic"
+            style="display:none;"
+        ></span>
+    </div>
+    <div class="form-row" id="instance-expression">
+        <label for="node-config-input-expression" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-code" style="margin-right: 5px;"></i>
+            <span data-i18n="ur_menu_page.label.expression"></span
+        ></label>
+        <input type="text" id="node-config-input-expression" />
+        <div
+            id="length-invalid"
+            style="display: none; font-size: 10px; line-height: 12px; color: red; padding-left: 105px; margin-top: -15px"
+        >
+            must provide expression
+        </div>
+        <div
+            id="expression-invalid"
+            style="display: none; font-size: 10px; line-height: 12px; color: red; padding-left: 105px;"
+        >
+            must include {x}
+        </div>
+    </div>
+    <div class="form-row" id="instances-map">
+        <label for="node-config-input-instances"
+            ><i class="fa fa-tags"></i> <span data-i18n="ur_menu_page.label.instances"></span
+        ></label>
+        <ol id="node-config-input-instances-list"></ol>
     </div>
     <div class="form-tips" data-i18n="[html]ur_menu_page.tip"></div>
 </script>
 
 <script type="text/html" data-help-name="ur_menu_page">
     <p>Menu Page configuration for Unified-RED</p>
-    <p><b>Disabled</b> pages are not included in the app, and are therefore not functional.
-       The menu page name still appears in the Navigation Menu (unless it is also hidden).
+    <p>
+        <b>Disabled</b> pages are not included in the app, and are therefore not functional. The menu page name still
+        appears in the Navigation Menu (unless it is also hidden).
     </p>
-    <p><b>Hidden</b> pages are not listed in the Left-hand Navigation Menu.
-       However, they are still active in the app, and can be shown by using a `ur_control` msg.
+    <p>
+        <b>Hidden</b> pages are not listed in the Left-hand Navigation Menu. However, they are still active in the app,
+        and can be shown by using a `ur_control` msg.
     </p>
-    <p>The <b>Icon</b> field can be either a <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
-    <i>(e.g. 'check', 'close')</i> or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a>
-    <i>(e.g. 'fa-fire')</i>, or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
-    You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.</p>
+    <p>
+        The <b>Icon</b> field can be either a
+        <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
+        <i>(e.g. 'check', 'close')</i> or a
+        <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i>,
+        or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>. You
+        can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
+    </p>
 </script>

@@ -23,12 +23,13 @@
             height: { value: 0 },
             format: {
                 value: `<img static src="/img/VAV/hwreheat/background.jpg">
-<img animated name="damper" src="/img/VAV/hwreheat/damper1.jpg" style="position: absolute;">
-<img animated name="coil" src="/img/VAV/hwreheat/coil10.jpg" style="position: absolute;">`,
+    <img animated name="damper" src="/img/VAV/hwreheat/damper1.jpg" style="position: absolute;">
+    <img animated name="coil" src="/img/VAV/hwreheat/coil10.jpg" style="position: absolute;">`,
             },
             rules: { value: [{ img: '', topic: '', prop: 'vis', exp: '' }] },
+            topicPattern: { value: '' },
             access: { value: '' },
-            accessBehavior: { value: '' }
+            accessBehavior: { value: '' },
         },
         inputs: 1,
         outputs: 0,
@@ -270,27 +271,33 @@
         }
     </style>
     <div class="form-row" id="template-row-group">
-        <label for="node-input-group"><i class="fa fa-table"></i> <span data-i18n="ur_animation.label.group"></span></label>
-        <input type="text" id="node-input-group">
+        <label for="node-input-group"
+            ><i class="fa fa-table"></i> <span data-i18n="ur_animation.label.group"></span
+        ></label>
+        <input type="text" id="node-input-group" />
     </div>
     <div class="form-row" id="template-row-size">
         <label><i class="fa fa-object-group"></i> <span data-i18n="ur_animation.label.size"></span></label>
-        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-width" />
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_animation.label.name"></span></label>
         <div style="display:inline-block; width:calc(100% - 105px)">
-            <input type="text" id="node-input-name">
+            <input type="text" id="node-input-name" />
         </div>
     </div>
     <div class="form-row" style="margin-bottom:0px;">
-        <label for="node-input-format"><i class="fa fa-copy"></i> <span data-i18n="ur_animation.label.template"></span></label>
-        <input type="hidden" id="node-input-format">
-        <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right"><i class="fa fa-expand"></i></button>
+        <label for="node-input-format"
+            ><i class="fa fa-copy"></i> <span data-i18n="ur_animation.label.template"></span
+        ></label>
+        <input type="hidden" id="node-input-format" />
+        <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right">
+            <i class="fa fa-expand"></i>
+        </button>
     </div>
     <div class="form-row node-text-editor-row">
-        <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor" ></div>
+        <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor"></div>
     </div>
     <div class="form-row" style="margin-bottom:0px;">
         <label><i class="fa fa-eye"></i> <span data-i18n="ur_animation.label.viewport"></span></label>
@@ -298,15 +305,27 @@
     <div class="form-row node-text-viewport-row">
         <div style="display: table;">
             <div style="display: table-cell;">
-                <div id="node-input-viewport" class="node-text-viewport red-ui-editableList-border" style="position:relative; margin:auto;"></div>
+                <div
+                    id="node-input-viewport"
+                    class="node-text-viewport red-ui-editableList-border"
+                    style="position:relative; margin:auto;"
+                ></div>
             </div>
         </div>
     </div>
     <div class="form-row" style="margin-bottom:0px;">
-        <label for="node-input-rule-container"><i class="fa fa-tasks"></i> <span data-i18n="ur_animation.label.rules"></span></label>
+        <label for="node-input-rule-container"
+            ><i class="fa fa-tasks"></i> <span data-i18n="ur_animation.label.rules"></span
+        ></label>
     </div>
     <div class="form-row node-input-rule-container-row">
         <ol id="node-input-rule-container"></ol>
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
     </div>
     <div class="form-row">
         <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
@@ -322,29 +341,36 @@
             <option value="8">Level 8 (reserved)</option>
             <option value="9">Level 9 Tech</option>
             <option value="10">Level 10 Admin</option>
-         </select>
-         <select id="node-input-accessBehavior" style="width: 35%">
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
             <option value="hide">Show/Hide</option>
             <option value="disable">Enable/Disable</option>
-         </select>
+        </select>
     </div>
 </script>
 
 <script type="text/html" data-help-name="ur_animation">
-        <p>The animation widget can contain any valid html and jQuery.</p>
-        <p>This node can be used to create a dynamic user interface element that changes its appearence
-        based on the input message.</p>
-        <p><b>For example:</b><br>
-        <pre style="font-size:smaller;">&lt;img static src=&quot;/img/VAV/hwreheat/background.jpg&quot; style=&quot;max-width: 358px;&quot;&gt;
+    <p>The animation widget can contain any valid html and jQuery.</p>
+    <p>
+        This node can be used to create a dynamic user interface element that changes its appearence based on the input
+        message.
+    </p>
+    <p><b>For example:</b><br /></p>
+    <pre style="font-size:smaller;">
+&lt;img static src=&quot;/img/VAV/hwreheat/background.jpg&quot; style=&quot;max-width: 358px;&quot;&gt;
 
     &lt;img animated name=&quot;damper&quot; src=&quot;/img/VAV/hwreheat/damper1.jpg&quot; style=&quot;position: absolute; top: 0%; left: 0%; width: 48.0447%; max-width: 172px;&quot;&gt;
 
-    &lt;img animated name=&quot;coil&quot; src=&quot;/img/VAV/hwreheat/coil10.jpg&quot; style=&quot;position: absolute; top: 16.8999%; left: 58.6025%; width: 41.3408%; max-width: 148px;&quot;&gt;</pre>
-        Will display if the number received as <code>msg.payload</code> is even or odd. It will also
-        change the color of the text to green if the number is even or red if odd.<br/>
-        <p>Templates made in this way can be copied and remain independent of each other.</p>
-        <p><b>Using <code>msg.template</code>:</b><br>
-        You can also define the template content via <code>msg.template</code>, so you can use external files for example.<br>
-        Template will be reloaded on input if it has changed.<br>
-        Code written in the Template field will be ignored when <code>msg.template</code> is present.</p>
+    &lt;img animated name=&quot;coil&quot; src=&quot;/img/VAV/hwreheat/coil10.jpg&quot; style=&quot;position: absolute; top: 16.8999%; left: 58.6025%; width: 41.3408%; max-width: 148px;&quot;&gt;</pre
+    >
+    Will display if the number received as <code>msg.payload</code> is even or odd. It will also change the color of the
+    text to green if the number is even or red if odd.<br />
+    <p>Templates made in this way can be copied and remain independent of each other.</p>
+    <p>
+        <b>Using <code>msg.template</code>:</b><br />
+        You can also define the template content via <code>msg.template</code>, so you can use external files for
+        example.<br />
+        Template will be reloaded on input if it has changed.<br />
+        Code written in the Template field will be ignored when <code>msg.template</code> is present.
+    </p>
 </script>

@@ -301,13 +301,38 @@ function add(opt) {
             if (msg.hasOwnProperty('enabled')) {
                 toEmit.disabled = !msg.enabled;
             }
-            toEmit.socketid = toEmit.id = toStore.id = opt.node.id;
+
+            // WIP: dynamic widget id update!
+            // console.log('opt.control: ', opt.control);
+            let newId = opt.node.id;
+            if (opt.menuPage.config.isDynamic) {
+                let topic = msg.topic;
+                console.log('msg.topic: ', msg.topic);
+                let topicPattern = opt.control.topicPattern;
+
+                // find and replace wildcard (*)
+                let topicRegex = topicPattern.replace(/\*/g, '.*');
+                // find and replace capture group (x)
+                topicRegex = topicRegex.replace(/\{x\}/gi, '([\\w\\. ]+)');
+                // make new regex
+                topicRegex = new RegExp('^' + topicRegex + '$');
+
+                let topicArr = topicRegex.exec(topic);
+                let destinationInstNum = topicArr[1];
+
+                newId += '.' + destinationInstNum;
+            }
+
+            toEmit.socketid = toEmit.id = toStore.id = newId;
+            // toEmit.id = toStore.id = opt.node.id;
+            // console.log('toEmit: ', toEmit);
             //toEmit.socketid = msg.socketid; // dcj mu
             // Emit and Store the data
             //if (settings.verbose) { console.log("UI-EMIT",JSON.stringify(toEmit)); }
             emitSocket(updateValueEventName, toEmit);
             if (opt.persistantFrontEndValue) {
-                replayMessages[opt.node.id] = toStore;
+                // replayMessages[opt.node.id] = toStore;
+                replayMessages[newId] = toStore;
             }
 
             // Handle the node output
@@ -400,7 +425,7 @@ function init(server, app, log, redSettings) {
     } else {
         settings.readOnly = false;
     }
-    settings.defaultGroupHeader = uiSettings.defaultGroup || 'Default';
+    // settings.defaultGroupHeader = uiSettings.defaultGroup || 'Default';
     settings.verbose = redSettings.verbose || false;
 
     var fullPath = join(redSettings.httpNodeRoot, settings.path);
@@ -524,10 +549,10 @@ function init(server, app, log, redSettings) {
             delete p.socketid;
             params = p;
         });
-        socket.on('join', function(room) {
+        socket.on('join', function (room) {
             socket.join(room);
         });
-        socket.on('leave', function(room) {
+        socket.on('leave', function (room) {
             socket.leave(room);
         });
     });
@@ -604,7 +629,54 @@ function findMenuItemById(container, id) {
     return result;
 }
 
-function addControl(menu_items, menu_page, page_group, control) {
+// credit to Samy Arbid (/nodes/ur_schedule.js)
+let explodeRange = function (exp) {
+    if (exp.indexOf('-') === -1) {
+        return exp;
+    }
+    let [a, b] = exp.split('-');
+    a = parseInt(a);
+    b = parseInt(b);
+    let start = Math.min(a, b);
+    let end = Math.max(a, b);
+    let range = [];
+    while (start <= end) {
+        range.push(start++);
+    }
+    return range.join(',');
+};
+
+// helper function to detect changes in dynamic page
+// NB: limitations of using JSON.stringify:
+//      1. 'undefined' values will be replaced as 'null'
+//      2. JSON.stringify does not consider object types
+let dynamicPagesNeedUpdate = function (current, incoming) {
+    return JSON.stringify(current) !== JSON.stringify(incoming);
+};
+
+let getUpdatedPageOrder = function (id, current) {
+    let result = current;
+
+    if (pageOrdersLog.hasOwnProperty(id)) {
+        pageOrdersLog[id].forEach((o) => {
+            if (result >= o.start && result <= o.end) {
+                result = o.end + 1;
+            }
+        });
+    }
+
+    return result;
+};
+
+let removeFunc;
+var dynamicPages = {};
+var dynamicGroups = {};
+var dynamicWidgets = {};
+var pageOrdersLog = {};
+// key: parent menuItem's id
+// val: { id: <menuPage's id>, start: <start order>, end: <end order> }
+
+function addControl(menu_items, menu_page, group, control) {
     if (typeof control.type !== 'string') {
         return function () {};
     }
@@ -624,7 +696,7 @@ function addControl(menu_items, menu_page, page_group, control) {
             }
         };
     } else {
-        page_group = page_group || settings.defaultGroupHeader;
+        // group = group || settings.defaultGroupHeader;
         control.order = parseFloat(control.order);
         let pathNeedsUpdate = false;
         var foundMenuItem;
@@ -681,11 +753,9 @@ function addControl(menu_items, menu_page, page_group, control) {
             }
 
             if (foundMenuItem && needsUpdate(foundMenuItem, currMenuItem)) {
-                console.log('needs update!');
                 var updatedMenuItem = {
                     id: currMenuItem.id,
                     isRoot: currMenuItem.isRoot,
-                    isYoungest: currMenuItem.isYoungest,
                     order: parseFloat(currMenuItem.config.order),
                     disabled: currMenuItem.config.disabled,
                     hidden: currMenuItem.config.hidden,
@@ -710,111 +780,416 @@ function addControl(menu_items, menu_page, page_group, control) {
             }
         }
 
-        var foundMenuPage = find(foundMenuItem.items, function (mp) {
-            return mp.id === menu_page.id;
-        });
+        if (menu_page.config.isDynamic) {
+            // get expression from menu_page
+            let expression = menu_page.config.expression;
 
-        if (foundMenuPage && (pathNeedsUpdate || needsUpdate(foundMenuPage, menu_page))) {
-            var updatedMenuPage = {
-                id: menu_page.id,
-                isMenuPage: true,
-                order: parseFloat(menu_page.config.order),
-                disabled: menu_page.config.disabled,
-                hidden: menu_page.config.hidden,
-                items: foundMenuPage.items,
-                // Atrio sidebarItems properties:
-                path: '/d/' + menuItemsPath + menu_page.config.pathName,
-                title: menu_page.config.name,
-                // icon: menu_page.config.icon,
-                class: foundMenuPage.class,
-                groupTitle: foundMenuPage.groupTitle,
-                submenu: foundMenuPage.submenu,
+            // split string as prefix and instance nums
+            let rx = /(.*)(\{x\})(.*)/g;
+
+            // index 0: input text
+            // index 1: first group (prefix)
+            // index 2: second group (instance num)
+            // index 3: third group (suffix)
+            let expressionArr = rx.exec(expression);
+
+            // set prefix & suffix
+            let pageTitlePrefix = expressionArr[1];
+            let pageTitleSuffix = expressionArr[3];
+
+            // determine instance numbers
+            let instanceNames = [];
+            let instanceNums = [];
+
+            let instanceMap = menu_page.config.instances;
+
+            for (let i = 0; i < instanceMap.length; i++) {
+                let rawInstanceNames = instanceMap[i].name;
+                let rawInstanceNums = instanceMap[i].number;
+                rawInstanceNames = rawInstanceNames.split(/[ ,]+/);
+                rawInstanceNums = rawInstanceNums.split(/[ ,]+/);
+
+                for (let i = 0; i < rawInstanceNames.length; i++) {
+                    let tempName = explodeRange(rawInstanceNames[i]).split(',');
+                    instanceNames = instanceNames.concat(tempName);
+                }
+
+                for (let i = 0; i < rawInstanceNums.length; i++) {
+                    let tempNum = explodeRange(rawInstanceNums[i]).split(',');
+                    instanceNums = instanceNums.concat(tempNum);
+                }
+            }
+
+            let incomingSettings = {
+                instanceNums,
+                instanceNames,
+                pageTitle: {
+                    pageTitlePrefix,
+                    pageTitleSuffix,
+                },
             };
 
-            foundMenuItem.items.splice(foundMenuItem.items.indexOf(foundMenuPage), 1, updatedMenuPage);
-            foundMenuItem.submenu.splice(foundMenuItem.submenu.indexOf(foundMenuPage), 1, updatedMenuPage);
-            foundMenuPage = updatedMenuPage;
-            pathNeedsUpdate = false;
-        }
+            if (
+                dynamicPages.hasOwnProperty(menu_page.id) &&
+                (dynamicPagesNeedUpdate(dynamicPages[menu_page.id], incomingSettings) || pathNeedsUpdate)
+            ) {
+                console.log('dynamicPagesNeedUpdate! ', control);
+                foundMenuItem.items = foundMenuItem.items.filter(function (page) {
+                    return !page.id.startsWith(menu_page.id);
+                });
 
-        if (!foundMenuPage) {
-            foundMenuPage = {
-                id: menu_page.id,
-                isMenuPage: true,
-                order: parseFloat(menu_page.config.order),
-                disabled: menu_page.config.disabled,
-                hidden: menu_page.config.hidden,
-                items: [],
-                // Atrio sidebarItems properties:
-                path: '/d/' + menuItemsPath + menu_page.config.pathName,
-                title: menu_page.config.name,
-                // icon: menu_page.config.icon,
-                class: 'ml-menu',
-                groupTitle: false,
-                submenu: [],
-            };
+                foundMenuItem.submenu = foundMenuItem.submenu.filter(function (page) {
+                    return !page.id.startsWith(menu_page.id);
+                });
 
-            foundMenuItem.items.push(foundMenuPage);
-            foundMenuItem.submenu.push(foundMenuPage);
-        }
+                delete dynamicPages[menu_page.id];
+                dynamicGroups = {};
+                dynamicWidgets = {};
 
-        var foundGroup = find(foundMenuPage.items, function (g) {
-            return g.header === page_group.config.name;
-        });
-        if (!foundGroup) {
-            foundGroup = {
-                header: page_group.config.name,
-                order: page_group.config.order,
-                widthLg: page_group.config.widthLg,
-                widthMd: page_group.config.widthMd,
-                widthSm: page_group.config.widthSm,
-                items: [],
-                access: page_group.config.access,
-            };
-            foundMenuPage.items.push(foundGroup);
-        }
-        foundGroup.items.push(control);
-        foundGroup.items.sort(itemSorter);
+                pathNeedsUpdate = false;
+            }
 
-        foundGroup.order = page_group.config.order;
-        foundMenuPage.items.sort(itemSorter);
-        foundMenuItem.items.sort(itemSorter);
+            // check to see if dynamic page has already been exploded && injected
+            if (dynamicPages.hasOwnProperty(menu_page.id)) {
+                foundMenuItem.items.forEach((page) => {
+                    if (page.id.startsWith(menu_page.id)) {
+                        if (dynamicGroups[group.id]) {
+                            page.items.forEach((g) => {
+                                if (g.id.startsWith(group.id)) {
+                                    g.header = group.config.name;
+                                    g.order = group.config.order;
+                                    g.widthLg = group.config.widthLg;
+                                    g.widthMd = group.config.widthMd;
+                                    g.widthSm = group.config.widthSm;
 
-        updateUi();
+                                    if (!dynamicWidgets[control.id]) {
+                                        control.instance = page.instance;
+                                        let newCtrlId = control.id + '.' + control.instance.number;
+                                        g.items.push({ ...control, 'id': newCtrlId });
+                                        g.items.sort(itemSorter);
+                                    }
+                                }
+                            });
+                        } else {
+                            let instanceGroup = {
+                                id: group.id + '.' + page.instance.number,
+                                header: group.config.name,
+                                order: group.config.order,
+                                widthLg: group.config.widthLg,
+                                widthMd: group.config.widthMd,
+                                widthSm: group.config.widthSm,
+                                items: [],
+                            };
 
-        // Return the remove function for this control
-        return function () {
-            var index = foundGroup.items.indexOf(control);
-            if (index >= 0) {
-                // Remove the item from the group
-                foundGroup.items.splice(index, 1);
+                            control.instance = page.instance;
+                            let newCtrlId = control.id + '.' + page.instance.number;
+                            instanceGroup.items.push({ ...control, 'id': newCtrlId });
 
-                // If the group is now empty, remove it from the menu_page
-                if (foundGroup.items.length === 0) {
-                    index = foundMenuPage.items.indexOf(foundGroup);
-                    if (index >= 0) {
-                        foundMenuPage.items.splice(index, 1);
+                            page.items.push(instanceGroup);
+                            page.items.sort(itemSorter);
+                        }
+                    }
+                });
+                foundMenuItem.items.sort(itemSorter);
+                foundMenuItem.submenu.sort(itemSorter);
+                dynamicGroups[group.id] = true;
+                dynamicWidgets[control.id] = true;
+            } else {
+                // let pages = [];
+                let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
 
-                        // If the menu_page is now empty, remove it from the menu-item
-                        if (foundMenuPage.items.length === 0) {
-                            index = foundMenuItem.indexOf(foundMenuPage);
-                            if (index >= 0) {
-                                foundMenuItem.items.splice(index, 1);
+                // update pageOrdersLog
+                if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
+                    let log = pageOrdersLog[foundMenuItem.id];
+                    let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
 
-                                // If the menu-item is now empty, remove it as well
-                                if (foundMenuItem.items.length === 0) {
-                                    index = menu.indexOf(foundMenuItem);
-                                    if (index >= 0) {
-                                        menu.splice(index, 1);
+                    if (currIndex > 0) {
+                        log[currIndex] = {
+                            id: menu_page.id,
+                            start: updatedOrder,
+                            end: updatedOrder + instanceNums.length - 1,
+                        };
+                    } else {
+                        log.push({
+                            id: menu_page.id,
+                            start: updatedOrder,
+                            end: updatedOrder + instanceNums.length - 1,
+                        });
+                    }
+                } else {
+                    pageOrdersLog[foundMenuItem.id] = [
+                        {
+                            id: menu_page.id,
+                            start: updatedOrder,
+                            end: updatedOrder + instanceNums.length - 1,
+                        },
+                    ];
+                }
+
+                foundMenuItem.items = foundMenuItem.items.filter(function (page) {
+                    return !page.id.startsWith(menu_page.id);
+                });
+
+                foundMenuItem.submenu = foundMenuItem.submenu.filter(function (page) {
+                    return !page.id.startsWith(menu_page.id);
+                });
+
+                for (let i = 0; i < instanceNums.length; i++) {
+                    let pageTitle = pageTitlePrefix + instanceNames[i] + pageTitleSuffix;
+
+                    let instancePage = {
+                        id: menu_page.id + '.' + instanceNums[i],
+                        isMenuPage: true,
+                        order: updatedOrder + i,
+                        disabled: menu_page.config.disabled,
+                        hidden: menu_page.config.hidden,
+                        instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
+                        items: [],
+                        // Atrio sidebarItems properties:
+                        path: '/d/' + menuItemsPath + pageTitle.replace(/ /g, '').toLowerCase(),
+                        title: pageTitle,
+                        // icon: menu_page.config.icon,
+                        class: 'ml-menu',
+                        groupTitle: false,
+                        submenu: [],
+                    };
+
+                    let instanceGroup = {
+                        id: group.id + '.' + instanceNums[i],
+                        header: group.config.name,
+                        order: group.config.order,
+                        widthLg: group.config.widthLg,
+                        widthMd: group.config.widthMd,
+                        widthSm: group.config.widthSm,
+                        items: [],
+                    };
+
+                    control.instance = instancePage.instance;
+                    let newCtrlId = control.id + '.' + instanceNums[i];
+                    instanceGroup.items.push({ ...control, 'id': newCtrlId });
+                    instanceGroup.items.sort(itemSorter);
+
+                    instancePage.items.push(instanceGroup);
+                    instancePage.items.sort(itemSorter);
+
+                    foundMenuItem.items.push(instancePage);
+                    foundMenuItem.submenu.push(instancePage);
+
+                    // pages.push(instancePage);
+                }
+
+                foundMenuItem.items.sort(itemSorter);
+                foundMenuItem.submenu.sort(itemSorter);
+
+                dynamicWidgets[control.id] = true;
+                dynamicGroups[group.id] = true;
+                dynamicPages[menu_page.id] = {
+                    instanceNums: [...instanceNums],
+                    instanceNames: [...instanceNames],
+                    pageTitle: { pageTitlePrefix, pageTitleSuffix },
+                };
+            }
+
+            function dynamicRemove() {
+                if (dynamicWidgets[control.id]) {
+                    foundMenuItem.items.forEach((page) => {
+                        if (page.id.startsWith(menu_page.id)) {
+                            page.items = page.items.filter((g) => {
+                                if (g.id.startsWith(group.id)) {
+                                    g.items = g.items.filter((widget) => !widget.id.startsWith(control.id));
+
+                                    if (g.items.length === 0) {
+                                        delete dynamicGroups[group.id];
+                                    }
+                                }
+                                return g.items.length > 0;
+                            });
+
+                            if (page.items.length === 0) {
+                                delete dynamicPages[menu_page.id];
+                                pageOrdersLog[foundMenuItem.id] = pageOrdersLog[foundMenuItem.id].filter(
+                                    (element) => element.id !== menu_page.id
+                                );
+                            }
+                        }
+                    });
+                    delete dynamicWidgets[control.id];
+                }
+                updateUi();
+            }
+
+            removeFunc = dynamicRemove;
+        } else {
+            if (dynamicPages.hasOwnProperty(menu_page.id)) {
+                foundMenuItem.items = foundMenuItem.items.filter(function (page) {
+                    return !page.id.startsWith(menu_page.id);
+                });
+
+                foundMenuItem.submenu = foundMenuItem.submenu.filter(function (page) {
+                    return !page.id.startsWith(menu_page.id);
+                });
+
+                delete dynamicPages[menu_page.id];
+            }
+            delete dynamicGroups[group.id];
+            delete dynamicWidgets[control.id];
+
+            let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
+
+            // update pageOrdersLog
+            if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
+                let log = pageOrdersLog[foundMenuItem.id];
+                let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
+
+                if (currIndex > 0) {
+                    log[currIndex] = {
+                        id: menu_page.id,
+                        start: updatedOrder,
+                        end: updatedOrder,
+                    };
+                } else {
+                    log.push({
+                        id: menu_page.id,
+                        start: updatedOrder,
+                        end: updatedOrder,
+                    });
+                }
+            } else {
+                pageOrdersLog[foundMenuItem.id] = [
+                    {
+                        id: menu_page.id,
+                        start: updatedOrder,
+                        end: updatedOrder,
+                    },
+                ];
+            }
+
+            var foundMenuPage = find(foundMenuItem.items, function (mp) {
+                return mp.id === menu_page.id;
+            });
+
+            if (foundMenuPage && (pathNeedsUpdate || needsUpdate(foundMenuPage, menu_page))) {
+                var updatedMenuPage = {
+                    id: menu_page.id,
+                    isMenuPage: true,
+                    order: updatedOrder,
+                    disabled: menu_page.config.disabled,
+                    hidden: menu_page.config.hidden,
+                    items: foundMenuPage.items,
+                    // Atrio sidebarItems properties:
+                    path: '/d/' + menuItemsPath + menu_page.config.pathName,
+                    title: menu_page.config.name,
+                    // icon: menu_page.config.icon,
+                    class: foundMenuPage.class,
+                    groupTitle: foundMenuPage.groupTitle,
+                    submenu: foundMenuPage.submenu,
+                };
+
+                foundMenuItem.items.splice(foundMenuItem.items.indexOf(foundMenuPage), 1, updatedMenuPage);
+                foundMenuItem.submenu.splice(foundMenuItem.submenu.indexOf(foundMenuPage), 1, updatedMenuPage);
+                foundMenuPage = updatedMenuPage;
+                pathNeedsUpdate = false;
+            }
+
+            if (!foundMenuPage) {
+                foundMenuPage = {
+                    id: menu_page.id,
+                    isMenuPage: true,
+                    order: updatedOrder,
+                    disabled: menu_page.config.disabled,
+                    hidden: menu_page.config.hidden,
+                    items: [],
+                    // Atrio sidebarItems properties:
+                    path: '/d/' + menuItemsPath + menu_page.config.pathName,
+                    title: menu_page.config.name,
+                    // icon: menu_page.config.icon,
+                    class: 'ml-menu',
+                    groupTitle: false,
+                    submenu: [],
+                };
+
+                foundMenuItem.items.push(foundMenuPage);
+                foundMenuItem.submenu.push(foundMenuPage);
+            }
+
+            var foundGroup = find(foundMenuPage.items, function (g) {
+                return g.header === group.config.name;
+            });
+            if (!foundGroup) {
+                foundGroup = {
+                    id: group.id,
+                    header: group.config.name,
+                    order: group.config.order,
+                    widthLg: group.config.widthLg,
+                    widthMd: group.config.widthMd,
+                    widthSm: group.config.widthSm,
+                    items: [],
+                };
+                foundMenuPage.items.push(foundGroup);
+            }
+            foundGroup.items.push(control);
+            foundGroup.items.sort(itemSorter);
+
+            foundGroup.order = group.config.order;
+            foundMenuPage.items.sort(itemSorter);
+            foundMenuItem.items.sort(itemSorter);
+            foundMenuItem.submenu.sort(itemSorter);
+
+            function staticRemove() {
+                var index = foundGroup.items.indexOf(control);
+                if (index >= 0) {
+                    // Remove the item from the group
+                    foundGroup.items.splice(index, 1);
+
+                    // If the group is now empty, remove it from the menu_page
+                    if (foundGroup.items.length === 0) {
+                        index = foundMenuPage.items.indexOf(foundGroup);
+                        if (index >= 0) {
+                            foundMenuPage.items.splice(index, 1);
+
+                            // If the menu_page is now empty, remove it from the menu-item
+                            if (foundMenuPage.items.length === 0) {
+                                itemsIdx = foundMenuItem.items.indexOf(foundMenuPage);
+                                submenuIdx = foundMenuItem.submenu.indexOf(foundMenuPage);
+                                pageOrdersLog[foundMenuItem.id] = pageOrdersLog[foundMenuItem.id].filter(
+                                    (element) => element.id !== menu_page.id
+                                );
+                                if (itemsIdx >= 0 && submenuIdx >= 0) {
+                                    foundMenuItem.items.splice(itemsIdx, 1);
+                                    foundMenuItem.submenu.splice(submenuIdx, 1);
+
+                                    // If the menu-item is now empty, remove the entire lineage from root
+                                    if (foundMenuItem.items.length === 0) {
+                                        let menuItemsStack = [...menu_items];
+                                        let curr = menuItemsStack.find((mi) => mi.id === foundMenuItem.id);
+
+                                        do {
+                                            let parent = findMenuItemById(menu, curr.config.menuItem);
+                                            let currInMenu = findMenuItemById(menu, curr.id);
+                                            if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
+                                                parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
+                                                parent.submenu = parent.submenu.filter(
+                                                    (item) => item.id !== currInMenu.id
+                                                );
+                                            }
+
+                                            curr = menuItemsStack.find((mi) => mi.id === parent.id);
+                                        } while (curr);
                                     }
                                 }
                             }
                         }
                     }
+                    updateUi();
                 }
-                updateUi();
             }
-        };
+
+            removeFunc = staticRemove;
+        }
+
+        updateUi();
+
+        return removeFunc;
     }
 }
 
@@ -910,12 +1285,15 @@ function selfInstall(log, settings) {
             let data = fs.readFileSync(settings.settingsFile, { encoding: 'utf8' });
             if (!settings.adminAuth) {
                 log.info('Self-installing Unified-RED adminAuth hook on ' + settings.settingsFile);
-                let adminAuthPath = path.resolve(__dirname + "/admin-auth");
-                data = data.replace(/(\/\/[\s]*)?(adminAuth[\s]*\:.*\n)/i, 'adminAuth: require("' + adminAuthPath + '"),\n// $2');
+                let adminAuthPath = path.resolve(__dirname + '/admin-auth');
+                data = data.replace(
+                    /(\/\/[\s]*)?(adminAuth[\s]*\:.*\n)/i,
+                    'adminAuth: require("' + adminAuthPath + '"),\n// $2'
+                );
             }
             if (!settings.httpStatic) {
                 log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
-                let staticPath = path.resolve(__dirname + "/static/");
+                let staticPath = path.resolve(__dirname + '/static/');
                 data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2');
             }
             fs.writeFileSync(settings.settingsFile, data, { encoding: 'utf8' });
@@ -926,7 +1304,7 @@ function selfInstall(log, settings) {
                 process.exit();
             }, 5000);
         }
-    } catch(e) {
+    } catch (e) {
         log.info('--- Unified-RED installaton error:');
         log.info(e);
         log.info('---');

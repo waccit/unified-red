@@ -64,8 +64,9 @@ module.exports = function (RED) {
                 format: config.bgcolor,
                 width: config.width || 3,
                 // height: config.height || 1,
+                topicPattern: config.topicPattern || '',
                 access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable'
+                accessBehavior: config.accessBehavior || 'disable',
             },
             beforeSend: function (msg) {
                 msg.topic = config.topic || msg.topic;

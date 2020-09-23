@@ -19,13 +19,14 @@
                 validate: RED.validators.hasOwnProperty('typedInput')
                     ? RED.validators.typedInput('payloadType')
                     : function (v) {
-                        return true;
-                    },
+                          return true;
+                      },
             },
             payloadType: { value: 'str' },
             topic: { value: '' },
+            topicPattern: { value: '' },
             access: { value: '' },
-            accessBehavior: { value: '' }
+            accessBehavior: { value: '' },
         },
         inputs: 1,
         outputs: 1,
@@ -39,7 +40,7 @@
         icon: 'ur_button.png',
         paletteLabel: 'button',
         label: function () {
-            return this.name || (~this.label.indexOf('{{') ? null : this.label) || 'button';
+            return this.name || (~this.label.indexOf('\{\{') ? null : this.label) || 'button';
         },
         labelStyle: function () {
             return this.name ? 'node_label_italic' : '';
@@ -59,91 +60,111 @@
 
 <script type="text/html" data-template-name="ur_button">
     <div class="form-row">
-           <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
-           <input type="text" id="node-input-group">
-       </div>
-       <div class="form-row">
-           <label><i class="fa fa-object-group"></i> Size</label>
-           <input type="hidden" id="node-input-width">
-           <button class="editor-button" id="node-input-size"></button>
-       </div>
-       <div class="form-row">
-           <label for="node-input-icon"><i class="fa fa-picture-o"></i> Icon</label>
-           <input type="text" id="node-input-icon" placeholder="optional icon ">
-       </div>
-       <div class="form-row">
-           <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
-           <input type="text" id="node-input-label" placeholder="optional label">
-       </div>
-       <div class="form-row">
-           <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
-           <input type="text" id="node-input-tooltip" placeholder="optional tooltip">
-       </div>
-       <div class="form-row">
-           <label for="node-input-color"><i class="fa fa-tint"></i>  Colour</label>
-           <input type="text" id="node-input-color" placeholder="optional text/icon color">
-       </div>
-       <div class="form-row">
-           <label for="node-input-bgcolor"><i class="fa fa-tint"></i>  Background</label>
-           <input type="text" id="node-input-bgcolor" placeholder="optional background color">
-       </div>
-       <div class="form-row">
-           <label style="width:auto" for="node-input-payload"><i class="fa fa-envelope-o"></i> When clicked, send:</label>
-       </div>
-       <div class="form-row">
-           <label for="node-input-payload" style="padding-left: 25px; margin-right: -25px">Payload</label>
-           <input type="text" id="node-input-payload" style="width:70%">
-           <input type="hidden" id="node-input-payloadType">
-       </div>
-       <div class="form-row">
-           <label for="node-input-topic" style="padding-left: 25px; margin-right: -25px">Topic</label>
-           <input type="text" id="node-input-topic">
-       </div>
-       <div class="form-row">
-           <label style="width:auto" for="node-input-passthru"><i class="fa fa-arrow-right"></i> If <code>msg</code> arrives on input, emulate a button click: </label>
-           <input type="checkbox" id="node-input-passthru" style="display:inline-block; width:auto; vertical-align:top;">
-       </div>
-       <div class="form-row">
-           <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-           <input type="text" id="node-input-name">
-       </div>
-       <div class="form-row">
-           <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
-           <select id="node-input-access" style="width: 35%">
-               <option value="">Default</option>
-               <option value="1">Level 1 Viewer</option>
-               <option value="2">Level 2 Limited Operator</option>
-               <option value="3">Level 3 Standard Operator</option>
-               <option value="4">Level 4 IT Operator</option>
-               <option value="5">Level 5 Security Operator</option>
-               <option value="6">Level 6 (reserved)</option>
-               <option value="7">Level 7 (reserved)</option>
-               <option value="8">Level 8 (reserved)</option>
-               <option value="9">Level 9 Tech</option>
-               <option value="10">Level 10 Admin</option>
-            </select>
-            <select id="node-input-accessBehavior" style="width: 35%">
-               <option value="hide">Show/Hide</option>
-               <option value="disable">Enable/Disable</option>
-            </select>
-       </div>
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-icon"><i class="fa fa-picture-o"></i> Icon</label>
+        <input type="text" id="node-input-icon" placeholder="optional icon " />
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional label" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
+        <input type="text" id="node-input-tooltip" placeholder="optional tooltip" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-color"><i class="fa fa-tint"></i> Colour</label>
+        <input type="text" id="node-input-color" placeholder="optional text/icon color" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-bgcolor"><i class="fa fa-tint"></i> Background</label>
+        <input type="text" id="node-input-bgcolor" placeholder="optional background color" />
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-payload"><i class="fa fa-envelope-o"></i> When clicked, send:</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-payload" style="padding-left: 25px; margin-right: -25px">Payload</label>
+        <input type="text" id="node-input-payload" style="width:70%" />
+        <input type="hidden" id="node-input-payloadType" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic" style="padding-left: 25px; margin-right: -25px">Topic</label>
+        <input type="text" id="node-input-topic" />
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-passthru"
+            ><i class="fa fa-arrow-right"></i> If <code>msg</code> arrives on input, emulate a button click:
+        </label>
+        <input type="checkbox" id="node-input-passthru" style="display:inline-block; width:auto; vertical-align:top;" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
 </script>
 
 <script type="text/html" data-help-name="ur_button">
-       <p>Adds a button to the user interface.</p>
-       <p>Clicking the button generates a message with <code>msg.payload</code> set to the <b>Payload</b> field.
-       If no payload is specified, the node id is used.</p>
-    <p>The <b>Size</b> defaults to  3 by 1.</p>
-       <p>The <b>Icon</b> can be defined, as either a <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
-       <i>(e.g. 'check', 'close')</i> or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a>
-       <i>(e.g. 'fa-fire')</i>, or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
-       You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.</p>
-       <p>The colours of the text and background may be set. They can also be set by a message property by setting
-       the field to the name of the property, for example <code>{{msg.background}}</code>.</p>
-       <p>The label can also be set by a message property by setting
-       the field to the name of the property, for example <code>{{msg.topic}}</code>.</p>
-       <p>If set to pass through mode a message arriving on the input will act like pressing the button.
-       The output payload will be as defined in the node configuration.</p>
-       <p>The <b>Topic</b> field can be used to set the <code>msg.topic</code> property that is output.</p>
-       <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the button.</p>
+    <p>Adds a button to the user interface.</p>
+    <p>
+        Clicking the button generates a message with <code>msg.payload</code> set to the <b>Payload</b> field. If no
+        payload is specified, the node id is used.
+    </p>
+    <p>The <b>Size</b> defaults to 3 by 1.</p>
+    <p>
+        The <b>Icon</b> can be defined, as either a
+        <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
+        <i>(e.g. 'check', 'close')</i> or a
+        <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i>,
+        or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>. You
+        can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
+    </p>
+    <p>
+        The colours of the text and background may be set. They can also be set by a message property by setting the
+        field to the name of the property, for example <code>{{msg.background}}</code>.
+    </p>
+    <p>
+        The label can also be set by a message property by setting the field to the name of the property, for example
+        <code>{{msg.topic}}</code>.
+    </p>
+    <p>
+        If set to pass through mode a message arriving on the input will act like pressing the button. The output
+        payload will be as defined in the node configuration.
+    </p>
+    <p>The <b>Topic</b> field can be used to set the <code>msg.topic</code> property that is output.</p>
+    <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the button.</p>
 </script>

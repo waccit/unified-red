@@ -14,8 +14,9 @@
             mode: { value: 'text', required: true },
             delay: { value: 300, validate: RED.validators.number() },
             topic: { value: '' },
+            topicPattern: { value: '' },
             access: { value: '' },
-            accessBehavior: { value: '' }
+            accessBehavior: { value: '' },
         },
         inputs: 1,
         outputs: 1,
@@ -25,7 +26,7 @@
         icon: 'ur_text.png',
         paletteLabel: 'text input',
         label: function () {
-            return this.name || (~this.label.indexOf('{{') ? null : this.label) || this.mode + ' input';
+            return this.name || (~this.label.indexOf('\{\{') ? null : this.label) || this.mode + ' input';
         },
         labelStyle: function () {
             return this.name ? 'node_label_italic' : '';
@@ -91,6 +92,12 @@
            <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
            <input type="text" id="node-input-name">
        </div>
+       <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
        <div class="form-row">
            <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
            <select id="node-input-access" style="width: 35%">
@@ -116,16 +123,22 @@
 
 <script type="text/html" data-help-name="ur_text_input">
     <p>Adds a text input field to the user interface. Mode can be regular text, email or color picker.</p>
-    <p>Any input is sent as <code>msg.payload</code>. If set to ‘pass through mode’ an arriving <code>msg.payload</code>
-        will be used if it is different from the existing text in the input field. This allows you to preset
-        the text of the input field.</p>
-    <p>The <b>Delay</b> <i>(default : 300ms)</i> sets the amount of time in milliseconds before the output is sent.
-    Setting to <code>0</code> waits for "Enter" or "Tab" key to send. Enter will send payload but remain in focus.
-    Tab will send payload and move to next field. Clicking elsewhere will also send the payload.</p>
+    <p>
+        Any input is sent as <code>msg.payload</code>. If set to ‘pass through mode’ an arriving
+        <code>msg.payload</code> will be used if it is different from the existing text in the input field. This allows
+        you to preset the text of the input field.
+    </p>
+    <p>
+        The <b>Delay</b> <i>(default : 300ms)</i> sets the amount of time in milliseconds before the output is sent.
+        Setting to <code>0</code> waits for "Enter" or "Tab" key to send. Enter will send payload but remain in focus.
+        Tab will send payload and move to next field. Clicking elsewhere will also send the payload.
+    </p>
     <p>The email mode will color in red if it is not a valid address and will return undefined.</p>
     <p>The time input type returns a number of milliseconds from midnight.</p>
-    <p>Not all browsers support the <i>week</i> and <i>month</i> input types, and may return <i>undefined</i>.
-    Please test your target browser(s) before use.</p>
+    <p>
+        Not all browsers support the <i>week</i> and <i>month</i> input types, and may return <i>undefined</i>. Please
+        test your target browser(s) before use.
+    </p>
     <p>If a <b>Topic</b> is specified, it will be added as <code>msg.topic</code>.</p>
     <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the input.</p>
 </script>

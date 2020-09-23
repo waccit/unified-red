@@ -7,7 +7,7 @@ module.exports = function (RED) {
     function TableNode(config) {
         RED.nodes.createNode(this, config);
         var node = this;
-        this.cache = { };
+        this.cache = {};
         let io = socketio.connection();
 
         var group = RED.nodes.getNode(config.group);
@@ -46,25 +46,32 @@ module.exports = function (RED) {
                     order: config.order,
                     fields: config.fields,
                     pivot: config.cts,
+                    topicPattern: config.topicPattern || '',
                     access: config.access || '',
-                    accessBehavior: config.accessBehavior || 'disable'
+                    accessBehavior: config.accessBehavior || 'disable',
                 },
                 beforeEmit: function (msg, value) {
-                    return {msg: {
-                        payload: value, 
-                        topic: msg.topic
-                    }};
+                    return {
+                        msg: {
+                            payload: value,
+                            topic: msg.topic,
+                        },
+                    };
                 },
                 beforeSend: function (msg, orig) {
-                    if (orig) { return orig.msg; }
+                    if (orig) {
+                        return orig.msg;
+                    }
                 },
-                
             });
+        } catch (e) {
+            console.log(e);
         }
-        catch (e) { console.log(e); }
 
         node.on('close', function () {
-            if (done) { done(); }
+            if (done) {
+                done();
+            }
         });
 
         node.on('input', function (msg) {
@@ -72,16 +79,15 @@ module.exports = function (RED) {
         });
 
         // io.on('connection', function (socket) {
-            io.on('ui-replay-state', function () {
-                for (let topic in node.cache) {
-                    let msg = node.cache[topic];
-                    msg.socketid = node.id;
-                    console.log("msg", msg);
-                    ui.emitSocket("update-value", { msg: msg });
-                }
-            });
+        io.on('ui-replay-state', function () {
+            for (let topic in node.cache) {
+                let msg = node.cache[topic];
+                msg.socketid = node.id;
+                console.log('msg', msg);
+                ui.emitSocket('update-value', { msg: msg });
+            }
+        });
         // });
-
     }
 
     RED.nodes.registerType('ur_table', TableNode);
