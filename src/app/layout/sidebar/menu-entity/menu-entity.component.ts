@@ -9,10 +9,8 @@ import { RouteInfo } from '../sidebar.metadata';
 })
 export class MenuEntityComponent implements OnInit {
     @Input() sidebarItems: RouteInfo[];
-    @Input() level: string = 'root'; // root || branch || leaf
-    @Input() leafTitle: string = '';
-    showMenu: string = '';
-    showSubMenu: string = '';
+    showMenu = '';
+    showSubMenu = '';
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
