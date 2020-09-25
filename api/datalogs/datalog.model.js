@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
     timestamp: { type: Date, default: Date.now, required: true },
-    topic: { type: String, required: true },
+    logger: { type: Schema.Types.ObjectId, ref: 'Logger' },
     value: { type: Object, required: true },
     status: { type: String },
     expires: { type: Date, required: true },

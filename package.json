@@ -44,6 +44,7 @@
             "ur_base": "nodes/ur_base.js",
             "ur_button": "nodes/ur_button.js",
             "ur_compare": "nodes/ur_compare.js",
+            "ur_datalog": "nodes/ur_datalog.js",
             "ur_menu_item": "nodes/ur_menu_item.js",
             "ur_menu_page": "nodes/ur_menu_page.js",
             "ur_group": "nodes/ur_group.js",
