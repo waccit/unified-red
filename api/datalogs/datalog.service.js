@@ -1,5 +1,5 @@
 const db = require('../db');
-const socketio = require('../../socket').connection();
+const socketio = require('../../socket');
 const Datalog = db.Datalog;
 const Logger = db.Logger;
 
@@ -75,7 +75,7 @@ function log(param) {
                 break;
             }
         }
-        socketio.emit('ur-datalog-update', {
+        socketio.connection().emit('ur-datalog-update', {
             'action': 'log',
             'payload': {
                 topic: logger.topic,

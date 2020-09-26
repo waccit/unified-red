@@ -1,4 +1,11 @@
-let connection = null;
+// fail-safe connection object for nodes that emit before ui.js initializes Socket.
+// once Socket is initialized, connection is overridden.
+let connection = {
+    emit: () => { console.error('Socket fired mock "emit" function.'); },
+    to: () => { console.error('Socket fired mock "to" function.'); },
+    on: () => { console.error('Socket fired mock "on" function.'); },
+    mock: true
+};
 
 class Socket {
     constructor() {
@@ -21,16 +28,13 @@ class Socket {
     }
 
     static init(server, opts, sessionMiddleware) {
-        if (!connection) {
+        if (connection.mock) {
             connection = new Socket();
             connection.connect(server, opts, sessionMiddleware);
         }
     }
 
     static getConnection() {
-        if (!connection) {
-            throw new Error('no active connection');
-        }
         return connection;
     }
 }
