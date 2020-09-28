@@ -5,6 +5,7 @@ Source: https://github.com/cornflourblue/node-mongo-registration-login-api
 
 const config = require('./config.json');
 const mongoose = require('mongoose');
+
 const connectionOptions = {
     useCreateIndex: true,
     useNewUrlParser: true,
@@ -21,4 +22,6 @@ module.exports = {
     User: require('./users/user.model'),
     Role: require('./users/role-name.model'),
     Alarm: require('./alarms/alarm.model'),
+    Logger: require('./datalogs/logger.model'),
+    Datalog: require('./datalogs/datalog.model'),
 };

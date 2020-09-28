@@ -1,5 +1,5 @@
 const db = require('../db');
-const socketio = require("../../socket").connection();
+const socketio = require("../../socket");
 const Alarm = db.Alarm;
 
 module.exports = {
@@ -75,7 +75,7 @@ async function create(alarmParam) {
     }
     const alarm = new Alarm(alarmParam);
     await alarm.save();
-    socketio.emit('ur-alarm-update', { "action": "create", "payload": alarm });
+    socketio.connection().emit('ur-alarm-update', { "action": "create", "payload": alarm });
     return alarm;
 }
 
@@ -86,7 +86,7 @@ async function update(id, alarmParam) {
     }
     Object.assign(alarm, alarmParam);
     await alarm.save();
-    socketio.emit('ur-alarm-update', { "action": "update", "payload": alarm });
+    socketio.connection().emit('ur-alarm-update', { "action": "update", "payload": alarm });
     return alarm;
 }
 
@@ -99,7 +99,7 @@ async function _ack(query) {
     for (let alarm of alarms) {
         alarm.acktime = Date.now();
         await alarm.save();
-        socketio.emit('ur-alarm-update', { "action": "update", "payload": alarm });
+        socketio.connection().emit('ur-alarm-update', { "action": "update", "payload": alarm });
     }
     return alarms;
 }
@@ -118,6 +118,6 @@ async function _delete(id) {
         throw 'Alarm not found';
     }
     await Alarm.findByIdAndRemove(id);
-    socketio.emit('ur-alarm-update', { "action": "delete", "payload": alarm });
+    socketio.connection().emit('ur-alarm-update', { "action": "delete", "payload": alarm });
 }
 

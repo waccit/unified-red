@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const emailService = require('../email.service');
-const socketio = require("../../socket").connection();
+const socketio = require("../../socket");
 const User = db.User;
 var _settings;
 
@@ -101,7 +101,7 @@ async function update(id, userParam) {
 
     await user.save();
 
-    socketio.emit('ur-user-update', user);
+    socketio.connection().emit('ur-user-update', user);
     return user;
 }
 
