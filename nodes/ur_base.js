@@ -143,7 +143,11 @@ module.exports = function (RED) {
     let staticRoot = path.join(__dirname, '../static/');
     const storage = multer.diskStorage({
         destination: function (req, file, callback) {
-            callback(null, staticRoot);
+            let absPath = path.join(staticRoot, req.body.p || '');
+            if (absPath.indexOf(staticRoot) === -1) { // do not navigate away from static root
+                absPath = staticRoot;
+            }
+            callback(null, absPath);
         },
         filename: function (req, file, callback) {
             callback(null, file.originalname);
@@ -152,14 +156,17 @@ module.exports = function (RED) {
     const upload = multer({ storage: storage });
 
     function traverseDir(dir) {
-        let files = {};
+        let files = [];
         fs.readdirSync(dir).forEach(file => {
-            let fullPath = path.join(dir, file);
-            let stat = fs.lstatSync(fullPath);
-            if (stat.isDirectory()) {
-                files[file] = traverseDir(fullPath);
-            } else {
-                files[file] = { mtime: stat.mtime.toISOString(), size: stat.size };
+            if (file.indexOf('.') !== 0) {
+                let fullPath = path.join(dir, file);
+                let stat = fs.lstatSync(fullPath);
+                if (stat.isDirectory()) {
+                    // files[file] = traverseDir(fullPath);
+                    files.push({ name: file, type: 'd', mtime: stat.mtime.toISOString(), size: stat.size });
+                } else {
+                    files.push({ name: file, type: 'f', mtime: stat.mtime.toISOString(), size: stat.size });
+                }
             }
         });
         return files;
@@ -172,38 +179,139 @@ module.exports = function (RED) {
     catch (e) {}
 
     RED.httpAdmin.get('/ur_base/filebrowser/list/', function (req, res) {
-        if (req.query.hasOwnProperty('refresh')) {
-            try {
-                staticFiles = traverseDir(staticRoot);
+        try {
+            let absPath = path.join(staticRoot, req.query.p || '');
+            if (absPath.indexOf(staticRoot) === -1) { // do not navigate away from static root
+                absPath = staticRoot;
             }
-            catch (e) {}
+            staticFiles = traverseDir(absPath);
+            res.json({
+                path: absPath.substr(staticRoot.length-1) || '/',
+                files: staticFiles
+            });
         }
-        res.json(staticFiles);
+        catch (e) {
+            console.error(e);
+            res.send(e);
+        }
+    });
+
+    RED.httpAdmin.post('/ur_base/filebrowser/new/', function (req, res) {
+        let absPath = path.join(staticRoot, req.body.p || '');
+        if (absPath.indexOf(staticRoot) === -1) { // do not navigate away from static root
+            res.status(500).send('Illegal path');
+            return;
+        }
+        fs.mkdir(absPath, function(err) {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            res.send("ok");
+        })
     });
 
     RED.httpAdmin.post('/ur_base/filebrowser/copy/', function (req, res) {
-        console.log(req.body.src, req.body.dest);
-        let src = path.join(__dirname, '../static/', req.body.src);
-        let dest = path.join(__dirname, '../static/', req.body.dest);
-        fs.copyFile(src, dest, (err) => {
-            if (err) {
-                res.status(500).send(err);
-                return;
+        let results = { errors: 0, success: 0 };
+        let files = Array.isArray(req.body.files) ? req.body.files : [ req.body.files ];
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            try {
+                let src = path.join(staticRoot, file.src);
+                if (src.indexOf(staticRoot) === -1) { // do not navigate away from static root
+                    results[file.src] = 'Illegal source path';
+                    results.errors += 1;
+                    continue;
+                }
+                let dest = path.join(staticRoot, file.dest);
+                if (dest.indexOf(staticRoot) === -1) { // do not navigate away from static root
+                    results[file.src] = 'Illegal destination path';
+                    results.errors += 1;
+                    continue;
+                }
+                fs.copyFileSync(src, dest);
+                results[file.src] = true;
+                results.success += 1;
+            } catch (err) {
+                results[file.src] = err;
+                results.errors += 1;
             }
-            res.send("ok");
-        });
+            if (i === files.length - 1) { // send on last result
+                res.json(results);
+            }
+        }
     });
 
-    RED.httpAdmin.post('/ur_base/filebrowser/rename/', function (req, res) {
-        let src = path.join(__dirname, '../static/', req.body.src);
-        let dest = path.join(__dirname, '../static/', req.body.dest);
-        fs.rename(src, dest, (err) => {
-            if (err) {
-                res.status(500).send(err);
-                return;
+    RED.httpAdmin.post('/ur_base/filebrowser/move/', function (req, res) {
+        let results = { errors: 0, success: 0 };
+        let files = Array.isArray(req.body.files) ? req.body.files : [ req.body.files ];
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            try {
+                let src = path.join(staticRoot, file.src);
+                if (src.indexOf(staticRoot) === -1) { // do not navigate away from static root
+                    results[file.src] = 'Illegal source path';
+                    results.errors += 1;
+                    continue;
+                }
+                let dest = path.join(staticRoot, file.dest);
+                if (dest.indexOf(staticRoot) === -1) { // do not navigate away from static root
+                    results[file.src] = 'Illegal destination path';
+                    results.errors += 1;
+                    continue;
+                }
+                fs.renameSync(src, dest);
+                results[file.src] = true;
+                results.success += 1;
+            } catch (err) {
+                results[file.src] = err;
+                results.errors += 1;
             }
-            res.send("ok");
-        });
+            if (i === files.length - 1) { // send on last result
+                res.json(results);
+            }
+        }
+    });
+
+    function deleteFolderRecursive(path) {
+        if(fs.existsSync(path)) {
+            fs.readdirSync(path).forEach(function(file) {
+              var curPath = path + "/" + file;
+                if(fs.lstatSync(curPath).isDirectory()) { // recurse
+                    deleteFolderRecursive(curPath);
+                } else { // delete file
+                    fs.unlinkSync(curPath);
+                }
+            });
+            fs.rmdirSync(path);
+        }
+    };
+
+    RED.httpAdmin.post('/ur_base/filebrowser/delete/', function (req, res) {
+        let results = { errors: 0, success: 0 };
+        let files = Array.isArray(req.body.files) ? req.body.files : [ req.body.files ];
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            try {
+                let filepath = path.join(staticRoot, file);
+                if (fs.existsSync(filepath)) {
+                    if (fs.lstatSync(filepath).isDirectory()) {
+                        deleteFolderRecursive(filepath);
+                    }
+                    else {
+                        fs.unlinkSync(filepath);
+                    }
+                    results[file] = true;
+                    results.success += 1;
+                }
+            } catch (err) {
+                results[file] = err;
+                results.errors += 1;
+            }
+            if (i === files.length - 1) { // send on last result
+                res.json(results);
+            }
+        }
     });
 
     RED.httpAdmin.post('/ur_base/filebrowser/upload/', upload.array('files'), function (req, res, next) {
