@@ -155,39 +155,43 @@ module.exports = function (RED) {
     });
     const upload = multer({ storage: storage });
 
-    function traverseDir(dir) {
+    function traverseDir(dir, recursive, filter) {
         let files = [];
         fs.readdirSync(dir).forEach(file => {
             if (file.indexOf('.') !== 0) {
                 let fullPath = path.join(dir, file);
                 let stat = fs.lstatSync(fullPath);
                 if (stat.isDirectory()) {
-                    // files[file] = traverseDir(fullPath);
-                    files.push({ name: file, type: 'd', mtime: stat.mtime.toISOString(), size: stat.size });
+                    let d = { name: file, type: 'd', mtime: stat.mtime.toISOString(), size: stat.size };
+                    if (recursive) {
+                        d.files = traverseDir(fullPath, recursive, filter);
+                        if (filter && !d.files.length) {
+                            return; // recursive filter traverse found no files in this folder. 
+                        }
+                    }
+                    files.push(d);
                 } else {
-                    files.push({ name: file, type: 'f', mtime: stat.mtime.toISOString(), size: stat.size });
+                    if (!filter || new RegExp('\.(' + filter.replace(/\W+/g, '|') + ')$', 'i').test(file)) {
+                        files.push({ name: file, type: 'f', mtime: stat.mtime.toISOString(), size: stat.size });
+                    }
                 }
             }
         });
         return files;
     }
 
-    let staticFiles = {};
-    try {
-        staticFiles = traverseDir(staticRoot);
-    }
-    catch (e) {}
-
     RED.httpAdmin.get('/ur_base/filebrowser/list/', function (req, res) {
         try {
+            let filter = req.query.f || '';
+            let recursive = !!req.query.r;
             let absPath = path.join(staticRoot, req.query.p || '');
             if (absPath.indexOf(staticRoot) === -1) { // do not navigate away from static root
                 absPath = staticRoot;
             }
-            staticFiles = traverseDir(absPath);
+            let files = traverseDir(absPath, recursive, filter);
             res.json({
-                path: absPath.substr(staticRoot.length-1) || '/',
-                files: staticFiles
+                path: absPath.substr(staticRoot.length - 1) || '/',
+                files: files
             });
         }
         catch (e) {
