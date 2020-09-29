@@ -759,7 +759,10 @@
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Files" style="width:80px;"><span>' +
                         files_label +
                         '</span></a></li>'
-                ).appendTo(ulDashboardTabs);
+                ).appendTo(ulDashboardTabs).click(function() {
+                    $(this).resize(); // trigger a resize event so that datatables can calculate header column widths
+                });
+
                 // var liThemeTab = $(
                 //     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Theme" style="width:80px;"><span>' +
                 //         theme_label +
@@ -969,14 +972,16 @@
                 //     .appendTo(divLockMenu);
 
                 var site_name = c_('site.title');
-
+                
                 // Files Tab
-                $('<div id="filebrowser">').appendTo(filesTab);
-                var uploadForm = $('<form method="post" enctype="multipart/form-data">').appendTo(filesTab);
-                var filesInput = $('<input type="file" name="files" multiple>').appendTo(uploadForm);
-                var uploadSubmit = $('<input type="button" value="Upload">').appendTo(uploadForm);
-                uploadSubmit.click(function () {
+                var filebrowser = $('<table id="filebrowser" style="width:100%">').appendTo(filesTab);
+                var uploadForm = $('<form id="uploadForm" method="post" enctype="multipart/form-data">').appendTo(filesTab);
+                $('<div>').text('Drag & drop files here to upload').appendTo(uploadForm);
+                var filesInput = $('<input id="filesInput" type="file" name="files" multiple>').appendTo(uploadForm).change(function (e) {
+                    e.preventDefault();
+                    var progressBar = $('<div>', { class: 'uploadProgressBar' }).appendTo(uploadForm);
                     var formData = new FormData();
+                    formData.append("p", $('#filebrowserpath').val() || '/');
                     for (var file of filesInput[0].files) {
                         formData.append("files", file);
                     }
@@ -989,9 +994,27 @@
                         processData: false,
                         cache: false,
                         timeout: 600000,
-                        success: function(resp) {
-                            console.log("upload form success", resp);
-                        }
+                        success: function() {
+                            refreshFileSystem();
+                        },
+                        xhr: function() {
+                            var xhr = $.ajaxSettings.xhr();
+                            if (xhr.upload) {
+                                xhr.upload.addEventListener('progress', function(e) {
+                                    if (e.lengthComputable) {
+                                        var currentProgress = (e.loaded / e.total) * 100;
+                                        progressBar.width(currentProgress + '%').text(currentProgress.toFixed(0) + '%');
+                                        if (currentProgress >= 100) {
+                                            setTimeout(function() {
+                                                filesInput.val('');
+                                                progressBar.remove();
+                                            }, 1000);
+                                        }
+                                    }
+                                }, false);
+                            }
+                            return xhr;
+                        },
                     });
                 });
 
@@ -3169,248 +3192,349 @@
 </script>
 
 <!-- File Browser -->
-<link href="./ur_base/css/jquery.filebrowser.min.css" rel="stylesheet"/>
+<link href="./ur_base/css/jquery.dataTables.min.css" rel="stylesheet"/>
+<link href="./ur_base/css/select.dataTables.min.css" rel="stylesheet"/>
 <style>
-    .browser-widget {
+    #dashboard-files .dataTable {
+        border: 1px solid #ccc;
+        border-radius: 0 0 4px 4px;
+    }
+    #dashboard-files .dataTable tr.selected {
+        background-color: #ffebc7;
+        color: #555;
+    }
+    #dashboard-files .dataTable tr.cut .name {
+        font-style: italic;
+        font-weight: bold;
+        color: #888;
+    }
+    #dashboard-files .dataTable tr.copy .name {
+        font-style: italic;
+        font-weight: bold;
+        color: #333;
+    }
+    #dashboard-files .dataTable thead th, #dashboard-files .dataTable tbody td {
+        padding: 0;
+        font-size: 13px;
+    }
+    #dashboard-files .dataTable th.icon, #dashboard-files .dataTable td.icon {
+        width: 15px !important;
+        padding: 0 5px;
+        text-align: right;
+    }
+    #dashboard-files .dataTable th.name, #dashboard-files .dataTable td.name {
+        white-space: nowrap;
+        text-align: left;
+        padding-right: 5px;
+    }
+    #dashboard-files .dataTable td.name .edit {
+        width: auto;
+        font-size: 13px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        color: #555;
     }
-    .browser-widget .toolbar {
-        border-bottom: 1px solid #ccc;
+    #dashboard-files .dataTable td.mtime {
+        font-size: 10px;
+        border-left: 1px solid #ccc;
+        padding: 0 5px;
+    }
+    #dashboard-files .dataTable td.size {
+        font-size: 10px;
+        text-align: right;
+        padding-left: 5px;
+        padding-right: 10px;
+        border-left: 1px solid #ccc;
+        width: 8%;
+    }
+    #dashboard-files .toolbar {
+        border-top: 1px solid #ccc;
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        border-radius: 4px 4px 0 0;
         background: #f0f0f0;
-        padding: 3px;
+        padding: 3px 0px 3px 8px;
         color: #555;
     }
-    .browser-widget ul:not(.ui-menu) > li {
-        padding-top: 0;
-        text-align: left;
-        margin: 0;
-        width: 70px;
-        font-size: 14px;
-        background-position: 0;
-        color: #555;
-    }
-    .browser-widget .content {
-        overflow-y: scroll;
-        min-height: 450px;
-        height: auto;
-    }
-    .browser-widget .content ul:not(.ui-menu) > li {
-        display: list-item;
-        width: auto;
-    }
-    .browser-widget .content ul:not(.ui-menu) li.active {
-        background: #2979ff;
-        color: white;
-    }
-    .browser-widget .content ul:not(.ui-menu) li textarea {
-        min-height: 0;
-        height: 20px;
-        width: auto;
-        text-align: left;
-        padding: 0;
-        top: 4px;
-    }
-    .browser-widget ul:not(.ui-menu) li::before {
-        width: 24px;
-        height: 16px;
-        position: static;
-    }
-    .browser-widget .adress-bar input {
+    #dashboard-files .toolbar input {
         border: 1px solid #ddd;
+        border-radius: 4px;
         padding-left: 8px;
-        font-size: 12px;
+        margin-right: 8px;
+        font-size: 13px;
+        width: calc(100% - 76px);
     }
-    .browser-widget .adress-bar button {
-        text-indent: 0;
-        width: 20px;
-        background-position: 0;
+    #dashboard-files .toolbar button {
+        border: 1px solid #ccc;
+        color: #888 !important;
+        background: #fff;
+        width: 28px;
+        height: 28px;
+        margin: 4px 0 3px;
     }
-    .browser-widget .adress-bar button::before {
-        font-family: FontAwesome;
-        content: "\f015";
+    #dashboard-files .toolbar button:hover {
+        color: #666 !important;
+        background: #e6e6e6;
     }
-    .browser-widget ul.labels li.back::before {
-        font-family: FontAwesome;
-        content: "\f060";
-    }
-    .browser-widget ul.labels li.up::before {
-        font-family: FontAwesome;
-        content: "\f148";
-    }
-    .browser-widget ul.labels li.refresh::before {
-        font-family: FontAwesome;
-        content: "\f021";
-    }
-    .browser-widget .content ul:not(.ui-menu) .drive::before {
-        font-family: FontAwesome;
-        content: "\f0a0";
-    }
-    .browser-widget .content ul:not(.ui-menu) .directory::before {
-        font-family: FontAwesome;
-        content: "\f114";
-    }
-    .browser-widget .content ul:not(.ui-menu) .file::before {
-        font-family: FontAwesome;
-        content: "\f016";
-    }
-    .browser-widget .content ul:not(.ui-menu) .txt::before {
-        font-family: FontAwesome;
-        content: "\f0f6";
-    }
-    .browser-widget .content ul:not(.ui-menu) .pdf::before {
-        font-family: FontAwesome;
-        content: "\f1c1";
-    }
-    .browser-widget .content ul:not(.ui-menu) .php::before,
-    .browser-widget .content ul:not(.ui-menu) .html::before,
-    .browser-widget .content ul:not(.ui-menu) .js::before,
-    .browser-widget .content ul:not(.ui-menu) .json::before,
-    .browser-widget .content ul:not(.ui-menu) .css::before {
-        font-family: FontAwesome;
-        content: "\f1c9";
-    }
-    .browser-widget .content ul:not(.ui-menu) .doc::before,
-    .browser-widget .content ul:not(.ui-menu) .docx::before {
-        font-family: FontAwesome;
-        content: "\f1c2";
-    }
-    .browser-widget .content ul:not(.ui-menu) .xls::before,
-    .browser-widget .content ul:not(.ui-menu) .xlsx::before {
-        font-family: FontAwesome;
-        content: "\f1c3";
-    }
-    .browser-widget .content ul:not(.ui-menu) .ppt::before,
-    .browser-widget .content ul:not(.ui-menu) .pptx::before {
-        font-family: FontAwesome;
-        content: "\f1c4";
-    }
-    .browser-widget .content ul:not(.ui-menu) .svg::before,
-    .browser-widget .content ul:not(.ui-menu) .jpg::before,
-    .browser-widget .content ul:not(.ui-menu) .jpeg::before,
-    .browser-widget .content ul:not(.ui-menu) .gif::before,
-    .browser-widget .content ul:not(.ui-menu) .bmp::before,
-    .browser-widget .content ul:not(.ui-menu) .png::before {
-        font-family: FontAwesome;
-        content: "\f1c5";
-    }
-    .browser-widget .content ul:not(.ui-menu) .md::before,
-    .browser-widget .content ul:not(.ui-menu) .markdown::before {
-        font-family: FontAwesome;
-        content: "\f0f6";
+    #dashboard-files .toolbar .more {
+        border-color: transparent;
+        background: transparent;
     }
 
-
+    #uploadForm {
+        position: relative;
+        margin: 12px 0px;
+        color: #555;
+        border: 2px #555 dashed;
+        border-radius: 4px;
+        background: #f0f0f0;
+    }
+    #uploadForm div {
+        position: absolute;
+        top: 40px;
+        left: 0px;
+        right: 0px;
+        text-align: center;
+        user-select: none;
+        pointer-events: none;
+    }
+    #uploadForm .uploadProgressBar {
+        margin: 5px 0px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 0px;
+        background-color: #2196f3;
+        color: white;
+        text-align: center;
+        transition: 1s linear width;
+        -webkit-transition: 1s linear width;
+        -moz-transition: 1s linear width;
+        -o-transition: 1s linear width;
+        -ms-transition: 1s linear width;
+    }
+    #uploadForm #filesInput {
+        width: 100%;
+        height: 100px;
+    }
 </style>
-<script src="./ur_base/js/jquery.filebrowser.min.js"></script>
+<script src="./ur_base/js/jquery.dataTables.min.js"></script>
+<script src="./ur_base/js/dataTables.select.min.js"></script>
 <script>
-    (function ($) {
-        var root = null;
 
-        function copy(src, dest, remove) {
-            // find source file
-            var sourceContents = root;
-            browser.walk(src, function (part, last) {
-                var src = sourceContents[part];
-                if (last && remove) {
-                    delete sourceContents[part];
+    var filebrowser = $("#filebrowser").DataTable({
+        dom: '<"toolbar">t',
+        select: { style: 'os' },
+        paging: false,
+        scrollY: "300px",
+        columns: [
+            {
+                data: 'type',
+                className: 'icon',
+                render: function(data, type, row, meta) {
+                    return type === 'display' ?
+                        (data === 'd' ? '<i class="fa fa-folder"></i>' : '<i class="fa fa-file"></i>') :
+                        data;
                 }
-                sourceContents = src;
-            });
-            // add dest file
-            var current = root;
-            var destFilename;
-            browser.walk(dest, function (part, last) {
-                if (!last) {
-                    current = current[part];
-                } else {
-                    destFilename = part;
-                }
-            });
-            current[destFilename] = sourceContents;
-
-            var defer = $.Deferred();
-            if (remove) {
-                $.post('./ur_base/filebrowser/rename/', { src: src, dest: dest }, function(result) {
-                    if (result === 'ok') {
-                        defer.resolve();
-                    }
-                });
-            }
-            else {
-                $.post('./ur_base/filebrowser/copy/', { src: src, dest: dest }, function(result) {
-                    if (result === 'ok') {
-                        defer.resolve();
-                    }
-                });
-            }
-            return defer.promise();
-        }
-
-        function upload(file, path) {
-            var current = root;
-            browser.walk(path, function (part) {
-                if (!current[part]) {
-                    current[part] = {}; // upload new directory
-                }
-                current = current[part];
-            });
-            current[file.name] = "new file " + file.name;
-            console.log("upload " + file.name + " to " + path + " directory");
-            var defer = $.Deferred();
-            $.post('./ur_base/filebrowser/upload/', { file: file, path: path }, function(result) {
-                if (result === 'ok') {
-                    defer.resolve();
-                }
-            });
-            return defer.promise();
-            // return $.when(true); // resolved promise
-        }
-
-        $("#filebrowser").browse({
-            root: "/",
-            separator: "/",
-            name: "filesystem",
-            refresh_timer: 0,
-            change: function() {
-                console.log("CHANGE!!!");
-                $.get('./ur_base/filebrowser/list/?refresh', function(data) {
-                    root = data;
-                });
             },
-            upload: upload,
-            copy: copy,
-            rename: function(src, dest) {
-                return copy(src, dest, true);
-            },
-            dir: function(path, callback) {
-                let list = function() {
-                    var result = { files: [], dirs: [] };
-                    var current = root;
-                    browser.walk(path, function(file) {
-                        current = current[file];
-                    });
-                    for (let key in current) {
-                        if (current[key].mtime) {
-                            result.files.push(key);
-                        } else {
-                            result.dirs.push(key);
-                        }
-                    }
-                    callback(result);
-                };
-                if (root) {
-                    list();
-                } else {
-                    $.get('./ur_base/filebrowser/list/', function(data) {
-                        root = data;
-                        list();
-                    });
+            {
+                title: "Name",
+                data: 'name',
+                className: 'name',
+                render: function(data, type, row, meta) {
+                    return '<span class="view">'+data+'</span><input class="edit" value="'+data+'" style="display:none">';
                 }
+            },
+            {
+                title: "Modified",
+                data: 'mtime',
+                className: 'mtime',
+                render: function(data, type, row, meta) {
+                    return new Date(data).toLocaleString();
+                }
+            },
+            {
+                title: "Size",
+                data: 'size',
+                className: 'size',
+                render: function(data, type, row, meta) {
+                    return type === 'display' ? (parseFloat(data) / 1000).toFixed(1) + 'kb' : data;
+                }
+            }
+        ]
+    });
+
+    let resizeFileBrowserDataTable = function() {
+        // recalculate filebrowser height
+        let height = $('#red-ui-sidebar-content').height() - 256;
+        $('#filebrowser_wrapper .dataTables_scrollBody').css({ height: height, 'max-height': height });
+        // recalculate filebrowser column widths
+        filebrowser.columns.adjust().draw();
+    };
+    RED.events.on("sidebar:resize", resizeFileBrowserDataTable);
+    $(window).resize(resizeFileBrowserDataTable);
+
+    var toolbar = $("div.dataTables_wrapper div.toolbar");
+    let filebrowserpath = $('<input id="filebrowserpath" autocomplete="false" spellcheck="false">').val('/').change(function(e) {
+        e.preventDefault();
+        refreshFileSystem($(this).val());
+    }).appendTo(toolbar);
+
+    $('<button>', { type: 'button' }).append('<i class="fa fa-level-up">').appendTo(toolbar).click(function(e) {
+        e.preventDefault();
+        refreshFileSystem(filebrowserpath.val() + '..');
+    });
+
+    var toolbarMenu = $('<ul>', { class: 'red-ui-menu red-ui-menu-dropdown pull-right' }).appendTo(toolbar);
+
+    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-refresh"></i> Refresh')).appendTo(toolbarMenu).click(function(e) {
+        e.preventDefault();
+        toolbarMenu.hide();
+        refreshFileSystem();
+    });
+
+    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-folder"></i> New Folder')).appendTo(toolbarMenu).click(function(e) {
+        e.preventDefault();
+        toolbarMenu.hide();
+        let p = filebrowserpath.val() + 'new folder';
+        $.post('./ur_base/filebrowser/new/', { p: p }, function(result) {
+            if (result === 'ok') {
+                refreshFileSystem();
             }
         });
-        var browser = $("#filebrowser").eq(0).browse();
-    })(jQuery);
+    });
+
+    let filebrowserClipboard = { action: null, selection: null, originalPath: null };
+    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-cut"></i> Cut')).appendTo(toolbarMenu).click(function(e) {
+        e.preventDefault();
+        toolbarMenu.hide();
+        let currentPath = filebrowserpath.val();
+        let files = filebrowser.rows({ selected: true }).data().toArray().map(s => s.name);
+        filebrowserClipboard = { action: 'cut', selection: files, originalPath: currentPath };
+        $('#filebrowser .copy').removeClass('copy');
+        $('#filebrowser .selected').addClass('cut');
+    });
+
+    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-copy"></i> Copy')).appendTo(toolbarMenu).click(function(e) {
+        e.preventDefault();
+        toolbarMenu.hide();
+        let currentPath = filebrowserpath.val();
+        let files = filebrowser.rows({ selected: true }).data().toArray().map(s => s.name);
+        filebrowserClipboard = { action: 'copy', selection: files, originalPath: currentPath };
+        $('#filebrowser .cut').removeClass('cut');
+        $('#filebrowser .selected').addClass('copy');
+    });
+
+    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-paste"></i> Paste')).appendTo(toolbarMenu).click(function(e) {
+        e.preventDefault();
+        toolbarMenu.hide();
+        let currentPath = filebrowserpath.val();
+        let files = filebrowserClipboard.selection.map(file => {
+            return {
+                src: (filebrowserClipboard.originalPath + file).replace(/\/{2,}/g, '/'),
+                dest: (currentPath + file).replace(/\/{2,}/g, '/')
+            };
+        });
+        if (filebrowserClipboard.action === 'cut') {
+            moveFileSystem(files);
+        } else if (filebrowserClipboard.action === 'copy') {
+            copyFileSystem(files);
+        }
+        $('#filebrowser .copy').removeClass('copy');
+        $('#filebrowser .cut').removeClass('cut');
+        filebrowserClipboard = { action: null, selection: null };
+    });
+
+    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-trash"></i> Delete')).appendTo(toolbarMenu).click(function(e) {
+        e.preventDefault();
+        toolbarMenu.hide();
+        let currentPath = filebrowserpath.val();
+        let selected = filebrowser.rows({ selected: true }).data().toArray().map(s => currentPath + s.name);
+        $.post('./ur_base/filebrowser/delete/', { files: selected }, function(result) {
+            if (result.success > 0) {
+                refreshFileSystem();
+            }
+        });
+    });
+
+    $('<button>', { type: 'button', class: 'more' }).append('<i class="fa fa-caret-down">').appendTo(toolbar).click(function(e) {
+        e.preventDefault();
+        let pos = $(this).position();
+        toolbarMenu.toggle().toggleClass('active').css({ position: 'absolute', top: (pos.top + 38)+'px' });
+    });
+
+    $('#filebrowser tbody').on('dblclick', 'tr', function() {
+        var data = filebrowser.row(this).data();
+        if (data.type === 'd') {
+            refreshFileSystem(filebrowserpath.val() + data.name);
+        }
+    });
+
+    filebrowser.on('select', function(e, dt, type, indexes) {
+        if (type === 'row') {
+            var row = filebrowser.rows(indexes);
+            var data = row.data();
+            if (data.length === 1) { // single file selected, allow renaming.
+                $('#filebrowser tbody td.name').unbind('click.rename2');
+                $(row.nodes()[0]).find('td.name').bind('click.rename2', function(event) {
+                    var view = $(this).find('.view').hide();
+                    var edit = $(this).find('.edit').width($(this).width()-2).addClass('active').show()
+                        .unbind('focus')
+                        .one('focus', function() {
+                            $(this).select();
+                        })
+                        .unbind('change')
+                        .one('change', function() {
+                            edit.removeClass('active').hide();
+                            view.show();
+                            if (data[0].name !== edit.val()) {
+                                let currentPath = filebrowserpath.val();
+                                let files = [ {
+                                    src: currentPath + data[0].name,
+                                    dest: currentPath + edit.val()
+                                } ];
+                                moveFileSystem(files);
+                            }
+                        }).focus();
+                    event.stopPropagation();
+                });
+            } else { // multiple files selected, no renaming allowed.
+            }
+        }
+    });
+
+    $('#red-ui-sidebar-content').click(function() {
+        $('#filebrowser tbody').find('.edit.active').trigger('change');
+    });
+
+    async function refreshFileSystem(path) {
+        try {
+            let p = path || filebrowserpath.val();
+            let data = await $.get('./ur_base/filebrowser/list/', { p: p });
+            filebrowserpath.val(data.path.charAt(data.path.length-1) === '/' ? data.path : data.path + '/');
+            if (filebrowser) {
+                filebrowser.clear();
+                filebrowser.rows.add(data.files).draw();
+            }
+        } catch (e) {}
+    };
+    refreshFileSystem('/');
+
+    function moveFileSystem(files) {
+        $.post('./ur_base/filebrowser/move/', { files: files }, function(result) {
+            if (result.success > 0) {
+                refreshFileSystem();
+            }
+        });
+    }
+
+    function copyFileSystem(files) {
+        $.post('./ur_base/filebrowser/copy/', { files: files }, function(result) {
+            if (result.success > 0) {
+                refreshFileSystem();
+            }
+        });
+    }
+
 </script>
 
 <script type="text/html" data-template-name="ur_base">

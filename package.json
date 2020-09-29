@@ -116,7 +116,6 @@
         "hammerjs": "^2.0.8",
         "jquery": "^3.4.1",
         "jquery-sparkline": "^2.4.0",
-        "jquery.filebrowser": "^0.8.2",
         "jsonwebtoken": "^8.5.1",
         "mat-progress-buttons": "^9.1.1",
         "material-design-iconic-font": "^2.2.0",
