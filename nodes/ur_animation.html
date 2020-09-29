@@ -173,6 +173,48 @@
             for (let i = 0; i < this.rules.length; i++) {
                 $('#node-input-rule-container').editableList('addItem', { rule: this.rules[i] });
             }
+
+            function reloadImageSelector() {
+                try {
+                    var imageSelector = $('#imageSelector');
+                    imageSelector.find('option, optgroup').remove();
+                    $('<option>').text('select an image').appendTo(imageSelector);
+                    $.get('./ur_base/filebrowser/list/', { f: 'jpg,png,gif', r: 1 }, function(data) {
+                        let addImageOption = function(entry) {
+                            if (entry.files && entry.files.length) {
+                                entry.files.map(f => {
+                                    f.folder = entry.path;
+                                    f.path = (entry.path || entry.name) + '/' + f.name;
+                                    return f;
+                                }).forEach(addImageOption);
+                            } else if (entry.type === 'f') {
+                                var optgroup = imageSelector.find('optgroup[label="' + entry.folder + '"]');
+                                if (!optgroup.length) {
+                                    optgroup = $('<optgroup>', { label: entry.folder }).appendTo(imageSelector);
+                                }
+                                $('<option>').val(entry.path).text(entry.name).appendTo(optgroup);
+                            }
+                        }
+                        data.files.forEach(addImageOption);
+                    });
+                } catch (e) {}
+            };
+            reloadImageSelector();
+            $('#reloadImageSelector').click(reloadImageSelector);
+            $('#imageSelector').change(function() {
+                var file = $(this).val();
+                if (file !== 'select an image') {
+                    var code = that.editor.getValue();
+                    if (!code) {
+                        code = '<img static src="' + file + '">';
+                    } else {
+                        code += '\n<img animated name="newImage" src="' + file + '" style="position: absolute;">';
+                    }
+                    that.editor.setValue(code, -1);
+                    that.editor.focus();
+                    updateViewport(code);
+                }
+            })
         },
         oneditsave: function () {
             // store rules from editable list
@@ -285,6 +327,17 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_animation.label.name"></span></label>
         <div style="display:inline-block; width:calc(100% - 105px)">
             <input type="text" id="node-input-name" />
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="imageSelector"><i class="fa fa-image"></i> <span data-i18n="ur_animation.label.image"></span></label>
+        <div style="display:inline-block; width:calc(100% - 105px)">
+            <select id="imageSelector" style="width: calc(100% - 52px);"></select>
+            <div style="margin-left:5px; display: inline-block;position: relative;">
+                <button id="reloadImageSelector" class="red-ui-button">
+                    <i class="fa fa-refresh"></i>
+                </button>
+            </div>
         </div>
     </div>
     <div class="form-row" style="margin-bottom:0px;">
