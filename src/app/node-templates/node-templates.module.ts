@@ -29,6 +29,11 @@ import { UrTableComponent } from './ur-table/ur-table.component';
 import { UrScheduleComponent } from './ur-schedule/ur-schedule.component';
 import { UrScheduleFormDialogComponent } from './ur-schedule/ur-schedule-form-dialog.component';
 import { UrFormComponent } from './ur-form/ur-form.component';
+import { UrChartComponent } from './ur-chart/ur-chart.component';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
     declarations: [
@@ -41,6 +46,7 @@ import { UrFormComponent } from './ur-form/ur-form.component';
         UrScheduleFormDialogComponent,
         UrTableComponent,
         UrFormComponent,
+        UrChartComponent,
     ],
     imports: [
         CommonModule,
@@ -62,6 +68,10 @@ import { UrFormComponent } from './ur-form/ur-form.component';
         FullCalendarModule,
         PerfectScrollbarModule,
         DragDropModule,
+        BrowserModule, 
+        FormsModule,
+        NgxChartsModule,
+        BrowserAnimationsModule 
     ],
 })
 export class NodeTemplatesModule {}

@@ -8,6 +8,7 @@ import { UrAnimationComponent } from '../node-templates/ur-animation/ur-animatio
 import { UrScheduleComponent } from '../node-templates/ur-schedule/ur-schedule.component';
 import { UrTableComponent } from '../node-templates/ur-table/ur-table.component';
 import { UrFormComponent } from '../node-templates/ur-form/ur-form.component';
+import { UrChartComponent } from '../node-templates/ur-chart/ur-chart.component';
 
 @Injectable({
     providedIn: 'root',
@@ -20,6 +21,8 @@ export class WidgetService {
                     return new GroupWidgets(UrTextComponent, widget);
                 case 'button':
                     return new GroupWidgets(UrButtonComponent, widget);
+                case 'chart':
+                    return new GroupWidgets(UrChartComponent, widget);
                 case 'text-input':
                     return new GroupWidgets(UrTextInputComponent, widget);
                 case 'template':
