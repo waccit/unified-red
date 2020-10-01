@@ -179,11 +179,12 @@
                     var imageSelector = $('#imageSelector');
                     imageSelector.find('option, optgroup').remove();
                     $('<option>').text('select an image').appendTo(imageSelector);
-                    $.get('./ur_base/filebrowser/list/', { f: 'jpg,png,gif', r: 1 }, function(data) {
+                    let imgRoot = 'img/';
+                    $.get('./ur_base/filebrowser/list/', { p: imgRoot, f: 'jpg,png,gif', r: 1 }, function(data) {
                         let addImageOption = function(entry) {
                             if (entry.files && entry.files.length) {
                                 entry.files.map(f => {
-                                    f.folder = entry.path;
+                                    f.folder = (entry.path || entry.name);
                                     f.path = (entry.path || entry.name) + '/' + f.name;
                                     return f;
                                 }).forEach(addImageOption);
@@ -192,7 +193,7 @@
                                 if (!optgroup.length) {
                                     optgroup = $('<optgroup>', { label: entry.folder }).appendTo(imageSelector);
                                 }
-                                $('<option>').val(entry.path).text(entry.name).appendTo(optgroup);
+                                $('<option>').val(imgRoot + entry.path).text(entry.name).appendTo(optgroup);
                             }
                         }
                         data.files.forEach(addImageOption);
