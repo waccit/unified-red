@@ -157,27 +157,44 @@ module.exports = function (RED) {
 
     function traverseDir(dir, recursive, filter) {
         let files = [];
-        fs.readdirSync(dir).forEach(file => {
-            if (file.indexOf('.') !== 0) {
-                let fullPath = path.join(dir, file);
-                let stat = fs.lstatSync(fullPath);
-                if (stat.isDirectory()) {
-                    let d = { name: file, type: 'd', mtime: stat.mtime.toISOString(), size: stat.size };
-                    if (recursive) {
-                        d.files = traverseDir(fullPath, recursive, filter);
-                        if (filter && !d.files.length) {
-                            return; // recursive filter traverse found no files in this folder. 
+        if (fs.existsSync(dir)) {
+            fs.readdirSync(dir).forEach(file => {
+                if (file.indexOf('.') !== 0) {
+                    let fullPath = path.join(dir, file);
+                    let stat = fs.lstatSync(fullPath);
+                    if (stat.isDirectory()) {
+                        let d = { name: file, type: 'd', mtime: stat.mtime.toISOString(), size: stat.size };
+                        if (recursive) {
+                            d.files = traverseDir(fullPath, recursive, filter);
+                            if (filter && !d.files.length) {
+                                return; // recursive filter traverse found no files in this folder. 
+                            }
+                        }
+                        files.push(d);
+                    } else {
+                        if (!filter || new RegExp('\.(' + filter.replace(/\W+/g, '|') + ')$', 'i').test(file)) {
+                            files.push({ name: file, type: 'f', mtime: stat.mtime.toISOString(), size: stat.size });
                         }
                     }
-                    files.push(d);
-                } else {
-                    if (!filter || new RegExp('\.(' + filter.replace(/\W+/g, '|') + ')$', 'i').test(file)) {
-                        files.push({ name: file, type: 'f', mtime: stat.mtime.toISOString(), size: stat.size });
-                    }
                 }
+            });
+        }
+        return files;
+    }
+
+    function copyFolderSync(src, dest) {
+        if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest);
+        }
+        fs.readdirSync(src).forEach(file => {
+            let srcPath = path.join(src, file);
+            let destPath = path.join(dest, file);
+            if (fs.lstatSync(srcPath).isFile()) {
+                fs.copyFileSync(srcPath, destPath);
+            } else {
+                copyFolderSync(srcPath, destPath);
             }
         });
-        return files;
     }
 
     RED.httpAdmin.get('/ur_base/filebrowser/list/', function (req, res) {
@@ -188,11 +205,15 @@ module.exports = function (RED) {
             if (absPath.indexOf(staticRoot) === -1) { // do not navigate away from static root
                 absPath = staticRoot;
             }
-            let files = traverseDir(absPath, recursive, filter);
-            res.json({
-                path: absPath.substr(staticRoot.length - 1) || '/',
-                files: files
-            });
+            if (fs.existsSync(absPath)) {
+                let files = traverseDir(absPath, recursive, filter);
+                res.json({
+                    path: absPath.substr(staticRoot.length - 1) || '/',
+                    files: files
+                });
+            } else {
+                res.send('file/folder path does not exist');
+            }
         }
         catch (e) {
             console.error(e);
@@ -233,7 +254,11 @@ module.exports = function (RED) {
                     results.errors += 1;
                     continue;
                 }
-                fs.copyFileSync(src, dest);
+                if (fs.lstatSync(src).isDirectory()) {
+                    copyFolderSync(src, dest);
+                } else {
+                    fs.copyFileSync(src, dest);
+                }
                 results[file.src] = true;
                 results.success += 1;
             } catch (err) {
