@@ -1,0 +1,391 @@
+<style>
+    input.series-color {
+        width: 100px;
+        text-align: center;
+    }
+    input.series-color::-webkit-color-swatch {
+        border: none;
+    }
+</style>
+<script type="text/javascript">
+    RED.nodes.registerType('ur_chart',{
+        category: 'unified-red',
+        color: '#81c784',
+        defaults: {
+            name: {value: ''},
+            group: {type: 'ur_group', required: true},
+            order: {value: 0},
+            width: {
+                value: 0,
+            },
+            height: { value: 0 },
+            label: {value: 'chart'},
+            chartType: {value: 'line'},
+            topic: {value: []},
+            topics: {
+                value: [
+                    {
+                        alias: '',
+                        def: '',
+                    },
+                ],
+            },
+            legend: {value: 'false'},
+            xformat: {value: 'HH:mm:ss'},
+            interpolate: {value: 'linear', required:true},
+            nodata: {value: ''},
+            live: {value: false},
+            xmin: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            xmax: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            ymin: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            ymax: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            // removeOlder: {value: 1, validate:RED.validators.number(), required:true},
+            // removeOlderPoints: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            // removeOlderUnit: {value: '3600', required:true},
+            // cutout: {value: 0},
+            // useOneColor: {value: false},
+            // colors: {value: ['#1F77B4', '#AEC7E8', '#FF7F0E', '#2CA02C', '#98DF8A', '#D62728', '#FF9896', '#9467BD', '#C5B0D5']},
+            // useOldStyle: {value: false},
+            outputs: {value: 1}
+        },
+        inputs:0,
+        outputs:1,
+        // inputLabels: function() { return this.chartType; },
+        outputLabels: ["chart state"],
+        align: "right",
+        icon: "ur_chart.png",
+        paletteLabel: 'chart',
+        label: function() { return this.name || (~this.label.indexOf("{{") ? null : this.label) || 'chart'; },
+        labelStyle: function() { return this.name?"node_label_italic":""; },
+        oneditprepare: function() {
+            var oldouts = this.outputs;
+            if (RED.nodes.filterLinks({source:{id:this.id},sourcePort:1}).length > 0) { this.outputs = 2; }
+            else { this.outputs = 1; }
+            if (this.outputs !== oldouts) { this.changed = true; }
+            if (!$("#node-input-chartType").val()) {
+                $("#node-input-chartType").val("line");
+            }
+            if (this.useOldStyle === undefined) {
+                $("#node-input-useOldStyle").prop('checked', true);
+            }
+            if (RED.nodes.getType('ur_group')) {
+                $('.form-tips').hide();
+            } else {
+                $('.form-row').hide();
+            }
+            $("#node-input-size").elementSizer({
+                width: '#node-input-width',
+            });
+            $("#node-input-chartType").on("change", function() {
+                $("#legend-show").hide();
+                if ($(this).val() === "line") {
+                    $("#x-axis-show").show();
+                    $("#x-axis-label-show").show();
+                    $("#interpolate-show").show();
+                    $("#legend-show").show();
+                    $("#y-axis-show").show();
+                    $("#hole-size-show").hide();
+                    $("#show-live-topic").show();
+                    $("#show-useOneColor").hide();
+                }
+                else {
+                    $("#x-axis-show").hide();
+                    $("#x-axis-label-show").hide();
+                    $("#interpolate-show").hide();
+                    $("#show-live-topic").hide();
+                    if (($(this).val() === "bar")||($(this).val() === "horizontalBar")) {
+                        $("#show-useOneColor").show();
+                        $("#legend-show").show();
+                    }
+                    else {
+                        $("#show-useOneColor").hide();
+                    }
+                    if ($(this).val() === "pie") {
+                        $("#y-axis-show").hide();
+                        $("#legend-show").show();
+                        $("#hole-size-show").show();
+                    }
+                    else {
+                        $("#y-axis-show").show();
+                        $("#hole-size-show").hide();
+                    }
+                }
+            });
+            // var setColour = function(id, value) {
+            //     $(id).val(value);
+            //     $(id).css("background-color", value);
+            //     var rgb = tinycolor(value).toRgb();
+            //     var level = ((rgb.r*299) + (rgb.g*587) + (rgb.b*114))/1000;
+            //     var textColor = (level >= 128) ? '#111111' : '#eeeeee';
+            //     $(id).css("color", textColor);
+            // }
+            // $(".series-color").on("change", function() {
+            //     setColour("#"+$(this).attr("id"), $(this).val());
+            // });
+            var oval = $("#node-input-xformat").val();
+            if (!oval) { $("#node-input-xformat").val("HH:mm:ss"); }
+            var odef = 'custom';
+            if (oval === "HH:mm:ss") { odef = oval; }
+            if (oval === "HH:mm") { odef = oval; }
+            if (oval === "Y-M-D") { odef = oval; }
+            if (oval === "D/M") { odef = oval; }
+            if (oval === "dd HH:mm") { odef = oval; }
+            if (oval === "auto") { odef = oval; }
+            var ohms = {value:"HH:mm:ss", label:"HH:mm:ss", hasValue:false};
+            var ohm = {value:"HH:mm", label:"HH:mm", hasValue:false};
+            var oymd = {value:"Y-M-D", label:"Year-Month-Date", hasValue:false};
+            var odm = {value:"D/M", label:"Date/Month", hasValue:false};
+            var oahm = {value:"dd HH:mm", label:"Day HH:mm", hasValue:false};
+            var ocus = {value:"custom", label:"custom", icon:"red/images/typedInput/az.png"};
+            var oaut = {value:"auto", label:"automatic", hasValue:false};
+            $("#node-input-xformat").typedInput({
+                default: odef,
+                types:[ ohms, ohm, oahm, odm, oymd, ocus, oaut ]
+            });
+            $('#node-input-topic-container')
+                .css('min-height', '100px')
+                .css('min-width', '950px')
+                .editableList({
+                    addItem: function (container, index, opt) {
+                        if (!opt.hasOwnProperty('topic')) {
+                            opt.topic = {};
+                        }
+                        var topic = opt.topic;
+                        if (!topic.hasOwnProperty('prop')) {
+                            topic.prop = 'vis';
+                        }
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                        });
+                        var row = $('<div/>').appendTo(container);
+                        //alias input
+                        $('<input/>', {
+                            class: 'node-input-topic-alias',
+                            type: 'text',
+                            placeholder: 'alias',
+                            style: 'margin-left: 5px; width: 45%;',
+                        })
+                            .appendTo(row)
+                            .val(topic.alias);
+                        //topic input
+                        $('<input/>', {
+                            class: 'node-input-topic-def',
+                            type: 'text',
+                            placeholder: 'topic',
+                            style: 'margin-left: 5px; width: 45%;',
+                        })
+                            .appendTo(row)
+                            .val(topic.def);
+                    },
+                    sortable: true,
+                    removable: true,
+                    addButton: true,
+                });
+            // $("#node-input-topic-container").editableList('addItems', this.topics);
+            for (let i = 0; i < this.topics.length; i++) {
+                $('#node-input-topic-container').editableList('addItem', { topic: this.topics[i] });
+            }
+            // var defaultColors = ['#1F77B4', '#AEC7E8', '#FF7F0E', '#2CA02C', '#98DF8A', '#D62728', '#FF9896', '#9467BD', '#C5B0D5'];
+
+            // if (this.colors) {
+            //     for (var i=0; i<this.colors.length; i++) {
+            //         var value = this.colors[i] || defaultColors[i];
+            //         setColour("#node-input-color"+(i+1), value);
+            //     }
+            // }
+            // else {
+            //     for (var c=0; c<defaultColors.length; c++) {
+            //         setColour("#node-input-color"+(c+1), defaultColors[c]);
+            //     }
+            // }
+
+        },
+        oneditsave: function() {
+            if ($("#node-input-xformat").typedInput('type') !== 'custom') {
+                $("#node-input-xformat").val($("#node-input-xformat").typedInput('type'));
+            }
+            // this.colors = [$("#node-input-color1").val(),$("#node-input-color2").val(),$("#node-input-color3").val(),
+            // $("#node-input-color4").val(),$("#node-input-color5").val(),$("#node-input-color6").val(),
+            // $("#node-input-color7").val(),$("#node-input-color8").val(),$("#node-input-color9").val()];
+            this.xmin = $("node-input-xmin").val();
+            this.xmax = $("node-input-xmax").val();
+            $('#node-input-live').is(':checked') ? (this.live = 1) : (this.live = 0);
+            
+            let topics = $('#node-input-topic-container').editableList('items');
+            let node = this;
+            node.topics = [];
+            topics.each(function (i) {
+                let container = $(this);
+
+                let c = {
+                    alias: container.find('.node-input-topic-alias').val(),
+                    def: container.find('.node-input-topic-def').val(),
+                };
+                node.topics.push(c);
+            });
+            console.log('topics', node.topics);
+            // console.log('this', this);
+        },
+        oneditresize: function (size) {
+            var rows = $('#dialog-form>div:not(.node-input-topic-container-row)');
+            var height = size.height;
+            for (var i = 0; i < rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $('#dialog-form>div.node-input-topic-container-row');
+            height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
+
+            $('#node-input-topic-container').editableList('height', height);
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_chart">
+    <div class="form-row">
+        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
+        <input type="text" id="node-input-group">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-height">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional chart title">
+    </div>
+    <!-- <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-cogs"></i> Topics</label>
+        <input type="text" id="node-input-topics" placeholder="List of topics">
+    </div> -->
+    <div class="form-row node-input-topic-container-row">
+        <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Topics</label>
+        <div class="form-row node-input-topic-container-row">
+            <ol id="node-input-topic-container"></ol>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-chartType"><i class="fa fa-line-chart"></i> Type</label>
+        <select id="node-input-chartType" style="width:159px; font-family:'FontAwesome','Helvetica Neue', Helvetica, Arial, sans-serif">
+            <option value="line">Line chart</option>
+            <option value="table">Table</option>
+        </select>
+        <div id="show-live-topic" style="display:inline-block;">
+            <input type="checkbox" id="node-input-live" style="display:inline-block; width:auto; vertical-align:baseline; margin-left:40px; margin-right:5px;">Live Chart
+        </div>
+    </div>
+    <div class="form-row" id="x-axis-label-show">
+        <label for="node-input-xformat">X-axis Label</label>
+        <input type="text" id="node-input-xformat" style="width:268px;">
+    </div>
+    <div class="form-row" id="x-axis-show">
+        <label id="x-label-show" for="node-input-xmin">X-axis</label>
+        <label for="node-input-xmin" style="width:auto">min</label>
+        <input type="date" id="node-input-xmin" style="width:140px">
+        <label for="not-input-xmax" style="width:auto; margin-left:10px;">max</label>
+        <input type="date" id="node-input-xmax" style="width:140px">
+    </div>
+    <div class="form-row" id="y-axis-show">
+        <label id="y-label-show" for="node-input-ymin">Y-axis</label>
+        <label for="node-input-ymin" style="width:auto">min</label>
+        <input type="text" id="node-input-ymin" style="width:140px">
+        <label for="not-input-ymax" style="width:auto; margin-left:10px;">max</label>
+        <input type="text" id="node-input-ymax" style="width:140px">
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+         </select>
+         <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+         </select>
+    </div>
+    <!-- <div class="form-row" id="legend-show">
+        <label for="node-input-legend">Legend</label>
+        <select id="node-input-legend" style="width:120px;">
+            <option value="false">None</option>
+            <option value="true">Show</option>
+        </select>
+        <span id="interpolate-show">&nbsp;&nbsp;&nbsp;&nbsp;Interpolate
+            <select id="node-input-interpolate" style="width:120px;">
+                <option value="linear">linear</option>
+                <option value="step">step</option>
+                <option value="bezier">bezier</option>
+            </select>
+        </span>
+        <span id="hole-size-show">&nbsp;&nbsp;&nbsp;&nbsp;Cutout
+            <input type="text" id="node-input-cutout" style="width:35px"> %
+        </span>
+    </div> -->
+    <!-- <div id="show-useOneColor" style="display:none; height:24px;">
+        <input type="checkbox" id="node-input-useOneColor" style="display:inline-block; width:auto; vertical-align:baseline; margin-left:105px; margin-right:5px;">Use first colour for all bars
+    </div>
+    <div class="form-row" id="ui-chart-colours">
+        <label for="node-input-color1">Series Colours</label>
+        <input type="color" id="node-input-color1" class="series-color" style="width:100px;"/>
+        <input type="color" id="node-input-color2" class="series-color" style="width:100px;"/>
+        <input type="color" id="node-input-color3" class="series-color" style="width:100px;"/>
+        <div style="margin-top:5px; margin-left:104px;">
+            <input type="color" id="node-input-color4" class="series-color" style="width:100px;"/>
+            <input type="color" id="node-input-color5" class="series-color" style="width:100px;"/>
+            <input type="color" id="node-input-color6" class="series-color" style="width:100px;"/>
+        </div>
+        <div style="margin-top:5px; margin-left:104px;">
+            <input type="color" id="node-input-color7" class="series-color" style="width:100px;"/>
+            <input type="color" id="node-input-color8" class="series-color" style="width:100px;"/>
+            <input type="color" id="node-input-color9" class="series-color" style="width:100px;"/>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-nodata">Blank label</label>
+        <input type="text" id="node-input-nodata" placeholder="display this text before valid data arrives">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-useOldStyle" style="display:inline-block; width:auto; vertical-align:baseline; margin-left:105px; margin-right:5px;">Use deprecated (pre 2.5.0) data format.
+    </div> -->
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_chart">
+    <p>Plots the input values on a chart. This can either be a time based line chart, a bar chart (vertical or horizontal),
+    or a pie chart.</p>
+    <p>Each input <code>msg.payload</code> value will be converted to a number. If the
+    conversion fails, the message is ignored.</p>
+    <p>Minimum and Maximum <b>Y</b> axis values are optional. The graph will auto-scale to any values received.</p>
+    <p>Multiple series can be shown on the same chart by using a different <code>msg.topic</code>
+    value on each input message. Multiple bars of the same series can be shown by using the <code>msg.label</code> property.</p>
+    <p>The <b>X</b> axis defines a time window or a maximum number of points to display. Older data will be automatically removed from the graph.
+    The axis labels can be formatted using a <a href="https://momentjs.com/docs/#/displaying/format/" target="_blank">
+    Moment.js time formatted</a> string.</p>
+    <p>Inputting a <code>msg.payload</code> containing a blank array <code>[]</code> will clear the chart.</p>
+    <p>See <b><a href="https://github.com/node-red/node-red-dashboard/blob/master/Charts.md" target="_new">this information</a></b>
+    for how to pre-format data to be passed in as a complete chart.</p>
+    <p>The <b>Blank label</b> topic can be used to display some text before any valid data is received.</p>
+    <p>The label can also be set by a message property by setting
+    the topic to the name of the property, for example <code>{{msg.topic}}</code>.</p>
+    <p>The node output contains an array of the chart state that can be persisted if needed. This can be passed
+    into the chart node to re-display the persisted data.</p>
+</script>
