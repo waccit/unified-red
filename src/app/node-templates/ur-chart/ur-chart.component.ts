@@ -12,6 +12,8 @@ import { multi } from './data';
 export interface chartConfiguration {
 	xmax: string;
     xmin: string;
+    ymin: string;
+    ymax: string;
     topics: {alias: string, def: string};
 }
 
@@ -23,7 +25,7 @@ export interface chartConfiguration {
 
 export class UrChartComponent extends BaseNode implements OnInit {
 
-    view: any[] = [700, 300];
+    view: any[] = [700, 500];
     config: chartConfiguration;
     multi: any[];
     
@@ -33,10 +35,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
     animations: boolean = true;
     xAxis: boolean = true;
     yAxis: boolean = true;
-    showYAxisLabel: boolean = true;
+    showYAxisLabel: boolean = false;
     showXAxisLabel: boolean = true;
-    xAxisLabel: string = 'Year';
-    yAxisLabel: string = 'Population';
+    xAxisLabel: string = '';
+    yAxisLabel: string = '';
     timeline: boolean = true;
 
     colorScheme = {
@@ -75,21 +77,18 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
     ngOnInit(): void {
         this.config = this.data;
-        console.log('this.config.topics', this.config);
+        console.log('this.config', this.config);
         const topics = [];
         for (const topic in this.config.topics) {
             topics.push(this.config.topics[topic].def);
         }
-        console.log('topics', topics);
-        
         let param = {
             "topic": topics,  //['some/sensor/a','some/sensor/b'],
-            // "topic": 'some/sensor/a',
             // startTimestamp: new Date(this.data.xmin),
             // endTimestamp: new Date(this.data.xmax),
             // value: any,
-            // lowValue: any,
-            // highValue: any,
+            lowValue: parseFloat(this.config.ymin),
+            highValue: parseFloat(this.config.ymax),
             // status: string,
             // tags: string[]
         }
