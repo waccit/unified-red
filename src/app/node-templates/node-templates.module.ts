@@ -32,8 +32,8 @@ import { UrFormComponent } from './ur-form/ur-form.component';
 import { UrChartComponent } from './ur-chart/ur-chart.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { InjectionService } from '@swimlane/ngx-charts/lib/common/tooltip/injection.service';
 
 @NgModule({
@@ -69,11 +69,6 @@ import { InjectionService } from '@swimlane/ngx-charts/lib/common/tooltip/inject
         FullCalendarModule,
         PerfectScrollbarModule,
         DragDropModule,
-        BrowserModule, 
-        FormsModule,
-        NgxChartsModule,
-        BrowserAnimationsModule 
     ],
-    providers: [InjectionService]
 })
 export class NodeTemplatesModule {}
