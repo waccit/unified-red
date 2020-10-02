@@ -121,8 +121,8 @@ async function query(param) {
     let criteria = [];
     if (param.topic) {
         if (Array.isArray(param.topic)) {
-            const loggerIds = await Logger.find({ 'topic': { '$in': loggerIds } }).map((l) => l._id);
-            criteria.push({ logger: { '$in': loggerIds } });
+            const loggerIds = await Logger.find({ 'topic': { '$in': param.topic } });
+            criteria.push({ logger: { '$in': loggerIds.map((l) => l._id) } });
         } else {
             const logger = await Logger.findOne({ 'topic': param.topic });
             criteria.push({ logger: logger._id });

@@ -34,6 +34,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { InjectionService } from '@swimlane/ngx-charts/lib/common/tooltip/injection.service';
 
 @NgModule({
     declarations: [
@@ -73,5 +74,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
         NgxChartsModule,
         BrowserAnimationsModule 
     ],
+    providers: [InjectionService]
 })
 export class NodeTemplatesModule {}
