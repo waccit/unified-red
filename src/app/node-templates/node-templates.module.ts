@@ -69,6 +69,10 @@ import { InjectionService } from '@swimlane/ngx-charts/lib/common/tooltip/inject
         FullCalendarModule,
         PerfectScrollbarModule,
         DragDropModule,
+        BrowserModule, 
+        FormsModule,
+        NgxChartsModule,
+        BrowserAnimationsModule
     ],
 })
 export class NodeTemplatesModule {}
