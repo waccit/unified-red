@@ -10,7 +10,8 @@
             </a>
         </div>
 
-        <div *ngIf="sidebarSubItem.submenu.length > 0">
+        <!-- <div *ngIf="sidebarSubItem.submenu.length > 0"> -->
+        <div *ngIf="!sidebarSubItem.isMenuPage">
             <a (click)="callSubMenuToggle(sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
                 {{ sidebarSubItem.title }}
             </a>

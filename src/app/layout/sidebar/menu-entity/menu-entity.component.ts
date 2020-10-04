@@ -18,27 +18,6 @@ export class MenuEntityComponent implements OnInit {
         public elementRef: ElementRef
     ) {}
 
-    // @HostListener('document:mousedown', ['$event'])
-    // onGlobalClick(event): void {
-    //     if (!this.elementRef.nativeElement.contains(event.target)) {
-    //         this.renderer.removeClass(this.document.body, 'overlay-open');
-    //     }
-    // }
-
-    // callMenuToggle(event: any, element: any) {
-    //     if (element === this.showMenu) {
-    //         this.showMenu = '0';
-    //     } else {
-    //         this.showMenu = element;
-    //     }
-    //     const hasClass = event.target.classList.contains('toggled');
-    //     if (hasClass) {
-    //         this.renderer.removeClass(event.target, 'toggled');
-    //     } else {
-    //         this.renderer.addClass(event.target, 'toggled');
-    //     }
-    // }
-
     callSubMenuToggle(element: any) {
         if (element === this.showSubMenu) {
             this.showSubMenu = '0';
