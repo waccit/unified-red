@@ -991,7 +991,10 @@ function addControl(menu_items, menu_page, group, control) {
             }
 
             function dynamicRemove() {
+                // console.log('dynamic remove called...');
                 if (dynamicWidgets[control.id]) {
+                    // for (page in foundMenuItem.items) {
+                    // }
                     foundMenuItem.items.forEach((page) => {
                         if (page.id.startsWith(menu_page.id)) {
                             page.items = page.items.filter((g) => {
@@ -1014,8 +1017,8 @@ function addControl(menu_items, menu_page, group, control) {
                         }
                     });
                     delete dynamicWidgets[control.id];
+                    updateUi();
                 }
-                updateUi();
             }
 
             removeFunc = dynamicRemove;
@@ -1136,6 +1139,7 @@ function addControl(menu_items, menu_page, group, control) {
             foundMenuItem.submenu.sort(itemSorter);
 
             function staticRemove() {
+                // console.log('static remove called...');
                 var index = foundGroup.items.indexOf(control);
                 if (index >= 0) {
                     // Remove the item from the group
@@ -1158,7 +1162,7 @@ function addControl(menu_items, menu_page, group, control) {
                                     foundMenuItem.items.splice(itemsIdx, 1);
                                     foundMenuItem.submenu.splice(submenuIdx, 1);
 
-                                    // If the menu-item is now empty, remove the entire lineage from root
+                                    // If the menu-item is now empty, find parent, remove self and check whether parent should be removed
                                     if (foundMenuItem.items.length === 0) {
                                         let menuItemsStack = [...menu_items];
                                         let curr = menuItemsStack.find((mi) => mi.id === foundMenuItem.id);
