@@ -38,7 +38,7 @@
         paletteLabel: 'dashboard group',
         label: function () {
             var menuPageNode = RED.nodes.node(this.menuPage);
-            var menuItemNode = RED.nodes.node(menuPageNode.menuItem);
+            var menuItemNode = menuPageNode !== null ? RED.nodes.node(menuPageNode.menuItem) : null;
             var menuPageName = menuPageNode ? menuPageNode.name : 'label.unassigned';
             var menuItemName = menuItemNode ? menuItemNode.name : 'label.unassigned';
 
@@ -95,33 +95,49 @@
 
 <script type="text/html" data-template-name="ur_group">
     <div class="form-row">
-        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_group.label.name"></span></label>
-        <input type="text" id="node-config-input-name">
+        <label for="node-config-input-name"
+            ><i class="fa fa-tag"></i> <span data-i18n="ur_group.label.name"></span
+        ></label>
+        <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-menuPage"><i class="fa fa-table"></i> <span data-i18n="ur_group.label.menuPage"></span></label>
-        <input type="text" id="node-config-input-menuPage">
+        <label for="node-config-input-menuPage"
+            ><i class="fa fa-table"></i> <span data-i18n="ur_group.label.menuPage"></span
+        ></label>
+        <input type="text" id="node-config-input-menuPage" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-width-row"><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span></label>
+        <label for="node-config-input-width-row"
+            ><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span
+        ></label>
 
-        <label for="node-config-input-widthLg" style="width: auto;"> <span data-i18n="ur_group.label.widthLg"></span></label>
-        <input type="hidden" id="node-config-input-widthLg">
+        <label for="node-config-input-widthLg" style="width: auto;">
+            <span data-i18n="ur_group.label.widthLg"></span
+        ></label>
+        <input type="hidden" id="node-config-input-widthLg" />
         <button class="editor-button" id="node-input-size-lg" style="margin-right: 7px;"></button>
 
-        <label for="node-config-input-widthMd" style="width: auto;"> <span data-i18n="ur_group.label.widthMd"></span></label>
-        <input type="hidden" id="node-config-input-widthMd">
+        <label for="node-config-input-widthMd" style="width: auto;">
+            <span data-i18n="ur_group.label.widthMd"></span
+        ></label>
+        <input type="hidden" id="node-config-input-widthMd" />
         <button class="editor-button" id="node-input-size-md" style="margin-right: 7px;"></button>
 
-        <label for="node-config-input-widthSm" style="width: auto;"> <span data-i18n="ur_group.label.widthSm"></span></label>
-        <input type="hidden" id="node-config-input-widthSm">
+        <label for="node-config-input-widthSm" style="width: auto;">
+            <span data-i18n="ur_group.label.widthSm"></span
+        ></label>
+        <input type="hidden" id="node-config-input-widthSm" />
         <button class="editor-button" id="node-input-size-sm" style="margin-right: 7px;"></button>
     </div>
     <div class="form-row">
-        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp"> <label style="width:auto" for="node-config-input-disp"><span data-i18n="ur_group.display-name"></span></label>
+        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp" />
+        <label style="width:auto" for="node-config-input-disp"><span data-i18n="ur_group.display-name"></span></label>
     </div>
     <div class="form-row" id="group-collapse-flag">
-        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse"> <label style="width:auto" for="node-config-input-collapse"><span data-i18n="ur_group.collapse-name"></span></label>
+        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse" />
+        <label style="width:auto" for="node-config-input-collapse"
+            ><span data-i18n="ur_group.collapse-name"></span
+        ></label>
     </div>
     <div class="form-row">
         <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
