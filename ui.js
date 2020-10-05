@@ -672,7 +672,7 @@ let removeFunc;
 var dynamicPages = {};
 var dynamicGroups = {};
 var dynamicWidgets = {};
-var pageOrdersLog = {};
+// var pageOrdersLog = {};
 // key: parent menuItem's id
 // val: { id: <menuPage's id>, start: <start order>, end: <end order> }
 
@@ -896,35 +896,35 @@ function addControl(menu_items, menu_page, group, control) {
                 dynamicWidgets[control.id] = true;
             } else {
                 // let pages = [];
-                let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
+                // let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
 
-                // update pageOrdersLog
-                if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
-                    let log = pageOrdersLog[foundMenuItem.id];
-                    let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
+                // // update pageOrdersLog
+                // if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
+                //     let log = pageOrdersLog[foundMenuItem.id];
+                //     let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
 
-                    if (currIndex > 0) {
-                        log[currIndex] = {
-                            id: menu_page.id,
-                            start: updatedOrder,
-                            end: updatedOrder + instanceNums.length - 1,
-                        };
-                    } else {
-                        log.push({
-                            id: menu_page.id,
-                            start: updatedOrder,
-                            end: updatedOrder + instanceNums.length - 1,
-                        });
-                    }
-                } else {
-                    pageOrdersLog[foundMenuItem.id] = [
-                        {
-                            id: menu_page.id,
-                            start: updatedOrder,
-                            end: updatedOrder + instanceNums.length - 1,
-                        },
-                    ];
-                }
+                //     if (currIndex > 0) {
+                //         log[currIndex] = {
+                //             id: menu_page.id,
+                //             start: updatedOrder,
+                //             end: updatedOrder + instanceNums.length - 1,
+                //         };
+                //     } else {
+                //         log.push({
+                //             id: menu_page.id,
+                //             start: updatedOrder,
+                //             end: updatedOrder + instanceNums.length - 1,
+                //         });
+                //     }
+                // } else {
+                //     pageOrdersLog[foundMenuItem.id] = [
+                //         {
+                //             id: menu_page.id,
+                //             start: updatedOrder,
+                //             end: updatedOrder + instanceNums.length - 1,
+                //         },
+                //     ];
+                // }
 
                 foundMenuItem.items = foundMenuItem.items.filter(function (page) {
                     return !page.id.startsWith(menu_page.id);
@@ -940,7 +940,8 @@ function addControl(menu_items, menu_page, group, control) {
                     let instancePage = {
                         id: menu_page.id + '.' + instanceNums[i],
                         isMenuPage: true,
-                        order: updatedOrder + i,
+                        // order: updatedOrder + i,
+                        order: parseFloat(menu_page.config.order + '.' + i.toString()),
                         disabled: menu_page.config.disabled,
                         hidden: menu_page.config.hidden,
                         instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
@@ -1037,35 +1038,35 @@ function addControl(menu_items, menu_page, group, control) {
             delete dynamicGroups[group.id];
             delete dynamicWidgets[control.id];
 
-            let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
+            // let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
 
-            // update pageOrdersLog
-            if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
-                let log = pageOrdersLog[foundMenuItem.id];
-                let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
+            // // update pageOrdersLog
+            // if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
+            //     let log = pageOrdersLog[foundMenuItem.id];
+            //     let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
 
-                if (currIndex > 0) {
-                    log[currIndex] = {
-                        id: menu_page.id,
-                        start: updatedOrder,
-                        end: updatedOrder,
-                    };
-                } else {
-                    log.push({
-                        id: menu_page.id,
-                        start: updatedOrder,
-                        end: updatedOrder,
-                    });
-                }
-            } else {
-                pageOrdersLog[foundMenuItem.id] = [
-                    {
-                        id: menu_page.id,
-                        start: updatedOrder,
-                        end: updatedOrder,
-                    },
-                ];
-            }
+            //     if (currIndex > 0) {
+            //         log[currIndex] = {
+            //             id: menu_page.id,
+            //             start: updatedOrder,
+            //             end: updatedOrder,
+            //         };
+            //     } else {
+            //         log.push({
+            //             id: menu_page.id,
+            //             start: updatedOrder,
+            //             end: updatedOrder,
+            //         });
+            //     }
+            // } else {
+            //     pageOrdersLog[foundMenuItem.id] = [
+            //         {
+            //             id: menu_page.id,
+            //             start: updatedOrder,
+            //             end: updatedOrder,
+            //         },
+            //     ];
+            // }
 
             var foundMenuPage = find(foundMenuItem.items, function (mp) {
                 return mp.id === menu_page.id;
@@ -1075,7 +1076,8 @@ function addControl(menu_items, menu_page, group, control) {
                 var updatedMenuPage = {
                     id: menu_page.id,
                     isMenuPage: true,
-                    order: updatedOrder,
+                    // order: updatedOrder,
+                    order: parseFloat(menu_page.config.order),
                     disabled: menu_page.config.disabled,
                     hidden: menu_page.config.hidden,
                     items: foundMenuPage.items,
@@ -1098,7 +1100,8 @@ function addControl(menu_items, menu_page, group, control) {
                 foundMenuPage = {
                     id: menu_page.id,
                     isMenuPage: true,
-                    order: updatedOrder,
+                    // order: updatedOrder,
+                    order: parseFloat(menu_page.config.order),
                     disabled: menu_page.config.disabled,
                     hidden: menu_page.config.hidden,
                     items: [],
