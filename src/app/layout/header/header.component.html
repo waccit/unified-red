@@ -1,9 +1,20 @@
 <nav #navbar class="navbar">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a href="#" onClick="return false;" class="navbar-toggle collapsed" data-toggle="collapse"
-                data-target="#navbar-collapse" aria-expanded="false"></a>
-            <a href="#" onClick="return false;" class="bars" (click)="mobileMenuSidebarOpen($event,'overlay-open')"></a>
+            <a
+                href="#"
+                onClick="return false;"
+                class="navbar-toggle collapsed"
+                data-toggle="collapse"
+                data-target="#navbar-collapse"
+                aria-expanded="false"
+            ></a>
+            <a
+                href="#"
+                onClick="return false;"
+                class="bars"
+                (click)="mobileMenuSidebarOpen($event, 'overlay-open')"
+            ></a>
             <a class="navbar-brand" routerLink="/">
                 <img src="assets/images/logo.png" alt="" />
                 <span class="logo-name">Unified-RED</span>
@@ -27,7 +38,12 @@
                 <!-- #END# Full Screen Button -->
                 <!-- #START# Notifications-->
                 <li class="dropdown">
-                    <button mat-icon-button data-toggle="dropdown" class="nav-notification-icons" (click)="newalarm = false">
+                    <button
+                        mat-icon-button
+                        data-toggle="dropdown"
+                        class="nav-notification-icons"
+                        (click)="newalarm = false"
+                    >
                         <i class="nav-hdr-btn ti-bell"></i>
                         <span class="notify" *ngIf="newalarm"></span>
                         <span class="heartbeat" *ngIf="newalarm"></span>
@@ -35,18 +51,26 @@
                     <ul class="dropdown-menu">
                         <li class="header">Recent Alarms</li>
                         <li class="body">
-                            <ul class="menu ur-menu-recent-alarm" style="position: relative; max-width: 600px; max-height: 200px;" [perfectScrollbar]>
+                            <ul
+                                class="menu ur-menu-recent-alarm"
+                                style="position: relative; max-width: 600px; max-height: 200px"
+                                [perfectScrollbar]
+                            >
                                 <li>
                                     <a href="#" *ngFor="let alarm of recentAlarms" onClick="return false;">
                                         <span class="table-img msg-user">
-                                            <i class="fas fa-exclamation-triangle" *ngIf="alarm.severity === 'warning'"></i>
+                                            <i
+                                                class="fas fa-exclamation-triangle"
+                                                *ngIf="alarm.severity === 'warning'"
+                                            ></i>
                                             <i class="fas fa-exclamation-circle" *ngIf="alarm.severity === 'alert'"></i>
                                             <i class="fas fa-fire" *ngIf="alarm.severity === 'critical'"></i>
                                         </span>
                                         <span class="menu-info">
-                                            <span class="menu-title">{{alarm.name}}</span>
+                                            <span class="menu-title">{{ alarm.name }}</span>
                                             <span class="menu-desc">
-                                                <i class="material-icons">access_time</i> {{alarm.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
+                                                <i class="material-icons">access_time</i>
+                                                {{ alarm.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
                                             </span>
                                         </span>
                                     </a>
@@ -99,4 +123,4 @@
             </ul>
         </div>
     </div>
-</nav>>
+</nav>
