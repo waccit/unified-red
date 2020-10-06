@@ -10,6 +10,12 @@ const schema = new Schema({
     acktime: { type: Date },
     ackreq: { type: Boolean },
     timestamp: { type: Date, default: Date.now },
+}, {
+    writeConcern: {
+        w: 1,
+        j: true,
+        wtimeout: 1000
+    }
 });
 
 schema.set('toJSON', {

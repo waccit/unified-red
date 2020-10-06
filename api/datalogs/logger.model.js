@@ -7,6 +7,12 @@ const schema = new Schema({
     presets: { type: Map, of: String },
     tags: { type: [String] },
     maxDays: { type: Number, required: true },
+}, {
+    writeConcern: {
+        w: 1,
+        j: true,
+        wtimeout: 1000
+    }
 });
 
 schema.set('toJSON', {

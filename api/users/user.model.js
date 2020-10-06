@@ -20,6 +20,12 @@ const schema = new Schema({
     sessionExpiration: { type: Number },
     sessionInactivity: { type: Number },
     homepage: { type: String },
+}, {
+    writeConcern: {
+        w: 1,
+        j: true,
+        wtimeout: 1000
+    }
 });
 
 schema.set('toJSON', {
