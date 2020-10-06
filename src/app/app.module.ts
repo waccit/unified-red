@@ -50,6 +50,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { MenuEntityComponent } from './layout/sidebar/menu-entity/menu-entity.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { InitialSetupComponent } from './initial-setup/initial-setup.component';
+import { MatStepperModule } from '@angular/material/stepper';
 
 FullCalendarModule.registerPlugins([
     // register FullCalendar plugins
@@ -73,6 +75,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         RightSidebarComponent,
         Page500Component,
         Page404Component,
+        InitialSetupComponent,
     ],
     imports: [
         BrowserModule,
@@ -97,6 +100,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         MatListModule,
         MatSidenavModule,
         MatSnackBarModule,
+        MatStepperModule,
         MatButtonToggleModule,
         MatCheckboxModule,
         MatSlideToggleModule,

@@ -1,0 +1,206 @@
+<div class="limiter" *ngIf="!canInstall">
+    <div class="container-login100">
+        <div class="wrap-login100">
+            <div class="login100-form">
+                <div class="login100-form-title p-b-30">To reinstall or modify your installation please contact your
+                    system
+                    administrator</div>
+                <div class="flex-sb-m w-full p-t-15 p-b-20">
+                    <a routerLink="/authentication/login" class="login100-form-btn">Login</a>
+                </div>
+            </div>
+            <div class="login100-more">
+                <img src="assets/images/pages/unified-logo.png" style="max-width: 300px">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="limiter" *ngIf="canInstall">
+    <div class="container-login100">
+        <div class="row clearfix">
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+                <img src="assets/images/pages/unified-logo.png">
+            </div>
+            <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+                <div class="card">
+                    <div class="header">
+                        <h2><strong>Unified-RED Initial Setup</strong></h2>
+                    </div>
+                    <div class="body">
+                        <mat-vertical-stepper [linear]="isLinear" #stepper>
+                            <mat-step [stepControl]="dbForm">
+                                <form [formGroup]="dbForm">
+                                    <ng-template matStepLabel>Connect to database</ng-template>
+                                    <mat-form-field class="example-full-width" appearance="outline">
+                                        <mat-label>MongoDB Connection</mat-label>
+                                        <input matInput formControlName="mongoConnection" required>
+                                        <mat-error *ngIf="dbForm.get('mongoConnection').hasError('required')">A MongoDB
+                                            connection is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                    <div>
+                                        Unified-RED requires a connection to a MongoDB database server.
+                                        <ul>
+                                            <li>
+                                                For instructions on installing MongoDB onto your local server, see
+                                                <a href="https://docs.mongodb.com/manual/installation/" target="_blank">
+                                                    Install MongoDB — MongoDB Manual
+                                                    <i class="fa fa-external-link" aria-hidden="true"></i>
+                                                </a>.
+                                            </li>
+                                            <li>
+                                                To setup a MongoDB in the cloud, see the
+                                                <a href="https://www.mongodb.com/cloud/atlas" target="_blank">
+                                                    MongoDB Atlas
+                                                    <i class="fa fa-external-link" aria-hidden="true"></i>
+                                                </a>cloud service.
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <button mat-button (click)="testDb()">
+                                            Test<mat-progress-bar mode="buffer" *ngIf="dbProgress"></mat-progress-bar>
+                                        </button>
+                                        <button mat-raised-button matStepperNext color="primary" [disabled]="!dbConnectionOk">Next</button>
+                                    </div>
+                                </form>
+                            </mat-step>
+                            <mat-step [stepControl]="jwtForm">
+                                <form [formGroup]="jwtForm">
+                                    <ng-template matStepLabel>Generate a JWT Secret</ng-template>
+                                    <div class="mb-4">
+                                        JSON Web Token (JWT) is an open standard (RFC 7519) used to secure user logins in Unified-RED and Node-RED.
+                                        A unique secret key is required to digitally sign information and has been automatically generated for you.
+                                        Click on the generate button if you'd like to generate a new key.
+                                    </div>
+                                    <mat-form-field class="example-full-width" appearance="outline">
+                                        <mat-label>JWT Secret</mat-label>
+                                        <input matInput formControlName="jwtsecret" required>
+                                        <mat-error *ngIf="jwtForm.get('jwtsecret').hasError('required')">
+                                            A secret is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                    <div>
+                                        <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
+                                        <button mat-button (click)="newJwtSecret()">Generate</button>
+                                        <button mat-raised-button matStepperNext color="primary">Next</button>
+                                    </div>
+                                </form>
+                            </mat-step>
+                            <mat-step [stepControl]="smtpForm">
+                                <form [formGroup]="smtpForm">
+                                    <ng-template matStepLabel>Setup SMTP Server</ng-template>
+                                    <div class="row">
+                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                <mat-label>Server Hostname</mat-label>
+                                                <input matInput formControlName="host" required>
+                                                <mat-error *ngIf="smtpForm.get('host').hasError('required')">
+                                                    A server hostname is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                <mat-label>Server Port</mat-label>
+                                                <input matInput formControlName="port" required>
+                                                <mat-error *ngIf="smtpForm.get('port').hasError('required')">
+                                                    A server port is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                <mat-label>Requires SSL</mat-label>
+                                                <select matNativeControl formControlName="ssl" required>
+                                                    <option value="false">No</option>
+                                                    <option value="true">Yes</option>
+                                                </select>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                <mat-label>From Name</mat-label>
+                                                <input matInput formControlName="fromName" required>
+                                                <mat-error *ngIf="smtpForm.get('fromName').hasError('required')">
+                                                    A from name is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                <mat-label>From Address</mat-label>
+                                                <input matInput formControlName="fromAddress" required>
+                                                <mat-error *ngIf="smtpForm.get('fromAddress').hasError('required')">
+                                                    A from address is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                <mat-label>Username</mat-label>
+                                                <input matInput formControlName="user">
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                                            <mat-form-field class="example-full-width" appearance="outline"
+                                                style="padding-bottom: 10px;">
+                                                <mat-label>Password</mat-label>
+                                                <input matInput formControlName="password" type="password">
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
+                                        <button mat-button (click)="testSmtp()">
+                                            Test<mat-progress-bar mode="buffer" *ngIf="smtpProgress"></mat-progress-bar>
+                                        </button>
+                                        <button mat-raised-button matStepperNext color="primary" [disabled]="!smtpServerOk">Next</button>
+                                    </div>
+                                </form>
+                            </mat-step>
+                            <mat-step [stepControl]="nrForm">
+                                <form [formGroup]="nrForm">
+                                    <ng-template matStepLabel>Node-RED Overrides (Advanced)</ng-template>
+                                    <div class="mb-4">
+                                        The following hooks are used to integrate Unified-RED with Node-RED and under normal circumstances 
+                                        should be left blank. However, if needed, you can override hook settings here.
+                                    </div>
+                                    <mat-form-field class="example-full-width" appearance="outline">
+                                        <mat-label>Authentication Handler (blank by default)</mat-label>
+                                        <input matInput formControlName="adminAuthPath">
+                                    </mat-form-field>
+                                    <mat-form-field class="example-full-width" appearance="outline">
+                                        <mat-label>Static Folder Path (blank by default)</mat-label>
+                                        <input matInput formControlName="staticPath">
+                                    </mat-form-field>
+                                    <div>
+                                        <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
+                                        <button mat-raised-button matStepperNext color="primary">Next</button>
+                                    </div>
+                                </form>
+                            </mat-step>
+
+                            <mat-step>
+                                <ng-template matStepLabel>Done</ng-template>
+                                <p>
+                                    You are now done. Click install to commit your settings.<br>
+                                    Note: Installation will cause Node-RED to be shutdown and must be manually restarted.
+                                </p>
+                                <div>
+                                    <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
+                                    <button mat-raised-button color="primary" (click)="install()">Install</button>
+                                </div>
+                            </mat-step>
+                        </mat-vertical-stepper>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -3,6 +3,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService, SnackbarService } from '../../services';
+import { InstallService } from '../../services/install.service';
 
 declare const $: any;
 
@@ -21,8 +22,14 @@ export class LoginComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private authenticationService: AuthenticationService,
-        private snackbar: SnackbarService
+        private snackbar: SnackbarService,
+        private installService: InstallService
     ) {
+        this.installService.isInstalled().subscribe(result => {
+            if (!result) {
+                this.router.navigate(['/initial-setup']);
+            }
+        })
         // redirect to home if already logged in
         if (this.authenticationService.tokenValue) {
             this.router.navigate(['/']);
