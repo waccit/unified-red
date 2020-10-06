@@ -12,13 +12,25 @@ const connectionOptions = {
     useUnifiedTopology: true,
     useFindAndModify: false,
 };
-mongoose.connect(
-    process.env.MONGODB_URI || config.mongoConnection,
-    connectionOptions
-);
+if (process.env.MONGODB_URI || config.mongoConnection) {
+    mongoose.connect(
+        process.env.MONGODB_URI || config.mongoConnection,
+        connectionOptions
+    );
+}
 mongoose.Promise = global.Promise;
 
+function status() {
+    return mongoose.STATES[mongoose.connection.readyState];
+}
+
+function test(conn) {
+    return mongoose.connect(conn, { useNewUrlParser: true, useUnifiedTopology: true });
+}
+
 module.exports = {
+    status,
+    test,
     User: require('./users/user.model'),
     Role: require('./users/role-name.model'),
     Alarm: require('./alarms/alarm.model'),

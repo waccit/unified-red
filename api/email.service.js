@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 
 module.exports = {
     send,
+    test
 };
 
 // setup email server
@@ -21,5 +22,19 @@ function send(to, subject, message) {
         subject: subject,
         text: message,
         html: message,
+    });
+}
+
+function test(host, port, ssl, fromAddress, user, password) {
+    let tran = nodemailer.createTransport({
+        host: host,
+        port: port,
+        secure: ssl,
+        auth: { user: user, pass: password },
+        tls: { rejectUnauthorized: false }, // do not fail on invalid certs
+    });
+    return tran.sendMail({
+        from: fromAddress,
+        to: 'none@none.com'
     });
 }

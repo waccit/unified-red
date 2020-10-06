@@ -2,7 +2,7 @@ var inited = false;
 
 module.exports = function (RED) {
     if (!inited) {
-        selfInstall(RED.log, RED.settings);
+        require('./api/install/install.service').init(RED.log, RED.settings);
         init(RED.server, RED.httpNode || RED.httpAdmin, RED.log, RED.settings);
         inited = true;
     }
@@ -1277,36 +1277,3 @@ function addBaseConfig(config) {
 //         return false;
 //     } // if in doubt - let's say it's light.
 // }
-
-function selfInstall(log, settings) {
-    // self-install
-    try {
-        if (!settings.adminAuth || !settings.httpStatic) {
-            let data = fs.readFileSync(settings.settingsFile, { encoding: 'utf8' });
-            if (!settings.adminAuth) {
-                log.info('Self-installing Unified-RED adminAuth hook on ' + settings.settingsFile);
-                let adminAuthPath = path.resolve(__dirname + '/admin-auth');
-                data = data.replace(
-                    /(\/\/[\s]*)?(adminAuth[\s]*\:.*\n)/i,
-                    'adminAuth: require("' + adminAuthPath + '"),\n// $2'
-                );
-            }
-            if (!settings.httpStatic) {
-                log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
-                let staticPath = path.resolve(__dirname + '/static/');
-                data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2');
-            }
-            fs.writeFileSync(settings.settingsFile, data, { encoding: 'utf8' });
-
-            // TODO: show shut down notice in open Node-RED editors
-            log.info('Installation complete. Shuttiing down Node-RED in 5 seconds...');
-            setTimeout(function () {
-                process.exit();
-            }, 5000);
-        }
-    } catch (e) {
-        log.info('--- Unified-RED installaton error:');
-        log.info(e);
-        log.info('---');
-    }
-}
