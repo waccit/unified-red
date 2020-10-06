@@ -16,9 +16,8 @@ import { User } from '../../data';
     styleUrls: ['./menu-page.component.sass'],
 })
 export class MenuPageComponent implements OnInit {
-    private menuItem: string;
-    private menuItems: string[];
     private pathList: string[];
+    private menuItem: string;
     private menuPage: string;
     private pageGroupsList: PageGroups[];
     private _menuSubscription: Subscription;
@@ -45,9 +44,7 @@ export class MenuPageComponent implements OnInit {
                 this.userRole = user.role;
 
                 this.route.url.subscribe((segments: UrlSegment[]) => {
-                    this.menuItems = [...segments.map((seg) => seg.path).slice(0, segments.length - 1)];
                     this.pathList = [...segments.map((seg) => seg.path)];
-                    this.menuPage = segments[segments.length - 1].path;
 
                     if (this._menuSubscription !== undefined) {
                         this._menuSubscription.unsubscribe();
@@ -71,11 +68,8 @@ export class MenuPageComponent implements OnInit {
         while (localCopy.length > 2) {
             const curr = localCopy.shift();
 
-            if (parent) {
-                parent = this.findMenuEntityByKeyValue(parent, 'title', curr);
-            } else {
-                parent = this.findMenuEntityByKeyValue(menu, 'title', curr);
-            }
+            parent = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', curr);
+
             if (parent) {
                 this.breadcrumbs.push(parent.title);
             }
@@ -84,7 +78,7 @@ export class MenuPageComponent implements OnInit {
         this.menuItem = this.pathList[this.pathList.length - 2];
         this.menuPage = this.pathList[this.pathList.length - 1];
 
-        const foundMenuItem = this.findMenuEntityByKeyValue(parent ? parent : menu, 'title', this.menuItem);
+        const foundMenuItem = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.menuItem);
 
         let foundMenuPage: any;
         if (foundMenuItem) {
@@ -122,6 +116,9 @@ export class MenuPageComponent implements OnInit {
                         return container;
                     }
                 }
+            }
+
+            for (const prop in container) {
                 if (container[prop] instanceof Object || container[prop] instanceof Array) {
                     result = this.findMenuEntityByKeyValue(container[prop], key, value);
                     if (result) {
