@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +18,7 @@ import { InitialSetupConfirmation } from './initial-setup-confirmation.component
 @NgModule({
     declarations: [InitialSetupComponent, InitialSetupConfirmation],
     imports: [
+        RouterModule,
         BrowserModule,
         ReactiveFormsModule,
         FormsModule,
@@ -28,7 +30,6 @@ import { InitialSetupConfirmation } from './initial-setup-confirmation.component
         MatInputModule,
         MatSnackBarModule,
         MatSlideToggleModule,
-    ],
-    entryComponents: [],
+    ]
 })
 export class InitialSetupModule {}
