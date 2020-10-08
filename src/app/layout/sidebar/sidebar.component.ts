@@ -1,7 +1,5 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input } from '@angular/core';
-import { User } from '../../data';
-import { CurrentUserService } from '../../services/';
 import { MenuService } from '../../services/menu.service';
 import { RouteInfo } from './sidebar.metadata';
 // import { ROUTES } from './sidebar-items';
@@ -21,18 +19,13 @@ export class SidebarComponent implements OnInit {
     listMaxHeight: string;
     listMaxWidth: string;
     headerHeight = 60;
-    user: User;
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
-        private currentUserService: CurrentUserService,
         private menuService: MenuService
     ) {
-        this.currentUserService.currentUser.subscribe((user) => {
-            this.user = user;
-        });
     }
 
     @HostListener('window:resize', ['$event'])
