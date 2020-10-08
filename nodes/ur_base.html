@@ -3552,7 +3552,7 @@
     }
 
     $.get('./api/install/', function (isInstalled) {
-        if (true || !isInstalled) {
+        if (!isInstalled) {
             var notification = RED.notify("<p>Thanks for installing Unified-RED!</p>\
                 <p>Ready to start using Unified-RED? Click the setup button below to continue.</p>",{
                 modal: true,
