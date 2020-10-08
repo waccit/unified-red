@@ -190,11 +190,13 @@
                                 <ng-template matStepLabel>Done</ng-template>
                                 <p>
                                     You are now done. Click install to commit your settings.<br>
-                                    Note: Installation will cause Node-RED to be shutdown and must be manually restarted.
+                                    <span class="font-weight-bold">
+                                        Note: Installation will cause Node-RED to be shutdown and must be manually restarted.
+                                    </span>
                                 </p>
                                 <div>
                                     <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
-                                    <button mat-raised-button color="primary" (click)="install()">Install</button>
+                                    <button mat-raised-button color="primary" (click)="openConfirmationDialog()">Install</button>
                                 </div>
                             </mat-step>
                         </mat-vertical-stepper>

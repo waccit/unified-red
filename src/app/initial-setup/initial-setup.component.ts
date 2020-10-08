@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { first } from 'rxjs/operators';
 import { InstallService } from '../services/install.service';
 import { SnackbarService } from '../services';
-
-declare const $: any;
+import { InitialSetupConfirmation } from './initial-setup-confirmation.component';
 
 @Component({
     selector: 'app-initial-setup',
@@ -26,9 +25,9 @@ export class InitialSetupComponent implements OnInit {
 
     constructor(
         private formBuilder: FormBuilder,
-        private router: Router,
         private snackbar: SnackbarService,
-        private installService: InstallService
+        private installService: InstallService,
+        public dialog: MatDialog
     ) {}
 
     ngOnInit() {
@@ -36,11 +35,11 @@ export class InitialSetupComponent implements OnInit {
             mongoConnection: ['mongodb://localhost:27017/unified-red', Validators.required],
         });
         this.jwtForm = this.formBuilder.group({
-            jwtsecret: [ this.generateKey(), Validators.required],
+            jwtsecret: [this.generateKey(), Validators.required],
         });
         this.smtpForm = this.formBuilder.group({
-            fromName: ["Unified", Validators.required],
-            fromAddress: ["unified@your_email_server.com", Validators.required],
+            fromName: ['Unified', Validators.required],
+            fromAddress: ['unified@your_email_server.com', Validators.required],
             host: ['your_email_server.com', Validators.required],
             port: ['587', Validators.required],
             ssl: ['false', Validators.required],
@@ -51,10 +50,10 @@ export class InitialSetupComponent implements OnInit {
             adminAuthPath: [''],
             staticPath: [''],
         });
-        this.installService.isInstalled().subscribe(result => {
+        this.installService.isInstalled().subscribe((result) => {
             this.canInstall = true;
             // this.canInstall = !result;
-        })
+        });
     }
 
     install() {
@@ -72,7 +71,8 @@ export class InitialSetupComponent implements OnInit {
         let adminAuthPath = this.nrForm.controls.adminAuthPath.value || undefined;
         let staticPath = this.nrForm.controls.staticPath.value || undefined;
 
-        this.installService.install(mongoConnection, jwtsecret, smtp, adminAuthPath, staticPath)
+        this.installService
+            .install(mongoConnection, jwtsecret, smtp, adminAuthPath, staticPath)
             .pipe(first())
             .subscribe(
                 (data) => {
@@ -102,7 +102,7 @@ export class InitialSetupComponent implements OnInit {
         this.dbConnectionOk = false;
         this.dbProgress = true;
         let mongoConnection = this.dbForm.controls.mongoConnection.value;
-        this.installService.testDbConnection(mongoConnection).subscribe(resp => {
+        this.installService.testDbConnection(mongoConnection).subscribe((resp) => {
             this.dbProgress = false;
             if (resp.result) {
                 this.dbConnectionOk = resp.result;
@@ -117,7 +117,7 @@ export class InitialSetupComponent implements OnInit {
         this.smtpServerOk = false;
         this.smtpProgress = true;
         let smtp = this.formSmtpObj();
-        this.installService.testSmtpServer(smtp).subscribe(resp => {
+        this.installService.testSmtpServer(smtp).subscribe((resp) => {
             this.smtpProgress = false;
             if (resp.result) {
                 this.smtpServerOk = resp.result;
@@ -130,14 +130,22 @@ export class InitialSetupComponent implements OnInit {
 
     formSmtpObj() {
         return {
-            fromAddress: this.smtpForm.controls.fromName.value ? 
-                "'" + this.smtpForm.controls.fromName.value + "' <" + this.smtpForm.controls.fromAddress.value + ">" :
-                this.smtpForm.controls.fromAddress.value,
+            fromAddress: this.smtpForm.controls.fromName.value
+                ? "'" + this.smtpForm.controls.fromName.value + "' <" + this.smtpForm.controls.fromAddress.value + '>'
+                : this.smtpForm.controls.fromAddress.value,
             host: this.smtpForm.controls.host.value,
             port: this.smtpForm.controls.port.value,
             ssl: this.smtpForm.controls.ssl.value === 'true',
             user: this.smtpForm.controls.user.value,
-            password: this.smtpForm.controls.password.value
+            password: this.smtpForm.controls.password.value,
         };
+    }
+
+    openConfirmationDialog() {
+        this.dialog.open(InitialSetupConfirmation).afterClosed().subscribe(result => {
+            if (result) {
+                this.install();
+            }
+        });
     }
 }
