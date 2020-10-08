@@ -12,17 +12,6 @@
                 }"
                 [perfectScrollbar]
             >
-                <li *ngIf="user">
-                    <div class="sidebar-profile clearfix">
-                        <!-- <div class="profile-img">
-                            <img src="assets/images/usrbig.jpg" alt="profile">
-                        </div> -->
-                        <div class="profile-info">
-                            <h3>{{ user.firstName }} {{ user.lastName }}</h3>
-                            <p>Welcome {{ user.role }}!</p>
-                        </div>
-                    </div>
-                </li>
                 <!-- First level menu -->
                 <li
                     [class.active]="showMenu === sidebarItem.title"
