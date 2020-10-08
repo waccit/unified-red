@@ -52,7 +52,8 @@ export class InitialSetupComponent implements OnInit {
             staticPath: [''],
         });
         this.installService.isInstalled().subscribe(result => {
-            this.canInstall = !result;
+            this.canInstall = true;
+            // this.canInstall = !result;
         })
     }
 
