@@ -3551,6 +3551,32 @@
         });
     }
 
+    $.get('./api/install/', function (isInstalled) {
+        if (true || !isInstalled) {
+            var notification = RED.notify("<p>Thanks for installing Unified-RED!</p>\
+                <p>Ready to start using Unified-RED? Click the setup button below to continue.</p>",{
+                modal: true,
+                fixed: true,
+                type: 'success', // 'compact', 'success', 'warning', 'error'
+                buttons: [
+                    {
+                        text: "close",
+                        click: function(e) {
+                            notification.close();
+                        }
+                    },
+                    {
+                        text: "setup",
+                        class:"primary",
+                        click: function(e) {
+                            window.open("./ui/#/initial-setup", '_blank');
+                            notification.close();
+                        }
+                    }
+                ]
+            });
+        }
+    });
 </script>
 
 <script type="text/html" data-template-name="ur_base">
