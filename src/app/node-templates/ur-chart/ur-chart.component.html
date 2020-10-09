@@ -1,17 +1,26 @@
-<ngx-charts-line-chart
-  [view]="view"
-  [scheme]="colorScheme"
-  [legend]="legend"
-  [showXAxisLabel]="showXAxisLabel"
-  [showYAxisLabel]="showYAxisLabel"
-  [xAxis]="xAxis"
-  [yAxis]="yAxis"
-  [xAxisLabel]="xAxisLabel"
-  [yAxisLabel]="yAxisLabel"
-  [timeline]="timeline"
-  [results]="multi"
-  (select)="onSelect($event)"
-  (activate)="onActivate($event)"
-  (deactivate)="onDeactivate($event)"
-  >
-</ngx-charts-line-chart>
+<div #container class="card">
+    <mat-form-field class="example-form-field">
+        <mat-label>Range</mat-label>
+        <input matInput type="number" (change)="startTimeValue($event)" value="{{ config.xrange }}" />
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+    <mat-label>Units</mat-label>
+    <!-- <mat-select [(ngModel)]="selectedUnit" name="units" [(value)]="config.xrangeunits"> -->
+        <mat-select [(ngModel)]="selectedUnit" [placeholder]="selectedUnit" name="units" (selectionChange)="startTimeUnits($event)">
+            <mat-option *ngFor="let unit of units" [value]="unit.value">
+                {{unit.viewValue}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div>
+        <mat-checkbox [checked]="config.live" (change)="graphChart($event)" class="example-margin">Live Chart
+        </mat-checkbox>
+    </div>
+
+    <ngx-charts-line-chart [view]="view" [scheme]="colorScheme" [legend]="legend" [showXAxisLabel]="showXAxisLabel"
+        [showYAxisLabel]="showYAxisLabel" [xAxis]="xAxis" [yAxis]="yAxis" [xAxisLabel]="xAxisLabel"
+        [yAxisLabel]="yAxisLabel" [xScaleMin]="xScaleMin" [xScaleMax]="xScaleMax" [yScaleMin]="yScaleMin"
+        [yScaleMax]="yScaleMax" [timeline]="timeline" [results]="graph" (select)="onSelect($event)"
+        (activate)="onActivate($event)" (deactivate)="onDeactivate($event)">
+    </ngx-charts-line-chart>
+</div>
