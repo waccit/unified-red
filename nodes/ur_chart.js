@@ -5,7 +5,6 @@ module.exports = function(RED) {
     function ChartNode(config) {
         RED.nodes.createNode(this, config);
         this.chartType = config.chartType || "line";
-        this.newStyle = (!config.hasOwnProperty("useOldStyle") || (config.useOldStyle === true)) ? false : true;
         var node = this;
 
         var group = RED.nodes.getNode(config.group);
@@ -46,12 +45,12 @@ module.exports = function(RED) {
                 nodata: config.nodata,
                 width: parseInt(config.width || group.config.width || 6),
                 height: parseInt(config.height || group.config.width/2+1 || 4),
-                xmin: config.xmin,
-                xmax: config.xmax,
+                xrange: config.xrange,
+                xrangeunits: config.xrangeunits,
                 ymin: config.ymin,
                 ymax: config.ymax,
                 topics: config.topics,
-                dot: config.dot || false,
+                live: config.live || false,
                 xformat : config.xformat || "HH:mm:ss",
                 cutout: parseInt(config.cutout || 0),
                 colors: config.colors,
