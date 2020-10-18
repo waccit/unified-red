@@ -19,12 +19,11 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     calendarComponent: FullCalendarComponent;
 
     calendarOptions: CalendarOptions = {
-        initialView: 'dayGridMonth',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,dayGridDay',
-        },
+        initialView: this.isMobile() ? 'timeGridWeek' : 'dayGridMonth',
+        headerToolbar: this.isMobile()
+            ? { left: '', center: 'title', right: '' } // mobile
+            : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop
+        footerToolbar: this.isMobile() ? { left: 'prev,next', right: 'dayGridMonth,timeGridWeek,dayGridDay' } : false,
         views: {
             timeGridWeek: {
                 allDaySlot: false,
@@ -53,6 +52,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     };
 
     dirty = false;
+    mobile = undefined;
 
     constructor(
         protected webSocketService: WebSocketService,
@@ -130,7 +130,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                                 allDay: false,
                                 daysOfWeek: [weekday],
                                 groupId: 'weekday' + weekday, // assign each weekday to a group so changes
-                                                              // to a weekday are repeated every week
+                                // to a weekday are repeated every week
                                 startTime: `${start.hour.padStart(2, '0')}:${start.minute.padStart(2, '0')}:00`,
                                 // if no end event was defined, then set end to end of day
                                 endTime: end
@@ -179,7 +179,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                             try {
                                 const start = dateSchedules[dateKey][j];
                                 const end = dateSchedules[dateKey][j + 1];
-                                const d = new Date(start.date);
+                                const d = new Date('2001/' + start.date);
                                 const month = d.getMonth();
                                 const date = d.getDate();
                                 const event = {
@@ -224,7 +224,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     });
                     let nextEvent: any = interval.next();
                     while (nextEvent) {
-                        const sch = { ... holidaySch }; // clone schedule
+                        const sch = { ...holidaySch }; // clone schedule
                         sch.date = nextEvent.value.toDate();
                         const d = nextEvent.value.toDate();
                         d.setHours(0, 0, 0, 0);
@@ -316,9 +316,15 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 if (result) {
                     this.dirty = true;
                     switch (result.type) {
-                        case 'weekday': this.addWeekdaySchedulesFromDialog(result); break;
-                        case 'date': this.addDateSchedulesFromDialog(result); break;
-                        case 'holiday': this.addHolidaySchedulesFromDialog(result); break;
+                        case 'weekday':
+                            this.addWeekdaySchedulesFromDialog(result);
+                            break;
+                        case 'date':
+                            this.addDateSchedulesFromDialog(result);
+                            break;
+                        case 'holiday':
+                            this.addHolidaySchedulesFromDialog(result);
+                            break;
                     }
                     this.calendarLoadSchedules();
                 }
@@ -335,22 +341,24 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         // collect all events for the selected weekday/date/holiday
         switch (orig?.type) {
             case 'weekday':
-                diaglogData.events = this.data.weekdays.filter(e => e.weekday === orig.start.weekday);
+                diaglogData.events = this.data.weekdays.filter((e) => e.weekday === orig.start.weekday);
                 break;
             case 'date':
-                diaglogData.events = this.data.dates.filter(e => e.date === orig.start.date);
+                diaglogData.events = this.data.dates.filter((e) => e.date === orig.start.date);
                 break;
             case 'holiday':
                 const origCron = orig.start.pattern.split(' ');
                 if (origCron.length >= 5) {
-                    diaglogData.events = this.data.holidays.filter(e => {
+                    diaglogData.events = this.data.holidays.filter((e) => {
                         const eCron = e.pattern.split(' ');
                         if (eCron.length < 5) {
                             return false;
                         }
-                        return /* date */ eCron[3] === origCron[3] &&
+                        return (
+                            /* date */ eCron[3] === origCron[3] &&
                             /* month */ eCron[4] === origCron[4] &&
-                            /* day */ eCron[5] === origCron[5];
+                            /* day */ eCron[5] === origCron[5]
+                        );
                     });
                 }
                 break;
@@ -366,7 +374,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
                     const purgeOldEvent = (arr, prop) => {
                         const startLength = arr.length;
-                        arr = arr.filter(sch => sch[prop] !== orig.start[prop] && (!orig.end || sch[prop] !== orig.end[prop]));
+                        arr = arr.filter(
+                            (sch) => sch[prop] !== orig.start[prop] && (!orig.end || sch[prop] !== orig.end[prop])
+                        );
                         // if anything removed, flag updated
                         if (startLength !== arr.length) {
                             updated = true;
@@ -376,9 +386,15 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
                     // in all cases (edit or delete), remove original events
                     switch (orig?.type) {
-                        case 'weekday': this.data.weekdays = purgeOldEvent(this.data.weekdays, 'weekday'); break;
-                        case 'date': this.data.dates = purgeOldEvent(this.data.dates, 'date'); break;
-                        case 'holiday': this.data.holidays = purgeOldEvent(this.data.holidays, '_pattern'); break;
+                        case 'weekday':
+                            this.data.weekdays = purgeOldEvent(this.data.weekdays, 'weekday');
+                            break;
+                        case 'date':
+                            this.data.dates = purgeOldEvent(this.data.dates, 'date');
+                            break;
+                        case 'holiday':
+                            this.data.holidays = purgeOldEvent(this.data.holidays, '_pattern');
+                            break;
                     }
 
                     if (result.action === 'edit') {
@@ -437,7 +453,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         } else if (orig?.type === 'holiday') {
             if (moment(fc.event.start).diff(moment(fc.oldEvent.start), 'days') !== 0) {
                 // holiday event dragged onto different day
-                console.error('Cannot drag holiday to a different day. Please edit the holiday\'s repeat rule.');
+                console.error("Cannot drag holiday to a different day. Please edit the holiday's repeat rule.");
                 fc.revert();
                 return;
             }
@@ -511,13 +527,21 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         let added = false;
         for (const event of result.events) {
             const weekday = parseInt(result.weekday, 10);
-            let weekdays = [ weekday ];
+            let weekdays = [weekday];
             if (result.addTo) {
                 switch (result.addTo) {
-                    case 'everyday': weekdays = [ 0, 1, 2, 3, 4, 5, 6 ]; break;
-                    case 'm-f': weekdays = [ ...new Set([1, 2, 3, 4, 5, weekday]) ]; break;
-                    case 'tu-f': weekdays = [ ...new Set([2, 3, 4, 5, weekday]) ]; break;
-                    case 'sa-su': weekdays = [ ...new Set([0, 6, weekday]) ]; break;
+                    case 'everyday':
+                        weekdays = [0, 1, 2, 3, 4, 5, 6];
+                        break;
+                    case 'm-f':
+                        weekdays = [...new Set([1, 2, 3, 4, 5, weekday])];
+                        break;
+                    case 'tu-f':
+                        weekdays = [...new Set([2, 3, 4, 5, weekday])];
+                        break;
+                    case 'sa-su':
+                        weekdays = [...new Set([0, 6, weekday])];
+                        break;
                 }
             }
             for (const w of weekdays) {
@@ -550,13 +574,16 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             const pattern = result.holiday;
             const name = this.buildHolidayName(result);
             const date = moment().hour(event.hour).minute(event.minute);
-            const sch = this.updateHolidaySchedule({
-                name,
-                value: event.value,
-                hour: '',
-                minute: '',
-                pattern
-            }, date);
+            const sch = this.updateHolidaySchedule(
+                {
+                    name,
+                    value: event.value,
+                    hour: '',
+                    minute: '',
+                    pattern,
+                },
+                date
+            );
             this.data.holidays.push(sch);
             added = true;
         }
@@ -600,37 +627,37 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             // { value: 'L', text: 'Last' },
         ];
         const arr = (a) => {
-            return Array.isArray(a) ? a : [ a ];
-        }
+            return Array.isArray(a) ? a : [a];
+        };
 
         if (result) {
             const m = moment();
             if (result.repeat === 'yearly') {
                 if (result.repeatYearType === 'date') {
-                    const month = arr(result.repeatYearMonth).map(w => m.month(parseInt(w, 10)-1).format('MMM')).join(', ');
+                    const month = arr(result.repeatYearMonth)
+                        .map((w) => m.month(parseInt(w, 10) - 1).format('MMM'))
+                        .join(', ');
                     const date = arr(result.repeatYearDate).join(',');
                     return `${month} ${date}`;
-                }
-                else if (result.repeatYearType === 'weekday') {
-                    const month = m.month(parseInt(result.repeatYearMonth, 10)-1).format('MMM');
+                } else if (result.repeatYearType === 'weekday') {
+                    const month = m.month(parseInt(result.repeatYearMonth, 10) - 1).format('MMM');
                     const weekday = m.weekday(result.repeatYearWeekday).format('ddd');
-                    const occ = nth.filter(i => i.value === result.repeatYearWeekdayOccurrence)[0].text;
+                    const occ = nth.filter((i) => i.value === result.repeatYearWeekdayOccurrence)[0].text;
                     return `${occ} ${weekday} of ${month}`;
                 }
-            }
-            else if (result.repeat === 'monthly') {
+            } else if (result.repeat === 'monthly') {
                 if (result.repeatMonthType === 'date') {
                     const date = arr(result.repeatMonthDate).join(',');
                     return `Day ${date} of every month`;
-                }
-                else if (result.repeatMonthType === 'weekday') {
+                } else if (result.repeatMonthType === 'weekday') {
                     const weekday = m.weekday(result.repeatMonthWeekday).format('ddd');
-                    const occ = nth.filter(i => i.value === result.repeatMonthWeekdayOccurrence)[0].text;
+                    const occ = nth.filter((i) => i.value === result.repeatMonthWeekdayOccurrence)[0].text;
                     return `${occ} ${weekday} of every month`;
                 }
-            }
-            else if (result.repeat === 'weekly') {
-                const weekday = arr(result.repeatWeekdays).map(w => m.weekday(w).format('ddd')).join(', ');
+            } else if (result.repeat === 'weekly') {
+                const weekday = arr(result.repeatWeekdays)
+                    .map((w) => m.weekday(w).format('ddd'))
+                    .join(', ');
                 return `Every ${weekday}`;
             }
             return result.repeat + ' ' + result.holiday.split(' ').slice(3).join(' ');
@@ -652,6 +679,20 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     private isHolidayScheduleMatch(a, b) {
         return a?._pattern === b?._pattern && this.isScheduleMatch(a, b);
+    }
+
+    private isMobile() {
+        if (this.mobile === undefined) {
+            let a = navigator.userAgent || navigator.vendor || window['opera'];
+            this.mobile =
+                /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(
+                    a
+                ) ||
+                /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+                    a.substr(0, 4)
+                );
+        }
+        return this.mobile;
     }
 
     private runTests() {
@@ -688,7 +729,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     }
                     nextEvent = interval.next();
                 }
-            } catch(e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+            }
         }
     }
 }
