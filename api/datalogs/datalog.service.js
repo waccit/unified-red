@@ -129,10 +129,12 @@ async function query(param) {
         }
     }
     if (param.startTimestamp) {
-        criteria.push({ timestamp: { '$gte': param.startTimestamp } });
+        let startDate = new Date(param.startTimestamp);
+        criteria.push({ timestamp: { '$gte': startDate } });
     }
     if (param.endTimestamp) {
-        criteria.push({ timestamp: { '$lte': param.endTimestamp } });
+        let endDate = new Date(param.endTimestamp);
+        criteria.push({ timestamp: { '$lte': endDate } });
     }
     if (param.value) {
         criteria.push({ value: param.value });

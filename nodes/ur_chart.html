@@ -35,33 +35,21 @@
             interpolate: {value: 'linear', required:true},
             nodata: {value: ''},
             live: {value: false},
-            xmin: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
-            xmax: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            xrange: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
+            xrangeunits: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
             ymin: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
             ymax: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
-            // removeOlder: {value: 1, validate:RED.validators.number(), required:true},
-            // removeOlderPoints: {value: '', validate:function(value) { return value === '' || RED.validators.number(); }},
-            // removeOlderUnit: {value: '3600', required:true},
-            // cutout: {value: 0},
-            // useOneColor: {value: false},
-            // colors: {value: ['#1F77B4', '#AEC7E8', '#FF7F0E', '#2CA02C', '#98DF8A', '#D62728', '#FF9896', '#9467BD', '#C5B0D5']},
-            // useOldStyle: {value: false},
-            outputs: {value: 1}
+            outputs: {value: 0}
         },
-        inputs:0,
-        outputs:1,
+        inputs:1,
+        outputs:0,
         // inputLabels: function() { return this.chartType; },
-        outputLabels: ["chart state"],
         align: "right",
         icon: "ur_chart.png",
         paletteLabel: 'chart',
         label: function() { return this.name || (~this.label.indexOf("{{") ? null : this.label) || 'chart'; },
         labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function() {
-            var oldouts = this.outputs;
-            if (RED.nodes.filterLinks({source:{id:this.id},sourcePort:1}).length > 0) { this.outputs = 2; }
-            else { this.outputs = 1; }
-            if (this.outputs !== oldouts) { this.changed = true; }
             if (!$("#node-input-chartType").val()) {
                 $("#node-input-chartType").val("line");
             }
@@ -111,17 +99,6 @@
                     }
                 }
             });
-            // var setColour = function(id, value) {
-            //     $(id).val(value);
-            //     $(id).css("background-color", value);
-            //     var rgb = tinycolor(value).toRgb();
-            //     var level = ((rgb.r*299) + (rgb.g*587) + (rgb.b*114))/1000;
-            //     var textColor = (level >= 128) ? '#111111' : '#eeeeee';
-            //     $(id).css("color", textColor);
-            // }
-            // $(".series-color").on("change", function() {
-            //     setColour("#"+$(this).attr("id"), $(this).val());
-            // });
             var oval = $("#node-input-xformat").val();
             if (!oval) { $("#node-input-xformat").val("HH:mm:ss"); }
             var odef = 'custom';
@@ -186,31 +163,15 @@
             for (let i = 0; i < this.topics.length; i++) {
                 $('#node-input-topic-container').editableList('addItem', { topic: this.topics[i] });
             }
-            // var defaultColors = ['#1F77B4', '#AEC7E8', '#FF7F0E', '#2CA02C', '#98DF8A', '#D62728', '#FF9896', '#9467BD', '#C5B0D5'];
-
-            // if (this.colors) {
-            //     for (var i=0; i<this.colors.length; i++) {
-            //         var value = this.colors[i] || defaultColors[i];
-            //         setColour("#node-input-color"+(i+1), value);
-            //     }
-            // }
-            // else {
-            //     for (var c=0; c<defaultColors.length; c++) {
-            //         setColour("#node-input-color"+(c+1), defaultColors[c]);
-            //     }
-            // }
 
         },
         oneditsave: function() {
             if ($("#node-input-xformat").typedInput('type') !== 'custom') {
                 $("#node-input-xformat").val($("#node-input-xformat").typedInput('type'));
             }
-            // this.colors = [$("#node-input-color1").val(),$("#node-input-color2").val(),$("#node-input-color3").val(),
-            // $("#node-input-color4").val(),$("#node-input-color5").val(),$("#node-input-color6").val(),
-            // $("#node-input-color7").val(),$("#node-input-color8").val(),$("#node-input-color9").val()];
             this.xmin = $("node-input-xmin").val();
             this.xmax = $("node-input-xmax").val();
-            $('#node-input-live').is(':checked') ? (this.live = 1) : (this.live = 0);
+            $('#node-input-live').is(':checked') ? (this.live = true) : (this.live = false);
             
             let topics = $('#node-input-topic-container').editableList('items');
             let node = this;
@@ -224,8 +185,6 @@
                 };
                 node.topics.push(c);
             });
-            console.log('topics', node.topics);
-            // console.log('this', this);
         },
         oneditresize: function (size) {
             var rows = $('#dialog-form>div:not(.node-input-topic-container-row)');
@@ -256,10 +215,6 @@
         <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
         <input type="text" id="node-input-label" placeholder="optional chart title">
     </div>
-    <!-- <div class="form-row">
-        <label for="node-input-topic"><i class="fa fa-cogs"></i> Topics</label>
-        <input type="text" id="node-input-topics" placeholder="List of topics">
-    </div> -->
     <div class="form-row node-input-topic-container-row">
         <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Topics</label>
         <div class="form-row node-input-topic-container-row">
@@ -276,28 +231,40 @@
             <input type="checkbox" id="node-input-live" style="display:inline-block; width:auto; vertical-align:baseline; margin-left:40px; margin-right:5px;">Live Chart
         </div>
     </div>
-    <div class="form-row" id="x-axis-label-show">
+    <!-- <div class="form-row" id="x-axis-label-show">
         <label for="node-input-xformat">X-axis Label</label>
         <input type="text" id="node-input-xformat" style="width:268px;">
+    </div> -->
+    <div class="form-row">
+        <label for="node-input-xrange">Range</label>
+        <input type="number" id="node-input-xrange" style="width: 35%">
+        <select id="node-input-xrangeunits" style="width: 35%">
+            <option value="1">sec</option>
+            <option value="60">min</option>
+            <option value="3600">hr</option>
+            <option value="86400">day(s)</option>
+            <option value="2592000">month(s)</option>
+            <option value="31104000">year(s)</option>
+         </select>
     </div>
-    <div class="form-row" id="x-axis-show">
+    <!-- <div class="form-row" id="x-axis-show">
         <label id="x-label-show" for="node-input-xmin">X-axis</label>
         <label for="node-input-xmin" style="width:auto">min</label>
-        <input type="date" id="node-input-xmin" style="width:140px">
+        <input type="datetime-local" id="node-input-xmin" style="width: 32%">
         <label for="not-input-xmax" style="width:auto; margin-left:10px;">max</label>
-        <input type="date" id="node-input-xmax" style="width:140px">
-    </div>
+        <input type="datetime-local" id="node-input-xmax" style="width: 31%">
+    </div> -->
     <div class="form-row" id="y-axis-show">
         <label id="y-label-show" for="node-input-ymin">Y-axis</label>
         <label for="node-input-ymin" style="width:auto">min</label>
-        <input type="text" id="node-input-ymin" style="width:140px">
+        <input type="text" id="node-input-ymin" style="width: 32%" placeholder="Auto">
         <label for="not-input-ymax" style="width:auto; margin-left:10px;">max</label>
-        <input type="text" id="node-input-ymax" style="width:140px">
+        <input type="text" id="node-input-ymax" style="width: 31%" placeholder="Auto">
     </div>
     <div class="form-row" id="topic-pattern">
-        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
-            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
-        >
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center">
+            <i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern
+        </label>
         <input type="text" id="node-input-topicPattern" />
     </div>
     <div class="form-row">
@@ -320,49 +287,6 @@
             <option value="disable">Enable/Disable</option>
          </select>
     </div>
-    <!-- <div class="form-row" id="legend-show">
-        <label for="node-input-legend">Legend</label>
-        <select id="node-input-legend" style="width:120px;">
-            <option value="false">None</option>
-            <option value="true">Show</option>
-        </select>
-        <span id="interpolate-show">&nbsp;&nbsp;&nbsp;&nbsp;Interpolate
-            <select id="node-input-interpolate" style="width:120px;">
-                <option value="linear">linear</option>
-                <option value="step">step</option>
-                <option value="bezier">bezier</option>
-            </select>
-        </span>
-        <span id="hole-size-show">&nbsp;&nbsp;&nbsp;&nbsp;Cutout
-            <input type="text" id="node-input-cutout" style="width:35px"> %
-        </span>
-    </div> -->
-    <!-- <div id="show-useOneColor" style="display:none; height:24px;">
-        <input type="checkbox" id="node-input-useOneColor" style="display:inline-block; width:auto; vertical-align:baseline; margin-left:105px; margin-right:5px;">Use first colour for all bars
-    </div>
-    <div class="form-row" id="ui-chart-colours">
-        <label for="node-input-color1">Series Colours</label>
-        <input type="color" id="node-input-color1" class="series-color" style="width:100px;"/>
-        <input type="color" id="node-input-color2" class="series-color" style="width:100px;"/>
-        <input type="color" id="node-input-color3" class="series-color" style="width:100px;"/>
-        <div style="margin-top:5px; margin-left:104px;">
-            <input type="color" id="node-input-color4" class="series-color" style="width:100px;"/>
-            <input type="color" id="node-input-color5" class="series-color" style="width:100px;"/>
-            <input type="color" id="node-input-color6" class="series-color" style="width:100px;"/>
-        </div>
-        <div style="margin-top:5px; margin-left:104px;">
-            <input type="color" id="node-input-color7" class="series-color" style="width:100px;"/>
-            <input type="color" id="node-input-color8" class="series-color" style="width:100px;"/>
-            <input type="color" id="node-input-color9" class="series-color" style="width:100px;"/>
-        </div>
-    </div>
-    <div class="form-row">
-        <label for="node-input-nodata">Blank label</label>
-        <input type="text" id="node-input-nodata" placeholder="display this text before valid data arrives">
-    </div>
-    <div class="form-row">
-        <input type="checkbox" id="node-input-useOldStyle" style="display:inline-block; width:auto; vertical-align:baseline; margin-left:105px; margin-right:5px;">Use deprecated (pre 2.5.0) data format.
-    </div> -->
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name">

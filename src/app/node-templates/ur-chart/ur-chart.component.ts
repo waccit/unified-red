@@ -5,15 +5,21 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { BaseNode } from '../ur-base-node';
 import { MatDialog } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
-import { first, reduce } from 'rxjs/operators';
-import { multi } from './data';
+import { reduce } from 'rxjs/operators';
+import { interval, Subscription } from 'rxjs';
 
-
+interface Unit {
+    value: string;
+    viewValue: string;
+  }
 export interface chartConfiguration {
-	xmax: string;
+    xrange: string;
+    xrangeunits: string;
+    xmax: string;
     xmin: string;
     ymin: string;
     ymax: string;
+    live: boolean;
     topics: {alias: string, def: string};
 }
 
@@ -24,10 +30,21 @@ export interface chartConfiguration {
 })
 
 export class UrChartComponent extends BaseNode implements OnInit {
+    selectedUnit: string;
+  
+    units: Unit[] = [
+        {value: '1', viewValue: 'sec'},
+        {value: '60', viewValue: 'min'},
+        {value: '3600', viewValue: 'hr'},
+        {value: '86400', viewValue: 'day(s)'},
+        {value: '2592000', viewValue: 'month(s)'},
+        {value: '31104000', viewValue: 'year(s)'}
+    ];
 
     view: any[] = [700, 500];
     config: chartConfiguration;
-    multi: any[];
+    graph: any[];
+    private _liveSub: Subscription;
     
     // options
     legend: boolean = true;
@@ -39,13 +56,23 @@ export class UrChartComponent extends BaseNode implements OnInit {
     showXAxisLabel: boolean = true;
     xAxisLabel: string = '';
     yAxisLabel: string = '';
-    timeline: boolean = true;
+    timeline: boolean = false;
+    xScaleMin: any;
+    xScaleMax: any;
+    yScaleMin: number;
+    yScaleMax: number;
 
     colorScheme = {
         domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5']
     };
     dataLog: any;
+    values: any;
+    param: any;
 
+    topics:Array<string>=[];
+    alias:Array<string>=[];
+    currentTime: Date;
+    timeValue: any;
 
     constructor(
         protected webSocketService: WebSocketService,
@@ -57,7 +84,121 @@ export class UrChartComponent extends BaseNode implements OnInit {
         public http: HttpClient,
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
-        // Object.assign(this, { multi });
+    }
+
+    ngOnDestroy(): void{
+        if (this._liveSub) {
+            this._liveSub.unsubscribe();
+        }
+    }
+
+    ngOnInit(): void {
+        this.config = this.data;
+        this.timeValue = this.config.xrange;
+        
+        for (const topic in this.config.topics) {
+            this.topics.push(this.config.topics[topic].def);
+            this.alias.push(this.config.topics[topic].alias);
+        }
+        this.selectedUnit = this.config.xrangeunits;
+        this.graphChart({checked: this.config.live});
+    }
+
+    startTimeValue(event: any) {
+        this.timeValue = event.target.value;
+        let startTime = new Date(this.currentTime.getTime()-parseFloat(event.target.value)*parseFloat(this.selectedUnit)*1000);
+        this.param.startTimestamp = startTime;
+        this.getData(this.param, this.topics, this.alias);
+    }
+    startTimeUnits(event: any) {
+        let startTime = new Date(this.currentTime.getTime()-parseFloat(this.timeValue)*parseFloat(this.selectedUnit)*1000);
+        this.param.startTimestamp = startTime;
+        this.getData(this.param, this.topics, this.alias);
+    }
+
+    endTime(event: any) {
+
+        this.param.endTimestamp = event.target.value;
+        this.getData(this.param, this.topics, this.alias);
+    }
+
+    graphChart(event: any) { // 
+        this.currentTime = new Date();
+        let startTime = new Date(this.currentTime.getTime()-parseFloat(this.config.xrange)*parseFloat(this.config.xrangeunits)*1000);
+        this.param = {
+            "topic": this.topics,  //['some/sensor/a','some/sensor/b'],
+            startTimestamp: startTime,
+            endTimestamp: this.currentTime,
+            // value: any,
+            lowValue: parseFloat(this.config.ymin),
+            highValue: parseFloat(this.config.ymax),
+            // status: string,
+            // tags: string[]
+        }
+        this.yScaleMin = this.param.lowValue;
+        this.yScaleMax = this.param.highValue;
+        this.getData(this.param, this.topics, this.alias);
+        if(event.checked){
+            this._liveSub = this.webSocketService.listen('ur-datalog-update').subscribe((msg: any) => {
+                this.liveData(msg, this.param, this.topics, this.alias);
+            });
+        }else{
+            if (this._liveSub) {
+                this._liveSub.unsubscribe();
+            }
+        }
+    }
+
+    getData(param:any, topics:any, alias:any){
+        this.http.put('/api/datalog/',param)
+            .pipe()
+            .subscribe(
+                (data) => {
+                    this.dataLog = data;
+                    this.formatData(topics, alias);
+                },
+                (error) => {
+                    this.snackbar.error(error);
+                }
+            );
+    };
+
+    liveData(data:any, param:any, topics:any, alias:any){
+        console.log("timestamp", data.payload.timestamp);
+        this.xScaleMax = new Date(data.payload.timestamp);
+        this.xScaleMin = new Date(this.xScaleMax.getTime()-parseFloat(this.config.xrange)*parseFloat(this.config.xrangeunits)*1000);
+        // this.getData(param, topics, alias);
+        this.dataLog.push({
+            value: data.payload.value,
+            timestamp: data.payload.timestamp,
+            topic: data.payload.topic,
+            units: data.payload.units
+        });
+        this.formatData(topics, alias);
+    };
+
+    formatData(topics:any, alias:any){
+        let seriesName;
+        let reduced = this.dataLog.reduce((out, entry) => {
+            if(topics.indexOf(entry.topic) >= 0  &&  alias[topics.indexOf(entry.topic)] !== ''){
+                seriesName = alias[topics.indexOf(entry.topic)];
+            }else{
+                seriesName = entry.topic;
+            }
+            if (out.hasOwnProperty(entry.topic)) {
+                out[entry.topic].series.push({ name: new Date(entry.timestamp), value: entry.value });
+            }
+            else {
+                out[entry.topic] = { name: seriesName, series: [{ name: new Date(entry.timestamp), value: entry.value }] };
+            }
+            return out;
+        }, {});
+        
+        let out = [];
+        for (let topic in reduced) {
+            out.push(reduced[topic]);
+        }
+        this.graph = out;
     }
 
     onSelect(data): void {
@@ -74,65 +215,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
     updateValue(data: any) {
         super.updateValue(data);
     }
-
-    ngOnInit(): void {
-        this.config = this.data;
-        console.log('this.config', this.config);
-        const topics = [];
-        for (const topic in this.config.topics) {
-            topics.push(this.config.topics[topic].def);
-        }
-        let param = {
-            "topic": topics,  //['some/sensor/a','some/sensor/b'],
-            // startTimestamp: new Date(this.data.xmin),
-            // endTimestamp: new Date(this.data.xmax),
-            // value: any,
-            lowValue: parseFloat(this.config.ymin),
-            highValue: parseFloat(this.config.ymax),
-            // status: string,
-            // tags: string[]
-        }
-        console.log('param', param);
-        this.getData(param);
-        
-
-        // Object.assign(this, { multi });
-    }
-
-    getData(param:any){
-        this.http.put('/api/datalog/',param)
-            .pipe()
-            .subscribe(
-                (data) => {
-                    console.log('data', data);
-                    this.dataLog = data;
-                    console.log('dataLog', this.dataLog);
-                    const reduced = this.dataLog.reduce((out, entry) => {
-                        if (out.hasOwnProperty(entry.topic)) {
-                            out[entry.topic].series.push({ name: entry.timestamp, value: entry.value });
-                        }
-                        else {
-                            out[entry.topic] = { name: entry.topic, series: [{ name: entry.timestamp, value: entry.value }] };
-                        }
-                        return out;
-                    }, {});
-                    
-                    const out = [];
-                    for (const topic in reduced) {
-                        out.push(reduced[topic]);
-                    }
-                    console.log('out', out);
-                    console.log('multi', multi);
-                    this.multi = out;
-                    console.log('this.multi', this.multi);
-                    this.snackbar.success('Data Recieved!');
-                },
-                (error) => {
-                    this.snackbar.error(error);
-                }
-            );
-    };
-    
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
