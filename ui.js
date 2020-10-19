@@ -654,27 +654,10 @@ let dynamicPagesNeedUpdate = function (current, incoming) {
     return JSON.stringify(current) !== JSON.stringify(incoming);
 };
 
-let getUpdatedPageOrder = function (id, current) {
-    let result = current;
-
-    if (pageOrdersLog.hasOwnProperty(id)) {
-        pageOrdersLog[id].forEach((o) => {
-            if (result >= o.start && result <= o.end) {
-                result = o.end + 1;
-            }
-        });
-    }
-
-    return result;
-};
-
 let removeFunc;
 var dynamicPages = {};
 var dynamicGroups = {};
 var dynamicWidgets = {};
-// var pageOrdersLog = {};
-// key: parent menuItem's id
-// val: { id: <menuPage's id>, start: <start order>, end: <end order> }
 
 function addControl(menu_items, menu_page, group, control) {
     if (typeof control.type !== 'string') {
@@ -787,11 +770,11 @@ function addControl(menu_items, menu_page, group, control) {
             // split string as prefix and instance nums
             let rx = /(.*)(\{x\})(.*)/g;
 
-            // index 0: input text
-            // index 1: first group (prefix)
-            // index 2: second group (instance num)
-            // index 3: third group (suffix)
             let expressionArr = rx.exec(expression);
+            // expressionArr[0]: input text (expression)
+            // expressionArr[1]: first group (prefix)
+            // expressionArr[2]: second group (instance num)
+            // expressionArr[3]: third group (suffix)
 
             // set prefix & suffix
             let pageTitlePrefix = expressionArr[1];
@@ -895,37 +878,6 @@ function addControl(menu_items, menu_page, group, control) {
                 dynamicGroups[group.id] = true;
                 dynamicWidgets[control.id] = true;
             } else {
-                // let pages = [];
-                // let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
-
-                // // update pageOrdersLog
-                // if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
-                //     let log = pageOrdersLog[foundMenuItem.id];
-                //     let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
-
-                //     if (currIndex > 0) {
-                //         log[currIndex] = {
-                //             id: menu_page.id,
-                //             start: updatedOrder,
-                //             end: updatedOrder + instanceNums.length - 1,
-                //         };
-                //     } else {
-                //         log.push({
-                //             id: menu_page.id,
-                //             start: updatedOrder,
-                //             end: updatedOrder + instanceNums.length - 1,
-                //         });
-                //     }
-                // } else {
-                //     pageOrdersLog[foundMenuItem.id] = [
-                //         {
-                //             id: menu_page.id,
-                //             start: updatedOrder,
-                //             end: updatedOrder + instanceNums.length - 1,
-                //         },
-                //     ];
-                // }
-
                 foundMenuItem.items = foundMenuItem.items.filter(function (page) {
                     return !page.id.startsWith(menu_page.id);
                 });
@@ -940,8 +892,7 @@ function addControl(menu_items, menu_page, group, control) {
                     let instancePage = {
                         id: menu_page.id + '.' + instanceNums[i],
                         isMenuPage: true,
-                        // order: updatedOrder + i,
-                        order: parseFloat(menu_page.config.order + '.' + i.toString()),
+                        order: parseFloat(menu_page.config.order) + i / 1000,
                         disabled: menu_page.config.disabled,
                         hidden: menu_page.config.hidden,
                         instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
@@ -975,8 +926,6 @@ function addControl(menu_items, menu_page, group, control) {
 
                     foundMenuItem.items.push(instancePage);
                     foundMenuItem.submenu.push(instancePage);
-
-                    // pages.push(instancePage);
                 }
 
                 foundMenuItem.items.sort(itemSorter);
@@ -992,31 +941,62 @@ function addControl(menu_items, menu_page, group, control) {
             }
 
             function dynamicRemove() {
-                // console.log('dynamic remove called...');
+                // if control is part of a dynamic page
                 if (dynamicWidgets[control.id]) {
-                    // for (page in foundMenuItem.items) {
-                    // }
-                    foundMenuItem.items.forEach((page) => {
-                        if (page.id.startsWith(menu_page.id)) {
-                            page.items = page.items.filter((g) => {
+                    // filter foundMenuItem.items
+                    foundMenuItem.items = foundMenuItem.items.filter((p) => {
+                        // if p is a pseudo-page of menu_page
+                        if (p.id.startsWith(menu_page.id)) {
+                            // filter p.items
+                            p.items = p.items.filter((g) => {
+                                // if g is a pseusdo-group of group
                                 if (g.id.startsWith(group.id)) {
-                                    g.items = g.items.filter((widget) => !widget.id.startsWith(control.id));
+                                    // filter g.items
+                                    g.items = g.items.filter((w) => !w.id.startsWith(control.id));
 
+                                    // cleanup dynamicGroups dictionary
                                     if (g.items.length === 0) {
                                         delete dynamicGroups[group.id];
                                     }
                                 }
+
+                                // filter out childless groups from p.items
                                 return g.items.length > 0;
                             });
 
-                            if (page.items.length === 0) {
+                            //cleanup dynamicPages dict && filter foundMenuItem.submenu to match foundMenuItem.items
+                            if (p.items.length === 0) {
                                 delete dynamicPages[menu_page.id];
-                                pageOrdersLog[foundMenuItem.id] = pageOrdersLog[foundMenuItem.id].filter(
-                                    (element) => element.id !== menu_page.id
-                                );
+                                foundMenuItem.submenu = foundMenuItem.submenu.filter((s) => s.id !== p.id);
                             }
                         }
+
+                        // filter out childless pages from foundMenuItem.items
+                        return p.items.length > 0;
                     });
+
+                    // if foundMenuItem is now childless
+                    if (foundMenuItem.items.length === 0 && foundMenuItem.submenu.length === 0) {
+                        // grab a copy of menu_items stack
+                        let menuItemsStack = [...menu_items];
+                        let curr = menuItemsStack.find((mi) => mi.id === foundMenuItem.id);
+
+                        // travel up the menu tree and remove childless menu_items
+                        do {
+                            let parent = findMenuItemById(menu, curr.config.menuItem);
+                            let currInMenu = findMenuItemById(menu, curr.id);
+                            if (parent) {
+                                if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
+                                    parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
+                                    parent.submenu = parent.submenu.filter((item) => item.id !== currInMenu.id);
+                                }
+                                curr = menuItemsStack.find((mi) => mi.id === parent.id);
+                            } else {
+                                menu = menu.filter((item) => item.id !== curr.id);
+                                curr = null;
+                            }
+                        } while (curr);
+                    }
                     delete dynamicWidgets[control.id];
                     updateUi();
                 }
@@ -1037,36 +1017,6 @@ function addControl(menu_items, menu_page, group, control) {
             }
             delete dynamicGroups[group.id];
             delete dynamicWidgets[control.id];
-
-            // let updatedOrder = getUpdatedPageOrder(foundMenuItem.id, parseFloat(menu_page.config.order));
-
-            // // update pageOrdersLog
-            // if (pageOrdersLog.hasOwnProperty(foundMenuItem.id)) {
-            //     let log = pageOrdersLog[foundMenuItem.id];
-            //     let currIndex = log.findIndex((entry) => entry.id === menu_page.id);
-
-            //     if (currIndex > 0) {
-            //         log[currIndex] = {
-            //             id: menu_page.id,
-            //             start: updatedOrder,
-            //             end: updatedOrder,
-            //         };
-            //     } else {
-            //         log.push({
-            //             id: menu_page.id,
-            //             start: updatedOrder,
-            //             end: updatedOrder,
-            //         });
-            //     }
-            // } else {
-            //     pageOrdersLog[foundMenuItem.id] = [
-            //         {
-            //             id: menu_page.id,
-            //             start: updatedOrder,
-            //             end: updatedOrder,
-            //         },
-            //     ];
-            // }
 
             var foundMenuPage = find(foundMenuItem.items, function (mp) {
                 return mp.id === menu_page.id;
@@ -1100,7 +1050,6 @@ function addControl(menu_items, menu_page, group, control) {
                 foundMenuPage = {
                     id: menu_page.id,
                     isMenuPage: true,
-                    // order: updatedOrder,
                     order: parseFloat(menu_page.config.order),
                     disabled: menu_page.config.disabled,
                     hidden: menu_page.config.hidden,
@@ -1144,6 +1093,7 @@ function addControl(menu_items, menu_page, group, control) {
             function staticRemove() {
                 // console.log('static remove called...');
                 var index = foundGroup.items.indexOf(control);
+
                 if (index >= 0) {
                     // Remove the item from the group
                     foundGroup.items.splice(index, 1);
@@ -1158,9 +1108,7 @@ function addControl(menu_items, menu_page, group, control) {
                             if (foundMenuPage.items.length === 0) {
                                 itemsIdx = foundMenuItem.items.indexOf(foundMenuPage);
                                 submenuIdx = foundMenuItem.submenu.indexOf(foundMenuPage);
-                                pageOrdersLog[foundMenuItem.id] = pageOrdersLog[foundMenuItem.id].filter(
-                                    (element) => element.id !== menu_page.id
-                                );
+
                                 if (itemsIdx >= 0 && submenuIdx >= 0) {
                                     foundMenuItem.items.splice(itemsIdx, 1);
                                     foundMenuItem.submenu.splice(submenuIdx, 1);
@@ -1173,14 +1121,20 @@ function addControl(menu_items, menu_page, group, control) {
                                         do {
                                             let parent = findMenuItemById(menu, curr.config.menuItem);
                                             let currInMenu = findMenuItemById(menu, curr.id);
-                                            if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
-                                                parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
-                                                parent.submenu = parent.submenu.filter(
-                                                    (item) => item.id !== currInMenu.id
-                                                );
+                                            if (parent) {
+                                                if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
+                                                    parent.items = parent.items.filter(
+                                                        (item) => item.id !== currInMenu.id
+                                                    );
+                                                    parent.submenu = parent.submenu.filter(
+                                                        (item) => item.id !== currInMenu.id
+                                                    );
+                                                }
+                                                curr = menuItemsStack.find((mi) => mi.id === parent.id);
+                                            } else {
+                                                menu = menu.filter((item) => item.id !== curr.id);
+                                                curr = null;
                                             }
-
-                                            curr = menuItemsStack.find((mi) => mi.id === parent.id);
                                         } while (curr);
                                     }
                                 }
