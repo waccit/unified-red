@@ -590,12 +590,20 @@ function find(array, predicate) {
 }
 
 function itemSorter(item1, item2) {
-    if (item1.order === 0 && item2.order !== 0) {
-        return 1;
-    } else if (item1.order !== 0 && item2.order === 0) {
-        return -1;
+    let result;
+
+    item1 = item1.order.toString().split('.');
+    item2 = item2.order.toString().split('.');
+
+    while (item1.length) {
+        result = item1.shift() - (item2.shift() || 0);
+
+        if (result) {
+            return result;
+        }
     }
-    return item1.order - item2.order;
+
+    return -item2.length;
 }
 
 function needsUpdate(current, incoming) {
@@ -892,7 +900,7 @@ function addControl(menu_items, menu_page, group, control) {
                     let instancePage = {
                         id: menu_page.id + '.' + instanceNums[i],
                         isMenuPage: true,
-                        order: parseFloat(menu_page.config.order) + i / 1000,
+                        order: parseFloat(menu_page.config.order + '.' + i),
                         disabled: menu_page.config.disabled,
                         hidden: menu_page.config.hidden,
                         instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
