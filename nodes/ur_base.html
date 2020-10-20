@@ -1029,7 +1029,7 @@
                         });
                     });
 
-                //Layout Tab
+                // Layout Tab
                 var divTabs = $('<div>', { class: 'form-row', style: 'position:relative' }).appendTo(layoutTab);
                 $('<label>')
                     .html('<b>' + c_('layout.nav-menu') + '</b>')
@@ -1037,7 +1037,7 @@
 
                 var buttonGroup = $('<div>', { class: 'nr-db-sb-list-button-group' }).appendTo(divTabs);
 
-                //Toggle expand buttons
+                // Expand/Collapse Buttons
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-angle-double-up"></i></a>'
                 )
@@ -1047,20 +1047,16 @@
                             .slideUp()
                             .addClass('nr-db-sb-collapsed');
                         folderContainer.find('.nr-db-sb-group-list-container').slideUp().addClass('nr-db-sb-collapsed');
-                        folderContainer.find('.nr-db-sb-page-list-container').slideUp().addClass('nr-db-sb-collapsed');
                         folderContainer
-                            .find('.nr-db-sb-folder-container-list-container')
+                            .find('.nr-db-sb-folder-content-container')
                             .slideUp()
                             .addClass('nr-db-sb-collapsed');
 
                         folderContainer
-                            .find('.nr-db-sb-folder-container-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': 'rotate(-90deg)' });
-                        folderContainer
                             .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
                         folderContainer
-                            .find('.nr-db-sb-page-list-header>.nr-db-sb-list-chevron')
+                            .find('.nr-db-sb-folder-content-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
                         folderContainer
                             .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
@@ -1074,7 +1070,7 @@
                 )
                     .click(function (evt) {
                         folderContainer
-                            .find('.nr-db-sb-widget-list-container')
+                            .find('.nr-db-sb-folder-content-container')
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
                         folderContainer
@@ -1082,14 +1078,14 @@
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
                         folderContainer
-                            .find('.nr-db-sb-page-list-container')
+                            .find('.nr-db-sb-widget-list-container')
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
                         folderContainer
                             .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
                         folderContainer
-                            .find('.nr-db-sb-page-list-header>.nr-db-sb-list-chevron')
+                            .find('.nr-db-sb-folder-content-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
                         folderContainer
                             .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
