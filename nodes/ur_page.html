@@ -48,14 +48,6 @@
             },
             instances: {
                 value: [{ name: '', number: '' }],
-                // validate: function (v) {
-                //     if (this.isDynamic) {
-                //         console.log('v: ', v);
-                //         return v.valid;
-                //     } else {
-                //         return true;
-                //     }
-                // },
             },
         },
         sort: function (A, B) {
@@ -290,8 +282,9 @@
 
             let instances = $('#node-config-input-instances-list').editableList('items');
             let node = this;
+
             node.instances = [];
-            console.log('instances: ', instances);
+
             instances.each(function (inst) {
                 let container = $(this);
                 let i = {

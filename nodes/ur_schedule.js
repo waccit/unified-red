@@ -34,7 +34,7 @@ module.exports = function (RED) {
         }
 
         /*
-        HELPER FUCTIONS
+        HELPER FUNCTIONS
         */
 
         let setPrioritySchedule = function () {
@@ -257,7 +257,7 @@ module.exports = function (RED) {
             }
             sch.pattern = correctedPattern;
 
-            // activate date or holiday schedule at beginning of day (unless time overriden)
+            // activate date or holiday schedule at beginning of day (unless time overridden)
             let startPattern = setCronTime(
                 sch.pattern,
                 time ? time.getHours() : 0,

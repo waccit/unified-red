@@ -8,25 +8,25 @@ export class AlarmService {
 
     getAll(limit: number = 10000) {
         let params = new HttpParams();
-        params = params.append('limit', limit+'');
+        params = params.append('limit', limit + '');
         return this.http.get<Alarm[]>(`/api/alarms/all/`, { params });
     }
 
     getSummary(limit: number = 10000) {
         let params = new HttpParams();
-        params = params.append('limit', limit+'');
+        params = params.append('limit', limit + '');
         return this.http.get<Alarm[]>(`/api/alarms/summary/`, { params });
     }
 
     getRecentActive(limit: number = 10) {
         let params = new HttpParams();
-        params = params.append('limit', limit+'');
+        params = params.append('limit', limit + '');
         return this.http.get<Alarm[]>(`/api/alarms/recent/active/`, { params });
     }
 
-    getRecentInctive(limit: number = 10) {
+    getRecentInactive(limit: number = 10) {
         let params = new HttpParams();
-        params = params.append('limit', limit+'');
+        params = params.append('limit', limit + '');
         return this.http.get<Alarm[]>(`/api/alarms/recent/inactive/`, { params });
     }
 
@@ -53,5 +53,4 @@ export class AlarmService {
     ackByTopic(topic: string) {
         return this.http.post<Alarm[]>(`/api/alarms/ack/`, { topic });
     }
-
 }

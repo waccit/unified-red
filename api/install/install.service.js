@@ -13,7 +13,7 @@ module.exports = {
     isDbConnected,
     install,
     testDbConnection,
-    testSmtpServer
+    testSmtpServer,
 };
 
 function init(_log, _settings) {
@@ -22,7 +22,15 @@ function init(_log, _settings) {
 }
 
 async function isInstalled() {
-    if (settings && settings.adminAuth && settings.httpStatic && config && config.mongoConnection && config.jwtsecret && config.smtp.host) {
+    if (
+        settings &&
+        settings.adminAuth &&
+        settings.httpStatic &&
+        config &&
+        config.mongoConnection &&
+        config.jwtsecret &&
+        config.smtp.host
+    ) {
         return true;
     }
     return false;
@@ -60,7 +68,10 @@ async function install(setup) {
             log.info('Self-installing Unified-RED adminAuth hook on ' + settings.settingsFile);
             let defaultAdminAuthPath = path.resolve(__dirname + '/../../admin-auth');
             let adminAuthPath = setup.adminAuthPath || defaultAdminAuthPath;
-            data = data.replace(/(\/\/[\s]*)?(adminAuth[\s]*\:.*\n)/i, 'adminAuth: require("' + adminAuthPath + '"),\n// $2');
+            data = data.replace(
+                /(\/\/[\s]*)?(adminAuth[\s]*\:.*\n)/i,
+                'adminAuth: require("' + adminAuthPath + '"),\n// $2'
+            );
         }
         if (!settings.httpStatic) {
             log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
@@ -70,14 +81,14 @@ async function install(setup) {
         }
         fs.writeFileSync(settings.settingsFile, data, { encoding: 'utf8' });
 
-        let successStr = 'Installation complete. Shuttiing down Node-RED in 5 seconds...';
+        let successStr = 'Installation complete. Shutting down Node-RED in 5 seconds...';
         log.info(successStr);
         setTimeout(function () {
             process.exit();
         }, 5000);
         return { result: true, message: successStr };
     } catch (e) {
-        log.info('--- Unified-RED installaton error:');
+        log.info('--- Unified-RED installation error:');
         log.info(e);
         log.info('---');
         return { result: false, message: e.message };

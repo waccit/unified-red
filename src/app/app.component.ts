@@ -12,44 +12,29 @@ import { MenuService } from './services/menu.service';
 })
 export class AppComponent {
     currentUrl: string;
-    showLoadingIndicatior = true;
-    // sidebarItems: any[] = [];
+    showLoadingIndicator = true;
     isLoggedIn = false;
 
     constructor(
         public _router: Router,
         location: PlatformLocation,
-        // private webSocketService: WebSocketService,
-        // private menuService: MenuService,
         private authenticationService: AuthenticationService
     ) {
-        console.log('AppComponent Constructor Called');
         this.authenticationService.token.subscribe((token) => {
             this.isLoggedIn = !!token;
         });
         this._router.events.subscribe((routerEvent: Event) => {
             if (routerEvent instanceof NavigationStart) {
-                this.showLoadingIndicatior = true;
+                this.showLoadingIndicator = true;
                 location.onPopState(() => {
                     window.location.reload();
                 });
                 this.currentUrl = routerEvent.url.substring(routerEvent.url.lastIndexOf('/') + 1);
             }
             if (routerEvent instanceof NavigationEnd) {
-                this.showLoadingIndicatior = false;
+                this.showLoadingIndicator = false;
             }
             window.scrollTo(0, 0);
         });
-
-        // this.menuService.menu.subscribe((data) => {
-        //     this.sidebarItems = data;
-        // });
-
-        // this.webSocketService.listen('ui-controls').subscribe((data: any) => {
-        //     console.log('app.component listening to WebSocketService data: ', data);
-        //     this.sidebarItems = [];
-        //     this.sidebarItems = data.menu;
-        //     // this.pageGroupsService.setPageGroupsList(data.menu);
-        // });
     }
 }

@@ -180,29 +180,34 @@
                     imageSelector.find('option, optgroup').remove();
                     $('<option>').text('select an image').appendTo(imageSelector);
                     let imgRoot = 'img/';
-                    $.get('./ur_base/filebrowser/list/', { p: imgRoot, f: 'jpg,png,gif', r: 1 }, function(data) {
-                        let addImageOption = function(entry) {
+                    $.get('./ur_base/filebrowser/list/', { p: imgRoot, f: 'jpg,png,gif', r: 1 }, function (data) {
+                        let addImageOption = function (entry) {
                             if (entry.files && entry.files.length) {
-                                entry.files.map(f => {
-                                    f.folder = (entry.path || entry.name);
-                                    f.path = (entry.path || entry.name) + '/' + f.name;
-                                    return f;
-                                }).forEach(addImageOption);
+                                entry.files
+                                    .map((f) => {
+                                        f.folder = entry.path || entry.name;
+                                        f.path = (entry.path || entry.name) + '/' + f.name;
+                                        return f;
+                                    })
+                                    .forEach(addImageOption);
                             } else if (entry.type === 'f') {
                                 var optgroup = imageSelector.find('optgroup[label="' + entry.folder + '"]');
                                 if (!optgroup.length) {
                                     optgroup = $('<optgroup>', { label: entry.folder }).appendTo(imageSelector);
                                 }
-                                $('<option>').val(imgRoot + entry.path).text(entry.name).appendTo(optgroup);
+                                $('<option>')
+                                    .val(imgRoot + entry.path)
+                                    .text(entry.name)
+                                    .appendTo(optgroup);
                             }
-                        }
+                        };
                         data.files.forEach(addImageOption);
                     });
                 } catch (e) {}
-            };
+            }
             reloadImageSelector();
             $('#reloadImageSelector').click(reloadImageSelector);
-            $('#imageSelector').change(function() {
+            $('#imageSelector').change(function () {
                 var file = $(this).val();
                 if (file !== 'select an image') {
                     var code = that.editor.getValue();
@@ -215,7 +220,7 @@
                     that.editor.focus();
                     updateViewport(code);
                 }
-            })
+            });
         },
         oneditsave: function () {
             // store rules from editable list
@@ -331,7 +336,9 @@
         </div>
     </div>
     <div class="form-row">
-        <label for="imageSelector"><i class="fa fa-image"></i> <span data-i18n="ur_animation.label.image"></span></label>
+        <label for="imageSelector"
+            ><i class="fa fa-image"></i> <span data-i18n="ur_animation.label.image"></span
+        ></label>
         <div style="display:inline-block; width:calc(100% - 105px)">
             <select id="imageSelector" style="width: calc(100% - 52px);"></select>
             <div style="margin-left:5px; display: inline-block;position: relative;">
@@ -406,7 +413,7 @@
 <script type="text/html" data-help-name="ur_animation">
     <p>The animation widget can contain any valid html and jQuery.</p>
     <p>
-        This node can be used to create a dynamic user interface element that changes its appearence based on the input
+        This node can be used to create a dynamic user interface element that changes its appearance based on the input
         message.
     </p>
     <p><b>For example:</b><br /></p>

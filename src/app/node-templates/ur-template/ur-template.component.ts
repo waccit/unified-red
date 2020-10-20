@@ -24,7 +24,7 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         const that = this;
         // Escape any funky symbols in the node ID
         const nodeId = this.nodeId.replace(/(\W)/g, '\\\\$1');
-        // Substite any $node references in the template code
+        // Substitute any $node references in the template code
         const html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         this.container.html($(html));
         // process any elements with request topic attributes
@@ -36,9 +36,8 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
                 };
                 that.send(msg);
             });
-        }
-        else if (this.data.accessBehavior === 'disable') {
-            this.container.find('input, select, button').attr('disabled','disabled');
+        } else if (this.data.accessBehavior === 'disable') {
+            this.container.find('input, select, button').attr('disabled', 'disabled');
         }
     }
 

@@ -337,19 +337,19 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         const orig = data?.event?.extendedProps?.schedule;
         // console.log('event extendedProps', orig);
 
-        const diaglogData = { type: orig.type, values: orig.values, events: [] };
+        const dialogData = { type: orig.type, values: orig.values, events: [] };
         // collect all events for the selected weekday/date/holiday
         switch (orig?.type) {
             case 'weekday':
-                diaglogData.events = this.data.weekdays.filter((e) => e.weekday === orig.start.weekday);
+                dialogData.events = this.data.weekdays.filter((e) => e.weekday === orig.start.weekday);
                 break;
             case 'date':
-                diaglogData.events = this.data.dates.filter((e) => e.date === orig.start.date);
+                dialogData.events = this.data.dates.filter((e) => e.date === orig.start.date);
                 break;
             case 'holiday':
                 const origCron = orig.start.pattern.split(' ');
                 if (origCron.length >= 5) {
-                    diaglogData.events = this.data.holidays.filter((e) => {
+                    dialogData.events = this.data.holidays.filter((e) => {
                         const eCron = e.pattern.split(' ');
                         if (eCron.length < 5) {
                             return false;
@@ -365,7 +365,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
 
         this.dialog
-            .open(UrScheduleFormDialogComponent, { data: { data: diaglogData, action: 'edit' } })
+            .open(UrScheduleFormDialogComponent, { data: { data: dialogData, action: 'edit' } })
             .afterClosed()
             .subscribe((result) => {
                 // console.log('edit response', result);

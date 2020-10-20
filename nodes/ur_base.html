@@ -417,7 +417,6 @@
 
         function getPageDataFromNodes(folderId, pageId) {
             var nodes = RED.nodes.createCompleteNodeSet(false);
-            // console.log('ur_base.html 408 nodes: ', nodes);
 
             var page = {};
 
@@ -760,7 +759,7 @@
                 )
                     .appendTo(ulDashboardTabs)
                     .click(function () {
-                        $(this).resize(); // trigger a resize event so that datatables can calculate header column widths
+                        $(this).resize(); // trigger a resize event so that data tables can calculate header column widths
                     });
 
                 // var liThemeTab = $(
@@ -1185,10 +1184,6 @@
                  * @return {Object} node
                  */
                 var makeNode = function (container, i, item) {
-                    // console.log('makeNode container: ', container);
-                    // console.log('makeNode i: ', i);
-                    // console.log('makeNode item: ', item);
-                    // console.log('makeNode getType: ', RED.nodes.getType('ur_page'));
                     if (!item.node) {
                         item.node = { ...defaultMenuEntities[item.type] };
                         item.node._def = RED.nodes.getType(item.type);
@@ -1728,7 +1723,7 @@
                         });
 
                     widgetContainer.css('min-height', '5px');
-                    console.log('addGroup groupNode: ', groupNode);
+
                     if (groupNode.id) {
                         groupLists[groupNode.id] = widgetContainer;
                     }
@@ -1967,12 +1962,10 @@
                 function getCurrentList() {
                     var currentList = [];
                     var folders = folderContainer.editableList('items');
-                    // console.log('getCurrentList() folders: ', folders);
 
                     var open = false;
                     folders.each(function (i, el) {
                         let folderData = el.data('data');
-                        // console.log('getCurrentList() folderData: ', folderData);
                         let folderContents = el.find('.nr-db-sb-folder-content-list').editableList('items');
                         let innerList = getInnerList(folderContents) || [];
 
@@ -2016,7 +2009,6 @@
                 // }
 
                 function refresh() {
-                    console.log('refresh called!');
                     var currentList = getCurrentList();
                     var newList = [];
                     dashboard = [];
@@ -2137,7 +2129,6 @@
                             group = groupElements[groupId];
                             groupElements[groupId] = group
                                 .map(function (v, i) {
-                                    console.log('sorting... ', v);
                                     return { n: v, i: i };
                                 })
                                 .sort(function (A, B) {
@@ -2222,8 +2213,6 @@
                             format = 'dashboard';
                         }
 
-                        // console.log('getNestedChildren parent: ', parent);
-
                         switch (parent.type) {
                             case 'ur_folder':
                                 if (folderChildren.hasOwnProperty(parent.id)) {
@@ -2289,12 +2278,12 @@
                     // console.log('folders: ', folders);
                     // console.log('pages: ', pages);
                     // console.log('folderChildren: ', folderChildren);
-                    console.log('dashboard: ', dashboard);
-                    console.log('newList: ', newList);
-                    console.log('currentList: ', currentList);
+                    // console.log('dashboard: ', dashboard);
+                    // console.log('newList: ', newList);
+                    // console.log('currentList: ', currentList);
 
                     if (JSON.stringify(newList) != JSON.stringify(currentList)) {
-                        console.log('currentList does not match newList...');
+                        // console.log('currentList does not match newList...');
                         listElements = {};
                         groupLists = {};
                         pageLists = {};
@@ -2506,11 +2495,6 @@
                 });
 
                 editSaveEventHandler = function (node) {
-                    console.log('editSaveEventHandler called by: ', node);
-                    // console.log('editSaveEventHandler() folderLists: ', folderLists);
-                    // console.log('editSaveEventHandler() pageLists: ', pageLists);
-                    // console.log('editSaveEventHandler() groupLists: ', groupLists);
-                    console.log('editSaveEventHandler() listElements: ', listElements);
                     if (/^ur_/.test(node.type)) {
                         if (node.type === 'ur_folder' || node.type === 'ur_page' || node.type === 'ur_group') {
                             if (listElements[node.id]) {
@@ -2600,9 +2584,6 @@
                         } else {
                             // TODO: fix orphaned widgets
                             // refreshOrphanedWidgets();
-                            console.log('saving a widget!');
-                            console.log('widget sees elementParents: ', elementParents);
-                            console.log('widget sees groupLists: ', groupLists);
                             if (listElements[node.id]) {
                                 if (node.group != elementParents[node.id]) {
                                     // Moved to a different group
@@ -2632,11 +2613,7 @@
                             } else {
                                 if (groupLists[node.group]) {
                                     if (node.order === 0) {
-                                        console.log('editSaveEventHandler groupLists.editableList properties:');
-                                        console.log('  items: ', groupLists[node.group].editableList('items'));
-                                        console.log('  length: ', groupLists[node.group].editableList('length'));
                                         node.order = groupLists[node.group].editableList('length');
-                                        console.log('updated node.order: ', node.order);
                                     }
                                     groupLists[node.group].editableList('addItem', node);
                                 }
@@ -2730,8 +2707,7 @@
                         }
                         return 0;
                     });
-                    // console.log('sorted pendingAdd: ', pendingAdd);
-                    // console.log("pendingAdd's view of folderLists: ", folderLists);
+
                     for (var i = 0; i < pendingAdd.length; i++) {
                         var node = pendingAdd[i];
                         if (node.type === 'ur_folder' && !node.folder) {
@@ -2797,7 +2773,6 @@
                 }
 
                 nodesAddEventHandler = function (node) {
-                    // console.log('nodesAddEventHandler called by: ', node);
                     if (/^ur_/.test(node.type) && !listElements[node.id]) {
                         pendingAdd.push(node);
                         clearTimeout(pendingAddTimer);
@@ -2807,7 +2782,6 @@
                 RED.events.on('nodes:add', nodesAddEventHandler);
 
                 nodesRemoveEventHandler = function (node) {
-                    console.log('nodesRemoveEventHandler called by: ', node);
                     if (/^ur_/.test(node.type)) {
                         if (node.type === 'ur_folder' || node.type === 'ur_link') {
                             if (listElements[node.id]) {
@@ -2925,11 +2899,9 @@
 
         $.widget('nodereddashboard.elementSizer', {
             _create: function () {
-                // console.log('elementSizer this: ', this);
                 var that = this;
                 var gridWidth = 12;
                 var width = parseInt($(this.options.width).val() || 0);
-                // console.log('elementSizer width: ', width);
                 var height = parseInt(this.options.hasOwnProperty('height') ? $(this.options.height).val() : '1') || 0;
                 var hasAuto = !this.options.hasOwnProperty('auto') || this.options.auto;
 
