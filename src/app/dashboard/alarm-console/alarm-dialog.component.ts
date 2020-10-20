@@ -27,17 +27,22 @@ export class AlarmDialogComponent implements OnInit, OnDestroy {
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
         private webSocketService: WebSocketService,
         private alarmService: AlarmService,
-        private snackbar: SnackbarService,
+        private snackbar: SnackbarService
     ) {
         this.data = this.dialogData;
     }
 
     ngOnInit(): void {
-        this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
-			if (msg && msg.payload && msg.payload.topic === this.data.topic) {
-                this.dataSource = new AlarmDialogDataSource(this.data.topic, this.alarmService, this.paginator, this.sort);
-			}
-		});
+        this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg: any) => {
+            if (msg && msg.payload && msg.payload.topic === this.data.topic) {
+                this.dataSource = new AlarmDialogDataSource(
+                    this.data.topic,
+                    this.alarmService,
+                    this.paginator,
+                    this.sort
+                );
+            }
+        });
         this.dataSource = new AlarmDialogDataSource(this.data.topic, this.alarmService, this.paginator, this.sort);
     }
 
@@ -48,9 +53,9 @@ export class AlarmDialogComponent implements OnInit, OnDestroy {
     }
 
     ackAlarm() {
-		this.alarmService.ackByTopic(this.data.topic).subscribe(alarms => {
-            this.snackbar.success(this.data.name + ' acknowleged');
+        this.alarmService.ackByTopic(this.data.topic).subscribe((alarms) => {
+            this.snackbar.success(this.data.name + ' acknowledged');
             this.dialogRef.close();
-		});
-	}
+        });
+    }
 }

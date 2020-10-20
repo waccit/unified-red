@@ -37,7 +37,7 @@ module.exports = function (RED) {
         var done = ui.add({
             forwardInputMessages: config.fwdInMessages,
             storeFrontEndInputAsState: config.storeOutMessages,
-            persistantFrontEndValue: config.resendOnRefresh,
+            persistentFrontEndValue: config.resendOnRefresh,
             emitOnlyNewValues: false,
             node: node,
             folders: folders,

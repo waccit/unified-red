@@ -18,14 +18,7 @@ export class NgxchartComponent {
     legendPosition = 'right';
     timeline = true;
     colorScheme = {
-        domain: [
-            '#9370DB',
-            '#87CEFA',
-            '#FA8072',
-            '#FF7F50',
-            '#90EE90',
-            '#9370DB',
-        ],
+        domain: ['#9370DB', '#87CEFA', '#FA8072', '#FF7F50', '#90EE90', '#9370DB'],
     };
     showLabels = true;
 
@@ -126,7 +119,7 @@ export class NgxchartComponent {
         },
     ];
 
-    // vaericle bar chart start
+    // vertical bar chart start
     vbarxAxisLabel = 'Country';
     vbaryAxisLabel = 'Sales';
 

@@ -11,54 +11,51 @@ import { MatDialog } from '@angular/material/dialog';
 import { AlarmDialogComponent } from './alarm-dialog.component';
 
 @Component({
-	selector: 'app-alarm-console',
-	templateUrl: './alarm-console.component.html',
-	styleUrls: ['./alarm-console.component.sass'],
-	providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
+    selector: 'app-alarm-console',
+    templateUrl: './alarm-console.component.html',
+    styleUrls: ['./alarm-console.component.sass'],
+    providers: [{ provide: MAT_DATE_LOCALE, useValue: 'en-US' }],
 })
 export class AlarmConsoleComponent implements OnInit, OnDestroy {
     displayedColumns = ['severity', 'name', 'topic', 'value', 'state', 'acktime', 'timestamp', 'actions'];
-	dataSource: AlarmDataSource;
-	private _wsSubscription: Subscription;
-	isAdmin = false;
+    dataSource: AlarmDataSource;
+    private _wsSubscription: Subscription;
+    isAdmin = false;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
     @ViewChild('filter', { static: true }) filter: ElementRef;
-	view = 'summary';
+    view = 'summary';
 
-	constructor(
-		private webSocketService: WebSocketService,
-		private alarmService: AlarmService,
-		private snackbar: SnackbarService,
-		private authenticationService: AuthenticationService,
-		public dialog: MatDialog,
-	) {}
+    constructor(
+        private webSocketService: WebSocketService,
+        private alarmService: AlarmService,
+        private snackbar: SnackbarService,
+        private authenticationService: AuthenticationService,
+        public dialog: MatDialog
+    ) {}
 
-	ngOnInit(): void {
-        this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
-			if (msg && msg.payload) {
-				if (this.view === 'history') {
-					if (msg.action === 'create') {
-						this.dataSource.add(msg.payload);
-					}
-					else if (msg.action === 'update') {
-						this.dataSource.update(msg.payload.id, msg.payload);
-					}
-					else if (msg.action === 'delete') {
-						this.dataSource.delete(msg.payload.id);
-					}
-				}
-				else if (this.view === 'summary') {
-					this.refreshData();
-				}
-			}
-		});
-		this.refreshData();
-		this.isAdmin = this.authenticationService.getUserRole() === Role.Level10;
-	}
+    ngOnInit(): void {
+        this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg: any) => {
+            if (msg && msg.payload) {
+                if (this.view === 'history') {
+                    if (msg.action === 'create') {
+                        this.dataSource.add(msg.payload);
+                    } else if (msg.action === 'update') {
+                        this.dataSource.update(msg.payload.id, msg.payload);
+                    } else if (msg.action === 'delete') {
+                        this.dataSource.delete(msg.payload.id);
+                    }
+                } else if (this.view === 'summary') {
+                    this.refreshData();
+                }
+            }
+        });
+        this.refreshData();
+        this.isAdmin = this.authenticationService.getUserRole() === Role.Level10;
+    }
 
-	ngOnDestroy(): void {
+    ngOnDestroy(): void {
         if (this._wsSubscription) {
             this._wsSubscription.unsubscribe();
         }
@@ -73,28 +70,32 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
             });
     }
 
-	ackAlarm(row) {
-		this.alarmService.ackByTopic(row.topic).subscribe(alarms => {
-			this.snackbar.success(row.name + ' acknowleged');
-		});
-	}
+    ackAlarm(row) {
+        this.alarmService.ackByTopic(row.topic).subscribe((alarms) => {
+            this.snackbar.success(row.name + ' acknowledged');
+        });
+    }
 
-	deleteAlarm(row) {
-		this.alarmService.delete(row.id).subscribe(data => {
-			this.snackbar.success(row.name + ' deleted');
-		});
-	}
+    deleteAlarm(row) {
+        this.alarmService.delete(row.id).subscribe((data) => {
+            this.snackbar.success(row.name + ' deleted');
+        });
+    }
 
-	openAlarmDialog(row) {
+    openAlarmDialog(row) {
         this.dialog.open(AlarmDialogComponent, { data: row });
-	}
+    }
 
-	changeView(view) {
-		this.view = view;
-		switch(this.view) {
-			case 'summary': this.dataSource.loadSummary(); break;
-			case 'history': this.dataSource.loadHistory(); break;
-		}
-		this.paginator.firstPage();
-	}
+    changeView(view) {
+        this.view = view;
+        switch (this.view) {
+            case 'summary':
+                this.dataSource.loadSummary();
+                break;
+            case 'history':
+                this.dataSource.loadHistory();
+                break;
+        }
+        this.paginator.firstPage();
+    }
 }

@@ -27,7 +27,7 @@ function start(site) {
                 (err, res, body) => {}
             );
         } catch (e) {}
-    }, 24*3600000 /*  24 hrs */);
+    }, 24 * 3600000 /*  24 hrs */);
 }
 
 function stop() {
@@ -47,7 +47,7 @@ function getUID() {
         }
     } catch (e) {}
 
-    // otherwse collect all active mac addresses, hash, and store as unique machine ID
+    // otherwise collect all active mac addresses, hash, and store as unique machine ID
     const networkInterfaces = require('os').networkInterfaces();
     let macs = [];
     for (let adapter in networkInterfaces) {

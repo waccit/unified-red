@@ -8,13 +8,13 @@ import { AlarmService } from '../services';
 import { BehaviorSubject } from 'rxjs';
 
 export class AlarmDataSource extends GenericDataSource<Alarm> {
-    private alarms : Alarm[] = [];
+    private alarms: Alarm[] = [];
     private alarmsSubject = new BehaviorSubject<Alarm[]>(this.alarms);
     private summary = true;
 
     constructor(private alarmService: AlarmService, paginator: MatPaginator, sort: MatSort) {
         super(paginator, sort);
-        this.alarmService.getAll().subscribe(data => {
+        this.alarmService.getAll().subscribe((data) => {
             this.alarms = data;
             this.loadSummary();
         });
@@ -40,12 +40,12 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
     }
 
     update(id: string, item: Alarm) {
-        this.alarms = this.alarms.map(a => a.id === id ? item : a );
+        this.alarms = this.alarms.map((a) => (a.id === id ? item : a));
         this.reload();
     }
 
     delete(id: string) {
-        this.alarms = this.alarms.filter(a => a.id !== id);
+        this.alarms = this.alarms.filter((a) => a.id !== id);
         this.reload();
     }
 
@@ -63,11 +63,12 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
     }
 
     private reload() {
-        if (this.summary) { // summary mode
+        if (this.summary) {
+            // summary mode
             // server-side map reduce
             // this.alarmService.getSummary().subscribe((data:any) => {
             //     this.alarms = data.results.map(v => v.value);
-            //     this.alarmsSsubject.next(this.alarms);
+            //     this.alarmsSubject.next(this.alarms);
             // });
 
             // client-side map reduce: opting for client-side map reduce to prevent server loading
@@ -86,7 +87,7 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
                     ackreq: alarm.ackreq,
                     timestamp: alarm.timestamp,
                     acktime: alarm.acktime || 0,
-                    unackActive: alarm.state && !alarm.acktime ? 1 : 0
+                    unackActive: alarm.state && !alarm.acktime ? 1 : 0,
                 });
             }
 
@@ -101,19 +102,20 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
                     const reduced = result[topic].reduce(reduceFunc);
                     // only include alarms that are active or unack'd alarms
                     if (reduced.state || reduced.unackActive) {
-                        if (reduced.acktime === 0) { // remove acktime field if no timestamp set
+                        if (reduced.acktime === 0) {
+                            // remove acktime field if no timestamp set
                             delete reduced.acktime;
                         }
                         result[topic] = reduced;
-                    }
-                    else {
+                    } else {
                         delete result[topic];
                     }
                 }
             }
-            const summaryData : Alarm[] = Object.values(result);
+            const summaryData: Alarm[] = Object.values(result);
             this.alarmsSubject.next(summaryData);
-        } else { // history mode
+        } else {
+            // history mode
             this.alarmsSubject.next(this.alarms);
         }
     }

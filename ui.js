@@ -79,8 +79,6 @@ function emit(event, data) {
 }
 
 function emitSocket(event, data) {
-    // console.log('ui.js emitSocket called event: ', event);
-    // console.log('ui.js emitSocket called data: ', data);
     if (data.hasOwnProperty('msg') && data.msg.hasOwnProperty('socketid') && data.msg.socketid !== undefined) {
         io.to(data.msg.socketid).emit(event, data);
     } else if (data.hasOwnProperty('socketid') && data.socketid !== undefined) {
@@ -115,7 +113,7 @@ options:
       If true, forwards input messages to the output
   [storeFrontEndInputAsState] - boolean (default true).
       If true, any message received from front-end is stored as state
-  [persistantFrontEndValue] - boolean (default true).
+  [persistentFrontEndValue] - boolean (default true).
       If true, last received message is send again when front end reconnect.
 
   [convert] - callback to convert the value before sending it to the front-end
@@ -125,8 +123,6 @@ options:
   [beforeSend] - callback to prepare the message that is sent to the output
 */
 function add(opt) {
-    //   console.log("add called by: ", add.caller);
-    // console.log('add called with opt: ', opt);
     clearTimeout(removeStateTimers[opt.node.id]);
     delete removeStateTimers[opt.node.id];
 
@@ -139,8 +135,8 @@ function add(opt) {
     if (typeof opt.storeFrontEndInputAsState === 'undefined') {
         opt.storeFrontEndInputAsState = true;
     }
-    if (typeof opt.persistantFrontEndValue === 'undefined') {
-        opt.persistantFrontEndValue = true;
+    if (typeof opt.persistentFrontEndValue === 'undefined') {
+        opt.persistentFrontEndValue = true;
     }
     opt.convert = opt.convert || noConvert;
     opt.beforeEmit = opt.beforeEmit || beforeEmit;
@@ -150,7 +146,6 @@ function add(opt) {
     var remove = addControl(opt.folders, opt.page, opt.group, opt.control);
 
     opt.node.on('input', function (msg) {
-        // console.log('opt.node.on input: ', msg);
         if (typeof msg.enabled === 'boolean') {
             var state = replayMessages[opt.node.id];
             if (!state) {
@@ -302,12 +297,9 @@ function add(opt) {
                 toEmit.disabled = !msg.enabled;
             }
 
-            // WIP: dynamic widget id update!
-            // console.log('opt.control: ', opt.control);
             let newId = opt.node.id;
             if (opt.page.config.isDynamic) {
                 let topic = msg.topic;
-                console.log('msg.topic: ', msg.topic);
                 let topicPattern = opt.control.topicPattern;
 
                 // find and replace wildcard (*)
@@ -324,13 +316,10 @@ function add(opt) {
             }
 
             toEmit.socketid = toEmit.id = toStore.id = newId;
-            // toEmit.id = toStore.id = opt.node.id;
-            // console.log('toEmit: ', toEmit);
-            //toEmit.socketid = msg.socketid; // dcj mu
-            // Emit and Store the data
-            //if (settings.verbose) { console.log("UI-EMIT",JSON.stringify(toEmit)); }
+
             emitSocket(updateValueEventName, toEmit);
-            if (opt.persistantFrontEndValue) {
+
+            if (opt.persistentFrontEndValue) {
                 // replayMessages[opt.node.id] = toStore;
                 replayMessages[newId] = toStore;
             }
@@ -357,7 +346,7 @@ function add(opt) {
             var converted = opt.convertBack(msg.value);
             if (opt.storeFrontEndInputAsState === true) {
                 currentValues[msg.id] = converted;
-                if (opt.persistantFrontEndValue) {
+                if (opt.persistentFrontEndValue) {
                     replayMessages[msg.id] = msg;
                 }
             }
@@ -410,10 +399,6 @@ function join() {
 }
 
 function init(server, app, log, redSettings) {
-    //   console.log(server);
-    //   console.log(app);
-    //   console.log(log);
-    //   console.log(redSettings);
     var uiSettings = redSettings.ui || {};
     if (uiSettings.hasOwnProperty('path') && typeof uiSettings.path === 'string') {
         settings.path = uiSettings.path;
@@ -429,13 +414,10 @@ function init(server, app, log, redSettings) {
     settings.verbose = redSettings.verbose || false;
 
     var fullPath = join(redSettings.httpNodeRoot, settings.path);
-    // console.log('ui.js 333 fullPath: ', fullPath);
     var socketIoPath = join(fullPath, 'socket.io');
-    // console.log('ui.js 335 socketIoPath: ', socketIoPath);
 
     socketio.connect(server, { path: socketIoPath });
     io = socketio.connection();
-    //   console.log(io);
 
     var dashboardMiddleware = function (req, res, next) {
         next();
@@ -449,12 +431,10 @@ function init(server, app, log, redSettings) {
 
     fs.stat(path.join(__dirname, 'dist/index.html'), function (err, stat) {
         app.use(compression());
-        //   console.log('ui.js 349: ' + __dirname);
         if (!err) {
             app.use(join(settings.path, 'manifest.json'), function (req, res) {
                 res.send(mani);
             });
-            //   console.log("serveStatic: ", path.join(__dirname, "dist"));
             app.use(join(settings.path), dashboardMiddleware, serveStatic(path.join(__dirname, 'dist')));
         } else {
             log.info('[Dashboard] Dashboard using development folder');
@@ -500,7 +480,6 @@ function init(server, app, log, redSettings) {
     log.info('Unified-RED Dashboard version ' + urVersion + ' started at ' + fullPath);
 
     io.on('connection', function (socket) {
-        //   console.log("ui io.on connection: ", socket);
         ev.emit('newsocket', socket.client.id, socket.request.connection.remoteAddress);
         updateUi(socket);
 
@@ -824,7 +803,6 @@ function addControl(folders, page, group, control) {
                 dynamicPages.hasOwnProperty(page.id) &&
                 (dynamicPagesNeedUpdate(dynamicPages[page.id], incomingSettings) || pathNeedsUpdate)
             ) {
-                console.log('dynamicPagesNeedUpdate! ', control);
                 foundFolder.items = foundFolder.items.filter(function (page) {
                     return !page.id.startsWith(page.id);
                 });
@@ -957,7 +935,7 @@ function addControl(folders, page, group, control) {
                         if (p.id.startsWith(page.id)) {
                             // filter p.items
                             p.items = p.items.filter((g) => {
-                                // if g is a pseusdo-group of group
+                                // if g is a pseudo-group of group
                                 if (g.id.startsWith(group.id)) {
                                     // filter g.items
                                     g.items = g.items.filter((w) => !w.id.startsWith(control.id));
@@ -1099,7 +1077,6 @@ function addControl(folders, page, group, control) {
             foundFolder.submenu.sort(itemSorter);
 
             function staticRemove() {
-                // console.log('static remove called...');
                 var index = foundGroup.items.indexOf(control);
 
                 if (index >= 0) {

@@ -30,7 +30,7 @@ module.exports = {
             };
             const req = http.request(options, (res) => {
                 if (res.statusCode === 200) {
-                    // Succeessful login. Resolve with the user object
+                    // Successful login. Resolve with the user object
                     resolve({ username: username, permissions: '*' });
                 } else {
                     // Resolve with null to indicate the username/password pair were not valid.
