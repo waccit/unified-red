@@ -4,21 +4,21 @@
         [class.activeSub]="showSubMenu === sidebarSubItem.title"
         [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'"
     >
-        <div *ngIf="sidebarSubItem.isMenuPage">
+        <div *ngIf="sidebarSubItem.isPage">
             <a [routerLink]="[sidebarSubItem.path]">
                 {{ sidebarSubItem.title }}
             </a>
         </div>
 
         <!-- <div *ngIf="sidebarSubItem.submenu.length > 0"> -->
-        <div *ngIf="!sidebarSubItem.isMenuPage">
+        <div *ngIf="!sidebarSubItem.isPage">
             <a (click)="callSubMenuToggle(sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
                 {{ sidebarSubItem.title }}
             </a>
 
             <app-menu-entity
                 [ngClass]="
-                    !sidebarSubItem.isMenuPage
+                    !sidebarSubItem.isPage
                         ? { 'collapse': true, 'in': showSubMenu === sidebarSubItem.title }
                         : 'collapse'
                 "

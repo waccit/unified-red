@@ -1,5 +1,5 @@
 module.exports = function (RED) {
-    function MenuPageNode(config) {
+    function PageNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
             pathName: config.name.replace(/ /g, '').toLowerCase(),
@@ -7,7 +7,7 @@ module.exports = function (RED) {
             disp: config.disp,
             width: config.width,
             order: config.order || 0,
-            menuItem: config.menuItem,
+            folder: config.folder,
             collapse: config.collapse || false,
             // icon: config.icon || 'ti-folder',
             disabled: config.disabled || false,
@@ -27,5 +27,5 @@ module.exports = function (RED) {
         }
     }
 
-    RED.nodes.registerType('ur_menu_page', MenuPageNode);
+    RED.nodes.registerType('ur_page', PageNode);
 };

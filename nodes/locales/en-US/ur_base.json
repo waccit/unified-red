@@ -27,9 +27,8 @@
         "title": "Node-RED Dashboard",
         "layout": {
             "nav-menu": "Navigation Menu",
-            "menuItem": "item",
-            "menuSubItem": "folder",
-            "menuPage": "page",
+            "folder": "folder",
+            "page": "page",
             "link": "link",
             "group": "group",
             "edit": "edit",

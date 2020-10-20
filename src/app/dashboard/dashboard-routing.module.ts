@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MenuPageComponent } from './menu-page/menu-page.component';
+import { PageComponent } from './page/page.component';
 import { AuthGuard } from '../authentication/auth.guard';
 import { HomePageComponent } from './home-page/home-page.component';
-import { Role } from '../data'
+import { Role } from '../data';
 import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
 
 const routes: Routes = [
@@ -18,7 +18,7 @@ const routes: Routes = [
             },
             {
                 path: '**',
-                component: MenuPageComponent,
+                component: PageComponent,
             },
         ],
     },

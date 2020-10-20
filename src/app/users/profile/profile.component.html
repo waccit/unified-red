@@ -11,33 +11,46 @@
                             <div class="example-container">
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>First Name</mat-label>
-                                    <input matInput formControlName="firstName" required>
+                                    <input matInput formControlName="firstName" required />
                                     <mat-icon matSuffix>face</mat-icon>
-                                    <mat-error *ngIf="settingsForm.get('firstName').hasError('required')">First name is required
+                                    <mat-error *ngIf="settingsForm.get('firstName').hasError('required')"
+                                        >First name is required
                                     </mat-error>
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Last Name</mat-label>
-                                    <input matInput formControlName="lastName" required>
+                                    <input matInput formControlName="lastName" required />
                                     <mat-icon matSuffix>face</mat-icon>
-                                    <mat-error *ngIf="settingsForm.get('lastName').hasError('required')">Last name is required
+                                    <mat-error *ngIf="settingsForm.get('lastName').hasError('required')"
+                                        >Last name is required
                                     </mat-error>
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Email</mat-label>
-                                    <input matInput formControlName="email" required>
+                                    <input matInput formControlName="email" required />
                                     <mat-icon matSuffix>mail</mat-icon>
                                     <mat-error
-                                        *ngIf="settingsForm.get('email').hasError('required') || settingsForm.get('email').touched">
-                                        Please enter a valid email address</mat-error>
+                                        *ngIf="
+                                            settingsForm.get('email').hasError('required') ||
+                                            settingsForm.get('email').touched
+                                        "
+                                    >
+                                        Please enter a valid email address</mat-error
+                                    >
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Home Page</mat-label>
-                                    <input matInput [formControl]="homepage" placeholder="any path after #, e.g. /d/centralplant"
-                                        [matAutocomplete]="auto">
+                                    <input
+                                        matInput
+                                        [formControl]="homepage"
+                                        placeholder="any path after #, e.g. /d/centralplant"
+                                        [matAutocomplete]="auto"
+                                    />
                                     <mat-icon matSuffix>home</mat-icon>
                                     <mat-autocomplete #auto="matAutocomplete">
-                                        <mat-option *ngFor="let page of filteredMenuPages | async" [value]="page">{{ page }}</mat-option>
+                                        <mat-option *ngFor="let page of filteredPages | async" [value]="page">{{
+                                            page
+                                        }}</mat-option>
                                     </mat-autocomplete>
                                 </mat-form-field>
                                 <!-- <div class="form-group">
@@ -72,16 +85,25 @@
                             <div class="example-container">
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>New Username</mat-label>
-                                    <input matInput formControlName="username" required>
+                                    <input matInput formControlName="username" required />
                                     <mat-icon matSuffix>face</mat-icon>
-                                    <mat-error *ngIf="usernameForm.get('username').hasError('required')">Username is required
+                                    <mat-error *ngIf="usernameForm.get('username').hasError('required')"
+                                        >Username is required
                                     </mat-error>
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Current Password</mat-label>
-                                    <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" required>
-                                    <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                                    <mat-error *ngIf="usernameForm.get('password').hasError('required')">Password is required
+                                    <input
+                                        matInput
+                                        formControlName="password"
+                                        [type]="hide ? 'password' : 'text'"
+                                        required
+                                    />
+                                    <mat-icon matSuffix (click)="hide = !hide">{{
+                                        hide ? 'visibility_off' : 'visibility'
+                                    }}</mat-icon>
+                                    <mat-error *ngIf="usernameForm.get('password').hasError('required')"
+                                        >Password is required
                                     </mat-error>
                                 </mat-form-field>
                             </div>
@@ -104,29 +126,61 @@
                             <div class="example-container">
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Current Password</mat-label>
-                                    <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" required>
-                                    <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                                    <mat-error *ngIf="passwordForm.get('password').hasError('required')">Password is required
+                                    <input
+                                        matInput
+                                        formControlName="password"
+                                        [type]="hide ? 'password' : 'text'"
+                                        required
+                                    />
+                                    <mat-icon matSuffix (click)="hide = !hide">{{
+                                        hide ? 'visibility_off' : 'visibility'
+                                    }}</mat-icon>
+                                    <mat-error *ngIf="passwordForm.get('password').hasError('required')"
+                                        >Password is required
                                     </mat-error>
                                 </mat-form-field>
-                                <mat-form-field class="example-full-width" appearance="fill" style="padding-bottom: 20px;">
+                                <mat-form-field
+                                    class="example-full-width"
+                                    appearance="fill"
+                                    style="padding-bottom: 20px"
+                                >
                                     <mat-label>New Password</mat-label>
-                                    <input matInput formControlName="newPassword" [type]="hide ? 'password' : 'text'" required>
-                                    <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                                    <mat-hint>Password must have a minimum of 8 characters containing a lowercase character, an
-                                        uppercase character, and a digit or symbol.</mat-hint>
-                                    <mat-error *ngIf="passwordForm.get('newPassword').hasError('required')">Password is required
+                                    <input
+                                        matInput
+                                        formControlName="newPassword"
+                                        [type]="hide ? 'password' : 'text'"
+                                        required
+                                    />
+                                    <mat-icon matSuffix (click)="hide = !hide">{{
+                                        hide ? 'visibility_off' : 'visibility'
+                                    }}</mat-icon>
+                                    <mat-hint
+                                        >Password must have a minimum of 8 characters containing a lowercase character,
+                                        an uppercase character, and a digit or symbol.</mat-hint
+                                    >
+                                    <mat-error *ngIf="passwordForm.get('newPassword').hasError('required')"
+                                        >Password is required
                                     </mat-error>
                                     <mat-error *ngIf="passwordForm.get('newPassword').hasError('passwordStrength')">
-                                        {{ passwordForm.get('newPassword').errors['passwordStrength'] }}</mat-error>
+                                        {{ passwordForm.get('newPassword').errors['passwordStrength'] }}</mat-error
+                                    >
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Confirm New Password</mat-label>
-                                    <input matInput formControlName="cNewPassword" [type]="chide ? 'password' : 'text'" required>
-                                    <mat-icon matSuffix (click)="chide = !chide">{{chide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                                    <mat-error *ngIf="passwordForm.get('cNewPassword').hasError('required')">Confirm Password is required
+                                    <input
+                                        matInput
+                                        formControlName="cNewPassword"
+                                        [type]="chide ? 'password' : 'text'"
+                                        required
+                                    />
+                                    <mat-icon matSuffix (click)="chide = !chide">{{
+                                        chide ? 'visibility_off' : 'visibility'
+                                    }}</mat-icon>
+                                    <mat-error *ngIf="passwordForm.get('cNewPassword').hasError('required')"
+                                        >Confirm Password is required
                                     </mat-error>
-                                    <mat-error *ngIf="passwordForm.get('cNewPassword').hasError('mustMatch')">Passwords must match
+                                    <mat-error *ngIf="passwordForm.get('cNewPassword').hasError('mustMatch')"
+                                        >Passwords must match
                                     </mat-error>
                                 </mat-form-field>
                             </div>

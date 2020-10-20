@@ -26,13 +26,13 @@ export class HomePageComponent implements OnInit {
                     this.menuService.menu.subscribe((menu: RouteInfo[]) => {
                         if (menu.length) {
                             let item = menu[0];
-                            while (item && !item.isMenuPage) {
+                            while (item && !item.isPage) {
                                 if (!item || !item.submenu || !item.submenu.length) {
                                     break;
                                 }
                                 item = item.submenu[0];
                             }
-                            if (item.isMenuPage) {
+                            if (item.isPage) {
                                 this.router.navigate([item.path]);
                             }
                         }

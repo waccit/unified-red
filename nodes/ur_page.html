@@ -1,15 +1,15 @@
 <script type="text/javascript">
     // convert to i18 text
-    function c_ur_menu_page(x) {
-        return RED._('unified-red/ur_menu_page:ur_menu_page.' + x);
+    function c_ur_page(x) {
+        return RED._('unified-red/ur_page:ur_page.' + x);
     }
 
-    RED.nodes.registerType('ur_menu_page', {
+    RED.nodes.registerType('ur_page', {
         category: 'config',
         defaults: {
-            name: { value: c_ur_menu_page('label.default') },
+            name: { value: c_ur_page('label.default') },
             // icon: { value: 'folder' },
-            menuItem: { type: 'ur_menu_item', required: true },
+            folder: { type: 'ur_folder', required: true },
             order: { value: 0 },
             disp: { value: true },
             width: { value: 6 },
@@ -59,31 +59,28 @@
             },
         },
         sort: function (A, B) {
-            if (A.menuItem !== B.menuItem) {
-                var menuItemA = RED.nodes.node(A.menuItem);
-                var menuItemB = RED.nodes.node(B.menuItem);
-                if (!menuItemA && menuItemB) {
+            if (A.folder !== B.folder) {
+                var folderA = RED.nodes.node(A.folder);
+                var folderB = RED.nodes.node(B.folder);
+                if (!folderA && folderB) {
                     return -1;
-                } else if (menuItemA && !menuItemB) {
+                } else if (folderA && !folderB) {
                     return 1;
                 } else {
-                    return menuItemA.order - menuItemB.order;
+                    return folderA.order - folderB.order;
                 }
             }
             return A.order - B.order;
         },
-        paletteLabel: 'dashboard menu_page',
+        paletteLabel: 'dashboard page',
         label: function () {
-            var menuItemNode = RED.nodes.node(this.menuItem);
-            if (menuItemNode) {
+            var folderNode = RED.nodes.node(this.folder);
+            if (folderNode) {
                 return (
-                    '[' +
-                    (menuItemNode.name || c_ur_menu_page('label.menuItem')) +
-                    '] ' +
-                    (this.name || c_ur_menu_page('label.menuPage'))
+                    '[' + (folderNode.name || c_ur_page('label.folder')) + '] ' + (this.name || c_ur_page('label.page'))
                 );
             }
-            return '[' + c_ur_menu_page('label.unassigned') + '] ' + (this.name || c_ur_menu_page('label.menuPage'));
+            return '[' + c_ur_page('label.unassigned') + '] ' + (this.name || c_ur_page('label.page'));
         },
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
@@ -94,7 +91,7 @@
                 i.attr('class', newCls);
                 $('#node-config-input-disabled').prop('checked', active);
 
-                var newTxt = c_ur_menu_page(active ? 'label.disabled' : 'label.enabled');
+                var newTxt = c_ur_page(active ? 'label.disabled' : 'label.enabled');
                 $('#node-config-input-disabled-label').text(newTxt);
 
                 var info = $('#node-config-input-disabled-info');
@@ -103,7 +100,7 @@
             if (this.disabled) {
                 $('#node-config-input-disabled-btn').click();
             } else {
-                $('#node-config-input-disabled-label').text(c_ur_menu_page('label.enabled'));
+                $('#node-config-input-disabled-label').text(c_ur_page('label.enabled'));
             }
 
             $('#node-config-input-hidden-btn').on('click', function (e) {
@@ -113,7 +110,7 @@
                 i.attr('class', newCls);
                 $('#node-config-input-hidden').prop('checked', active);
 
-                var newTxt = c_ur_menu_page(active ? 'label.hidden' : 'label.visible');
+                var newTxt = c_ur_page(active ? 'label.hidden' : 'label.visible');
                 $('#node-config-input-hidden-label').text(newTxt);
 
                 var info = $('#node-config-input-hidden-info');
@@ -122,7 +119,7 @@
             if (this.hidden) {
                 $('#node-config-input-hidden-btn').click();
             } else {
-                $('#node-config-input-hidden-label').text(c_ur_menu_page('label.visible'));
+                $('#node-config-input-hidden-label').text(c_ur_page('label.visible'));
             }
 
             $('#node-config-input-isDynamic-btn').on('click', function (e) {
@@ -132,7 +129,7 @@
                 i.attr('class', newCls);
                 $('#node-config-input-isDynamic').prop('checked', disabled);
 
-                var newTxt = c_ur_menu_page(disabled ? 'label.enabled' : 'label.disabled');
+                var newTxt = c_ur_page(disabled ? 'label.enabled' : 'label.disabled');
                 $('#node-config-input-isDynamic-label').text(newTxt);
 
                 // if disabled toggle "on"
@@ -150,7 +147,7 @@
             if (this.isDynamic) {
                 $('#node-config-input-isDynamic-btn').click();
             } else {
-                $('#node-config-input-isDynamic-label').text(c_ur_menu_page('label.disabled'));
+                $('#node-config-input-isDynamic-label').text(c_ur_page('label.disabled'));
                 $('#instance-expression').hide();
                 $('#instances-map').hide();
             }
@@ -307,22 +304,22 @@
     });
 </script>
 
-<script type="text/html" data-template-name="ur_menu_page">
+<script type="text/html" data-template-name="ur_page">
     <div class="form-row">
         <label for="node-config-input-name"
-            ><i class="fa fa-tag"></i> <span data-i18n="ur_menu_page.label.name"></span
+            ><i class="fa fa-tag"></i> <span data-i18n="ur_page.label.name"></span
         ></label>
         <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-menuItem"
-            ><i class="fa fa-table"></i> <span data-i18n="ur_menu_page.label.menuItem"></span
+        <label for="node-config-input-folder"
+            ><i class="fa fa-table"></i> <span data-i18n="ur_page.label.folder"></span
         ></label>
-        <input type="text" id="node-config-input-menuItem" />
+        <input type="text" id="node-config-input-folder" />
     </div>
     <div class="form-row">
         <label for="node-config-input-disabled-btn"
-            ><i class="fa fa-ban"></i> <span data-i18n="ur_menu_page.label.state"></span
+            ><i class="fa fa-ban"></i> <span data-i18n="ur_page.label.state"></span
         ></label>
         <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
             <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
@@ -330,28 +327,23 @@
         <input type="checkbox" id="node-config-input-disabled" style="display: none;" />
         <span
             id="node-config-input-disabled-info"
-            data-i18n="[html]ur_menu_page.info.disabled"
+            data-i18n="[html]ur_page.info.disabled"
             style="display: none;"
         ></span>
     </div>
     <div class="form-row">
         <label for="node-config-input-hidden-btn"
-            ><i class="fa fa-eye-slash"></i> <span data-i18n="ur_menu_page.label.navmenu"></span
+            ><i class="fa fa-eye-slash"></i> <span data-i18n="ur_page.label.navmenu"></span
         ></label>
         <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
             <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
         </button>
         <input type="checkbox" id="node-config-input-hidden" style="display:none;" />
-        <span
-            id="node-config-input-hidden-info"
-            data-i18n="[html]ur_menu_page.info.hidden"
-            style="display:none;"
-        ></span>
+        <span id="node-config-input-hidden-info" data-i18n="[html]ur_page.info.hidden" style="display:none;"></span>
     </div>
     <div class="form-row">
         <label for="node-config-input-isDynamic-btn" style="display: inline-flex; align-items: center"
-            ><i class="fa fa-clone" style="margin-right: 5px"></i>
-            <span data-i18n="ur_menu_page.label.dynamic-page"></span
+            ><i class="fa fa-clone" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.dynamic-page"></span
         ></label>
         <button id="node-config-input-isDynamic-btn" class="editor-button" style="width:100px; margin-right:6px;">
             <i class="fa fa-toggle-off"></i> <span id="node-config-input-isDynamic-label"></span>
@@ -359,14 +351,13 @@
         <input type="checkbox" id="node-config-input-isDynamic" style="display:none;" />
         <span
             id="node-config-input-isDynamic-info"
-            data-i18n="[html]ur_menu_page.info.isDynamic"
+            data-i18n="[html]ur_page.info.isDynamic"
             style="display:none;"
         ></span>
     </div>
     <div class="form-row" id="instance-expression">
         <label for="node-config-input-expression" style="display: inline-flex; align-items: center"
-            ><i class="fa fa-code" style="margin-right: 5px;"></i>
-            <span data-i18n="ur_menu_page.label.expression"></span
+            ><i class="fa fa-code" style="margin-right: 5px;"></i> <span data-i18n="ur_page.label.expression"></span
         ></label>
         <input type="text" id="node-config-input-expression" />
         <div
@@ -384,18 +375,18 @@
     </div>
     <div class="form-row" id="instances-map">
         <label for="node-config-input-instances"
-            ><i class="fa fa-tags"></i> <span data-i18n="ur_menu_page.label.instances"></span
+            ><i class="fa fa-tags"></i> <span data-i18n="ur_page.label.instances"></span
         ></label>
         <ol id="node-config-input-instances-list"></ol>
     </div>
-    <div class="form-tips" data-i18n="[html]ur_menu_page.tip"></div>
+    <div class="form-tips" data-i18n="[html]ur_page.tip"></div>
 </script>
 
-<script type="text/html" data-help-name="ur_menu_page">
-    <p>Menu Page configuration for Unified-RED</p>
+<script type="text/html" data-help-name="ur_page">
+    <p>Page configuration for Unified-RED</p>
     <p>
-        <b>Disabled</b> pages are not included in the app, and are therefore not functional. The menu page name still
-        appears in the Navigation Menu (unless it is also hidden).
+        <b>Disabled</b> pages are not included in the app, and are therefore not functional. The page name still appears
+        in the Navigation Menu (unless it is also hidden).
     </p>
     <p>
         <b>Hidden</b> pages are not listed in the Left-hand Navigation Menu. However, they are still active in the app,

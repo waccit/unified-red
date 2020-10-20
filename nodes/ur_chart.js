@@ -1,39 +1,39 @@
-module.exports = function(RED) {
+module.exports = function (RED) {
     var ui = require('../ui')(RED);
     var ChartIdList = {};
 
     function ChartNode(config) {
         RED.nodes.createNode(this, config);
-        this.chartType = config.chartType || "line";
+        this.chartType = config.chartType || 'line';
         var node = this;
 
         var group = RED.nodes.getNode(config.group);
         if (!group) {
             return;
         }
-        var menuPage = RED.nodes.getNode(group.config.menuPage);
-        if (!menuPage) {
+        var page = RED.nodes.getNode(group.config.page);
+        if (!page) {
             return;
         }
-        var menuItem = RED.nodes.getNode(menuPage.config.menuItem);
-        if (!menuItem) {
+        var folder = RED.nodes.getNode(page.config.folder);
+        if (!folder) {
             return;
         }
 
-        // menu-item tree stack (First In Last Out)
-        var menuItems = [];
-        menuItems.push(menuItem);
-        while (menuItem.config.menuItem) {
-            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
-            menuItems.push(menuItem);
+        // folder tree stack (First In Last Out)
+        var folders = [];
+        folders.push(folder);
+        while (folder.config.folder) {
+            folder = RED.nodes.getNode(folder.config.folder);
+            folders.push(folder);
         }
 
         var dnow = Date.now();
         var options = {
             emitOnlyNewValues: true,
             node: node,
-            menuItems: menuItems,
-            menuPage: menuPage,
+            folders: folders,
+            page: page,
             group: group,
             control: {
                 type: 'chart',
@@ -44,14 +44,14 @@ module.exports = function(RED) {
                 interpolate: config.interpolate,
                 nodata: config.nodata,
                 width: parseInt(config.width || group.config.width || 6),
-                height: parseInt(config.height || group.config.width/2+1 || 4),
+                height: parseInt(config.height || group.config.width / 2 + 1 || 4),
                 xrange: config.xrange,
                 xrangeunits: config.xrangeunits,
                 ymin: config.ymin,
                 ymax: config.ymax,
                 topics: config.topics,
                 live: config.live || false,
-                xformat : config.xformat || "HH:mm:ss",
+                xformat: config.xformat || 'HH:mm:ss',
                 cutout: parseInt(config.cutout || 0),
                 colors: config.colors,
                 useOneColor: config.useOneColor || false,
@@ -61,28 +61,31 @@ module.exports = function(RED) {
                 topicPattern: config.topicPattern || '',
                 access: config.access || '',
                 accessBehavior: config.accessBehavior || 'disable',
-            }
+            },
         };
 
-        var chgtab = function() {
-            node.receive({payload:"R"});
+        var chgtab = function () {
+            node.receive({ payload: 'R' });
         };
         ui.ev.on('changetab', chgtab);
 
         var done = ui.add(options);
 
-        var st = setTimeout(function() {
-            node.emit("input",{payload:"start"}); // trigger a redraw at start to flush out old data.
-            if (node.wires.length === 2) { // if it's an old version of the node honour it
-                node.send([null, {payload:"restore", for:node.id}]);
+        var st = setTimeout(function () {
+            node.emit('input', { payload: 'start' }); // trigger a redraw at start to flush out old data.
+            if (node.wires.length === 2) {
+                // if it's an old version of the node honour it
+                node.send([null, { payload: 'restore', for: node.id }]);
             }
         }, 100);
 
-        node.on("close", function() {
-            if (st) { clearTimeout(st); }
+        node.on('close', function () {
+            if (st) {
+                clearTimeout(st);
+            }
             ui.ev.removeListener('changetab', chgtab);
             done();
-        })
+        });
     }
-    RED.nodes.registerType("ur_chart", ChartNode);
+    RED.nodes.registerType('ur_chart', ChartNode);
 };

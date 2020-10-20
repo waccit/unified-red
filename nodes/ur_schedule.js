@@ -16,21 +16,21 @@ module.exports = function (RED) {
         if (!group) {
             return;
         }
-        var menuPage = RED.nodes.getNode(group.config.menuPage);
-        if (!menuPage) {
+        var page = RED.nodes.getNode(group.config.page);
+        if (!page) {
             return;
         }
-        var menuItem = RED.nodes.getNode(menuPage.config.menuItem);
-        if (!menuItem) {
+        var folder = RED.nodes.getNode(page.config.folder);
+        if (!folder) {
             return;
         }
 
-        // menu-item tree stack (First In Last Out)
-        var menuItems = [];
-        menuItems.push(menuItem);
-        while (menuItem.config.menuItem) {
-            menuItem = RED.nodes.getNode(menuItem.config.menuItem);
-            menuItems.push(menuItem);
+        // folder tree stack (First In Last Out)
+        var folders = [];
+        folders.push(folder);
+        while (folder.config.folder) {
+            folder = RED.nodes.getNode(folder.config.folder);
+            folders.push(folder);
         }
 
         /*
@@ -397,8 +397,8 @@ module.exports = function (RED) {
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
-            menuItems: menuItems,
-            menuPage: menuPage,
+            folders: folders,
+            page: page,
             group: group,
             control: {
                 id: config.id,

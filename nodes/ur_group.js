@@ -9,7 +9,7 @@ module.exports = function (RED) {
             widthMd: config.widthMd || '6',
             widthSm: config.widthSm || '12',
             order: config.order || 0,
-            menuPage: config.menuPage,
+            page: config.page,
             collapse: config.collapse || false,
             access: config.access || '',
         };
