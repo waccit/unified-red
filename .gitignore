@@ -4,5 +4,7 @@ dist
 *.log
 node_modules
 .vscode
+static/img
+api/config.json
 
 *_BKUP.*
