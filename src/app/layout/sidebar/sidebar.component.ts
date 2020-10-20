@@ -25,8 +25,7 @@ export class SidebarComponent implements OnInit {
         private renderer: Renderer2,
         public elementRef: ElementRef,
         private menuService: MenuService
-    ) {
-    }
+    ) {}
 
     @HostListener('window:resize', ['$event'])
     windowResizeCall(event) {
@@ -74,7 +73,7 @@ export class SidebarComponent implements OnInit {
         const height = this.innerHeight - this.headerHeight;
         this.listMaxHeight = height + '';
         this.listMaxWidth = '500px';
-        // Scroll active menu item when page load, if option set = true
+        // Scroll active folder when page load, if option set = true
         /*  if ($.MyAdmin.options.leftSideBar.scrollActiveItemWhenPageLoad) {
           var activeItemOffsetTop = $('.menu .list li.active')[0].offsetTop
           if (activeItemOffsetTop > 150) $el.slimscroll({ scrollTo: activeItemOffsetTop + 'px' });

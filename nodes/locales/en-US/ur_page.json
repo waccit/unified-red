@@ -1,8 +1,8 @@
 {
-    "ur_menu_page": {
+    "ur_page": {
         "label": {
             "name": "Name",
-            "menuItem": "Item",
+            "folder": "Item",
             "icon": "Icon",
             "state": "State",
             "navmenu": "Nav. Menu",
@@ -12,16 +12,16 @@
             "hidden": "hidden",
             "width": "Width",
             "default": "Default",
-            "menuPage": "Page",
+            "page": "Page",
             "dynamic-page": "Dynamic Page",
             "expression": "Instance Name Expression",
             "instances": "Instances",
             "unassigned": "unassigned"
         },
         "info": {
-            "disabled": " Menu Page is inactive in Dashboard.",
-            "hidden": " Menu Page is not shown in Navigation Menu.",
-            "isDynamic": " Menu Page is now a Dynamic Page"
+            "disabled": " Page is inactive in Dashboard.",
+            "hidden": " Page is not shown in Navigation Menu.",
+            "isDynamic": " Page is now a Dynamic Page"
         },
         "tip": "The <b>Icon</b> field can be either a <a href=\"https://klarsys.github.io/angular-material-icons/\" target=\"_blank\">Material Design icon</a> <i>(e.g. 'check', 'close')</i> or a <a href=\"https://fontawesome.com/v4.7.0/icons/\" target=\"_blank\">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i>, or a <a href=\"https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md\" target=\"_blank\">Weather icon</a> <i>(e.g. 'wi-wu-sunny')</i>.</p><p>You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.</p>",
         "display-name": "Display group name",

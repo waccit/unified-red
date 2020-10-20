@@ -147,7 +147,7 @@ function add(opt) {
     opt.convertBack = opt.convertBack || noConvert;
     opt.beforeSend = opt.beforeSend || beforeSend;
     opt.control.id = opt.node.id;
-    var remove = addControl(opt.menuItems, opt.menuPage, opt.group, opt.control);
+    var remove = addControl(opt.folders, opt.page, opt.group, opt.control);
 
     opt.node.on('input', function (msg) {
         // console.log('opt.node.on input: ', msg);
@@ -305,7 +305,7 @@ function add(opt) {
             // WIP: dynamic widget id update!
             // console.log('opt.control: ', opt.control);
             let newId = opt.node.id;
-            if (opt.menuPage.config.isDynamic) {
+            if (opt.page.config.isDynamic) {
                 let topic = msg.topic;
                 console.log('msg.topic: ', msg.topic);
                 let topicPattern = opt.control.topicPattern;
@@ -514,25 +514,25 @@ function init(server, app, log, redSettings) {
             }, 50);
             socket.emit('ui-replay-done');
         });
-        socket.on('ui-change', function (menuItemIndex, menuPageIndex) {
+        socket.on('ui-change', function (folderIndex, pageIndex) {
             var name = '';
             if (
-                menuItemIndex != null &&
-                menuPageIndex != null &&
-                !isNaN(menuItemIndex) &&
-                !isNaN(menuPageIndex) &&
+                folderIndex != null &&
+                pageIndex != null &&
+                !isNaN(folderIndex) &&
+                !isNaN(pageIndex) &&
                 menu.length > 0 &&
-                menu[menuItemIndex].items.length > 0 &&
-                menuItemIndex < menu.length &&
-                menuPageIndex < menu[menuItemIndex].items.length &&
-                menu[menuItemIndex] &&
-                menu[menuItemIndex].items[menuPageIndex]
+                menu[folderIndex].items.length > 0 &&
+                folderIndex < menu.length &&
+                pageIndex < menu[folderIndex].items.length &&
+                menu[folderIndex] &&
+                menu[folderIndex].items[pageIndex]
             ) {
                 name =
-                    menu[menuItemIndex].items[menuPageIndex].hasOwnProperty('header') &&
-                    typeof menu[menuItemIndex].items[menuPageIndex].header !== 'undefined'
-                        ? menu[menuItemIndex].items[menuPageIndex].header
-                        : menu[menuItemIndex].items[menuPageIndex].name;
+                    menu[folderIndex].items[pageIndex].hasOwnProperty('header') &&
+                    typeof menu[folderIndex].items[pageIndex].header !== 'undefined'
+                        ? menu[folderIndex].items[pageIndex].header
+                        : menu[folderIndex].items[pageIndex].name;
                 ev.emit('changetab', index, name, socket.client.id, socket.request.connection.remoteAddress, params);
             }
         });
@@ -615,23 +615,23 @@ function needsUpdate(current, incoming) {
     );
 }
 
-// helper function for searching the menu for menu_items
-function findMenuItemById(container, id) {
+// helper function for searching the menu for folders
+function findFolderById(container, id) {
     var result = null;
     if (container instanceof Array) {
         for (var i = 0; i < container.length; i++) {
-            result = findMenuItemById(container[i], id);
+            result = findFolderById(container[i], id);
             if (result) {
                 break;
             }
         }
     } else {
-        if (container.hasOwnProperty('isMenuPage') && container.isMenuPage) {
+        if (container.hasOwnProperty('isPage') && container.isPage) {
             return result;
         } else if (container instanceof Object && container.hasOwnProperty('id') && container.id === id) {
             result = container;
         } else {
-            result = findMenuItemById(container.items, id);
+            result = findFolderById(container.items, id);
         }
     }
     return result;
@@ -667,7 +667,7 @@ var dynamicPages = {};
 var dynamicGroups = {};
 var dynamicWidgets = {};
 
-function addControl(menu_items, menu_page, group, control) {
+function addControl(folders, page, group, control) {
     if (typeof control.type !== 'string') {
         return function () {};
     }
@@ -690,90 +690,90 @@ function addControl(menu_items, menu_page, group, control) {
         // group = group || settings.defaultGroupHeader;
         control.order = parseFloat(control.order);
         let pathNeedsUpdate = false;
-        var foundMenuItem;
+        var foundFolder;
 
-        var menuItemsStack = [...menu_items];
-        var menuItemsPath = '';
+        var foldersStack = [...folders];
+        var foldersPath = '';
 
         let parent = null;
         let isRoot;
-        let currMenuItem;
+        let currFolder;
 
-        while (menuItemsStack.length > 0) {
-            isRoot = menuItemsStack.length === menu_items.length;
-            currMenuItem = menuItemsStack.pop();
-            menuItemsPath += currMenuItem.config.pathName + '/';
+        while (foldersStack.length > 0) {
+            isRoot = foldersStack.length === folders.length;
+            currFolder = foldersStack.pop();
+            foldersPath += currFolder.config.pathName + '/';
 
             if (isRoot) {
-                foundMenuItem = find(menu, function (mi) {
-                    return mi.id === currMenuItem.id;
+                foundFolder = find(menu, function (mi) {
+                    return mi.id === currFolder.id;
                 });
             } else {
-                parent = findMenuItemById(menu, currMenuItem.config.menuItem);
-                foundMenuItem = find(parent.items, function (mi) {
-                    return mi.id == currMenuItem.id;
+                parent = findFolderById(menu, currFolder.config.folder);
+                foundFolder = find(parent.items, function (mi) {
+                    return mi.id == currFolder.id;
                 });
             }
 
-            if (!foundMenuItem) {
-                foundMenuItem = {
-                    id: currMenuItem.id,
+            if (!foundFolder) {
+                foundFolder = {
+                    id: currFolder.id,
                     isRoot: isRoot,
-                    order: parseFloat(currMenuItem.config.order),
-                    disabled: currMenuItem.config.disabled,
-                    hidden: currMenuItem.config.hidden,
+                    order: parseFloat(currFolder.config.order),
+                    disabled: currFolder.config.disabled,
+                    hidden: currFolder.config.hidden,
                     items: [],
                     // Atrio sidebarItems properties:
                     path: '',
-                    title: currMenuItem.config.name,
-                    icon: currMenuItem.config.icon,
+                    title: currFolder.config.name,
+                    icon: currFolder.config.icon,
                     class: 'ml-sub-menu',
                     groupTitle: false,
                     submenu: [],
                 };
 
                 if (parent) {
-                    parent.items.push(foundMenuItem);
-                    parent.submenu.push(foundMenuItem);
+                    parent.items.push(foundFolder);
+                    parent.submenu.push(foundFolder);
                     parent.items.sort(itemSorter);
                     parent.submenu.sort(itemSorter);
                 } else {
-                    menu.push(foundMenuItem);
+                    menu.push(foundFolder);
                     menu.sort(itemSorter);
                 }
             }
 
-            if (foundMenuItem && needsUpdate(foundMenuItem, currMenuItem)) {
-                var updatedMenuItem = {
-                    id: currMenuItem.id,
-                    isRoot: currMenuItem.isRoot,
-                    order: parseFloat(currMenuItem.config.order),
-                    disabled: currMenuItem.config.disabled,
-                    hidden: currMenuItem.config.hidden,
-                    items: foundMenuItem.items,
+            if (foundFolder && needsUpdate(foundFolder, currFolder)) {
+                var updatedFolder = {
+                    id: currFolder.id,
+                    isRoot: currFolder.isRoot,
+                    order: parseFloat(currFolder.config.order),
+                    disabled: currFolder.config.disabled,
+                    hidden: currFolder.config.hidden,
+                    items: foundFolder.items,
                     // Atrio sidebarItems properties:
                     path: '',
-                    title: currMenuItem.config.name,
-                    icon: currMenuItem.config.icon,
-                    class: foundMenuItem.class,
-                    groupTitle: foundMenuItem.groupTitle,
-                    submenu: foundMenuItem.submenu,
+                    title: currFolder.config.name,
+                    icon: currFolder.config.icon,
+                    class: foundFolder.class,
+                    groupTitle: foundFolder.groupTitle,
+                    submenu: foundFolder.submenu,
                 };
 
                 if (parent) {
-                    parent.items.splice(parent.items.indexOf(foundMenuItem), 1, updatedMenuItem);
-                    parent.submenu.splice(parent.items.indexOf(foundMenuItem), 1, updatedMenuItem);
+                    parent.items.splice(parent.items.indexOf(foundFolder), 1, updatedFolder);
+                    parent.submenu.splice(parent.items.indexOf(foundFolder), 1, updatedFolder);
                 } else {
-                    menu.splice(menu.indexOf(foundMenuItem), 1, updatedMenuItem);
+                    menu.splice(menu.indexOf(foundFolder), 1, updatedFolder);
                 }
-                foundMenuItem = updatedMenuItem;
+                foundFolder = updatedFolder;
                 pathNeedsUpdate = true;
             }
         }
 
-        if (menu_page.config.isDynamic) {
-            // get expression from menu_page
-            let expression = menu_page.config.expression;
+        if (page.config.isDynamic) {
+            // get expression from page
+            let expression = page.config.expression;
 
             // split string as prefix and instance nums
             let rx = /(.*)(\{x\})(.*)/g;
@@ -792,7 +792,7 @@ function addControl(menu_items, menu_page, group, control) {
             let instanceNames = [];
             let instanceNums = [];
 
-            let instanceMap = menu_page.config.instances;
+            let instanceMap = page.config.instances;
 
             for (let i = 0; i < instanceMap.length; i++) {
                 let rawInstanceNames = instanceMap[i].name;
@@ -821,19 +821,19 @@ function addControl(menu_items, menu_page, group, control) {
             };
 
             if (
-                dynamicPages.hasOwnProperty(menu_page.id) &&
-                (dynamicPagesNeedUpdate(dynamicPages[menu_page.id], incomingSettings) || pathNeedsUpdate)
+                dynamicPages.hasOwnProperty(page.id) &&
+                (dynamicPagesNeedUpdate(dynamicPages[page.id], incomingSettings) || pathNeedsUpdate)
             ) {
                 console.log('dynamicPagesNeedUpdate! ', control);
-                foundMenuItem.items = foundMenuItem.items.filter(function (page) {
-                    return !page.id.startsWith(menu_page.id);
+                foundFolder.items = foundFolder.items.filter(function (page) {
+                    return !page.id.startsWith(page.id);
                 });
 
-                foundMenuItem.submenu = foundMenuItem.submenu.filter(function (page) {
-                    return !page.id.startsWith(menu_page.id);
+                foundFolder.submenu = foundFolder.submenu.filter(function (page) {
+                    return !page.id.startsWith(page.id);
                 });
 
-                delete dynamicPages[menu_page.id];
+                delete dynamicPages[page.id];
                 dynamicGroups = {};
                 dynamicWidgets = {};
 
@@ -841,9 +841,9 @@ function addControl(menu_items, menu_page, group, control) {
             }
 
             // check to see if dynamic page has already been exploded && injected
-            if (dynamicPages.hasOwnProperty(menu_page.id)) {
-                foundMenuItem.items.forEach((page) => {
-                    if (page.id.startsWith(menu_page.id)) {
+            if (dynamicPages.hasOwnProperty(page.id)) {
+                foundFolder.items.forEach((page) => {
+                    if (page.id.startsWith(page.id)) {
                         if (dynamicGroups[group.id]) {
                             page.items.forEach((g) => {
                                 if (g.id.startsWith(group.id)) {
@@ -881,34 +881,34 @@ function addControl(menu_items, menu_page, group, control) {
                         }
                     }
                 });
-                foundMenuItem.items.sort(itemSorter);
-                foundMenuItem.submenu.sort(itemSorter);
+                foundFolder.items.sort(itemSorter);
+                foundFolder.submenu.sort(itemSorter);
                 dynamicGroups[group.id] = true;
                 dynamicWidgets[control.id] = true;
             } else {
-                foundMenuItem.items = foundMenuItem.items.filter(function (page) {
-                    return !page.id.startsWith(menu_page.id);
+                foundFolder.items = foundFolder.items.filter(function (page) {
+                    return !page.id.startsWith(page.id);
                 });
 
-                foundMenuItem.submenu = foundMenuItem.submenu.filter(function (page) {
-                    return !page.id.startsWith(menu_page.id);
+                foundFolder.submenu = foundFolder.submenu.filter(function (page) {
+                    return !page.id.startsWith(page.id);
                 });
 
                 for (let i = 0; i < instanceNums.length; i++) {
                     let pageTitle = pageTitlePrefix + instanceNames[i] + pageTitleSuffix;
 
                     let instancePage = {
-                        id: menu_page.id + '.' + instanceNums[i],
-                        isMenuPage: true,
-                        order: parseFloat(menu_page.config.order + '.' + i),
-                        disabled: menu_page.config.disabled,
-                        hidden: menu_page.config.hidden,
+                        id: page.id + '.' + instanceNums[i],
+                        isPage: true,
+                        order: parseFloat(page.config.order + '.' + i),
+                        disabled: page.config.disabled,
+                        hidden: page.config.hidden,
                         instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
                         items: [],
                         // Atrio sidebarItems properties:
-                        path: '/d/' + menuItemsPath + pageTitle.replace(/ /g, '').toLowerCase(),
+                        path: '/d/' + foldersPath + pageTitle.replace(/ /g, '').toLowerCase(),
                         title: pageTitle,
-                        // icon: menu_page.config.icon,
+                        // icon: page.config.icon,
                         class: 'ml-menu',
                         groupTitle: false,
                         submenu: [],
@@ -932,16 +932,16 @@ function addControl(menu_items, menu_page, group, control) {
                     instancePage.items.push(instanceGroup);
                     instancePage.items.sort(itemSorter);
 
-                    foundMenuItem.items.push(instancePage);
-                    foundMenuItem.submenu.push(instancePage);
+                    foundFolder.items.push(instancePage);
+                    foundFolder.submenu.push(instancePage);
                 }
 
-                foundMenuItem.items.sort(itemSorter);
-                foundMenuItem.submenu.sort(itemSorter);
+                foundFolder.items.sort(itemSorter);
+                foundFolder.submenu.sort(itemSorter);
 
                 dynamicWidgets[control.id] = true;
                 dynamicGroups[group.id] = true;
-                dynamicPages[menu_page.id] = {
+                dynamicPages[page.id] = {
                     instanceNums: [...instanceNums],
                     instanceNames: [...instanceNames],
                     pageTitle: { pageTitlePrefix, pageTitleSuffix },
@@ -951,10 +951,10 @@ function addControl(menu_items, menu_page, group, control) {
             function dynamicRemove() {
                 // if control is part of a dynamic page
                 if (dynamicWidgets[control.id]) {
-                    // filter foundMenuItem.items
-                    foundMenuItem.items = foundMenuItem.items.filter((p) => {
-                        // if p is a pseudo-page of menu_page
-                        if (p.id.startsWith(menu_page.id)) {
+                    // filter foundFolder.items
+                    foundFolder.items = foundFolder.items.filter((p) => {
+                        // if p is a pseudo-page of page
+                        if (p.id.startsWith(page.id)) {
                             // filter p.items
                             p.items = p.items.filter((g) => {
                                 // if g is a pseusdo-group of group
@@ -972,33 +972,33 @@ function addControl(menu_items, menu_page, group, control) {
                                 return g.items.length > 0;
                             });
 
-                            //cleanup dynamicPages dict && filter foundMenuItem.submenu to match foundMenuItem.items
+                            //cleanup dynamicPages dict && filter foundFolder.submenu to match foundFolder.items
                             if (p.items.length === 0) {
-                                delete dynamicPages[menu_page.id];
-                                foundMenuItem.submenu = foundMenuItem.submenu.filter((s) => s.id !== p.id);
+                                delete dynamicPages[page.id];
+                                foundFolder.submenu = foundFolder.submenu.filter((s) => s.id !== p.id);
                             }
                         }
 
-                        // filter out childless pages from foundMenuItem.items
+                        // filter out childless pages from foundFolder.items
                         return p.items.length > 0;
                     });
 
-                    // if foundMenuItem is now childless
-                    if (foundMenuItem.items.length === 0 && foundMenuItem.submenu.length === 0) {
-                        // grab a copy of menu_items stack
-                        let menuItemsStack = [...menu_items];
-                        let curr = menuItemsStack.find((mi) => mi.id === foundMenuItem.id);
+                    // if foundFolder is now childless
+                    if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
+                        // grab a copy of folders stack
+                        let foldersStack = [...folders];
+                        let curr = foldersStack.find((mi) => mi.id === foundFolder.id);
 
-                        // travel up the menu tree and remove childless menu_items
+                        // travel up the menu tree and remove childless folders
                         do {
-                            let parent = findMenuItemById(menu, curr.config.menuItem);
-                            let currInMenu = findMenuItemById(menu, curr.id);
+                            let parent = findFolderById(menu, curr.config.folder);
+                            let currInMenu = findFolderById(menu, curr.id);
                             if (parent) {
                                 if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
                                     parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
                                     parent.submenu = parent.submenu.filter((item) => item.id !== currInMenu.id);
                                 }
-                                curr = menuItemsStack.find((mi) => mi.id === parent.id);
+                                curr = foldersStack.find((mi) => mi.id === parent.id);
                             } else {
                                 menu = menu.filter((item) => item.id !== curr.id);
                                 curr = null;
@@ -1012,70 +1012,70 @@ function addControl(menu_items, menu_page, group, control) {
 
             removeFunc = dynamicRemove;
         } else {
-            if (dynamicPages.hasOwnProperty(menu_page.id)) {
-                foundMenuItem.items = foundMenuItem.items.filter(function (page) {
-                    return !page.id.startsWith(menu_page.id);
+            if (dynamicPages.hasOwnProperty(page.id)) {
+                foundFolder.items = foundFolder.items.filter(function (page) {
+                    return !page.id.startsWith(page.id);
                 });
 
-                foundMenuItem.submenu = foundMenuItem.submenu.filter(function (page) {
-                    return !page.id.startsWith(menu_page.id);
+                foundFolder.submenu = foundFolder.submenu.filter(function (page) {
+                    return !page.id.startsWith(page.id);
                 });
 
-                delete dynamicPages[menu_page.id];
+                delete dynamicPages[page.id];
             }
             delete dynamicGroups[group.id];
             delete dynamicWidgets[control.id];
 
-            var foundMenuPage = find(foundMenuItem.items, function (mp) {
-                return mp.id === menu_page.id;
+            var foundPage = find(foundFolder.items, function (mp) {
+                return mp.id === page.id;
             });
 
-            if (foundMenuPage && (pathNeedsUpdate || needsUpdate(foundMenuPage, menu_page))) {
-                var updatedMenuPage = {
-                    id: menu_page.id,
-                    isMenuPage: true,
+            if (foundPage && (pathNeedsUpdate || needsUpdate(foundPage, page))) {
+                var updatedPage = {
+                    id: page.id,
+                    isPage: true,
                     // order: updatedOrder,
-                    order: parseFloat(menu_page.config.order),
-                    disabled: menu_page.config.disabled,
-                    hidden: menu_page.config.hidden,
-                    items: foundMenuPage.items,
+                    order: parseFloat(page.config.order),
+                    disabled: page.config.disabled,
+                    hidden: page.config.hidden,
+                    items: foundPage.items,
                     // Atrio sidebarItems properties:
-                    path: '/d/' + menuItemsPath + menu_page.config.pathName,
-                    title: menu_page.config.name,
-                    // icon: menu_page.config.icon,
-                    class: foundMenuPage.class,
-                    groupTitle: foundMenuPage.groupTitle,
-                    submenu: foundMenuPage.submenu,
+                    path: '/d/' + foldersPath + page.config.pathName,
+                    title: page.config.name,
+                    // icon: page.config.icon,
+                    class: foundPage.class,
+                    groupTitle: foundPage.groupTitle,
+                    submenu: foundPage.submenu,
                 };
 
-                foundMenuItem.items.splice(foundMenuItem.items.indexOf(foundMenuPage), 1, updatedMenuPage);
-                foundMenuItem.submenu.splice(foundMenuItem.submenu.indexOf(foundMenuPage), 1, updatedMenuPage);
-                foundMenuPage = updatedMenuPage;
+                foundFolder.items.splice(foundFolder.items.indexOf(foundPage), 1, updatedPage);
+                foundFolder.submenu.splice(foundFolder.submenu.indexOf(foundPage), 1, updatedPage);
+                foundPage = updatedPage;
                 pathNeedsUpdate = false;
             }
 
-            if (!foundMenuPage) {
-                foundMenuPage = {
-                    id: menu_page.id,
-                    isMenuPage: true,
-                    order: parseFloat(menu_page.config.order),
-                    disabled: menu_page.config.disabled,
-                    hidden: menu_page.config.hidden,
+            if (!foundPage) {
+                foundPage = {
+                    id: page.id,
+                    isPage: true,
+                    order: parseFloat(page.config.order),
+                    disabled: page.config.disabled,
+                    hidden: page.config.hidden,
                     items: [],
                     // Atrio sidebarItems properties:
-                    path: '/d/' + menuItemsPath + menu_page.config.pathName,
-                    title: menu_page.config.name,
-                    // icon: menu_page.config.icon,
+                    path: '/d/' + foldersPath + page.config.pathName,
+                    title: page.config.name,
+                    // icon: page.config.icon,
                     class: 'ml-menu',
                     groupTitle: false,
                     submenu: [],
                 };
 
-                foundMenuItem.items.push(foundMenuPage);
-                foundMenuItem.submenu.push(foundMenuPage);
+                foundFolder.items.push(foundPage);
+                foundFolder.submenu.push(foundPage);
             }
 
-            var foundGroup = find(foundMenuPage.items, function (g) {
+            var foundGroup = find(foundPage.items, function (g) {
                 return g.header === group.config.name;
             });
             if (!foundGroup) {
@@ -1088,15 +1088,15 @@ function addControl(menu_items, menu_page, group, control) {
                     widthSm: group.config.widthSm,
                     items: [],
                 };
-                foundMenuPage.items.push(foundGroup);
+                foundPage.items.push(foundGroup);
             }
             foundGroup.items.push(control);
             foundGroup.items.sort(itemSorter);
 
             foundGroup.order = group.config.order;
-            foundMenuPage.items.sort(itemSorter);
-            foundMenuItem.items.sort(itemSorter);
-            foundMenuItem.submenu.sort(itemSorter);
+            foundPage.items.sort(itemSorter);
+            foundFolder.items.sort(itemSorter);
+            foundFolder.submenu.sort(itemSorter);
 
             function staticRemove() {
                 // console.log('static remove called...');
@@ -1106,29 +1106,29 @@ function addControl(menu_items, menu_page, group, control) {
                     // Remove the item from the group
                     foundGroup.items.splice(index, 1);
 
-                    // If the group is now empty, remove it from the menu_page
+                    // If the group is now empty, remove it from the page
                     if (foundGroup.items.length === 0) {
-                        index = foundMenuPage.items.indexOf(foundGroup);
+                        index = foundPage.items.indexOf(foundGroup);
                         if (index >= 0) {
-                            foundMenuPage.items.splice(index, 1);
+                            foundPage.items.splice(index, 1);
 
-                            // If the menu_page is now empty, remove it from the menu-item
-                            if (foundMenuPage.items.length === 0) {
-                                itemsIdx = foundMenuItem.items.indexOf(foundMenuPage);
-                                submenuIdx = foundMenuItem.submenu.indexOf(foundMenuPage);
+                            // If the page is now empty, remove it from the folder
+                            if (foundPage.items.length === 0) {
+                                itemsIdx = foundFolder.items.indexOf(foundPage);
+                                submenuIdx = foundFolder.submenu.indexOf(foundPage);
 
                                 if (itemsIdx >= 0 && submenuIdx >= 0) {
-                                    foundMenuItem.items.splice(itemsIdx, 1);
-                                    foundMenuItem.submenu.splice(submenuIdx, 1);
+                                    foundFolder.items.splice(itemsIdx, 1);
+                                    foundFolder.submenu.splice(submenuIdx, 1);
 
-                                    // If the menu-item is now empty, find parent, remove self and check whether parent should be removed
-                                    if (foundMenuItem.items.length === 0) {
-                                        let menuItemsStack = [...menu_items];
-                                        let curr = menuItemsStack.find((mi) => mi.id === foundMenuItem.id);
+                                    // If the folder is now empty, find parent, remove self and check whether parent should be removed
+                                    if (foundFolder.items.length === 0) {
+                                        let foldersStack = [...folders];
+                                        let curr = foldersStack.find((mi) => mi.id === foundFolder.id);
 
                                         do {
-                                            let parent = findMenuItemById(menu, curr.config.menuItem);
-                                            let currInMenu = findMenuItemById(menu, curr.id);
+                                            let parent = findFolderById(menu, curr.config.folder);
+                                            let currInMenu = findFolderById(menu, curr.id);
                                             if (parent) {
                                                 if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
                                                     parent.items = parent.items.filter(
@@ -1138,7 +1138,7 @@ function addControl(menu_items, menu_page, group, control) {
                                                         (item) => item.id !== currInMenu.id
                                                     );
                                                 }
-                                                curr = menuItemsStack.find((mi) => mi.id === parent.id);
+                                                curr = foldersStack.find((mi) => mi.id === parent.id);
                                             } else {
                                                 menu = menu.filter((item) => item.id !== curr.id);
                                                 curr = null;

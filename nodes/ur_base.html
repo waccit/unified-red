@@ -36,16 +36,16 @@
         height: auto;
     }
 
-    .nr-db-sb-menu-item-list {
+    .nr-db-sb-folder-list {
         min-height: 250px;
         height: auto;
     }
 
-    .nr-db-sb-menu-item-list li {
+    .nr-db-sb-folder-list li {
         padding: 0;
     }
 
-    .nr-db-sb-menu-item-list-item {
+    .nr-db-sb-folder-list-item {
         border-radius: 4px;
         color: var(--nr-db-dark-text);
     }
@@ -70,12 +70,12 @@
         color: var(--nr-db-disabled-text);
     }
 
-    .nr-db-sb-menu-item-list-header {
+    .nr-db-sb-folder-list-header {
         /* background: var(--nr-db-light-text); */
         padding: 5px;
     }
 
-    /* .nr-db-sb-menu-page-list-header:hover,
+    /* .nr-db-sb-page-list-header:hover,
     .nr-db-sb-group-list-header:hover,
     .nr-db-sb-widget-list-header:hover {
         background: var(--nr-db-light-text);
@@ -87,7 +87,7 @@
         margin: 3px 5px 3px 5px;
     }
 
-    .nr-db-sb-menu-item-list-item .red-ui-editableList-container {
+    .nr-db-sb-folder-list-item .red-ui-editableList-container {
         border-radius: 0;
         border: none;
         height: auto !important;
@@ -119,7 +119,7 @@
         padding: 5px;
     }
 
-    .nr-db-sb-menu-item-list-header > .nr-db-sb-list-chevron {
+    .nr-db-sb-folder-list-header > .nr-db-sb-list-chevron {
         margin-left: 0px;
         transition: transform 0.2s ease-in-out;
     }
@@ -415,17 +415,17 @@
 
         var MAX_GROUP_WIDTH = 12; // The maximum width is 12
 
-        function getMenuPageDataFromNodes(menuItemId, menuPageId) {
+        function getPageDataFromNodes(folderId, pageId) {
             var nodes = RED.nodes.createCompleteNodeSet(false);
             // console.log('ur_base.html 408 nodes: ', nodes);
 
-            var menuPage = {};
+            var page = {};
 
-            // Menu Page Information
+            // Page Information
             for (let i = 0; i < nodes.length; i++) {
-                if (nodes[i].type == 'ur_menu_page' && nodes[i].id == menuPageId) {
-                    menuPage = {
-                        menuItemId,
+                if (nodes[i].type == 'ur_page' && nodes[i].id == pageId) {
+                    page = {
+                        folderId,
                         id: nodes[i].id,
                         type: nodes[i].type,
                         order: nodes[i].order,
@@ -438,7 +438,7 @@
 
             // Group Information
             nodes.forEach((node) => {
-                if (node.type == 'ur_group' && node.menuPage == menuPageId) {
+                if (node.type == 'ur_group' && node.page == pageId) {
                     var group = {
                         id: node.id,
                         name: node.name,
@@ -450,13 +450,13 @@
                         widthSm: nodes[cnt].widthSm,
                         widgets: [],
                     };
-                    menuPage.groups.push(group);
+                    page.groups.push(group);
                 }
             });
 
             // Widget Information
             var groupIdx = {};
-            menuPage.groups.forEach((group) => {
+            page.groups.forEach((group) => {
                 groupIdx[group.id] = group;
             });
 
@@ -468,8 +468,8 @@
                     nodeType !== 'ur_audio' &&
                     nodeType !== 'ur_base' &&
                     nodeType !== 'ur_group' &&
-                    nodeType !== 'ur_menu_page' &&
-                    nodeType !== 'ur_menu_item'
+                    nodeType !== 'ur_page' &&
+                    nodeType !== 'ur_folder'
                 );
             };
 
@@ -491,7 +491,7 @@
                     // }
                 }
             });
-            return menuPage;
+            return page;
         }
 
         ////////////////////////////////////////
@@ -636,55 +636,53 @@
                         // }
                         // themeState['base-font'] = { value: baseFontName };
 
-                        var missingFields =
-                            !globalDashboardNode ||
-                            !globalDashboardNode.site;
+                        var missingFields = !globalDashboardNode || !globalDashboardNode.site;
                         // ||
                         //     !globalDashboardNode.theme ||
                         //     !globalDashboardNode.site.sizes;
 
                         if (missingFields && createMissing) {
-                        //     var lightTheme = {
-                        //         default: baseColor,
-                        //         baseColor: baseColor,
-                        //         baseFont: baseFontName,
-                        //         edited: false,
-                        //     };
-                        //     var darkTheme = {
-                        //         default: '#097479',
-                        //         baseColor: '#097479',
-                        //         baseFont: baseFontName,
-                        //         edited: false,
-                        //     };
-                        //     var customTheme = {
-                        //         name: 'Untitled Theme 1',
-                        //         default: '#4B7930',
-                        //         baseColor: '#4B7930',
-                        //         baseFont: baseFontName,
-                        //     };
-                        //     var oldThemeName;
-                        //     if (globalDashboardNode && typeof (globalDashboardNode.theme === 'string')) {
-                        //         oldThemeName = globalDashboardNode.theme;
-                        //     }
+                            //     var lightTheme = {
+                            //         default: baseColor,
+                            //         baseColor: baseColor,
+                            //         baseFont: baseFontName,
+                            //         edited: false,
+                            //     };
+                            //     var darkTheme = {
+                            //         default: '#097479',
+                            //         baseColor: '#097479',
+                            //         baseFont: baseFontName,
+                            //         edited: false,
+                            //     };
+                            //     var customTheme = {
+                            //         name: 'Untitled Theme 1',
+                            //         default: '#4B7930',
+                            //         baseColor: '#4B7930',
+                            //         baseFont: baseFontName,
+                            //     };
+                            //     var oldThemeName;
+                            //     if (globalDashboardNode && typeof (globalDashboardNode.theme === 'string')) {
+                            //         oldThemeName = globalDashboardNode.theme;
+                            //     }
 
                             // var theme = {
-                                // name: 'theme-light',
-                                // name: oldThemeName || 'theme-light',
-                                // lightTheme: lightTheme,
-                                // darkTheme: darkTheme,
-                                // customTheme: customTheme,
-                                // themeState: themeState,
-                                // angularTheme: aTheme,
+                            // name: 'theme-light',
+                            // name: oldThemeName || 'theme-light',
+                            // lightTheme: lightTheme,
+                            // darkTheme: darkTheme,
+                            // customTheme: customTheme,
+                            // themeState: themeState,
+                            // angularTheme: aTheme,
                             // };
 
-                        //     var site_name = c_('site.title');
-                        //     var site_date_format = c_('site.date-format');
+                            //     var site_name = c_('site.title');
+                            //     var site_date_format = c_('site.date-format');
                             var site = {
                                 name: '',
                                 address: '',
                                 contactName: '',
                                 contactEmail: '',
-                                monitorServer: 'https://urmon.wasocal.com'
+                                monitorServer: 'https://urmon.wasocal.com',
                                 // hideToolbar: 'false',
                                 // allowSwipe: 'false',
                                 // lockMenu: 'false',
@@ -692,24 +690,24 @@
                                 // dateFormat: site_date_format,
                                 // sizes: sizes,
                             };
-                        //     if (globalDashboardNode !== null) {
-                        //         if (typeof globalDashboardNode.site !== 'undefined') {
-                        //             site = {
-                        //                 name: globalDashboardNode.site.name || globalDashboardNode.name,
-                        //                 hideToolbar: globalDashboardNode.site.hideToolbar,
-                        //                 lockMenu: globalDashboardNode.site.lockMenu,
-                        //                 allowSwipe: globalDashboardNode.site.allowSwipe,
-                        //                 allowTempTheme: globalDashboardNode.site.allowTempTheme,
-                        //                 dateFormat: globalDashboardNode.site.dateFormat,
-                        //                 sizes: globalDashboardNode.site.sizes,
-                        //             };
-                        //         }
-                        //         if (globalDashboardNode.theme.hasOwnProperty('angularTheme')) {
-                        //             aTheme = globalDashboardNode.theme.angularTheme;
-                        //         } else {
-                        //             globalDashboardNode.theme.angularTheme = aTheme;
-                        //         }
-                        //     }
+                            //     if (globalDashboardNode !== null) {
+                            //         if (typeof globalDashboardNode.site !== 'undefined') {
+                            //             site = {
+                            //                 name: globalDashboardNode.site.name || globalDashboardNode.name,
+                            //                 hideToolbar: globalDashboardNode.site.hideToolbar,
+                            //                 lockMenu: globalDashboardNode.site.lockMenu,
+                            //                 allowSwipe: globalDashboardNode.site.allowSwipe,
+                            //                 allowTempTheme: globalDashboardNode.site.allowTempTheme,
+                            //                 dateFormat: globalDashboardNode.site.dateFormat,
+                            //                 sizes: globalDashboardNode.site.sizes,
+                            //             };
+                            //         }
+                            //         if (globalDashboardNode.theme.hasOwnProperty('angularTheme')) {
+                            //             aTheme = globalDashboardNode.theme.angularTheme;
+                            //         } else {
+                            //             globalDashboardNode.theme.angularTheme = aTheme;
+                            //         }
+                            //     }
 
                             if (noDashboardNode) {
                                 globalDashboardNode = {
@@ -759,9 +757,11 @@
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Files" style="width:80px;"><span>' +
                         files_label +
                         '</span></a></li>'
-                ).appendTo(ulDashboardTabs).click(function() {
-                    $(this).resize(); // trigger a resize event so that datatables can calculate header column widths
-                });
+                )
+                    .appendTo(ulDashboardTabs)
+                    .click(function () {
+                        $(this).resize(); // trigger a resize event so that datatables can calculate header column widths
+                    });
 
                 // var liThemeTab = $(
                 //     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Theme" style="width:80px;"><span>' +
@@ -972,51 +972,63 @@
                 //     .appendTo(divLockMenu);
 
                 var site_name = c_('site.title');
-                
+
                 // Files Tab
-                var filebrowser = $('<table id="filebrowser" style="table-layout:fixed; width: 100%;">').appendTo(filesTab);
-                var uploadForm = $('<form id="uploadForm" method="post" enctype="multipart/form-data">').appendTo(filesTab);
+                var filebrowser = $('<table id="filebrowser" style="table-layout:fixed; width: 100%;">').appendTo(
+                    filesTab
+                );
+                var uploadForm = $('<form id="uploadForm" method="post" enctype="multipart/form-data">').appendTo(
+                    filesTab
+                );
                 $('<div>').text('Drag & drop files here to upload').appendTo(uploadForm);
-                var filesInput = $('<input id="filesInput" type="file" name="files" multiple>').appendTo(uploadForm).change(function (e) {
-                    e.preventDefault();
-                    var progressBar = $('<div>', { class: 'uploadProgressBar' }).appendTo(uploadForm);
-                    var formData = new FormData();
-                    formData.append("p", $('#filebrowserpath').val() || '/');
-                    for (var file of filesInput[0].files) {
-                        formData.append("files", file);
-                    }
-                    $.ajax({
-                        url: '/ur_base/filebrowser/upload/',
-                        type: 'post',
-                        enctype: 'multipart/form-data',
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        cache: false,
-                        timeout: 600000,
-                        success: function() {
-                            refreshFileSystem();
-                        },
-                        xhr: function() {
-                            var xhr = $.ajaxSettings.xhr();
-                            if (xhr.upload) {
-                                xhr.upload.addEventListener('progress', function(e) {
-                                    if (e.lengthComputable) {
-                                        var currentProgress = (e.loaded / e.total) * 100;
-                                        progressBar.width(currentProgress + '%').text(currentProgress.toFixed(0) + '%');
-                                        if (currentProgress >= 100) {
-                                            setTimeout(function() {
-                                                filesInput.val('');
-                                                progressBar.remove();
-                                            }, 1000);
-                                        }
-                                    }
-                                }, false);
-                            }
-                            return xhr;
-                        },
+                var filesInput = $('<input id="filesInput" type="file" name="files" multiple>')
+                    .appendTo(uploadForm)
+                    .change(function (e) {
+                        e.preventDefault();
+                        var progressBar = $('<div>', { class: 'uploadProgressBar' }).appendTo(uploadForm);
+                        var formData = new FormData();
+                        formData.append('p', $('#filebrowserpath').val() || '/');
+                        for (var file of filesInput[0].files) {
+                            formData.append('files', file);
+                        }
+                        $.ajax({
+                            url: '/ur_base/filebrowser/upload/',
+                            type: 'post',
+                            enctype: 'multipart/form-data',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            cache: false,
+                            timeout: 600000,
+                            success: function () {
+                                refreshFileSystem();
+                            },
+                            xhr: function () {
+                                var xhr = $.ajaxSettings.xhr();
+                                if (xhr.upload) {
+                                    xhr.upload.addEventListener(
+                                        'progress',
+                                        function (e) {
+                                            if (e.lengthComputable) {
+                                                var currentProgress = (e.loaded / e.total) * 100;
+                                                progressBar
+                                                    .width(currentProgress + '%')
+                                                    .text(currentProgress.toFixed(0) + '%');
+                                                if (currentProgress >= 100) {
+                                                    setTimeout(function () {
+                                                        filesInput.val('');
+                                                        progressBar.remove();
+                                                    }, 1000);
+                                                }
+                                            }
+                                        },
+                                        false
+                                    );
+                                }
+                                return xhr;
+                            },
+                        });
                     });
-                });
 
                 //Layout Tab
                 var divTabs = $('<div>', { class: 'form-row', style: 'position:relative' }).appendTo(layoutTab);
@@ -1031,33 +1043,27 @@
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-angle-double-up"></i></a>'
                 )
                     .click(function (evt) {
-                        menuItemContainer
+                        folderContainer
                             .find('.nr-db-sb-widget-list-container')
                             .slideUp()
                             .addClass('nr-db-sb-collapsed');
-                        menuItemContainer
-                            .find('.nr-db-sb-group-list-container')
-                            .slideUp()
-                            .addClass('nr-db-sb-collapsed');
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-page-list-container')
-                            .slideUp()
-                            .addClass('nr-db-sb-collapsed');
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-item-container-list-container')
+                        folderContainer.find('.nr-db-sb-group-list-container').slideUp().addClass('nr-db-sb-collapsed');
+                        folderContainer.find('.nr-db-sb-page-list-container').slideUp().addClass('nr-db-sb-collapsed');
+                        folderContainer
+                            .find('.nr-db-sb-folder-container-list-container')
                             .slideUp()
                             .addClass('nr-db-sb-collapsed');
 
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-item-container-list-header>.nr-db-sb-list-chevron')
+                        folderContainer
+                            .find('.nr-db-sb-folder-container-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-item-list-header>.nr-db-sb-list-chevron')
+                        folderContainer
+                            .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-page-list-header>.nr-db-sb-list-chevron')
+                        folderContainer
+                            .find('.nr-db-sb-page-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
-                        menuItemContainer
+                        folderContainer
                             .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
 
@@ -1068,25 +1074,25 @@
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-angle-double-down"></i></a>'
                 )
                     .click(function (evt) {
-                        menuItemContainer
+                        folderContainer
                             .find('.nr-db-sb-widget-list-container')
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
-                        menuItemContainer
+                        folderContainer
                             .find('.nr-db-sb-group-list-container')
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-page-list-container')
+                        folderContainer
+                            .find('.nr-db-sb-page-list-container')
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-item-list-header>.nr-db-sb-list-chevron')
+                        folderContainer
+                            .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
-                        menuItemContainer
-                            .find('.nr-db-sb-menu-page-list-header>.nr-db-sb-list-chevron')
+                        folderContainer
+                            .find('.nr-db-sb-page-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
-                        menuItemContainer
+                        folderContainer
                             .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
                         evt.preventDefault();
@@ -1096,11 +1102,11 @@
                 // Add Item button
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                        c_('layout.menuItem') +
+                        c_('layout.folder') +
                         '</a>'
                 )
                     .click(function (evt) {
-                        menuItemContainer.editableList('addItem', { type: 'ur_menu_item', child: false });
+                        folderContainer.editableList('addItem', { type: 'ur_folder', child: false });
                         evt.preventDefault();
                     })
                     .appendTo(buttonGroup);
@@ -1112,16 +1118,16 @@
                         '</a>'
                 )
                     .click(function (evt) {
-                        menuItemContainer.editableList('addItem', { type: 'ur_link' });
+                        folderContainer.editableList('addItem', { type: 'ur_link' });
                         evt.preventDefault();
                     })
                     .appendTo(buttonGroup);
 
-                var menuItemLists = {};
-                var menuPageLists = {};
+                var folderLists = {};
+                var pageLists = {};
                 var groupLists = {};
 
-                // toggle slide menu item content
+                // toggle slide folder content
                 var titleToggle = function (id, content, chevron) {
                     return function (evt) {
                         if (content.is(':visible')) {
@@ -1139,17 +1145,17 @@
                 };
 
                 /**
-                 * Provides the default setups for Menu Item, Menu Page, or Menu Link
+                 * Provides the default setups for Folder, Page, or Link
                  */
                 var defaultMenuEntities = {
-                    'ur_menu_item': {
-                        type: 'ur_menu_item',
+                    'ur_folder': {
+                        type: 'ur_folder',
                         users: [],
                         icon: 'dashboard',
-                        name: 'Item',
+                        name: 'Folder',
                     },
-                    'ur_menu_page': {
-                        type: 'ur_menu_page',
+                    'ur_page': {
+                        type: 'ur_page',
                         users: [],
                         icon: 'folder',
                         name: 'Page',
@@ -1182,7 +1188,7 @@
                     // console.log('makeNode container: ', container);
                     // console.log('makeNode i: ', i);
                     // console.log('makeNode item: ', item);
-                    // console.log('makeNode getType: ', RED.nodes.getType('ur_menu_page'));
+                    // console.log('makeNode getType: ', RED.nodes.getType('ur_page'));
                     if (!item.node) {
                         item.node = { ...defaultMenuEntities[item.type] };
                         item.node._def = RED.nodes.getType(item.type);
@@ -1190,12 +1196,12 @@
                         item.node.order = i + 1;
                         item.node.name += ' ' + item.node.order;
 
-                        if (item.menuItem) {
-                            item.node.menuItem = item.menuItem;
+                        if (item.folder) {
+                            item.node.folder = item.folder;
                         }
 
-                        if (item.menuPage) {
-                            item.node.menuPage = item.menuPage;
+                        if (item.page) {
+                            item.node.page = item.page;
                         }
                     } else if (item.type === undefined) {
                         item.type = item.node.type;
@@ -1218,25 +1224,25 @@
                 };
 
                 /**
-                 * Add a new Menu Item, Menu Page, Group, Menu Entity
+                 * Add a new Folder, `Page, Group, Menu Entity
                  *
                  * @param {string} container - the jQuery DOM element to which any row content should be added
                  * @param {Number} i - the index of the row
                  * @param {Object} item - the data object for the row. MUST include 'type' property
                  */
-                var addMenuItem = function (container, i, item) {
-                    let titleClass = 'nr-db-sb-list-header nr-db-sb-menu-item-list-header';
-                    let containerClass = 'nr-db-sb-menu-item-list-item';
+                var addFolder = function (container, i, item) {
+                    let titleClass = 'nr-db-sb-list-header nr-db-sb-folder-list-header';
+                    let containerClass = 'nr-db-sb-folder-list-item';
 
-                    if (!item.node.menuItem && item.menuItem) {
-                        item.node.menuItem = item.menuItem;
+                    if (!item.node.folder && item.folder) {
+                        item.node.folder = item.folder;
                     }
 
                     if (item.child) {
-                        // item.node.menuItem = item.menuItem;
-                        elementParents[item.node.id] = item.node.menuItem;
-                        titleClass = 'nr-db-sb-list-header nr-db-sb-menu-item-content-list-header';
-                        containerClass = 'nr-db-sb-menu-item-content-list-item';
+                        // item.node.folder = item.folder;
+                        elementParents[item.node.id] = item.node.folder;
+                        titleClass = 'nr-db-sb-list-header nr-db-sb-folder-content-list-header';
+                        containerClass = 'nr-db-sb-folder-content-list-item';
                     }
 
                     item.children = item.children || [];
@@ -1258,9 +1264,7 @@
                     container.addClass(containerClass);
 
                     // add handle
-                    $('<i class="nr-db-sb-list-handle nr-db-sb-menu-item-list-handle fa fa-bars"></i>').appendTo(
-                        titleRow
-                    );
+                    $('<i class="nr-db-sb-list-handle nr-db-sb-folder-list-handle fa fa-bars"></i>').appendTo(titleRow);
 
                     // make chevron
                     let chevron = $('<i class="fa fa-angle-down nr-db-sb-list-chevron">', {
@@ -1268,7 +1272,7 @@
                     }).appendTo(titleRow);
 
                     // make & add icon
-                    $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-item-icon fa fa-folder-o' }).appendTo(titleRow);
+                    $('<i>', { class: 'nr-db-sb-icon nr-db-sb-folder-icon fa fa-folder-o' }).appendTo(titleRow);
 
                     // add hide & disable
                     let hide = item.node.hidden ? ' nr-db-sb-title-hidden' : '';
@@ -1280,17 +1284,17 @@
                     // buttons
                     let buttonGroup = $('<div>', { class: 'nr-db-sb-list-header-button-group' }).appendTo(titleRow);
 
-                    // menu-item button
-                    var addMenuItemButton = $(
+                    // folder button
+                    var addFolderButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.menuItem') +
+                            c_('layout.folder') +
                             '</a>'
                     ).appendTo(buttonGroup);
 
-                    // menu-page button
-                    var addMenuPageButton = $(
+                    // page button
+                    var addPageButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.menuPage') +
+                            c_('layout.page') +
                             '</a>'
                     ).appendTo(buttonGroup);
 
@@ -1307,7 +1311,7 @@
                         evt.preventDefault();
                     });
 
-                    let content = $('<div>', { class: 'nr-db-sb-menu-item-content-container' }).appendTo(container);
+                    let content = $('<div>', { class: 'nr-db-sb-folder-content-container' }).appendTo(container);
 
                     if (listStates.hasOwnProperty(item.node.id) && !listStates[item.node.id]) {
                         content.hide();
@@ -1320,26 +1324,26 @@
 
                     titleRow.click(titleToggle(item.node.id, content, chevron));
 
-                    // menu-item-content hook
-                    let menuItemContentContainer = $('<ol>', { class: 'nr-db-sb-menu-item-content-list' })
+                    // folder-content hook
+                    let folderContentContainer = $('<ol>', { class: 'nr-db-sb-folder-content-list' })
                         .appendTo(content)
                         .editableList({
-                            sortable: '.nr-db-sb-menu-item-content-list-header',
+                            sortable: '.nr-db-sb-folder-content-list-header',
                             addButton: false,
                             height: 'auto',
-                            connectWith: '.nr-db-sb-menu-item-content-list',
+                            connectWith: '.nr-db-sb-folder-content-list',
                             addItem: addMenuEntity,
                             sortItems: function (items) {
                                 var historyEvents = [];
                                 items.each(function (i, el) {
-                                    var menuPageData = el.data('data');
-                                    var node = menuPageData.node;
+                                    var pageData = el.data('data');
+                                    var node = pageData.node;
                                     var hev = {
                                         t: 'edit',
                                         node: node,
                                         changes: {
                                             order: node.order,
-                                            menuItem: node.menuItem,
+                                            folder: node.folder,
                                         },
                                         dirty: node.dirty,
                                         changed: node.changed,
@@ -1354,13 +1358,13 @@
                                         node.dirty = true;
                                         node.changed = true;
                                     }
-                                    if (node.menuItem !== item.node.id) {
-                                        var oldMenuItemNode = RED.nodes.node(node.menuItem);
-                                        if (oldMenuItemNode) {
-                                            var index = oldMenuItemNode.users.indexOf(node);
-                                            oldMenuItemNode.users.splice(index, 1);
+                                    if (node.folder !== item.node.id) {
+                                        var oldFolderNode = RED.nodes.node(node.folder);
+                                        if (oldFolderNode) {
+                                            var index = oldFolderNode.users.indexOf(node);
+                                            oldFolderNode.users.splice(index, 1);
                                         }
-                                        node.menuItem = item.node.id;
+                                        node.folder = item.node.id;
                                         item.node.users.push(node);
                                         changed = true;
                                     }
@@ -1374,22 +1378,22 @@
                             },
                         });
 
-                    menuItemLists[item.node.id] = menuItemContentContainer;
+                    folderLists[item.node.id] = folderContentContainer;
 
-                    addMenuItemButton.click(function (evt) {
-                        menuItemContentContainer.editableList('addItem', {
-                            type: 'ur_menu_item',
+                    addFolderButton.click(function (evt) {
+                        folderContentContainer.editableList('addItem', {
+                            type: 'ur_folder',
                             child: true,
-                            menuItem: item.node.id,
+                            folder: item.node.id,
                         });
                         evt.stopPropagation();
                         evt.preventDefault();
                     });
 
-                    addMenuPageButton.click(function (evt) {
-                        menuItemContentContainer.editableList('addItem', {
-                            type: 'ur_menu_page',
-                            menuItem: item.node.id,
+                    addPageButton.click(function (evt) {
+                        folderContentContainer.editableList('addItem', {
+                            type: 'ur_page',
+                            folder: item.node.id,
                         });
                         evt.stopPropagation();
                         evt.preventDefault();
@@ -1397,13 +1401,13 @@
 
                     item.children.forEach(function (child) {
                         child.child = true;
-                        menuItemContentContainer.editableList('addItem', child);
+                        folderContentContainer.editableList('addItem', child);
                     });
                 };
 
-                var addMenuPage = function (container, i, item) {
-                    if (!item.node.menuItem && item.menuItem) {
-                        item.node.menuItem = item.menuItem;
+                var addPage = function (container, i, item) {
+                    if (!item.node.folder && item.folder) {
+                        item.node.folder = item.folder;
                     }
 
                     item.groups = item.groups || [];
@@ -1419,20 +1423,18 @@
                         RED.nodes.updateConfigNodeUsers(item.node);
                     }
 
-                    let menuPageNode = item.node;
-                    elementParents[menuPageNode.id] = item.node.menuItem;
+                    let pageNode = item.node;
+                    elementParents[pageNode.id] = item.node.folder;
 
-                    container.addClass('nr-db-sb-menu-page-list-item');
+                    container.addClass('nr-db-sb-page-list-item');
 
                     // title row
                     let titleRow = $('<div>', {
-                        class: 'nr-db-sb-list-header nr-db-sb-menu-item-content-list-header',
+                        class: 'nr-db-sb-list-header nr-db-sb-folder-content-list-header',
                     }).appendTo(container);
 
                     // handle
-                    $('<i class="nr-db-sb-list-handle nr-db-sb-menu-page-list-handle fa fa-bars"></i>').appendTo(
-                        titleRow
-                    );
+                    $('<i class="nr-db-sb-list-handle nr-db-sb-page-list-handle fa fa-bars"></i>').appendTo(titleRow);
 
                     // chevron
                     let chevron = $('<i class="fa fa-angle-down nr-db-sb-list-chevron">', {
@@ -1441,14 +1443,14 @@
 
                     // icon
                     // NB: include 2 icons and use CSS to switch (show/hide 1)
-                    let staticIcon = $('<i>', { class: 'nr-db-sb-icon nr-db-sb-menu-page-icon fa fa-file-o' }).appendTo(
+                    let staticIcon = $('<i>', { class: 'nr-db-sb-icon nr-db-sb-page-icon fa fa-file-o' }).appendTo(
                         titleRow
                     );
                     let dynamicIcon = $('<i>', {
                         class: 'nr-db-sb-icon nr-db-sb-dynamic-page-icon fa fa-files-o',
                     }).appendTo(titleRow);
 
-                    if (menuPageNode.isDynamic) {
+                    if (pageNode.isDynamic) {
                         staticIcon.hide();
                         dynamicIcon.show();
                     } else {
@@ -1458,7 +1460,7 @@
 
                     // title
                     let title = $('<span class="nr-db-sb-title">')
-                        .text(menuPageNode.name || menuPageNode.id || '')
+                        .text(pageNode.name || pageNode.id || '')
                         .appendTo(titleRow);
 
                     // button group
@@ -1476,13 +1478,13 @@
 
                     let content = $('<div>', { class: 'nr-db-sb-group-list-container' }).appendTo(container);
 
-                    if (!listStates.hasOwnProperty(menuPageNode.id) || !listStates[menuPageNode.id]) {
+                    if (!listStates.hasOwnProperty(pageNode.id) || !listStates[pageNode.id]) {
                         content.hide();
                         chevron.css({ 'transform': 'rotate(-90deg)' });
                         content.addClass('nr-db-sb-collapsed');
-                        listStates[menuPageNode.id] = false;
+                        listStates[pageNode.id] = false;
                     } else {
-                        listStates[menuPageNode.id] = true;
+                        listStates[pageNode.id] = true;
                     }
 
                     var groupContainer = $('<ol>', { class: 'nr-db-sb-group-list' })
@@ -1503,7 +1505,7 @@
                                         node: node,
                                         changes: {
                                             order: node.order,
-                                            menuPage: node.menuPage,
+                                            page: node.page,
                                         },
                                         dirty: node.dirty,
                                         changed: node.changed,
@@ -1518,13 +1520,13 @@
                                         node.dirty = true;
                                         node.changed = true;
                                     }
-                                    if (node.menuPage !== item.node.id) {
-                                        var oldMenuPageNode = RED.nodes.node(node.menuPage);
-                                        if (oldMenuPageNode) {
-                                            var index = oldMenuPageNode.users.indexOf(node);
-                                            oldMenuPageNode.users.splice(index, 1);
+                                    if (node.page !== item.node.id) {
+                                        var oldPageNode = RED.nodes.node(node.page);
+                                        if (oldPageNode) {
+                                            var index = oldPageNode.users.indexOf(node);
+                                            oldPageNode.users.splice(index, 1);
                                         }
-                                        node.menuPage = item.node.id;
+                                        node.page = item.node.id;
                                         item.node.users.push(node);
                                         changed = true;
                                     }
@@ -1538,20 +1540,20 @@
                             },
                         });
 
-                    if (menuPageNode.id) {
-                        menuPageLists[menuPageNode.id] = groupContainer;
+                    if (pageNode.id) {
+                        pageLists[pageNode.id] = groupContainer;
                     }
 
-                    titleRow.click(titleToggle(menuPageNode.id, content, chevron));
+                    titleRow.click(titleToggle(pageNode.id, content, chevron));
 
                     addGroupButton.click(function (evt) {
-                        groupContainer.editableList('addItem', { type: 'ur_group', menuPage: menuPageNode.id });
+                        groupContainer.editableList('addItem', { type: 'ur_group', page: pageNode.id });
                         evt.stopPropagation();
                         evt.preventDefault();
                     });
 
                     editButton.on('click', function (evt) {
-                        RED.editor.editConfig('', menuPageNode.type, menuPageNode.id);
+                        RED.editor.editConfig('', pageNode.type, pageNode.id);
                         evt.stopPropagation();
                         evt.preventDefault();
                     });
@@ -1562,14 +1564,14 @@
                 };
 
                 var addGroup = function (container, i, item) {
-                    if (!item.node.menuPage && item.menuPage) {
-                        item.node.menuPage = item.menuPage;
+                    if (!item.node.page && item.page) {
+                        item.node.page = item.page;
                     }
 
                     item.widgets = item.widgets || [];
 
                     let groupNode = item.node;
-                    elementParents[groupNode.id] = item.node.menuPage;
+                    elementParents[groupNode.id] = item.node.page;
                     listElements[groupNode.id] = container;
 
                     RED.history.push({
@@ -1749,11 +1751,11 @@
                     item = makeNode(container, i, item);
 
                     switch (item.type) {
-                        case 'ur_menu_item':
-                            addMenuItem(container, i, item);
+                        case 'ur_folder':
+                            addFolder(container, i, item);
                             break;
-                        case 'ur_menu_page':
-                            addMenuPage(container, i, item);
+                        case 'ur_page':
+                            addPage(container, i, item);
                             break;
                         case 'ur_group':
                             addGroup(container, i, item);
@@ -1768,10 +1770,10 @@
                     }
                 };
 
-                var menuItemContainer = $('<ol>', { class: 'nr-db-sb-menu-item-list' })
+                var folderContainer = $('<ol>', { class: 'nr-db-sb-folder-list' })
                     .appendTo(divTabs)
                     .editableList({
-                        sortable: '.nr-db-sb-menu-item-list-header',
+                        sortable: '.nr-db-sb-folder-list-header',
                         addButton: false,
                         // addItem: addTabOrLinkItem,
                         addItem: addMenuEntity,
@@ -1830,47 +1832,47 @@
                 //             }
                 //         }
                 //     });
-                //     var menuItem = null;
-                //     var menuPage = null;
-                //     var menuItems = menuItemContainer.editableList('items');
-                //     menuItems.first().each(function (i, el) {
-                //         var menuItemData = el.data('data');
-                //         menuItem = menuItemData.node;
+                //     var folder = null;
+                //     var page = null;
+                //     var folders = folderContainer.editableList('items');
+                //     folders.first().each(function (i, el) {
+                //         var folderData = el.data('data');
+                //         folder = folderData.node;
 
-                //         if (menuItemData.menuPages.length > 0) {
+                //         if (folderData.pages.length > 0) {
                 //             // check type {}
-                //             menuPage = menuItemData.menuPages[0].node;
+                //             page = folderData.pages[0].node;
                 //         }
                 //     });
 
                 //     var hev = [];
-                //     if (menuItem === null) {
-                //         menuItem = {
+                //     if (folder === null) {
+                //         folder = {
                 //             id: RED.nodes.id(),
-                //             _def: RED.nodes.getType('ur_menu_item'),
-                //             type: 'ur_menu_item',
+                //             _def: RED.nodes.getType('ur_folder'),
+                //             type: 'ur_folder',
                 //             users: [],
                 //             order: 0,
                 //             name: 'Item',
                 //             icon: 'dashboard',
                 //         };
-                //         RED.nodes.add(menuItem);
-                //         hev.push(menuItem.id);
+                //         RED.nodes.add(folder);
+                //         hev.push(folder.id);
                 //     }
 
-                //     if (menuPage === null) {
-                //         menuPage = {
+                //     if (page === null) {
+                //         page = {
                 //             id: RED.nodes.id(),
-                //             _def: RED.nodes.getType('ur_menu_page'),
-                //             type: 'ur_menu_page',
+                //             _def: RED.nodes.getType('ur_page'),
+                //             type: 'ur_page',
                 //             users: [],
-                //             menuItem: menuItem.id,
+                //             folder: folder.id,
                 //             order: i + 1,
                 //             name: 'Page',
                 //             icon: 'dashboard',
                 //         };
-                //         RED.nodes.add(menuPage);
-                //         hev.push(menuPage.id);
+                //         RED.nodes.add(page);
+                //         hev.push(page.id);
                 //     }
 
                 //     for (var groupId in unknownGroups) {
@@ -1880,7 +1882,7 @@
                 //                 _def: RED.nodes.getType('ur_group'),
                 //                 type: 'ur_group',
                 //                 users: [],
-                //                 menuPage: menuPage.id,
+                //                 page: page.id,
                 //                 order: i + 1,
                 //                 name: groupId === '_BLANK_' ? 'Group' : groupId,
                 //                 width: 6,
@@ -1921,7 +1923,7 @@
                 var listStates = {};
                 var elementParents = {};
                 var awaitingGroups = {};
-                var awaitingMenuItems = {};
+                var awaitingFolders = {};
 
                 // helper function to get inner list
                 function getInnerList(contents) {
@@ -1937,14 +1939,12 @@
                         }
 
                         switch (contentData.type) {
-                            case 'ur_menu_item':
-                                let itemContents = content
-                                    .find('.nr-db-sb-menu-item-content-list')
-                                    .editableList('items');
+                            case 'ur_folder':
+                                let itemContents = content.find('.nr-db-sb-folder-content-list').editableList('items');
                                 inner = getInnerList(itemContents);
                                 entity = { id: contentData.id, children: inner };
                                 break;
-                            case 'ur_menu_page':
+                            case 'ur_page':
                                 let groups = content.find('.nr-db-sb-group-list').editableList('items');
                                 inner = getInnerList(groups);
                                 entity = { id: contentData.id, groups: inner };
@@ -1966,17 +1966,17 @@
 
                 function getCurrentList() {
                     var currentList = [];
-                    var menuItems = menuItemContainer.editableList('items');
-                    // console.log('getCurrentList() menuItems: ', menuItems);
+                    var folders = folderContainer.editableList('items');
+                    // console.log('getCurrentList() folders: ', folders);
 
                     var open = false;
-                    menuItems.each(function (i, el) {
-                        let menuItemData = el.data('data');
-                        // console.log('getCurrentList() menuItemData: ', menuItemData);
-                        let menuItemContents = el.find('.nr-db-sb-menu-item-content-list').editableList('items');
-                        let innerList = getInnerList(menuItemContents) || [];
+                    folders.each(function (i, el) {
+                        let folderData = el.data('data');
+                        // console.log('getCurrentList() folderData: ', folderData);
+                        let folderContents = el.find('.nr-db-sb-folder-content-list').editableList('items');
+                        let innerList = getInnerList(folderContents) || [];
 
-                        currentList.push({ id: menuItemData.node.id, children: innerList });
+                        currentList.push({ id: folderData.node.id, children: innerList });
                     });
 
                     return currentList;
@@ -2020,41 +2020,41 @@
                     var currentList = getCurrentList();
                     var newList = [];
                     dashboard = [];
-                    var menuItems = {}; // a dictionary of "root-level" menu-items
-                    var menuItemItems = {}; // a dictionary of menu-items that have a parent menuItem
-                    var menuPages = {}; // a dictionary of menu-pages
+                    var folders = {}; // a dictionary of "root-level" folders
+                    var childFolders = {}; // a dictionary of child folders
+                    var pages = {}; // a dictionary of pages
                     var groups = {}; // a dictionary of groups
                     var elements = []; // a dictionary of widgets
                     var groupElements = {}; // a dictionary of widgets by parent group ID
-                    var menuPageGroups = {}; // a dictionary of groups by parent menuPage
-                    var menuItemChildren = {}; // a dictionary of any menu-item's children <key: parent menuItem's id, value: array of children (items & pages)>
+                    var pageGroups = {}; // a dictionary of groups by parent page
+                    var folderChildren = {}; // a dictionary of any folder's children <key: parent folder's id, value: array of children (items & pages)>
                     var groupId;
                     var group;
-                    var menuPageId;
-                    var menuPage;
-                    var menuItemId;
-                    var menuItem;
+                    var pageId;
+                    var page;
+                    var folderId;
+                    var folder;
                     var unknownGroups = 0;
 
                     var find;
 
-                    // Find all the menuItems, menuPages, and groups
+                    // Find all the folders, pages, and groups
                     RED.nodes.eachConfig(function (node) {
                         switch (node.type) {
                             case 'ur_link': {
                                 // TODO: ur_link stuffs
                                 break;
                             }
-                            case 'ur_menu_item': {
-                                if (!node.menuItem) {
-                                    menuItems[node.id] = node;
+                            case 'ur_folder': {
+                                if (!node.folder) {
+                                    folders[node.id] = node;
                                 } else {
-                                    menuItemItems[node.id] = node;
+                                    childFolders[node.id] = node;
                                 }
                                 break;
                             }
-                            case 'ur_menu_page': {
-                                menuPages[node.id] = node;
+                            case 'ur_page': {
+                                pages[node.id] = node;
                                 break;
                             }
                             case 'ur_group': {
@@ -2071,28 +2071,22 @@
                         }
                     });
 
-                    for (menuItemId in menuItemItems) {
-                        if (menuItemItems.hasOwnProperty(menuItemId)) {
-                            menuItem = menuItemItems[menuItemId];
-                            if (
-                                menuItems.hasOwnProperty(menuItem.menuItem) ||
-                                menuItemItems.hasOwnProperty(menuItem.menuItem)
-                            ) {
-                                menuItemChildren[menuItem.menuItem] = menuItemChildren[menuItem.menuItem] || [];
-                                menuItemChildren[menuItem.menuItem].push(menuItem);
+                    for (folderId in childFolders) {
+                        if (childFolders.hasOwnProperty(folderId)) {
+                            folder = childFolders[folderId];
+                            if (folders.hasOwnProperty(folder.folder) || childFolders.hasOwnProperty(folder.folder)) {
+                                folderChildren[folder.folder] = folderChildren[folder.folder] || [];
+                                folderChildren[folder.folder].push(folder);
                             }
                         }
                     }
 
-                    for (menuPageId in menuPages) {
-                        if (menuPages.hasOwnProperty(menuPageId)) {
-                            menuPage = menuPages[menuPageId];
-                            if (
-                                menuItems.hasOwnProperty(menuPage.menuItem) ||
-                                menuItemItems.hasOwnProperty(menuPage.menuItem)
-                            ) {
-                                menuItemChildren[menuPage.menuItem] = menuItemChildren[menuPage.menuItem] || [];
-                                menuItemChildren[menuPage.menuItem].push(menuPage);
+                    for (pageId in pages) {
+                        if (pages.hasOwnProperty(pageId)) {
+                            page = pages[pageId];
+                            if (folders.hasOwnProperty(page.folder) || childFolders.hasOwnProperty(page.folder)) {
+                                folderChildren[page.folder] = folderChildren[page.folder] || [];
+                                folderChildren[page.folder].push(page);
                             }
                         }
                     }
@@ -2100,10 +2094,10 @@
                     for (groupId in groups) {
                         if (groups.hasOwnProperty(groupId)) {
                             group = groups[groupId];
-                            if (menuPages.hasOwnProperty(group.menuPage)) {
-                                // This group belongs to a menuPage
-                                menuPageGroups[group.menuPage] = menuPageGroups[group.menuPage] || [];
-                                menuPageGroups[group.menuPage].push(group);
+                            if (pages.hasOwnProperty(group.page)) {
+                                // This group belongs to a page
+                                pageGroups[group.page] = pageGroups[group.page] || [];
+                                pageGroups[group.page].push(group);
                             } else {
                                 unknownGroups++;
                             }
@@ -2160,11 +2154,11 @@
                                 });
                         }
                     }
-                    // Sort each menuPage's array of groups
-                    for (menuPageId in menuPageGroups) {
-                        if (menuPageGroups.hasOwnProperty(menuPageId)) {
-                            menuPage = menuPageGroups[menuPageId];
-                            menuPageGroups[menuPageId] = menuPage
+                    // Sort each page's array of groups
+                    for (pageId in pageGroups) {
+                        if (pageGroups.hasOwnProperty(pageId)) {
+                            page = pageGroups[pageId];
+                            pageGroups[pageId] = page
                                 .map((v, i) => {
                                     return { n: v, i: i };
                                 })
@@ -2182,11 +2176,11 @@
                                 });
                         }
                     }
-                    // Sort each menuItem's array of children
-                    for (menuItemId in menuItemChildren) {
-                        if (menuItemChildren.hasOwnProperty(menuItemId)) {
-                            menuItem = menuItemChildren[menuItemId];
-                            menuItemChildren[menuItemId] = menuItem
+                    // Sort each folder's array of children
+                    for (folderId in folderChildren) {
+                        if (folderChildren.hasOwnProperty(folderId)) {
+                            folder = folderChildren[folderId];
+                            folderChildren[folderId] = folder
                                 .map(function (v, i) {
                                     return { n: v, i: i };
                                 })
@@ -2204,9 +2198,9 @@
                                 });
                         }
                     }
-                    var menuItemIds = Object.keys(menuItems)
+                    var folderIds = Object.keys(folders)
                         .map(function (v, i) {
-                            return { n: menuItems[v], i: i };
+                            return { n: folders[v], i: i };
                         })
                         .sort(function (A, B) {
                             if (A.n.order < B.n.order) {
@@ -2231,22 +2225,22 @@
                         // console.log('getNestedChildren parent: ', parent);
 
                         switch (parent.type) {
-                            case 'ur_menu_item':
-                                if (menuItemChildren.hasOwnProperty(parent.id)) {
-                                    let children = [...menuItemChildren[parent.id]];
+                            case 'ur_folder':
+                                if (folderChildren.hasOwnProperty(parent.id)) {
+                                    let children = [...folderChildren[parent.id]];
 
                                     for (let child of children) {
-                                        if (child.type === 'ur_menu_item') {
+                                        if (child.type === 'ur_folder') {
                                             let mi =
                                                 format === 'dashboard'
-                                                    ? { node: { ...child, menuItem: parent.id } }
+                                                    ? { node: { ...child, folder: parent.id } }
                                                     : { id: child.id };
                                             mi.children = getNestedChildren(child, format);
                                             result.push(mi);
-                                        } else if (child.type === 'ur_menu_page') {
+                                        } else if (child.type === 'ur_page') {
                                             let mp =
                                                 format === 'dashboard'
-                                                    ? { node: { ...child, menuItem: parent.id } }
+                                                    ? { node: { ...child, folder: parent.id } }
                                                     : { id: child.id };
                                             mp.groups = getNestedChildren(child, format);
                                             result.push(mp);
@@ -2254,14 +2248,14 @@
                                     }
                                 }
                                 break;
-                            case 'ur_menu_page':
-                                if (menuPageGroups.hasOwnProperty(parent.id)) {
-                                    let groups = [...menuPageGroups[parent.id]];
+                            case 'ur_page':
+                                if (pageGroups.hasOwnProperty(parent.id)) {
+                                    let groups = [...pageGroups[parent.id]];
 
                                     for (let group of groups) {
                                         let g =
                                             format === 'dashboard'
-                                                ? { node: { ...group, menuPage: parent.id } }
+                                                ? { node: { ...group, page: parent.id } }
                                                 : { id: group.id };
                                         g.widgets = getNestedChildren(group, format);
                                         result.push(g);
@@ -2281,20 +2275,20 @@
                         return result;
                     };
 
-                    menuItemIds.forEach(function (menuItemId) {
-                        let menuItemForDashboard = { node: menuItems[menuItemId] };
-                        menuItemForDashboard.children = getNestedChildren(menuItems[menuItemId]);
-                        dashboard.push(menuItemForDashboard);
+                    folderIds.forEach(function (folderId) {
+                        let folderForDashboard = { node: folders[folderId] };
+                        folderForDashboard.children = getNestedChildren(folders[folderId]);
+                        dashboard.push(folderForDashboard);
 
                         // build newList for comparison against currentList
-                        let menuItemForNewList = { id: menuItemId };
-                        menuItemForNewList.children = getNestedChildren(menuItems[menuItemId], 'new-list');
-                        newList.push(menuItemForNewList);
+                        let folderForNewList = { id: folderId };
+                        folderForNewList.children = getNestedChildren(folders[folderId], 'new-list');
+                        newList.push(folderForNewList);
                     });
 
-                    // console.log('menuItems: ', menuItems);
-                    // console.log('menuPages: ', menuPages);
-                    // console.log('menuItemChildren: ', menuItemChildren);
+                    // console.log('folders: ', folders);
+                    // console.log('pages: ', pages);
+                    // console.log('folderChildren: ', folderChildren);
                     console.log('dashboard: ', dashboard);
                     console.log('newList: ', newList);
                     console.log('currentList: ', currentList);
@@ -2303,15 +2297,15 @@
                         console.log('currentList does not match newList...');
                         listElements = {};
                         groupLists = {};
-                        menuPageLists = {};
-                        menuItemLists = {};
-                        menuItems = {};
-                        menuPages = {};
+                        pageLists = {};
+                        folderLists = {};
+                        folders = {};
+                        pages = {};
                         groups = {};
                         elementParents = {};
-                        menuItemContainer.empty();
-                        dashboard.forEach(function (menuItem) {
-                            menuItemContainer.editableList('addItem', menuItem);
+                        folderContainer.empty();
+                        dashboard.forEach(function (folder) {
+                            folderContainer.editableList('addItem', folder);
                         });
                     }
                     ensureDashboardNode(true);
@@ -2320,7 +2314,9 @@
                         $('#nr-db-field-siteaddress').val(globalDashboardNode.site.address);
                         $('#nr-db-field-contactName').val(globalDashboardNode.site.contactName);
                         $('#nr-db-field-contactEmail').val(globalDashboardNode.site.contactEmail);
-                        $('#nr-db-field-monitorServer').val(globalDashboardNode.site.monitorServer || 'https://urmon.wasocal.com');
+                        $('#nr-db-field-monitorServer').val(
+                            globalDashboardNode.site.monitorServer || 'https://urmon.wasocal.com'
+                        );
                         // $('#nr-db-field-allowSwipe').val(globalDashboardNode.site.allowSwipe || 'false');
                         // $('#nr-db-field-allowTempTheme').val(globalDashboardNode.site.allowTempTheme || 'true');
                         // $('#nr-db-field-hideToolbar').val(globalDashboardNode.site.hideToolbar || 'false');
@@ -2472,7 +2468,9 @@
                                 $('#nr-db-field-siteaddress').val(globalDashboardNode.site.address);
                                 $('#nr-db-field-contactName').val(globalDashboardNode.site.contactName);
                                 $('#nr-db-field-contactEmail').val(globalDashboardNode.site.contactEmail);
-                                $('#nr-db-field-monitorServer').val(globalDashboardNode.site.monitorServer || 'https://urmon.wasocal.com');
+                                $('#nr-db-field-monitorServer').val(
+                                    globalDashboardNode.site.monitorServer || 'https://urmon.wasocal.com'
+                                );
                                 // $('#nr-db-field-hideToolbar').val(globalDashboardNode.site.hideToolbar);
                                 // $('#nr-db-field-allowSwipe').val(globalDashboardNode.site.allowSwipe);
                                 // $('#nr-db-field-allowTempTheme').val(globalDashboardNode.site.allowTempTheme);
@@ -2490,7 +2488,7 @@
                         });
                     }
                     awaitingGroups = {};
-                    awaitingMenuItems = {};
+                    awaitingFolders = {};
                 }
 
                 RED.sidebar.addTab({
@@ -2509,12 +2507,12 @@
 
                 editSaveEventHandler = function (node) {
                     console.log('editSaveEventHandler called by: ', node);
-                    // console.log('editSaveEventHandler() menuItemLists: ', menuItemLists);
-                    // console.log('editSaveEventHandler() menuPageLists: ', menuPageLists);
+                    // console.log('editSaveEventHandler() folderLists: ', folderLists);
+                    // console.log('editSaveEventHandler() pageLists: ', pageLists);
                     // console.log('editSaveEventHandler() groupLists: ', groupLists);
                     console.log('editSaveEventHandler() listElements: ', listElements);
                     if (/^ur_/.test(node.type)) {
-                        if (node.type === 'ur_menu_item' || node.type === 'ur_menu_page' || node.type === 'ur_group') {
+                        if (node.type === 'ur_folder' || node.type === 'ur_page' || node.type === 'ur_group') {
                             if (listElements[node.id]) {
                                 // Existing element
                                 listElements[node.id]
@@ -2523,11 +2521,11 @@
                                     .text(node.name || node.id);
                                 if (node.type === 'ur_group') {
                                     refresh();
-                                } else if (node.type === 'ur_menu_page') {
+                                } else if (node.type === 'ur_page') {
                                     if (node.isDynamic) {
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-menu-page-icon')
+                                            .find('.nr-db-sb-page-icon')
                                             .hide();
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
@@ -2536,7 +2534,7 @@
                                     } else {
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-menu-page-icon')
+                                            .find('.nr-db-sb-page-icon')
                                             .show();
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
@@ -2567,27 +2565,27 @@
                                             .removeClass('nr-db-sb-title-disabled');
                                     }
                                 }
-                            } else if (node.type === 'ur_menu_item') {
-                                if (!node.menuItem) {
-                                    // Adding a root menuItem
-                                    menuItemContainer.editableList('addItem', { node: node, children: [] });
-                                } else if (menuItemLists[node.menuItem]) {
-                                    // Adding a child menuItem
-                                    menuItemLists[node.menuItem].editableList('addItem', {
+                            } else if (node.type === 'ur_folder') {
+                                if (!node.folder) {
+                                    // Adding a root folder
+                                    folderContainer.editableList('addItem', { node: node, children: [] });
+                                } else if (folderLists[node.folder]) {
+                                    // Adding a child folder
+                                    folderLists[node.folder].editableList('addItem', {
                                         node: node,
                                         child: true,
                                         children: [],
                                     });
                                 }
-                            } else if (node.type === 'ur_menu_page') {
-                                // Adding a menuPage
-                                if (menuItemLists[node.menuItem]) {
-                                    menuItemLists[node.menuItem].editableList('addItem', { node: node, groups: [] });
+                            } else if (node.type === 'ur_page') {
+                                // Adding a page
+                                if (folderLists[node.folder]) {
+                                    folderLists[node.folder].editableList('addItem', { node: node, groups: [] });
                                 }
                             } else {
                                 // Adding a group
-                                if (menuPageLists[node.menuPage]) {
-                                    menuPageLists[node.menuPage].editableList('addItem', {
+                                if (pageLists[node.page]) {
+                                    pageLists[node.page].editableList('addItem', {
                                         node: node,
                                         widgets: [],
                                     });
@@ -2658,8 +2656,8 @@
                 //         node.type !== 'ur_audio' &&
                 //         node.type !== 'ur_base' &&
                 //         node.type !== 'ur_group' &&
-                //         node.type !== 'ur_menu_page' &&
-                //         node.type !== 'ur_menu_item'
+                //         node.type !== 'ur_page' &&
+                //         node.type !== 'ur_folder'
                 //     ) {
                 //         if (listElements[node.id]) {
                 //             if (node.group != elementParents[node.id]) {
@@ -2692,38 +2690,38 @@
 
                 // handlePendingAdds working correctly now. Added
                 function handlePendingAdds() {
-                    var hasMenuItems = false;
-                    var hasChildMenuItems = false;
-                    var hasMenuPages = false;
+                    var hasFolders = false;
+                    var hasChildFolders = false;
+                    var hasPages = false;
                     var hasGroups = false;
                     pendingAdd.sort(function (A, B) {
-                        hasMenuItems = // has root level menu_items
-                            hasMenuItems ||
-                            (A.type === 'ur_menu_item' && !A.menuItem) ||
-                            (B.type === 'ur_menu_item' && !B.menuItem);
-                        hasChildMenuItems = // has non-root level menu_items
-                            hasChildMenuItems ||
-                            (A.type === 'ur_menu_item' && A.menuItem) ||
-                            (B.type === 'ur_menu_item' && B.menuItem);
-                        hasMenuPages = hasMenuPages || A.type === 'ur_menu_page' || B.type === 'ur_menu_page';
+                        hasFolders = // has root level folders
+                            hasFolders ||
+                            (A.type === 'ur_folder' && !A.folder) ||
+                            (B.type === 'ur_folder' && !B.folder);
+                        hasChildFolders = // has non-root level folders
+                            hasChildFolders ||
+                            (A.type === 'ur_folder' && A.folder) ||
+                            (B.type === 'ur_folder' && B.folder);
+                        hasPages = hasPages || A.type === 'ur_page' || B.type === 'ur_page';
                         hasGroups = hasGroups || A.type === 'ur_group' || B.type === 'ur_group';
                         if (A.type === B.type) {
-                            if (A.type === 'ur_menu_item') {
-                                if (A.menuItem == undefined && B.menuItem !== undefined) {
+                            if (A.type === 'ur_folder') {
+                                if (A.folder == undefined && B.folder !== undefined) {
                                     return -1;
-                                } else if (A.menuItem !== undefined && B.menuItem == undefined) {
+                                } else if (A.folder !== undefined && B.folder == undefined) {
                                     return 1;
                                 }
                             }
                             return 0;
                         }
-                        if (A.type === 'ur_menu_item') {
+                        if (A.type === 'ur_folder') {
                             return -1;
-                        } else if (B.type === 'ur_menu_item') {
+                        } else if (B.type === 'ur_folder') {
                             return 1;
-                        } else if (A.type === 'ur_menu_page') {
+                        } else if (A.type === 'ur_page') {
                             return -1;
-                        } else if (B.type === 'ur_menu_page') {
+                        } else if (B.type === 'ur_page') {
                             return 1;
                         } else if (A.type === 'ur_group') {
                             return -1;
@@ -2733,46 +2731,46 @@
                         return 0;
                     });
                     // console.log('sorted pendingAdd: ', pendingAdd);
-                    // console.log("pendingAdd's view of menuItemLists: ", menuItemLists);
+                    // console.log("pendingAdd's view of folderLists: ", folderLists);
                     for (var i = 0; i < pendingAdd.length; i++) {
                         var node = pendingAdd[i];
-                        if (node.type === 'ur_menu_item' && !node.menuItem) {
-                            menuItemContainer.editableList('addItem', { node: node, children: [] });
+                        if (node.type === 'ur_folder' && !node.folder) {
+                            folderContainer.editableList('addItem', { node: node, children: [] });
                         } else {
-                            if (hasMenuItems) {
-                                // We've added some menuItems, need to give jquery time to add the lists
+                            if (hasFolders) {
+                                // We've added some folders, need to give jquery time to add the lists
                                 pendingAdd = pendingAdd.slice(i);
                                 pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                 return;
                             }
-                            if (node.type === 'ur_menu_item' && node.menuItem) {
-                                if (menuItemLists[node.menuItem]) {
-                                    menuItemLists[node.menuItem].editableList('addItem', { node: node, children: [] });
+                            if (node.type === 'ur_folder' && node.folder) {
+                                if (folderLists[node.folder]) {
+                                    folderLists[node.folder].editableList('addItem', { node: node, children: [] });
                                 }
                             } else {
-                                // we've added some child menuItems, need to give jquery time to add the lists
-                                if (hasChildMenuItems) {
+                                // we've added some child folders, need to give jquery time to add the lists
+                                if (hasChildFolders) {
                                     pendingAdd = pendingAdd.slice(i);
                                     pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                     return;
                                 }
-                                if (node.type === 'ur_menu_page') {
-                                    if (menuItemLists[node.menuItem]) {
-                                        menuItemLists[node.menuItem].editableList('addItem', {
+                                if (node.type === 'ur_page') {
+                                    if (folderLists[node.folder]) {
+                                        folderLists[node.folder].editableList('addItem', {
                                             node: node,
                                             groups: [],
                                         });
                                     }
                                 } else {
-                                    if (hasMenuPages) {
-                                        // We've added some menuPages, need to give jquery time to add the lists
+                                    if (hasPages) {
+                                        // We've added some pages, need to give jquery time to add the lists
                                         pendingAdd = pendingAdd.slice(i);
                                         pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                         return;
                                     }
                                     if (node.type === 'ur_group') {
-                                        if (menuPageLists[node.menuPage]) {
-                                            menuPageLists[node.menuPage].editableList('addItem', {
+                                        if (pageLists[node.page]) {
+                                            pageLists[node.page].editableList('addItem', {
                                                 node: node,
                                                 widgets: [],
                                             });
@@ -2811,32 +2809,26 @@
                 nodesRemoveEventHandler = function (node) {
                     console.log('nodesRemoveEventHandler called by: ', node);
                     if (/^ur_/.test(node.type)) {
-                        if (node.type === 'ur_menu_item' || node.type === 'ur_link') {
+                        if (node.type === 'ur_folder' || node.type === 'ur_link') {
                             if (listElements[node.id]) {
-                                if (node.menuItem) {
-                                    menuItemLists[node.menuItem].editableList(
+                                if (node.folder) {
+                                    folderLists[node.folder].editableList(
                                         'removeItem',
                                         listElements[node.id].data('data')
                                     );
                                 } else {
-                                    menuItemContainer.editableList('removeItem', listElements[node.id].data('data'));
+                                    folderContainer.editableList('removeItem', listElements[node.id].data('data'));
                                 }
-                                delete menuItemLists[node.id];
+                                delete folderLists[node.id];
                             }
-                        } else if (node.type === 'ur_menu_page') {
-                            if (menuItemLists[node.menuItem] && listElements[node.id]) {
-                                menuItemLists[node.menuItem].editableList(
-                                    'removeItem',
-                                    listElements[node.id].data('data')
-                                );
+                        } else if (node.type === 'ur_page') {
+                            if (folderLists[node.folder] && listElements[node.id]) {
+                                folderLists[node.folder].editableList('removeItem', listElements[node.id].data('data'));
                             }
-                            delete menuPageLists[node.id];
+                            delete pageLists[node.id];
                         } else if (node.type === 'ur_group') {
-                            if (menuPageLists[node.menuPage] && listElements[node.id]) {
-                                menuPageLists[node.menuPage].editableList(
-                                    'removeItem',
-                                    listElements[node.id].data('data')
-                                );
+                            if (pageLists[node.page] && listElements[node.id]) {
+                                pageLists[node.page].editableList('removeItem', listElements[node.id].data('data'));
                             }
                             delete groupLists[node.id];
                         } else {
@@ -3192,8 +3184,8 @@
 </script>
 
 <!-- File Browser -->
-<link href="./ur_base/css/jquery.dataTables.min.css" rel="stylesheet"/>
-<link href="./ur_base/css/select.dataTables.min.css" rel="stylesheet"/>
+<link href="./ur_base/css/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="./ur_base/css/select.dataTables.min.css" rel="stylesheet" />
 <style>
     #dashboard-files .dataTable {
         border: 1px solid #ccc;
@@ -3213,16 +3205,19 @@
         font-weight: bold;
         color: #333;
     }
-    #dashboard-files .dataTable thead th, #dashboard-files .dataTable tbody td {
+    #dashboard-files .dataTable thead th,
+    #dashboard-files .dataTable tbody td {
         padding: 0;
         font-size: 13px;
     }
-    #dashboard-files .dataTable th.icon, #dashboard-files .dataTable td.icon {
+    #dashboard-files .dataTable th.icon,
+    #dashboard-files .dataTable td.icon {
         width: 15px !important;
         padding: 0 5px;
         text-align: right;
     }
-    #dashboard-files .dataTable th.name, #dashboard-files .dataTable td.name {
+    #dashboard-files .dataTable th.name,
+    #dashboard-files .dataTable td.name {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3321,200 +3316,262 @@
 <script src="./ur_base/js/jquery.dataTables.min.js"></script>
 <script src="./ur_base/js/dataTables.select.min.js"></script>
 <script>
-
-    var filebrowser = $("#filebrowser").DataTable({
+    var filebrowser = $('#filebrowser').DataTable({
         dom: '<"toolbar">t',
         select: { style: 'os' },
         paging: false,
-        scrollY: "300px",
+        scrollY: '300px',
         columns: [
             {
                 data: 'type',
                 className: 'icon',
-                render: function(data, type, row, meta) {
-                    return type === 'display' ?
-                        (data === 'd' ? '<i class="fa fa-folder"></i>' : '<i class="fa fa-file"></i>') :
-                        data;
-                }
+                render: function (data, type, row, meta) {
+                    return type === 'display'
+                        ? data === 'd'
+                            ? '<i class="fa fa-folder"></i>'
+                            : '<i class="fa fa-file"></i>'
+                        : data;
+                },
             },
             {
                 title: 'Name',
                 data: 'name',
                 className: 'name',
-                render: function(data, type, row, meta) {
+                render: function (data, type, row, meta) {
                     if (type === 'display') {
-                        return '<span class="view">'+data+'</span><input class="edit" value="'+data+'" style="display:none">';
+                        return (
+                            '<span class="view">' +
+                            data +
+                            '</span><input class="edit" value="' +
+                            data +
+                            '" style="display:none">'
+                        );
                     }
-                    return data.toString().toLowerCase()
-                }
+                    return data.toString().toLowerCase();
+                },
             },
             {
                 title: 'Modified',
                 data: 'mtime',
                 className: 'mtime',
                 width: '65px',
-                render: function(data, type, row, meta) {
+                render: function (data, type, row, meta) {
                     if (type === 'display') {
                         var date = new Date(data);
                         let dateStr = date.toLocaleDateString();
                         return new Date().toLocaleDateString() === dateStr ? date.toLocaleTimeString() : dateStr;
                     }
                     return data;
-                }
+                },
             },
             {
                 title: 'Size',
                 data: 'size',
                 className: 'size',
                 width: '55px',
-                render: function(data, type, row, meta) {
+                render: function (data, type, row, meta) {
                     if (type === 'display') {
                         var size = parseFloat(data);
                         var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
-                        return (size / Math.pow(1024, i) ).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+                        return (size / Math.pow(1024, i)).toFixed(1) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
                     }
                     return data;
-                }
-            }
-        ]
+                },
+            },
+        ],
     });
 
-    let resizeFileBrowserDataTable = function() {
+    let resizeFileBrowserDataTable = function () {
         // recalculate filebrowser height
         let height = $('#red-ui-sidebar-content').height() - 256;
         $('#filebrowser_wrapper .dataTables_scrollBody').css({ height: height, 'max-height': height });
         // recalculate filebrowser column widths
         filebrowser.columns.adjust().draw();
     };
-    RED.events.on("sidebar:resize", resizeFileBrowserDataTable);
+    RED.events.on('sidebar:resize', resizeFileBrowserDataTable);
     $(window).resize(resizeFileBrowserDataTable);
 
-    var toolbar = $("div.dataTables_wrapper div.toolbar");
-    let filebrowserpath = $('<input id="filebrowserpath" autocomplete="false" spellcheck="false">').val('/').data('oldpath', '/').change(function() {
-        let oldpath = filebrowserpath.data('oldpath');
-        let newpath = filebrowserpath.val();
-        refreshFileSystem(newpath).then(result => {
-            if (result) {
-                filebrowserpath.data('oldpath', newpath);
-            } else { //refresh failed, revert path
-                filebrowserpath.val(oldpath);
-            }
-        });
-    }).appendTo(toolbar);
+    var toolbar = $('div.dataTables_wrapper div.toolbar');
+    let filebrowserpath = $('<input id="filebrowserpath" autocomplete="false" spellcheck="false">')
+        .val('/')
+        .data('oldpath', '/')
+        .change(function () {
+            let oldpath = filebrowserpath.data('oldpath');
+            let newpath = filebrowserpath.val();
+            refreshFileSystem(newpath).then((result) => {
+                if (result) {
+                    filebrowserpath.data('oldpath', newpath);
+                } else {
+                    //refresh failed, revert path
+                    filebrowserpath.val(oldpath);
+                }
+            });
+        })
+        .appendTo(toolbar);
 
-    $('<button>', { type: 'button' }).append('<i class="fa fa-level-up">').appendTo(toolbar).click(function() {
-        refreshFileSystem(filebrowserpath.val() + '..');
-    });
+    $('<button>', { type: 'button' })
+        .append('<i class="fa fa-level-up">')
+        .appendTo(toolbar)
+        .click(function () {
+            refreshFileSystem(filebrowserpath.val() + '..');
+        });
 
     var toolbarMenu = $('<ul>', { class: 'red-ui-menu red-ui-menu-dropdown pull-right' }).appendTo(toolbar);
-    $(document).mouseup(function() {
+    $(document).mouseup(function () {
         toolbarMenu.hide();
     });
 
-    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-refresh"></i> Refresh')).appendTo(toolbarMenu).click(function() {
-        refreshFileSystem();
-    });
-
-    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-folder"></i> New Folder')).appendTo(toolbarMenu).click(function() {
-        let p = filebrowserpath.val() + 'new folder';
-        $.post('./ur_base/filebrowser/new/', { p: p }, function(result) {
-            if (result === 'ok') {
-                refreshFileSystem();
-            }
+    $('<li>')
+        .append($('<a>', { href: '#' }).html('<i class="fa fa-refresh"></i> Refresh'))
+        .appendTo(toolbarMenu)
+        .click(function () {
+            refreshFileSystem();
         });
-    });
+
+    $('<li>')
+        .append($('<a>', { href: '#' }).html('<i class="fa fa-folder"></i> New Folder'))
+        .appendTo(toolbarMenu)
+        .click(function () {
+            let p = filebrowserpath.val() + 'new folder';
+            $.post('./ur_base/filebrowser/new/', { p: p }, function (result) {
+                if (result === 'ok') {
+                    refreshFileSystem();
+                }
+            });
+        });
 
     let filebrowserClipboard = { action: null, selection: null, originalPath: null };
-    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-cut"></i> Cut')).appendTo(toolbarMenu).click(function() {
-        let currentPath = filebrowserpath.val();
-        let files = filebrowser.rows({ selected: true }).data().toArray().map(s => s.name);
-        filebrowserClipboard = { action: 'cut', selection: files, originalPath: currentPath };
-        $('#filebrowser .copy').removeClass('copy');
-        $('#filebrowser .selected').addClass('cut');
-    });
-
-    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-copy"></i> Copy')).appendTo(toolbarMenu).click(function() {
-        let currentPath = filebrowserpath.val();
-        let files = filebrowser.rows({ selected: true }).data().toArray().map(s => s.name);
-        filebrowserClipboard = { action: 'copy', selection: files, originalPath: currentPath };
-        $('#filebrowser .cut').removeClass('cut');
-        $('#filebrowser .selected').addClass('copy');
-    });
-
-    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-paste"></i> Paste')).appendTo(toolbarMenu).click(function() {
-        let currentPath = filebrowserpath.val();
-        let files = filebrowserClipboard.selection.map(file => {
-            return {
-                src: (filebrowserClipboard.originalPath + file).replace(/\/{2,}/g, '/'),
-                dest: (currentPath + file).replace(/\/{2,}/g, '/')
-            };
+    $('<li>')
+        .append($('<a>', { href: '#' }).html('<i class="fa fa-cut"></i> Cut'))
+        .appendTo(toolbarMenu)
+        .click(function () {
+            let currentPath = filebrowserpath.val();
+            let files = filebrowser
+                .rows({ selected: true })
+                .data()
+                .toArray()
+                .map((s) => s.name);
+            filebrowserClipboard = { action: 'cut', selection: files, originalPath: currentPath };
+            $('#filebrowser .copy').removeClass('copy');
+            $('#filebrowser .selected').addClass('cut');
         });
-        if (filebrowserClipboard.action === 'cut') {
-            moveFileSystem(files);
-        } else if (filebrowserClipboard.action === 'copy') {
-            copyFileSystem(files);
-        }
-        $('#filebrowser .copy').removeClass('copy');
-        $('#filebrowser .cut').removeClass('cut');
-        filebrowserClipboard = { action: null, selection: null };
-    });
 
-    $('<li>').append($('<a>', { href: '#' }).html('<i class="fa fa-trash"></i> Delete')).appendTo(toolbarMenu).click(function() {
-        let currentPath = filebrowserpath.val();
-        let selected = filebrowser.rows({ selected: true }).data().toArray().map(s => currentPath + s.name);
-        $.post('./ur_base/filebrowser/delete/', { files: selected }, function(result) {
-            if (result.success > 0) {
-                refreshFileSystem();
+    $('<li>')
+        .append($('<a>', { href: '#' }).html('<i class="fa fa-copy"></i> Copy'))
+        .appendTo(toolbarMenu)
+        .click(function () {
+            let currentPath = filebrowserpath.val();
+            let files = filebrowser
+                .rows({ selected: true })
+                .data()
+                .toArray()
+                .map((s) => s.name);
+            filebrowserClipboard = { action: 'copy', selection: files, originalPath: currentPath };
+            $('#filebrowser .cut').removeClass('cut');
+            $('#filebrowser .selected').addClass('copy');
+        });
+
+    $('<li>')
+        .append($('<a>', { href: '#' }).html('<i class="fa fa-paste"></i> Paste'))
+        .appendTo(toolbarMenu)
+        .click(function () {
+            let currentPath = filebrowserpath.val();
+            let files = filebrowserClipboard.selection.map((file) => {
+                return {
+                    src: (filebrowserClipboard.originalPath + file).replace(/\/{2,}/g, '/'),
+                    dest: (currentPath + file).replace(/\/{2,}/g, '/'),
+                };
+            });
+            if (filebrowserClipboard.action === 'cut') {
+                moveFileSystem(files);
+            } else if (filebrowserClipboard.action === 'copy') {
+                copyFileSystem(files);
             }
+            $('#filebrowser .copy').removeClass('copy');
+            $('#filebrowser .cut').removeClass('cut');
+            filebrowserClipboard = { action: null, selection: null };
         });
-    });
 
-    $('<button>', { type: 'button', class: 'more' }).append('<i class="fa fa-caret-down">').appendTo(toolbar).click(function() {
-        let pos = $(this).position();
-        toolbarMenu.toggle().toggleClass('active').css({ position: 'absolute', top: (pos.top + 38)+'px' });
-    });
+    $('<li>')
+        .append($('<a>', { href: '#' }).html('<i class="fa fa-trash"></i> Delete'))
+        .appendTo(toolbarMenu)
+        .click(function () {
+            let currentPath = filebrowserpath.val();
+            let selected = filebrowser
+                .rows({ selected: true })
+                .data()
+                .toArray()
+                .map((s) => currentPath + s.name);
+            $.post('./ur_base/filebrowser/delete/', { files: selected }, function (result) {
+                if (result.success > 0) {
+                    refreshFileSystem();
+                }
+            });
+        });
 
-    $('#filebrowser tbody').on('dblclick', 'tr', function() {
+    $('<button>', { type: 'button', class: 'more' })
+        .append('<i class="fa fa-caret-down">')
+        .appendTo(toolbar)
+        .click(function () {
+            let pos = $(this).position();
+            toolbarMenu
+                .toggle()
+                .toggleClass('active')
+                .css({ position: 'absolute', top: pos.top + 38 + 'px' });
+        });
+
+    $('#filebrowser tbody').on('dblclick', 'tr', function () {
         var data = filebrowser.row(this).data();
         if (data.type === 'd') {
             refreshFileSystem(filebrowserpath.val() + data.name);
         }
     });
 
-    filebrowser.on('select', function(e, dt, type, indexes) {
+    filebrowser.on('select', function (e, dt, type, indexes) {
         if (type === 'row') {
             var row = filebrowser.rows(indexes);
             var data = row.data();
-            if (data.length === 1) { // single file selected, allow renaming.
+            if (data.length === 1) {
+                // single file selected, allow renaming.
                 $('#filebrowser tbody td.name').unbind('click.rename2');
-                $(row.nodes()[0]).find('td.name').bind('click.rename2', function(event) {
-                    var view = $(this).find('.view').hide();
-                    var edit = $(this).find('.edit').width($(this).width()-2).addClass('active').show()
-                        .unbind('focus')
-                        .one('focus', function() {
-                            $(this).select();
-                        })
-                        .unbind('change')
-                        .one('change', function() {
-                            edit.removeClass('active').hide();
-                            view.show();
-                            if (data[0].name !== edit.val()) {
-                                let currentPath = filebrowserpath.val();
-                                let files = [ {
-                                    src: currentPath + data[0].name,
-                                    dest: currentPath + edit.val()
-                                } ];
-                                moveFileSystem(files);
-                            }
-                        }).focus();
-                    event.stopPropagation();
-                });
-            } else { // multiple files selected, no renaming allowed.
+                $(row.nodes()[0])
+                    .find('td.name')
+                    .bind('click.rename2', function (event) {
+                        var view = $(this).find('.view').hide();
+                        var edit = $(this)
+                            .find('.edit')
+                            .width($(this).width() - 2)
+                            .addClass('active')
+                            .show()
+                            .unbind('focus')
+                            .one('focus', function () {
+                                $(this).select();
+                            })
+                            .unbind('change')
+                            .one('change', function () {
+                                edit.removeClass('active').hide();
+                                view.show();
+                                if (data[0].name !== edit.val()) {
+                                    let currentPath = filebrowserpath.val();
+                                    let files = [
+                                        {
+                                            src: currentPath + data[0].name,
+                                            dest: currentPath + edit.val(),
+                                        },
+                                    ];
+                                    moveFileSystem(files);
+                                }
+                            })
+                            .focus();
+                        event.stopPropagation();
+                    });
+            } else {
+                // multiple files selected, no renaming allowed.
             }
         }
     });
 
-    $('#red-ui-sidebar-content').click(function() {
+    $('#red-ui-sidebar-content').click(function () {
         $('#filebrowser tbody').find('.edit.active').trigger('change');
     });
 
@@ -3523,7 +3580,7 @@
             let p = path || filebrowserpath.val();
             let data = await $.get('./ur_base/filebrowser/list/', { p: p });
             if (data.path && data.files) {
-                filebrowserpath.val(data.path.charAt(data.path.length-1) === '/' ? data.path : data.path + '/');
+                filebrowserpath.val(data.path.charAt(data.path.length - 1) === '/' ? data.path : data.path + '/');
                 if (filebrowser) {
                     filebrowser.clear();
                     filebrowser.rows.add(data.files).draw();
@@ -3532,11 +3589,11 @@
             }
         } catch (e) {}
         return false;
-    };
+    }
     refreshFileSystem('/');
 
     function moveFileSystem(files) {
-        $.post('./ur_base/filebrowser/move/', { files: files }, function(result) {
+        $.post('./ur_base/filebrowser/move/', { files: files }, function (result) {
             if (result.success > 0) {
                 refreshFileSystem();
             }
@@ -3544,7 +3601,7 @@
     }
 
     function copyFileSystem(files) {
-        $.post('./ur_base/filebrowser/copy/', { files: files }, function(result) {
+        $.post('./ur_base/filebrowser/copy/', { files: files }, function (result) {
             if (result.success > 0) {
                 refreshFileSystem();
             }
@@ -3553,28 +3610,31 @@
 
     $.get('./api/install/', function (isInstalled) {
         if (!isInstalled) {
-            var notification = RED.notify("<p>Thanks for installing Unified-RED!</p>\
-                <p>Ready to start using Unified-RED? Click the setup button below to continue.</p>",{
-                modal: true,
-                fixed: true,
-                type: 'success', // 'compact', 'success', 'warning', 'error'
-                buttons: [
-                    {
-                        text: "close",
-                        click: function(e) {
-                            notification.close();
-                        }
-                    },
-                    {
-                        text: "setup",
-                        class:"primary",
-                        click: function(e) {
-                            window.open("./ui/#/initial-setup", '_blank');
-                            notification.close();
-                        }
-                    }
-                ]
-            });
+            var notification = RED.notify(
+                '<p>Thanks for installing Unified-RED!</p>\
+                <p>Ready to start using Unified-RED? Click the setup button below to continue.</p>',
+                {
+                    modal: true,
+                    fixed: true,
+                    type: 'success', // 'compact', 'success', 'warning', 'error'
+                    buttons: [
+                        {
+                            text: 'close',
+                            click: function (e) {
+                                notification.close();
+                            },
+                        },
+                        {
+                            text: 'setup',
+                            class: 'primary',
+                            click: function (e) {
+                                window.open('./ui/#/initial-setup', '_blank');
+                                notification.close();
+                            },
+                        },
+                    ],
+                }
+            );
         }
     });
 </script>

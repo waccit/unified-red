@@ -6,8 +6,8 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { GroupComponent } from './group/group.component';
 import { GroupDirective } from '../directives/group.directive';
-import { MenuPageComponent } from './menu-page/menu-page.component';
-import { MenuPageDirective } from '../directives/menu-page.directive';
+import { PageComponent } from './page/page.component';
+import { PageDirective } from '../directives/page.directive';
 import { HomePageComponent } from './home-page/home-page.component';
 import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
 import { AlarmDialogComponent } from './alarm-console/alarm-dialog.component';
@@ -25,8 +25,8 @@ import { MatInputModule } from '@angular/material/input';
     declarations: [
         GroupComponent,
         GroupDirective,
-        MenuPageDirective,
-        MenuPageComponent,
+        PageDirective,
+        PageComponent,
         HomePageComponent,
         AlarmConsoleComponent,
         AlarmDialogComponent,

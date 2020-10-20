@@ -21,8 +21,8 @@ export class ProfileComponent implements OnInit {
     chide = true;
     private userId: string;
     private username: string;
-    menuPages: string[] = [];
-    filteredMenuPages: Observable<string[]>;
+    pages: string[] = [];
+    filteredPages: Observable<string[]>;
     homepage = new FormControl();
 
     constructor(
@@ -73,12 +73,12 @@ export class ProfileComponent implements OnInit {
         });
         this.menuService.menu.subscribe((menu) => {
             if (menu && menu.length) {
-                for (let item of menu) {
-                    this.getMenuPagePaths(item);
+                for (let folder of menu) {
+                    this.getPagePaths(folder);
                 }
             }
         });
-        this.filteredMenuPages = this.homepage.valueChanges.pipe(
+        this.filteredPages = this.homepage.valueChanges.pipe(
             startWith(''),
             map((value) => this._filter(value))
         );
@@ -104,7 +104,8 @@ export class ProfileComponent implements OnInit {
             .update(this.userId, this.settingsForm.value)
             .pipe(first())
             .subscribe(
-                () => { // data: User
+                () => {
+                    // data: User
                     this.snackbar.success('Account settings successfully saved!');
                 },
                 (error) => {
@@ -121,7 +122,8 @@ export class ProfileComponent implements OnInit {
             .login(this.username, this.uf.password.value)
             .pipe(first())
             .subscribe(
-                () => { // data
+                () => {
+                    // data
                     this.userService
                         .update(this.userId, { username: this.uf.username.value })
                         .pipe(first())
@@ -149,7 +151,8 @@ export class ProfileComponent implements OnInit {
             .login(this.username, this.pf.password.value)
             .pipe(first())
             .subscribe(
-                () => { // data
+                () => {
+                    // data
                     this.userService
                         .update(this.userId, { password: this.pf.newPassword.value })
                         .pipe(first())
@@ -169,18 +172,18 @@ export class ProfileComponent implements OnInit {
             );
     }
 
-    private getMenuPagePaths(page: RouteInfo) {
-        if (page.isMenuPage) {
-            this.menuPages.push(page.path);
+    private getPagePaths(page: RouteInfo) {
+        if (page.isPage) {
+            this.pages.push(page.path);
         } else {
             for (let sub of page.submenu) {
-                this.getMenuPagePaths(sub);
+                this.getPagePaths(sub);
             }
         }
     }
 
     private _filter(value: string): string[] {
         const filterValue = value.toLowerCase();
-        return this.menuPages.filter((option) => option.toLowerCase().includes(filterValue));
+        return this.pages.filter((option) => option.toLowerCase().includes(filterValue));
     }
 }

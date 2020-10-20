@@ -1,5 +1,5 @@
 import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
-import { MenuPageDirective } from '../../directives/menu-page.directive';
+import { PageDirective } from '../../directives/page.directive';
 import { GroupComponent } from '../group/group.component';
 import { PageGroups } from './page-groups';
 import { CurrentUserService, RoleService } from '../../services';
@@ -11,18 +11,18 @@ import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 import { User } from '../../data';
 
 @Component({
-    selector: 'app-menu-page',
-    templateUrl: './menu-page.component.html',
-    styleUrls: ['./menu-page.component.sass'],
+    selector: 'app-page',
+    templateUrl: './page.component.html',
+    styleUrls: ['./page.component.sass'],
 })
-export class MenuPageComponent implements OnInit {
+export class PageComponent implements OnInit {
     private pathList: string[];
-    private menuItem: string;
-    private menuPage: string;
+    private folder: string;
+    private page: string;
     private pageGroupsList: PageGroups[];
     private _menuSubscription: Subscription;
     breadcrumbs: string[];
-    @ViewChild(MenuPageDirective, { static: true }) menuPageHost: MenuPageDirective;
+    @ViewChild(PageDirective, { static: true }) pageHost: PageDirective;
     private userRole: string;
 
     constructor(
@@ -37,7 +37,7 @@ export class MenuPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.viewContainerRef = this.menuPageHost.viewContainerRef;
+        this.viewContainerRef = this.pageHost.viewContainerRef;
 
         this.currentUserService.currentUser.subscribe((user: User) => {
             if (user) {
@@ -75,20 +75,20 @@ export class MenuPageComponent implements OnInit {
             }
         }
 
-        this.menuItem = this.pathList[this.pathList.length - 2];
-        this.menuPage = this.pathList[this.pathList.length - 1];
+        this.folder = this.pathList[this.pathList.length - 2];
+        this.page = this.pathList[this.pathList.length - 1];
 
-        const foundMenuItem = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.menuItem);
+        const foundFolder = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.folder);
 
-        let foundMenuPage: any;
-        if (foundMenuItem) {
-            this.breadcrumbs.push(foundMenuItem.title);
-            foundMenuPage = this.findMenuEntityByKeyValue(foundMenuItem.items, 'title', this.menuPage);
+        let foundPage: any;
+        if (foundFolder) {
+            this.breadcrumbs.push(foundFolder.title);
+            foundPage = this.findMenuEntityByKeyValue(foundFolder.items, 'title', this.page);
         }
 
-        if (foundMenuPage) {
-            this.breadcrumbs.push(foundMenuPage.title);
-            foundMenuPage.items.forEach((g) => {
+        if (foundPage) {
+            this.breadcrumbs.push(foundPage.title);
+            foundPage.items.forEach((g) => {
                 this.pageGroupsList.push({
                     header: g.header,
                     access: g.access || '',

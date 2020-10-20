@@ -1,8 +1,8 @@
 import { Directive, ViewContainerRef } from '@angular/core';
 
 @Directive({
-    selector: '[menu-page-host]',
+    selector: '[page-host]',
 })
-export class MenuPageDirective {
+export class PageDirective {
     constructor(public viewContainerRef: ViewContainerRef) {}
 }

@@ -2,8 +2,8 @@
     "ur_group": {
         "label": {
             "name": "Name",
-            "menuItem": "Menu Item",
-            "menuPage": "Menu Page",
+            "folder": "Folder",
+            "page": "Page",
             "width": "Width",
             "widthLg": "lg",
             "widthMd": "md",
