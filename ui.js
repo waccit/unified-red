@@ -306,12 +306,12 @@ function add(opt) {
                 // find and replace wildcard (*)
                 let topicRegex = topicPattern.replace(/\*/g, '.*');
                 console.log('topicRegex replaced *: ', topicRegex);
-                // find and replace capture group (x)
-                topicRegex = topicRegex.replace(/\{x\}/gi, '([\\w\\. ]+)');
-                console.log('topicRegex replaced {x}: ', topicRegex);
                 // find and escape square-brackets
                 topicRegex = topicRegex.replace(/\[/g, '\\[');
                 topicRegex = topicRegex.replace(/\]/g, '\\]');
+                // find and replace capture group (x)
+                topicRegex = topicRegex.replace(/\{x\}/gi, '([\\w\\. ]+)');
+                console.log('topicRegex replaced {x}: ', topicRegex);
                 // make new regex
                 topicRegex = new RegExp('^' + topicRegex + '$');
                 console.log('topicRegex done: ', topicRegex);
