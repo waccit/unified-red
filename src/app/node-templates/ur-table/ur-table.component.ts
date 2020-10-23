@@ -90,7 +90,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 							if (isGLP) {
 								this.device = this.glp.exec(data.msg.topic)[4];
 								devIndex = this.glp.exec(data.msg.topic)[5];
-								console.log('this.device', this.device);
+								// console.log('this.device', this.device);
 								this.point = 'Web Server[' + this.device + ']' + devIndex;
 								// console.log('this.point 1: ', this.point);
 							} else {
