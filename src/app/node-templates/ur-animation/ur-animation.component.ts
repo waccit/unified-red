@@ -80,10 +80,8 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     }
 
     private processRule(msg:any) {
-        // for (let i = 0; i < this.data.rules.length; i++) {
-        // const rule:AnimationRule = this.data.rules[i];
         for (const rule of this.data.rules) {
-            if (rule.topic === msg.topic) {
+            if (msg.topic.indexOf(rule.topic) !== -1) {
                 const element = this.container.find(`[animated][name='${rule.img}']`);
                 if (element.length) {
                     switch (rule.prop) {
