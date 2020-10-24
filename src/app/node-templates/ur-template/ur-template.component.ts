@@ -25,7 +25,11 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         // Escape any funky symbols in the node ID
         const nodeId = this.nodeId.replace(/(\W)/g, '\\\\$1');
         // Substitute any $node references in the template code
-        const html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
+        let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
+        // handle dynamic page. substitute {x}
+        if (this.data.instance?.number) {
+            html = html.replace(/\{x\}/ig, this.data.instance.number);
+        }
         this.container.html($(html));
         // process any elements with request topic attributes
         if (this.access.write) {
@@ -45,7 +49,9 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
             // process any elements with feedback topic attributes
-            const elements = this.container.find(`[feedback='${data.msg.topic}']`);
+            const elements = this.container.find('[feedback]').filter(function() {
+                return data.msg.topic.indexOf($(this).attr('feedback')) !== -1;
+            });
             elements.filter('input, select').val(data.msg.payload);
             elements.not('img, input, select').html(data.msg.payload);
         }
