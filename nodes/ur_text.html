@@ -48,7 +48,7 @@
                 });
             });
 
-            // if (this.page.isDynamic) {
+            // if (this.menuPage.isDynamic) {
             //     $('#topic-pattern').show();
             // } else {
             //     $('#topic-pattern').hide();
@@ -239,32 +239,58 @@
     }
 </style>
 <script type="text/html" data-help-name="ur_text">
-    <p>Will display a non-editable text field on the user interface.</p>
-    <p>Each received <code>msg.payload</code> will update the text based on the provided <b>Value Format</b>.</p>
     <p>
-        The <b>Value Format</b> field can be used to change the displayed format and can contain valid HTML and
-        <a href="https://scotch.io/tutorials/all-about-the-built-in-angularjs-filters" target="_blank"
-            >Angular filters</a
-        >.
+        Displays a non-editable text field on the user interface.
+    </p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>updates the text field value based on the provided <b>Value Format</b> </dd>
+        <!-- <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd> the MQTT topic to publish to.</dd> -->
+    </dl>
+    <h3>Details</h3>
+    <p>
+        <b>Group</b> allows you to group user interface elements and controls where the text field appears in the
+        user interface layout.
     </p>
     <p>
-        For example: <code>{{value | uppercase}} &amp;deg;</code> will uppercase the payload text and add the degree
-        symbol.
+        <b>Size</b> controls the text field width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
     </p>
     <p>
-        The label can also be set by a message property by setting the field to the name of the property, for example
-        <code>{{msg.topic}}</code>.
+        <b>Label</b> provides a description of the text field in the user interface.
     </p>
     <p>
-        The following icon fonts are also available:
-        <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
-        <i>(e.g. 'check', 'close')</i> or a
-        <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i>,
-        or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>. You
-        can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
+        <b>Value Format</b> is a <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the value displayed in the text field.
     </p>
     <p>
-        The widget also has a class of <code>nr-dashboard-widget-{the_widget_label_with_underscores}</code> which can be
-        used for additional styling if required. You may need to use the <i>!important</i> flag to override the theme.
+        <b>Layout</b> controls the arrangement and alignment of the text field label and value in the user interface.
     </p>
+    <p>
+        <b>Name</b> is the name of a node in the workspace.
+    </p>
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a member of
+        a dynamic page. The pattern must include one <code>{x}</code> which identifies the intended instance number in the topic.
+        Optionally, the pattern may include <code>*</code> as wildcards to represent 0 or more characters in the topic.
+        Example: <code>*/nvoSpaceTemp{x}/*</code>
+    </p>
+    <p>
+        <b>Access</b> controls the user's read access to the text field. When set to <code>Default</code>, Unified-RED's 
+        standard role-based permissions will be used. If access is set to anything other than <code>Default</code> then
+        the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or 
+        <code>enable/disable</code> the text field.
+    </p>
+    <h3>References</h3>
+    <ul>
+        <li><a href="#" target="_blank">Unified-RED User Roles</a></li>
+        <li><a href="#" target="_blank">Unified-RED Dynamic Pages</a></li>
+        <li><a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap Grid System</a></li>
+        <li><a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache Templates</a></li>
+    </ul>
 </script>
