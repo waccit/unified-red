@@ -301,27 +301,28 @@ function add(opt) {
             if (opt.page.config.isDynamic) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
-                console.log('topicPatter rcvd: ', topicPattern);
+                // console.log('topicPatter rcvd: ', topicPattern);
 
                 // find and replace wildcard (*)
                 let topicRegex = topicPattern.replace(/\*/g, '.*');
-                console.log('topicRegex replaced *: ', topicRegex);
+                // console.log('topicRegex replaced *: ', topicRegex);
                 // find and escape square-brackets
                 topicRegex = topicRegex.replace(/\[/g, '\\[');
                 topicRegex = topicRegex.replace(/\]/g, '\\]');
                 // find and replace capture group (x)
                 topicRegex = topicRegex.replace(/\{x\}/gi, '([\\w\\. ]+)');
-                console.log('topicRegex replaced {x}: ', topicRegex);
+                // console.log('topicRegex replaced {x}: ', topicRegex);
                 // make new regex
                 topicRegex = new RegExp('^' + topicRegex + '$');
-                console.log('topicRegex done: ', topicRegex);
-                console.log('topic: ', topic);
+                // console.log('topicRegex done: ', topicRegex);
+                // console.log('topic: ', topic);
 
                 let topicArr = topicRegex.exec(topic);
-                console.log('topicArr: ', topicArr);
-                let destinationInstNum = topicArr[1];
-
-                newId += '.' + destinationInstNum;
+                // console.log('topicArr: ', topicArr);
+                if (topicArr) {
+                    let destinationInstNum = topicArr[1];
+                    newId += '.' + destinationInstNum;
+                }
             }
 
             toEmit.socketid = toEmit.id = toStore.id = newId;
