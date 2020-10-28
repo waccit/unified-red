@@ -68,6 +68,10 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     send(msg: any) {
         if (this.nodeId) {
+            // handle dynamic page. substitute {x}
+            if (this.data?.instance?.number && msg.topic) {
+                msg.topic = msg.topic.replace(/\{x\}/ig, this.data.instance.number);
+            }
             this.webSocketService.emit({ id: this.nodeId, msg });
         }
     }
