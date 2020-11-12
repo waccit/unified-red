@@ -9,7 +9,7 @@
             category: 'unified-red',
             color: '#b39ddb',
             defaults: {
-                group: { type: 'ur_group', required: true },
+                tab: { type: 'ur_tab', required: true },
                 order: { value: 0 },
                 width: { value: 12 },
                 holidays: { type: 'ur_schedule_holidays_config', required: true },
@@ -53,8 +53,6 @@
                 }
                 $('#node-input-size').elementSizer({
                     width: '#node-input-width',
-                    height: '#node-input-height',
-                    group: '#node-input-group',
                 });
 
                 $('#node-input-value-container')
@@ -289,15 +287,14 @@
 
 <script type="text/html" data-template-name="ur_schedule">
     <div class="form-row">
-        <label for="node-input-group"
-            ><i class="fa fa-table"></i> <span data-i18n="ur_schedule.label.group"></span
+        <label for="node-input-tab"
+            ><i class="fa fa-columns"></i> <span data-i18n="ur_schedule.label.tab"></span
         ></label>
-        <input type="text" id="node-input-group" />
+        <input type="text" id="node-input-tab" />
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> <span data-i18n="ur_schedule.label.size"></span></label>
         <input type="hidden" id="node-input-width" />
-        <input type="hidden" id="node-input-height" />
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">

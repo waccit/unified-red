@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GroupWidgets } from '../dashboard/group/group-widget';
+import { Widget } from '../data/widget.model';
 import { UrTextComponent } from '../node-templates/ur-text/ur-text.component';
 import { UrButtonComponent } from '../node-templates/ur-button/ur-button.component';
 import { UrTextInputComponent } from '../node-templates/ur-text-input/ur-text-input.component';
@@ -14,27 +14,27 @@ import { UrChartComponent } from '../node-templates/ur-chart/ur-chart.component'
     providedIn: 'root',
 })
 export class WidgetService {
-    getWidgets(widgetsList: any[]) {
-        return widgetsList.map((widget) => {
+    getWidgets(widgets: any[]) {
+        return widgets.map((widget) => {
             switch (widget.type) {
                 case 'text':
-                    return new GroupWidgets(UrTextComponent, widget);
+                    return new Widget(UrTextComponent, widget);
                 case 'button':
-                    return new GroupWidgets(UrButtonComponent, widget);
+                    return new Widget(UrButtonComponent, widget);
                 case 'chart':
-                    return new GroupWidgets(UrChartComponent, widget);
+                    return new Widget(UrChartComponent, widget);
                 case 'text-input':
-                    return new GroupWidgets(UrTextInputComponent, widget);
+                    return new Widget(UrTextInputComponent, widget);
                 case 'template':
-                    return new GroupWidgets(UrTemplateComponent, widget);
+                    return new Widget(UrTemplateComponent, widget);
                 case 'animation':
-                    return new GroupWidgets(UrAnimationComponent, widget);
+                    return new Widget(UrAnimationComponent, widget);
                 case 'schedule':
-                    return new GroupWidgets(UrScheduleComponent, widget);
+                    return new Widget(UrScheduleComponent, widget);
                 case 'table':
-                    return new GroupWidgets(UrTableComponent, widget);
+                    return new Widget(UrTableComponent, widget);
                 case 'form':
-                    return new GroupWidgets(UrFormComponent, widget);
+                    return new Widget(UrFormComponent, widget);
             }
         });
     }

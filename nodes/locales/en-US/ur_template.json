@@ -3,9 +3,9 @@
         "label": {
             "category": "unified-red",
             "type": "Template type",
-            "local": "Widget in group",
+            "local": "Widget in tab",
             "global": "Added to site <head> section",
-            "group": "Group",
+            "tab": "Tab",
             "size": "Size",
             "name": "Name",
             "pass-through": "Pass through messages from input.",

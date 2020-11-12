@@ -20,9 +20,14 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { TabComponent } from './tab/tab.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { TabDirective } from '../directives/tab.directive';
 
 @NgModule({
     declarations: [
+        TabComponent,
+        TabDirective,
         GroupComponent,
         GroupDirective,
         PageDirective,
@@ -45,6 +50,7 @@ import { MatInputModule } from '@angular/material/input';
         MatPaginatorModule,
         MatTableModule,
         MatSortModule,
+        MatTabsModule,
     ],
     entryComponents: [GroupComponent],
 })

@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
 
-export class GroupWidgets {
+export class Widget {
     constructor(public component: Type<any>, public data: any) {}
 }

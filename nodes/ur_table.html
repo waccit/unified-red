@@ -3,7 +3,7 @@
         category: 'unified-red',
         color: 'rgb(63, 173, 181)',
         defaults: {
-            group: { type: 'ur_group', required: true },
+            tab: { type: 'ur_tab', required: true },
             name: { value: '' },
             order: { value: 0 },
             width: {
@@ -41,7 +41,7 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
-            if (RED.nodes.getType('ur_group')) {
+            if (RED.nodes.getType('ur_tab')) {
                 $('.form-tips').hide();
             } else {
                 $('.form-row').hide();
@@ -189,11 +189,11 @@
 </script>
 
 <script type="text/html" data-template-name="ur_table">
-    <div class='form-row' id='table-row-group'>
-        <label for='node-input-group'>
-            <i class='fa fa-table'></i> Group</span>
+    <div class='form-row' id='table-row-tab'>
+        <label for='node-input-tab'>
+            <i class='fa fa-columns'></i> Tab</span>
         </label>
-        <input type='text' id='node-input-group'>
+        <input type='text' id='node-input-tab'>
     </div>
     <div class="form-row" id="table-row-size">
         <label><i class="fa fa-object-group"></i> Size</label>

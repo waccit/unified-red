@@ -1,0 +1,12 @@
+{
+    "ur_tab": {
+        "label": {
+            "default": "Default",
+            "name": "Name",
+            "group": "Group",
+            "page": "Page",
+            "folder": "Folder",
+            "tab": "Tab"
+        }
+    }
+}

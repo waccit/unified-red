@@ -10,7 +10,11 @@ module.exports = function (RED) {
         this.cache = {};
         let io = socketio.connection();
 
-        var group = RED.nodes.getNode(config.group);
+        var tab = RED.nodes.getNode(config.tab);
+        if (!tab) {
+            return;
+        }
+        var group = RED.nodes.getNode(tab.config.group);
         if (!group) {
             return;
         }
@@ -38,6 +42,7 @@ module.exports = function (RED) {
                 folders: folders,
                 page: page,
                 group: group,
+                tab: tab,
                 control: {
                     id: config.id,
                     type: 'table',

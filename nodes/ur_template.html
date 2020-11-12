@@ -8,7 +8,7 @@
         category: 'unified-red',
         color: 'rgb( 63, 173, 181)',
         defaults: {
-            group: { type: 'ur_group', required: true },
+            tab: { type: 'ur_tab', required: true },
             name: { value: '' },
             order: { value: 0 },
             width: { value: 12 },
@@ -74,11 +74,11 @@
 
             $('#node-input-templateScope').on('change', function () {
                 if ($('#node-input-templateScope').val() === 'global') {
-                    $('#template-row-group, #template-row-size, #template-pass-store').hide();
-                    that._def.defaults.group.required = false;
+                    $('#template-row-tab, #template-row-size, #template-pass-store').hide();
+                    that._def.defaults.tab.required = false;
                 } else {
-                    $('#template-row-group, #template-row-size, #template-pass-store').show();
-                    that._def.defaults.group.required = true;
+                    $('#template-row-tab, #template-row-size, #template-pass-store').show();
+                    that._def.defaults.tab.required = true;
                 }
 
                 var rows = $('#dialog-form>div:not(.node-text-editor-row)');
@@ -176,11 +176,11 @@
             <option value="global" data-i18n="ur_template.label.global"></option>
         </select>
     </div>
-    <div class="form-row" id="template-row-group">
-        <label for="node-input-group"
-            ><i class="fa fa-table"></i> <span data-i18n="ur_template.label.group"></span
+    <div class="form-row" id="template-row-tab">
+        <label for="node-input-tab"
+            ><i class="fa fa-columns"></i> <span data-i18n="ur_template.label.tab"></span
         ></label>
-        <input type="text" id="node-input-group" />
+        <input type="text" id="node-input-tab" />
     </div>
     <div class="form-row" id="template-row-size">
         <label><i class="fa fa-object-group"></i> <span data-i18n="ur_template.label.size"></span></label>

@@ -2,7 +2,7 @@
     "ur_animation": {
         "label": {
             "category": "unified-red",
-            "group": "Group",
+            "tab": "Tab",
             "size": "Size",
             "name": "Name",
             "template": "Template",
