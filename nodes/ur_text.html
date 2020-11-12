@@ -3,7 +3,7 @@
         category: 'unified-red',
         color: 'rgb(119, 198, 204)',
         defaults: {
-            group: { type: 'ur_group', required: true },
+            tab: { type: 'ur_tab', required: true },
             order: { value: 0 },
             width: { value: 12 },
             height: { value: 0 },
@@ -59,8 +59,8 @@
 
 <script type="text/html" data-template-name="ur_text">
     <div class="form-row">
-        <label for="node-input-group"><i class="fa fa-table"></i> Group</label>
-        <input type="text" id="node-input-group" />
+        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
+        <input type="text" id="node-input-tab" />
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> Size</label>
@@ -239,51 +239,44 @@
     }
 </style>
 <script type="text/html" data-help-name="ur_text">
-    <p>
-        Displays a non-editable text field on the user interface.
-    </p>
+    <p>Displays a non-editable text field on the user interface.</p>
     <h3>Inputs</h3>
     <dl class="message-properties">
         <dt>payload<span class="property-type">string</span></dt>
-        <dd>updates the text field value based on the provided <b>Value Format</b> </dd>
+        <dd>updates the text field value based on the provided <b>Value Format</b></dd>
         <!-- <dt class="optional">topic <span class="property-type">string</span></dt>
         <dd> the MQTT topic to publish to.</dd> -->
     </dl>
     <h3>Details</h3>
     <p>
-        <b>Group</b> allows you to group user interface elements and controls where the text field appears in the
-        user interface layout.
+        <b>Tab</b> allows you to group user interface elements and controls where the text field appears in the user
+        interface layout.
     </p>
     <p>
         <b>Size</b> controls the text field width using
         <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
     </p>
+    <p><b>Label</b> provides a description of the text field in the user interface.</p>
     <p>
-        <b>Label</b> provides a description of the text field in the user interface.
-    </p>
-    <p>
-        <b>Value Format</b> is a <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        <b>Value Format</b> is a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
         used to evaluate the value displayed in the text field.
     </p>
+    <p><b>Layout</b> controls the arrangement and alignment of the text field label and value in the user interface.</p>
+    <p><b>Name</b> is the name of a node in the workspace.</p>
     <p>
-        <b>Layout</b> controls the arrangement and alignment of the text field label and value in the user interface.
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a dynamic page. The pattern must include one <code>{x}</code> which identifies the intended instance
+        number in the topic. Optionally, the pattern may include <code>*</code> as wildcards to represent 0 or more
+        characters in the topic. Example: <code>*/nvoSpaceTemp{x}/*</code>
     </p>
     <p>
-        <b>Name</b> is the name of a node in the workspace.
-    </p>
-    <p>
-        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a member of
-        a dynamic page. The pattern must include one <code>{x}</code> which identifies the intended instance number in the topic.
-        Optionally, the pattern may include <code>*</code> as wildcards to represent 0 or more characters in the topic.
-        Example: <code>*/nvoSpaceTemp{x}/*</code>
-    </p>
-    <p>
-        <b>Access</b> controls the user's read access to the text field. When set to <code>Default</code>, Unified-RED's 
+        <b>Access</b> controls the user's read access to the text field. When set to <code>Default</code>, Unified-RED's
         standard role-based permissions will be used. If access is set to anything other than <code>Default</code> then
         the user must be assigned to the same or higher role than selected to be granted access.
     </p>
     <p>
-        When the user is denied access, the user interface can degrade to <code>show/hide</code> or 
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
         <code>enable/disable</code> the text field.
     </p>
     <h3>References</h3>

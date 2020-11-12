@@ -30,6 +30,7 @@
             "folder": "folder",
             "page": "page",
             "link": "link",
+            "tab": "tab",
             "group": "group",
             "edit": "edit",
             "spacer": "spacer",

@@ -5,7 +5,11 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         var node = this;
 
-        var group = RED.nodes.getNode(config.group);
+        var tab = RED.nodes.getNode(config.tab);
+        if (!tab) {
+            return;
+        }
+        var group = RED.nodes.getNode(tab.config.group);
         if (!group) {
             return;
         }
@@ -38,6 +42,7 @@ module.exports = function (RED) {
             folders: folders,
             page: page,
             group: group,
+            tab: tab,
             control: {
                 type: 'animation',
                 order: config.order,

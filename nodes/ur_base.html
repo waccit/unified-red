@@ -120,12 +120,12 @@
     }
 
     .nr-db-sb-folder-list-header > .nr-db-sb-list-chevron {
-        margin-left: 0px;
+        /* margin-left: 0px; */
         transition: transform 0.2s ease-in-out;
     }
 
     .nr-db-sb-group-list-header > .nr-db-sb-list-chevron {
-        margin-left: 20px;
+        /* margin-left: 20px; */
         transition: transform 0.2s ease-in-out;
     }
 
@@ -175,7 +175,7 @@
     }
 
     .nr-db-sb-widget-icon {
-        margin-left: 56px;
+        margin-left: 25px;
     }
 
     .nr-db-sb-icon {
@@ -1121,6 +1121,7 @@
                 var folderLists = {};
                 var pageLists = {};
                 var groupLists = {};
+                var tabLists = {};
 
                 // toggle slide folder content
                 var titleToggle = function (id, content, chevron) {
@@ -1165,6 +1166,11 @@
                         widthMd: 6,
                         widthSm: 12,
                         disp: true,
+                    },
+                    'ur_tab': {
+                        type: 'ur_tab',
+                        users: [],
+                        name: 'Tab',
                     },
                     'ur_menu_link': {
                         type: 'ur_menu_link',
@@ -1433,7 +1439,6 @@
                     }).appendTo(titleRow);
 
                     // icon
-                    // NB: include 2 icons and use CSS to switch (show/hide 1)
                     let staticIcon = $('<i>', { class: 'nr-db-sb-icon nr-db-sb-page-icon fa fa-file-o' }).appendTo(
                         titleRow
                     );
@@ -1469,7 +1474,7 @@
 
                     let content = $('<div>', { class: 'nr-db-sb-group-list-container' }).appendTo(container);
 
-                    if (!listStates.hasOwnProperty(pageNode.id) || !listStates[pageNode.id]) {
+                    if (listStates.hasOwnProperty(pageNode.id) && !listStates[pageNode.id]) {
                         content.hide();
                         chevron.css({ 'transform': 'rotate(-90deg)' });
                         content.addClass('nr-db-sb-collapsed');
@@ -1559,11 +1564,10 @@
                         item.node.page = item.page;
                     }
 
-                    item.widgets = item.widgets || [];
+                    item.tabs = item.tabs || [];
 
                     let groupNode = item.node;
                     elementParents[groupNode.id] = item.node.page;
-                    listElements[groupNode.id] = container;
 
                     RED.history.push({
                         t: 'add',
@@ -1590,7 +1594,7 @@
                     }).appendTo(titleRow);
 
                     // icon
-                    $('<i class="nr-db-sb-icon nr-db-sb-group-icon fa fa-table"></i>').appendTo(titleRow);
+                    $('<i class="nr-db-sb-icon nr-db-sb-group-icon fa fa-window-maximize"></i>').appendTo(titleRow);
 
                     //title
                     let title = $('<span class="nr-db-sb-title">')
@@ -1602,15 +1606,21 @@
                         class: 'nr-db-sb-list-header-button-group',
                     }).appendTo(titleRow);
 
+                    let addTabButton = $(
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
+                            c_('layout.tab') +
+                            '</a>'
+                    ).appendTo(buttonGroup);
+
                     let editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
                             c_('layout.edit') +
                             '</a>'
                     ).appendTo(buttonGroup);
 
-                    let content = $('<div>', { class: 'nr-db-sb-widget-list-container' }).appendTo(container);
+                    let content = $('<div>', { class: 'nr-db-sb-tab-list-container' }).appendTo(container);
 
-                    if (!listStates.hasOwnProperty(groupNode.id) || !listStates[groupNode.id]) {
+                    if (listStates.hasOwnProperty(groupNode.id) && !listStates[groupNode.id]) {
                         content.hide();
                         chevron.css({ 'transform': 'rotate(-90deg)' });
                         content.addClass('nr-db-sb-collapsed');
@@ -1619,65 +1629,19 @@
                         listStates[groupNode.id] = true;
                     }
 
-                    var widgetContainer = $('<ol>', { class: 'nr-db-sb-widget-list' })
+                    var tabContainer = $('<ol>', { class: 'nr-db-sb-tab-list' })
                         .appendTo(content)
                         .editableList({
-                            sortable: '.nr-db-sb-widget-list-header',
+                            sortable: '.nr-db-sb-tab-list-header',
                             addButton: false,
                             height: 'auto',
-                            connectWith: '.nr-db-sb-widget-list',
-                            addItem: function (container, i, widgetNode) {
-                                elementParents[widgetNode.id] = groupNode.id;
-                                widgetNode.order = i + 1;
-                                var titleRow = $('<div>', {
-                                    class: 'nr-db-sb-list-header nr-db-sb-widget-list-header',
-                                }).appendTo(container);
-                                $(
-                                    '<i class="nr-db-sb-list-handle nr-db-sb-widget-list-handle fa fa-bars"></i>'
-                                ).appendTo(titleRow);
-                                $('<i class="nr-db-sb-icon nr-db-sb-widget-icon fa fa-picture-o"></i>')
-                                    .click(function (e) {
-                                        e.preventDefault();
-                                        RED.search.show(widgetNode.id);
-                                    })
-                                    .appendTo(titleRow);
-                                var l = widgetNode._def.label;
-                                try {
-                                    l = (typeof l === 'function' ? l.call(widgetNode) : l) || '';
-                                } catch (err) {
-                                    console.log('Definition error: ' + d.type + '.label', err);
-                                    l = d.type;
-                                }
-                                var title = $('<span class="nr-db-sb-title">').text(l).appendTo(titleRow);
-                                listElements[widgetNode.id] = container;
-                                var buttonGroup = $('<div>', {
-                                    class: 'nr-db-sb-list-header-button-group',
-                                }).appendTo(titleRow);
-                                var editButton = $(
-                                    '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa=pencil"></i> ' +
-                                        c_('layout.edit') +
-                                        '</a>'
-                                ).appendTo(buttonGroup);
-                                container.on('mouseover', function () {
-                                    widgetNode.highlighted = true;
-                                    widgetNode.dirty = true;
-                                    RED.view.redraw();
-                                });
-                                container.on('mouseout', function () {
-                                    widgetNode.highlighted = false;
-                                    widgetNode.dirty = true;
-                                    RED.view.redraw();
-                                });
-                                editButton.on('click', function (evt) {
-                                    RED.editor.edit(widgetNode);
-                                    evt.stopPropagation();
-                                    evt.preventDefault();
-                                });
-                            },
+                            connectWith: '.nr-db-sb-tab-list',
+                            addItem: addMenuEntity,
                             sortItems: function (items) {
                                 var historyEvents = [];
                                 items.each(function (i, el) {
-                                    var node = el.data('data');
+                                    var tabData = el.data('data');
+                                    var node = tabData.node;
                                     var hev = {
                                         t: 'edit',
                                         node: node,
@@ -1694,6 +1658,10 @@
                                         node.order = i + 1;
                                         changed = true;
                                     }
+                                    if (changed) {
+                                        node.dirty = true;
+                                        node.changed = true;
+                                    }
                                     if (node.group !== item.node.id) {
                                         var oldGroupNode = RED.nodes.node(node.group);
                                         if (oldGroupNode) {
@@ -1701,6 +1669,202 @@
                                             oldGroupNode.users.splice(index, 1);
                                         }
                                         node.group = item.node.id;
+                                        item.node.users.push(node);
+                                        changed = true;
+                                    }
+                                });
+                                RED.history.push({
+                                    t: 'multi',
+                                    events: historyEvents,
+                                });
+                                RED.nodes.dirty(true);
+                                RED.view.redraw();
+                            },
+                        });
+
+                    if (groupNode.id) {
+                        groupLists[groupNode.id] = tabContainer;
+                    }
+
+                    titleRow.click(titleToggle(groupNode.id, content, chevron));
+
+                    addTabButton.click(function (evt) {
+                        tabContainer.editableList('addItem', { type: 'ur_tab', group: groupNode.id });
+                        evt.stopPropagation();
+                        evt.preventDefault();
+                    });
+
+                    editButton.on('click', function (evt) {
+                        RED.editor.editConfig('', groupNode.type, groupNode.id);
+                        evt.stopPropagation();
+                        evt.preventDefault();
+                    });
+
+                    item.tabs.forEach(function (tab) {
+                        tabContainer.editableList('addItem', tab);
+                    });
+                };
+
+                var addTab = function (container, i, item) {
+                    if (!item.node.group && item.group) {
+                        item.node.group = item.group;
+                    }
+
+                    item.widgets = item.widgets || [];
+
+                    let tabNode = item.node;
+                    elementParents[tabNode.id] = item.node.group;
+                    // listElements[tabNode.id] = container;
+
+                    RED.history.push({
+                        t: 'add',
+                        nodes: [item.node.id],
+                        dirty: RED.nodes.dirty(),
+                    });
+                    RED.nodes.dirty(true);
+
+                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
+                        RED.nodes.updateConfigNodeUsers(item.node);
+                    }
+
+                    // title row
+                    let titleRow = $('<div>', {
+                        class: 'nr-db-sb-list-header nr-db-sb-tab-list-header',
+                    }).appendTo(container);
+
+                    // handle
+                    $('<i class="nr-db-sb-list-handle nr-db-sb-tab-list-handle fa fa-bars"></i>').appendTo(titleRow);
+
+                    // chevron
+                    let chevron = $('<i class="fa fa-angle-down nr-db-sb-list-chevron">', {
+                        style: 'width:10px;',
+                    }).appendTo(titleRow);
+
+                    // icon
+                    $('<i class="nr-db-sb-icon nr-db-sb-tab-icon fa fa-columns"></i>').appendTo(titleRow);
+
+                    // title
+                    $('<span class="nr-db-sb-title">')
+                        .text(tabNode.name || tabNode.id || '')
+                        .appendTo(titleRow);
+
+                    // button group
+                    let buttonGroup = $('<div>', {
+                        class: 'nr-db-sb-list-header-button-group',
+                    }).appendTo(titleRow);
+
+                    let editButton = $(
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
+                            c_('layout.edit') +
+                            '</a>'
+                    ).appendTo(buttonGroup);
+
+                    let content = $('<div>', {
+                        class: 'nr-db-sb-widget-list-container',
+                    }).appendTo(container);
+
+                    if (listStates.hasOwnProperty(tabNode.id) && !listStates[tabNode.id]) {
+                        content.hide();
+                        chevron.css({ transform: 'rotate(-90deg)' });
+                        content.addClass('nr-db-sb-collapsed');
+                        listStates[tabNode.id] = false;
+                    } else {
+                        listStates[tabNode.id] = true;
+                    }
+
+                    var widgetContainer = $('<ol>', { class: 'nr-db-sb-widget-list' })
+                        .appendTo(content)
+                        .editableList({
+                            sortable: '.nr-db-sb-widget-list-header',
+                            addButton: false,
+                            height: 'auto',
+                            connectWith: '.nr-db-sb-widget-list',
+                            addItem: function (container, i, widgetNode) {
+                                elementParents[widgetNode.id] = tabNode.id;
+                                widgetNode.order = i + 1;
+
+                                var titleRow = $('<div>', {
+                                    class: 'nr-db-sb-list-header nr-db-sb-widget-list-header',
+                                }).appendTo(container);
+
+                                $(
+                                    '<i class="nr-db-sb-list-handle nr-db-sb-widget-list-handle fa fa-bars"></i>'
+                                ).appendTo(titleRow);
+
+                                $('<i class="nr-db-sb-icon nr-db-sb-widget-icon fa fa-picture-o"></i>')
+                                    .click(function (e) {
+                                        e.preventDefault();
+                                        RED.search.show(widgetNode.id);
+                                    })
+                                    .appendTo(titleRow);
+
+                                var l = widgetNode._def.label;
+
+                                try {
+                                    l = (typeof l === 'function' ? l.call(widgetNode) : l) || '';
+                                } catch (err) {
+                                    console.log('Definition error: ' + d.type + '.label', err);
+                                    l = d.type;
+                                }
+
+                                var title = $('<span class="nr-db-sb-title">').text(l).appendTo(titleRow);
+                                listElements[widgetNode.id] = container;
+
+                                var buttonGroup = $('<div>', {
+                                    class: 'nr-db-sb-list-header-button-group',
+                                }).appendTo(titleRow);
+
+                                var editButton = $(
+                                    '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa=pencil"></i> ' +
+                                        c_('layout.edit') +
+                                        '</a>'
+                                ).appendTo(buttonGroup);
+
+                                container.on('mouseover', function () {
+                                    widgetNode.highlighted = true;
+                                    widgetNode.dirty = true;
+                                    RED.view.redraw();
+                                });
+
+                                container.on('mouseout', function () {
+                                    widgetNode.highlighted = false;
+                                    widgetNode.dirty = true;
+                                    RED.view.redraw();
+                                });
+
+                                editButton.on('click', function (evt) {
+                                    RED.editor.edit(widgetNode);
+                                    evt.stopPropagation();
+                                    evt.preventDefault();
+                                });
+                            },
+                            sortItems: function (items) {
+                                var historyEvents = [];
+                                items.each(function (i, el) {
+                                    var node = el.data('data');
+                                    var hev = {
+                                        t: 'edit',
+                                        node: node,
+                                        changes: {
+                                            order: node.order,
+                                            tab: node.tab,
+                                        },
+                                        dirty: node.dirty,
+                                        changed: node.changed,
+                                    };
+                                    historyEvents.push(hev);
+                                    var changed = false;
+                                    if (node.order !== i + 1) {
+                                        node.order = i + 1;
+                                        changed = true;
+                                    }
+                                    if (node.tab !== item.node.id) {
+                                        var oldTabNode = RED.nodes.node(node.tab);
+                                        if (oldTabNode) {
+                                            var index = oldTabNode.users.indexOf(node);
+                                            oldTabNode.users.splice(index, 1);
+                                        }
+                                        node.tab = item.node.id;
                                         item.node.users.push(node);
                                         changed = true;
                                     }
@@ -1720,14 +1884,14 @@
 
                     widgetContainer.css('min-height', '5px');
 
-                    if (groupNode.id) {
-                        groupLists[groupNode.id] = widgetContainer;
+                    if (tabNode.id) {
+                        tabLists[tabNode.id] = widgetContainer;
                     }
 
-                    titleRow.click(titleToggle(groupNode.id, content, chevron));
+                    titleRow.click(titleToggle(tabNode.id, content, chevron));
 
                     editButton.on('click', function (evt) {
-                        RED.editor.editConfig('', groupNode.type, groupNode.id);
+                        RED.editor.editConfig('', tabNode.type, tabNode.id);
                         evt.stopPropagation();
                         evt.preventDefault();
                     });
@@ -1751,6 +1915,9 @@
                         case 'ur_group':
                             addGroup(container, i, item);
                             break;
+                        case 'ur_tab':
+                            addTab(container, i, item);
+                            break;
                         case 'ur_menu_link':
                             addMenuLink(container, i, item);
                         default:
@@ -1766,7 +1933,6 @@
                     .editableList({
                         sortable: '.nr-db-sb-folder-list-header',
                         addButton: false,
-                        // addItem: addTabOrLinkItem,
                         addItem: addMenuEntity,
                         sortItems: function (items) {
                             var historyEvents = [];
@@ -1941,6 +2107,11 @@
                                 entity = { id: contentData.id, groups: inner };
                                 break;
                             case 'ur_group':
+                                let tabs = content.find('.nr-db-sb-tab-list').editableList('items');
+                                inner = getInnerList(tabs);
+                                entity = { id: contentData.id, tabs: inner };
+                                break;
+                            case 'ur_tab':
                                 let widgets = content.find('.nr-db-sb-widget-list').editableList('items');
                                 inner = getInnerList(widgets);
                                 entity = { id: contentData.id, widgets: inner };
@@ -2012,9 +2183,11 @@
                     var childFolders = {}; // a dictionary of child folders
                     var pages = {}; // a dictionary of pages
                     var groups = {}; // a dictionary of groups
+                    var tabs = {}; // a dictionary of tabs
                     var elements = []; // a dictionary of widgets
-                    var groupElements = {}; // a dictionary of widgets by parent group ID
-                    var pageGroups = {}; // a dictionary of groups by parent page
+                    var tabElements = {}; // a dictionary of widgets by parent tab id
+                    var groupTabs = {}; // a dictionary of tabs by parent group id
+                    var pageGroups = {}; // a dictionary of groups by parent page id
                     var folderChildren = {}; // a dictionary of any folder's children <key: parent folder's id, value: array of children (items & pages)>
                     var groupId;
                     var group;
@@ -2026,7 +2199,7 @@
 
                     var find;
 
-                    // Find all the folders, pages, and groups
+                    // Find all the folders, pages, groups, and tabs from flow.json
                     RED.nodes.eachConfig(function (node) {
                         switch (node.type) {
                             case 'ur_link': {
@@ -2049,13 +2222,17 @@
                                 groups[node.id] = node;
                                 break;
                             }
-                            case 'ur_spacer': {
-                                if (groups.hasOwnProperty(node.group)) {
-                                    groupElements[node.group] = groupElements[node.group] || [];
-                                    groupElements[node.group].push(node);
-                                }
+                            case 'ur_tab': {
+                                tabs[node.id] = node;
                                 break;
                             }
+                            // case 'ur_spacer': {
+                            //     if (groups.hasOwnProperty(node.group)) {
+                            //         groupElements[node.group] = groupElements[node.group] || [];
+                            //         groupElements[node.group].push(node);
+                            //     }
+                            //     break;
+                            // }
                         }
                     });
 
@@ -2086,27 +2263,41 @@
                                 // This group belongs to a page
                                 pageGroups[group.page] = pageGroups[group.page] || [];
                                 pageGroups[group.page].push(group);
-                            } else {
-                                unknownGroups++;
+                            }
+                            // else {
+                            //     unknownGroups++;
+                            // }
+                        }
+                    }
+
+                    for (tabId in tabs) {
+                        if (tabs.hasOwnProperty(tabId)) {
+                            tab = tabs[tabId];
+                            if (groups.hasOwnProperty(tab.group)) {
+                                groupTabs[tab.group] = groupTabs[tab.group] || [];
+                                groupTabs[tab.group].push(tab);
                             }
                         }
                     }
-                    // Find all ui widgets - list them by their group id
+
+                    // Find all ui widgets - list them by their tab id
                     RED.nodes.eachNode(function (node) {
                         if (/^ur_/.test(node.type)) {
-                            if (groups.hasOwnProperty(node.group)) {
-                                groupElements[node.group] = groupElements[node.group] || [];
-                                groupElements[node.group].push(node);
-                            } else if (
-                                node.type !== 'ur_toast' &&
-                                node.type !== 'ur_ui_control' &&
-                                node.type === 'ur_template' &&
-                                node.templateScope !== 'global'
-                            ) {
-                                unknownGroups++;
+                            if (tabs.hasOwnProperty(node.tab)) {
+                                tabElements[node.tab] = tabElements[node.tab] || [];
+                                tabElements[node.tab].push(node);
                             }
+                            // else if (
+                            //     node.type !== 'ur_toast' &&
+                            //     node.type !== 'ur_ui_control' &&
+                            //     node.type === 'ur_template' &&
+                            //     node.templateScope !== 'global'
+                            // ) {
+                            //     unknownGroups++;
+                            // }
                         }
                     });
+
                     // TODO: fix orphaned widgets
                     // if (unknownGroups > 0) {
                     //     $('#nr-db-missing-group-count').text(
@@ -2119,11 +2310,12 @@
                     // } else {
                     //     orphanedWidgets.hide();
                     // }
-                    // Sort each group's array of widgets
-                    for (groupId in groupElements) {
-                        if (groupElements.hasOwnProperty(groupId)) {
-                            group = groupElements[groupId];
-                            groupElements[groupId] = group
+
+                    // Sort each tab's array of widgets
+                    for (tabId in tabElements) {
+                        if (tabElements.hasOwnProperty(tabId)) {
+                            group = tabElements[tabId];
+                            tabElements[tabId] = group
                                 .map(function (v, i) {
                                     return { n: v, i: i };
                                 })
@@ -2141,6 +2333,30 @@
                                 });
                         }
                     }
+
+                    // Sort each group's array of tabs
+                    for (groupId in groupTabs) {
+                        if (groupTabs.hasOwnProperty(tabId)) {
+                            tab = groupTabs[tabId];
+                            groupTabs[tabId] = tab
+                                .map((v, i) => {
+                                    return { n: v, i: i };
+                                })
+                                .sort((A, B) => {
+                                    if (A.n.order < B.n.order) {
+                                        return -1;
+                                    }
+                                    if (A.n.order > B.n.order) {
+                                        return 1;
+                                    }
+                                    return A.i - B.i;
+                                })
+                                .map((v) => {
+                                    return v.n;
+                                });
+                        }
+                    }
+
                     // Sort each page's array of groups
                     for (pageId in pageGroups) {
                         if (pageGroups.hasOwnProperty(pageId)) {
@@ -2163,6 +2379,7 @@
                                 });
                         }
                     }
+
                     // Sort each folder's array of children
                     for (folderId in folderChildren) {
                         if (folderChildren.hasOwnProperty(folderId)) {
@@ -2185,6 +2402,7 @@
                                 });
                         }
                     }
+
                     var folderIds = Object.keys(folders)
                         .map(function (v, i) {
                             return { n: folders[v], i: i };
@@ -2216,19 +2434,19 @@
 
                                     for (let child of children) {
                                         if (child.type === 'ur_folder') {
-                                            let mi =
+                                            let f =
                                                 format === 'dashboard'
                                                     ? { node: { ...child, folder: parent.id } }
                                                     : { id: child.id };
-                                            mi.children = getNestedChildren(child, format);
-                                            result.push(mi);
+                                            f.children = getNestedChildren(child, format);
+                                            result.push(f);
                                         } else if (child.type === 'ur_page') {
-                                            let mp =
+                                            let p =
                                                 format === 'dashboard'
                                                     ? { node: { ...child, folder: parent.id } }
                                                     : { id: child.id };
-                                            mp.groups = getNestedChildren(child, format);
-                                            result.push(mp);
+                                            p.groups = getNestedChildren(child, format);
+                                            result.push(p);
                                         }
                                     }
                                 }
@@ -2242,17 +2460,32 @@
                                             format === 'dashboard'
                                                 ? { node: { ...group, page: parent.id } }
                                                 : { id: group.id };
-                                        g.widgets = getNestedChildren(group, format);
+                                        g.tabs = getNestedChildren(group, format);
                                         result.push(g);
                                     }
                                 }
                                 break;
                             case 'ur_group':
-                                if (groupElements.hasOwnProperty(parent.id)) {
+                                $;
+                                if (groupTabs.hasOwnProperty(parent.id)) {
+                                    let tabs = [...groupTabs[parent.id]];
+
+                                    for (let tab of tabs) {
+                                        let t =
+                                            format === 'dashboard'
+                                                ? { node: { ...tab }, group: parent.id }
+                                                : { id: tab.id };
+                                        t.widgets = getNestedChildren(tab, format);
+                                        result.push(t);
+                                    }
+                                }
+                                break;
+                            case 'ur_tab':
+                                if (tabElements.hasOwnProperty(parent.id)) {
                                     result =
                                         format === 'dashboard'
-                                            ? groupElements[parent.id]
-                                            : groupElements[parent.id].map((element) => element.id);
+                                            ? tabElements[parent.id]
+                                            : tabElements[parent.id].map((element) => element.id);
                                 }
                                 break;
                         }
@@ -2262,7 +2495,7 @@
 
                     folderIds.forEach(function (folderId) {
                         let folderForDashboard = { node: folders[folderId] };
-                        folderForDashboard.children = getNestedChildren(folders[folderId]);
+                        folderForDashboard.children = getNestedChildren(folders[folderId], 'dashboard');
                         dashboard.push(folderForDashboard);
 
                         // build newList for comparison against currentList
@@ -2281,12 +2514,14 @@
                     if (JSON.stringify(newList) != JSON.stringify(currentList)) {
                         // console.log('currentList does not match newList...');
                         listElements = {};
+                        tabLists = {};
                         groupLists = {};
                         pageLists = {};
                         folderLists = {};
                         folders = {};
                         pages = {};
                         groups = {};
+                        tabs = {};
                         elementParents = {};
                         folderContainer.empty();
                         dashboard.forEach(function (folder) {
@@ -2492,14 +2727,19 @@
 
                 editSaveEventHandler = function (node) {
                     if (/^ur_/.test(node.type)) {
-                        if (node.type === 'ur_folder' || node.type === 'ur_page' || node.type === 'ur_group') {
+                        if (
+                            node.type === 'ur_folder' ||
+                            node.type === 'ur_page' ||
+                            node.type === 'ur_group' ||
+                            node.type === 'ur_tab'
+                        ) {
                             if (listElements[node.id]) {
                                 // Existing element
                                 listElements[node.id]
                                     .children('.nr-db-sb-list-header')
                                     .find('.nr-db-sb-title')
                                     .text(node.name || node.id);
-                                if (node.type === 'ur_group') {
+                                if (node.type === 'ur_group' || node.type === 'ur_tab') {
                                     refresh();
                                 } else if (node.type === 'ur_page') {
                                     if (node.isDynamic) {
@@ -2521,6 +2761,7 @@
                                             .find('.nr-db-sb-dynamic-page-icon')
                                             .hide();
                                     }
+                                    refresh();
                                 } else {
                                     if (node.hidden === true) {
                                         listElements[node.id]
@@ -2562,10 +2803,15 @@
                                 if (folderLists[node.folder]) {
                                     folderLists[node.folder].editableList('addItem', { node: node, groups: [] });
                                 }
-                            } else {
+                            } else if (node.type === 'ur_group') {
                                 // Adding a group
                                 if (pageLists[node.page]) {
-                                    pageLists[node.page].editableList('addItem', {
+                                    pageLists[node.page].editableList('addItem', { node: node, tabs: [] });
+                                }
+                            } else {
+                                // Adding a tab
+                                if (groupLists[node.group]) {
+                                    groupLists[node.group].editableList('addItem', {
                                         node: node,
                                         widgets: [],
                                     });
@@ -2581,17 +2827,17 @@
                             // TODO: fix orphaned widgets
                             // refreshOrphanedWidgets();
                             if (listElements[node.id]) {
-                                if (node.group != elementParents[node.id]) {
-                                    // Moved to a different group
-                                    if (groupLists[elementParents[node.id]]) {
-                                        groupLists[elementParents[node.id]].editableList(
+                                if (node.tab != elementParents[node.id]) {
+                                    // Moved to a different tab
+                                    if (tabLists[elementParents[node.id]]) {
+                                        tabLists[elementParents[node.id]].editableList(
                                             'removeItem',
                                             listElements[node.id].data('data')
                                         );
                                     }
-                                    if (groupLists[node.group]) {
-                                        groupLists[node.group].editableList('removeItem', node);
-                                        groupLists[node.group].editableList('addItem', node);
+                                    if (tabLists[node.tab]) {
+                                        tabLists[node.tab].editableList('removeItem', node);
+                                        tabLists[node.tab].editableList('addItem', node);
                                     }
                                 } else {
                                     var l = node._def.label;
@@ -2607,11 +2853,13 @@
                                         .text(l);
                                 }
                             } else {
-                                if (groupLists[node.group]) {
+                                console.log('node: ', node);
+                                console.log('tabLists: ', tabLists);
+                                if (tabLists[node.tab]) {
                                     if (node.order === 0) {
-                                        node.order = groupLists[node.group].editableList('length');
+                                        node.order = tabLists[node.tab].editableList('length');
                                     }
-                                    groupLists[node.group].editableList('addItem', node);
+                                    tabLists[node.tab].editableList('addItem', node);
                                 }
                             }
                         }
@@ -2667,6 +2915,8 @@
                     var hasChildFolders = false;
                     var hasPages = false;
                     var hasGroups = false;
+                    var hasTabs = false;
+
                     pendingAdd.sort(function (A, B) {
                         hasFolders = // has root level folders
                             hasFolders ||
@@ -2678,6 +2928,8 @@
                             (B.type === 'ur_folder' && B.folder);
                         hasPages = hasPages || A.type === 'ur_page' || B.type === 'ur_page';
                         hasGroups = hasGroups || A.type === 'ur_group' || B.type === 'ur_group';
+                        hasTabs = hasTabs || A.type === 'ur_tab' || B.type === 'ur_tab';
+
                         if (A.type === B.type) {
                             if (A.type === 'ur_folder') {
                                 if (A.folder == undefined && B.folder !== undefined) {
@@ -2688,6 +2940,7 @@
                             }
                             return 0;
                         }
+
                         if (A.type === 'ur_folder') {
                             return -1;
                         } else if (B.type === 'ur_folder') {
@@ -2700,7 +2953,12 @@
                             return -1;
                         } else if (B.type === 'ur_group') {
                             return 1;
+                        } else if (A.type === 'ur_tab') {
+                            return -1;
+                        } else if (B.type === 'ur_tab') {
+                            return 1;
                         }
+
                         return 0;
                     });
 
@@ -2744,7 +3002,7 @@
                                         if (pageLists[node.page]) {
                                             pageLists[node.page].editableList('addItem', {
                                                 node: node,
-                                                widgets: [],
+                                                tabs: [],
                                             });
                                         }
                                     } else {
@@ -2754,11 +3012,27 @@
                                             pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                             return;
                                         }
-                                        if (groupLists[node.group]) {
-                                            groupLists[node.group].editableList('addItem', node);
+                                        if (node.type === 'ur_tab') {
+                                            if (groupLists[node.group]) {
+                                                groupLists[node.group].editableList('addItem', {
+                                                    node: node,
+                                                    widgets: [],
+                                                });
+                                            }
                                         } else {
-                                            // TODO: fix orphaned widgets
-                                            // refreshOrphanedWidgets();
+                                            if (hasTabs) {
+                                                // We've added some tabs, need to give jquery time to add the lists
+                                                pendingAdd = pendingAdd.slice(i);
+                                                pendingAddTimer = setTimeout(handlePendingAdds, 50);
+                                                return;
+                                            }
+
+                                            if (tabLists[node.tab]) {
+                                                tabLists[node.tab].editableList('addItem', node);
+                                            } else {
+                                                // TODO: fix orphaned widgets
+                                                // refreshOrphanedWidgets();
+                                            }
                                         }
                                     }
                                 }
@@ -2801,9 +3075,14 @@
                                 pageLists[node.page].editableList('removeItem', listElements[node.id].data('data'));
                             }
                             delete groupLists[node.id];
+                        } else if (node.type === 'ur_tab') {
+                            if (groupLists[node.group] && listElements[node.id]) {
+                                groupLists[node.group].editableList('removeItem', listElements[node.id].data('data'));
+                            }
+                            delete tabLists[node.id];
                         } else {
-                            if (groupLists[node.group]) {
-                                groupLists[node.group].editableList('removeItem', node);
+                            if (tabLists[node.tab]) {
+                                tabLists[node.tab].editableList('removeItem', node);
                             }
                         }
                         // TODO: fix orphaned widgets

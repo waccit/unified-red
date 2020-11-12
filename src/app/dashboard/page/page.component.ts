@@ -1,7 +1,7 @@
 import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
 import { PageDirective } from '../../directives/page.directive';
 import { GroupComponent } from '../group/group.component';
-import { PageGroups } from './page-groups';
+import { Group } from '../../data/group.model';
 import { CurrentUserService, RoleService } from '../../services';
 import { WidgetService } from '../../services/widget.service';
 import { ActivatedRoute, UrlSegment } from '@angular/router';
@@ -19,7 +19,7 @@ export class PageComponent implements OnInit {
     private pathList: string[];
     private folder: string;
     private page: string;
-    private pageGroupsList: PageGroups[];
+    private groups: Group[];
     private _menuSubscription: Subscription;
     breadcrumbs: string[];
     @ViewChild(PageDirective, { static: true }) pageHost: PageDirective;
@@ -51,7 +51,7 @@ export class PageComponent implements OnInit {
                     }
 
                     this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
-                        this.setPageGroupsList(menu);
+                        this.setGroups(menu);
                         this.loadGroups();
                     });
                 });
@@ -59,8 +59,8 @@ export class PageComponent implements OnInit {
         });
     }
 
-    setPageGroupsList(menu: any[]) {
-        this.pageGroupsList = [];
+    setGroups(menu: any[]) {
+        this.groups = [];
         this.breadcrumbs = [];
         const localCopy = [...this.pathList];
         let parent: any = null;
@@ -89,11 +89,16 @@ export class PageComponent implements OnInit {
         if (foundPage) {
             this.breadcrumbs.push(foundPage.title);
             foundPage.items.forEach((g) => {
-                this.pageGroupsList.push({
+                this.groups.push({
                     header: g.header,
                     access: g.access || '',
                     cols: { lg: g.widthLg, md: g.widthMd, sm: g.widthSm },
-                    widgets: this.widgetService.getWidgets(g.items),
+                    tabs: g.items.map((t) => {
+                        return {
+                            header: t.header,
+                            widgets: this.widgetService.getWidgets(t.items),
+                        };
+                    }),
                 });
             });
         }
@@ -133,7 +138,7 @@ export class PageComponent implements OnInit {
     loadGroups() {
         this.viewContainerRef.clear();
 
-        this.pageGroupsList.forEach((group) => {
+        this.groups.forEach((group) => {
             let access: any;
             if (!group.access || group.access === '0') {
                 access = this.roleService.getRoleAccess('datapoint', this.userRole);
@@ -156,7 +161,7 @@ export class PageComponent implements OnInit {
                 }
             }
 
-            componentRef.instance.widgets = group.widgets;
+            componentRef.instance.tabs = group.tabs;
         });
     }
 }

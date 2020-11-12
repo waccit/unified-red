@@ -12,6 +12,10 @@ module.exports = function (RED) {
         this.valuePriority = { holiday: null, date: null, weekday: null };
         var node = this;
 
+        var tab = RED.nodes.getNode(config.tab);
+        if (!tab) {
+            return;
+        }
         var group = RED.nodes.getNode(config.group);
         if (!group) {
             return;
@@ -400,6 +404,7 @@ module.exports = function (RED) {
             folders: folders,
             page: page,
             group: group,
+            tab: tab,
             control: {
                 id: config.id,
                 type: 'schedule',

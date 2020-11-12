@@ -50,6 +50,7 @@
             "ur_page": "nodes/ur_page.js",
             "ur_group": "nodes/ur_group.js",
             "ur_form": "nodes/ur_form.js",
+            "ur_tab": "nodes/ur_tab.js",
             "ur_text": "nodes/ur_text.js",
             "ur_text_input": "nodes/ur_text_input.js",
             "ur_template": "nodes/ur_template.js",

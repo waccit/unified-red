@@ -143,7 +143,7 @@ function add(opt) {
     opt.convertBack = opt.convertBack || noConvert;
     opt.beforeSend = opt.beforeSend || beforeSend;
     opt.control.id = opt.node.id;
-    var remove = addControl(opt.folders, opt.page, opt.group, opt.control);
+    var remove = addControl(opt.folders, opt.page, opt.group, opt.tab, opt.control);
 
     opt.node.on('input', function (msg) {
         if (typeof msg.enabled === 'boolean') {
@@ -654,9 +654,10 @@ let dynamicPagesNeedUpdate = function (current, incoming) {
 let removeFunc;
 var dynamicPages = {};
 var dynamicGroups = {};
+var dynamicTabs = {};
 var dynamicWidgets = {};
 
-function addControl(folders, page, group, control) {
+function addControl(folders, page, group, tab, control) {
     if (typeof control.type !== 'string') {
         return function () {};
     }
@@ -765,13 +766,17 @@ function addControl(folders, page, group, control) {
             let expression = page.config.expression;
 
             // split string as prefix and instance nums
-            let rx = /(.*)(\{x\})(.*)/g;
+            let rx = /^(.*)(\{x\})(.*)$/gi;
 
             let expressionArr = rx.exec(expression);
             // expressionArr[0]: input text (expression)
             // expressionArr[1]: first group (prefix)
             // expressionArr[2]: second group (instance num)
             // expressionArr[3]: third group (suffix)
+
+            if (!expressionArr) {
+                throw new Error("Please check dynamic page's Instance Name Expression");
+            }
 
             // set prefix & suffix
             let pageTitlePrefix = expressionArr[1];
@@ -822,6 +827,7 @@ function addControl(folders, page, group, control) {
                 });
 
                 delete dynamicPages[page.id];
+                dynamicTabs = {};
                 dynamicGroups = {};
                 dynamicWidgets = {};
 
@@ -830,10 +836,10 @@ function addControl(folders, page, group, control) {
 
             // check to see if dynamic page has already been exploded && injected
             if (dynamicPages.hasOwnProperty(page.id)) {
-                foundFolder.items.forEach((page) => {
-                    if (page.id.startsWith(page.id)) {
+                foundFolder.items.forEach((p) => {
+                    if (p.id.startsWith(page.id)) {
                         if (dynamicGroups[group.id]) {
-                            page.items.forEach((g) => {
+                            p.items.forEach((g) => {
                                 if (g.id.startsWith(group.id)) {
                                     g.header = group.config.name;
                                     g.order = group.config.order;
@@ -841,17 +847,48 @@ function addControl(folders, page, group, control) {
                                     g.widthMd = group.config.widthMd;
                                     g.widthSm = group.config.widthSm;
 
-                                    if (!dynamicWidgets[control.id]) {
-                                        control.instance = page.instance;
+                                    if (dynamicTabs[tab.id]) {
+                                        g.items.forEach((t) => {
+                                            if (t.id.startsWith(tab.id)) {
+                                                t.header = tab.config.name;
+                                                t.order = tab.config.order;
+
+                                                if (dynamicWidgets[control.id]) {
+                                                    t.items.forEach((w) => {
+                                                        if (w.id.startsWith(control.id)) {
+                                                            control.instance = p.instance;
+                                                            let newCtrlId = control.id + '.' + control.instance.number;
+                                                            w = { ...control, 'id': newCtrlId };
+                                                        }
+                                                    });
+                                                } else {
+                                                    control.instance = p.instance;
+                                                    let newCtrlId = control.id + '.' + control.instance.number;
+                                                    t.items.push({ ...control, 'id': newCtrlId });
+                                                    t.items.sort(itemSorter);
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        let instanceTab = {
+                                            id: tab.id + '.' + p.instance.number,
+                                            header: tab.config.name,
+                                            order: tab.config.order,
+                                            items: [],
+                                        };
+
+                                        control.instance = p.instance;
                                         let newCtrlId = control.id + '.' + control.instance.number;
-                                        g.items.push({ ...control, 'id': newCtrlId });
+                                        instanceTab.items.push({ ...control, 'id': newCtrlId });
+
+                                        g.items.push(instanceTab);
                                         g.items.sort(itemSorter);
                                     }
                                 }
                             });
                         } else {
                             let instanceGroup = {
-                                id: group.id + '.' + page.instance.number,
+                                id: group.id + '.' + p.instance.number,
                                 header: group.config.name,
                                 order: group.config.order,
                                 widthLg: group.config.widthLg,
@@ -860,17 +897,29 @@ function addControl(folders, page, group, control) {
                                 items: [],
                             };
 
-                            control.instance = page.instance;
-                            let newCtrlId = control.id + '.' + page.instance.number;
-                            instanceGroup.items.push({ ...control, 'id': newCtrlId });
+                            let instanceTab = {
+                                id: tab.id + '.' + p.instance.number,
+                                header: tab.config.name,
+                                order: tab.config.order,
+                                items: [],
+                            };
 
-                            page.items.push(instanceGroup);
-                            page.items.sort(itemSorter);
+                            control.instance = p.instance;
+                            let newCtrlId = control.id + '.' + control.instance.number;
+                            instanceTab.items.push({ ...control, 'id': newCtrlId });
+
+                            instanceGroup.items.push(instanceTab);
+                            instancePage.items.push(itemSorter);
+
+                            p.items.push(instanceGroup);
+                            p.items.sort(itemSorter);
                         }
                     }
                 });
                 foundFolder.items.sort(itemSorter);
                 foundFolder.submenu.sort(itemSorter);
+
+                dynamicTabs[tab.id] = true;
                 dynamicGroups[group.id] = true;
                 dynamicWidgets[control.id] = true;
             } else {
@@ -912,9 +961,20 @@ function addControl(folders, page, group, control) {
                         items: [],
                     };
 
+                    let instanceTab = {
+                        id: tab.id + '.' + instanceNums[i],
+                        header: tab.config.name,
+                        order: tab.config.order,
+                        items: [],
+                    };
+
                     control.instance = instancePage.instance;
                     let newCtrlId = control.id + '.' + instanceNums[i];
-                    instanceGroup.items.push({ ...control, 'id': newCtrlId });
+
+                    instanceTab.items.push({ ...control, 'id': newCtrlId });
+                    instanceTab.items.sort(itemSorter);
+
+                    instanceGroup.items.push(instanceTab);
                     instanceGroup.items.sort(itemSorter);
 
                     instancePage.items.push(instanceGroup);
@@ -928,6 +988,7 @@ function addControl(folders, page, group, control) {
                 foundFolder.submenu.sort(itemSorter);
 
                 dynamicWidgets[control.id] = true;
+                dynamicTabs[tab.id] = true;
                 dynamicGroups[group.id] = true;
                 dynamicPages[page.id] = {
                     instanceNums: [...instanceNums],
@@ -948,14 +1009,25 @@ function addControl(folders, page, group, control) {
                                 // if g is a pseudo-group of group
                                 if (g.id.startsWith(group.id)) {
                                     // filter g.items
-                                    g.items = g.items.filter((w) => !w.id.startsWith(control.id));
+                                    g.items = g.items.filter((t) => {
+                                        // if t is a pseudo-tab of tab
+                                        if (t.id.startsWith(tab.id)) {
+                                            t.items = t.items.filter((w) => !w.id.startsWith(control.id));
+                                        }
+
+                                        // cleanup dynamicTabs dictionary
+                                        if (t.items.length === 0) {
+                                            delete dynamicTabs[tab.id];
+                                        }
+
+                                        return t.items.length > 0;
+                                    });
 
                                     // cleanup dynamicGroups dictionary
                                     if (g.items.length === 0) {
                                         delete dynamicGroups[group.id];
                                     }
                                 }
-
                                 // filter out childless groups from p.items
                                 return g.items.length > 0;
                             });
@@ -1078,59 +1150,87 @@ function addControl(folders, page, group, control) {
                 };
                 foundPage.items.push(foundGroup);
             }
-            foundGroup.items.push(control);
-            foundGroup.items.sort(itemSorter);
 
-            foundGroup.order = group.config.order;
+            var foundTab = find(foundGroup.items, function (t) {
+                return t.header === tab.config.name;
+            });
+            if (!foundTab) {
+                foundTab = {
+                    id: tab.id,
+                    header: tab.config.name,
+                    order: tab.config.order,
+                    items: [],
+                };
+                foundGroup.items.push(foundTab);
+            }
+
+            foundTab.items.push(control);
+            foundTab.items.sort(itemSorter);
+
+            foundTab.order = tab.config.order;
+            foundGroup.items.sort(itemSorter);
             foundPage.items.sort(itemSorter);
             foundFolder.items.sort(itemSorter);
             foundFolder.submenu.sort(itemSorter);
 
             function staticRemove() {
-                var index = foundGroup.items.indexOf(control);
+                var index = foundTab.items.indexOf(control);
 
                 if (index >= 0) {
-                    // Remove the item from the group
-                    foundGroup.items.splice(index, 1);
+                    // Remove the item from the tab
+                    foundTab.items.splice(index, 1);
 
-                    // If the group is now empty, remove it from the page
-                    if (foundGroup.items.length === 0) {
-                        index = foundPage.items.indexOf(foundGroup);
+                    // If the tab is now empty, remove it from the group
+                    if (foundTab.items.length === 0) {
+                        index = foundGroup.items.indexOf(foundTab);
+
                         if (index >= 0) {
-                            foundPage.items.splice(index, 1);
+                            foundGroup.items.splice(index, 1);
 
-                            // If the page is now empty, remove it from the folder
-                            if (foundPage.items.length === 0) {
-                                itemsIdx = foundFolder.items.indexOf(foundPage);
-                                submenuIdx = foundFolder.submenu.indexOf(foundPage);
+                            // If the group is not empty, remove it from the page
+                            if (foundGroup.items.length === 0) {
+                                index = foundPage.items.index(foundGroup);
 
-                                if (itemsIdx >= 0 && submenuIdx >= 0) {
-                                    foundFolder.items.splice(itemsIdx, 1);
-                                    foundFolder.submenu.splice(submenuIdx, 1);
+                                if (index >= 0) {
+                                    foundPage.items.splice(index, 1);
 
-                                    // If the folder is now empty, find parent, remove self and check whether parent should be removed
-                                    if (foundFolder.items.length === 0) {
-                                        let foldersStack = [...folders];
-                                        let curr = foldersStack.find((mi) => mi.id === foundFolder.id);
+                                    // If the page is now empty, remove it from the folder
+                                    if (foundPage.items.length === 0) {
+                                        itemsIdx = foundFolder.items.indexOf(foundPage);
+                                        submenuIdx = foundFolder.submenu.indexOf(foundPage);
 
-                                        do {
-                                            let parent = findFolderById(menu, curr.config.folder);
-                                            let currInMenu = findFolderById(menu, curr.id);
-                                            if (parent) {
-                                                if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
-                                                    parent.items = parent.items.filter(
-                                                        (item) => item.id !== currInMenu.id
-                                                    );
-                                                    parent.submenu = parent.submenu.filter(
-                                                        (item) => item.id !== currInMenu.id
-                                                    );
-                                                }
-                                                curr = foldersStack.find((mi) => mi.id === parent.id);
-                                            } else {
-                                                menu = menu.filter((item) => item.id !== curr.id);
-                                                curr = null;
+                                        if (itemsIdx >= 0 && submenuIdx >= 0) {
+                                            foundFolder.items.splice(itemsIdx, 1);
+                                            foundFolder.submenu.splice(submenuIdx, 1);
+
+                                            // If the folder is now empty, find parent, remove self and check whether parent should be removed
+                                            if (foundFolder.items.length === 0) {
+                                                let foldersStack = [...folders];
+                                                let curr = foldersStack.find((mi) => mi.id === foundFolder.id);
+
+                                                do {
+                                                    let parent = findFolderById(menu, curr.config.folder);
+                                                    let currInMenu = findFolderById(menu, curr.id);
+                                                    if (parent) {
+                                                        if (
+                                                            currInMenu.items.length === 0 &&
+                                                            currInMenu.submenu.length === 0
+                                                        ) {
+                                                            parent.items = parent.items.filter(
+                                                                (item) => item.id !== currInMenu.id
+                                                            );
+                                                            parent.submenu = parent.submenu.filter(
+                                                                (item) => item.id !== currInMenu.id
+                                                            );
+                                                        }
+                                                        curr = foldersStack.find((mi) => mi.id === parent.id);
+                                                    } else {
+                                                        menu = menu.filter((item) => item.id !== curr.id);
+                                                        curr = null;
+                                                    }
+                                                } while (curr);
                                             }
-                                        } while (curr);
+                                        }
                                     }
                                 }
                             }
