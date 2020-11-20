@@ -909,7 +909,6 @@ function addControl(folders, page, group, tab, control) {
                             instanceTab.items.push({ ...control, 'id': newCtrlId });
 
                             instanceGroup.items.push(instanceTab);
-                            instancePage.items.push(itemSorter);
 
                             p.items.push(instanceGroup);
                             p.items.sort(itemSorter);
