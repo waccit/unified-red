@@ -717,7 +717,7 @@ function addControl(folders, page, group, tab, control) {
                     path: '',
                     title: currFolder.config.name,
                     icon: currFolder.config.icon,
-                    class: 'ml-sub-menu',
+                    class: isRoot ? 'menu-toggle' : 'ml-sub-menu',
                     groupTitle: false,
                     submenu: [],
                 };
@@ -1186,9 +1186,9 @@ function addControl(folders, page, group, tab, control) {
                         if (index >= 0) {
                             foundGroup.items.splice(index, 1);
 
-                            // If the group is not empty, remove it from the page
+                            // If the group is now empty, remove it from the page
                             if (foundGroup.items.length === 0) {
-                                index = foundPage.items.index(foundGroup);
+                                index = foundPage.items.indexOf(foundGroup);
 
                                 if (index >= 0) {
                                     foundPage.items.splice(index, 1);
