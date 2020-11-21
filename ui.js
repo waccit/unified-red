@@ -149,7 +149,12 @@ function add(opt) {
         if (typeof msg.enabled === 'boolean') {
             var state = replayMessages[opt.node.id];
             if (!state) {
-                replayMessages[opt.node.id] = state = { id: opt.node.id };
+                if (msg.topic) {
+                    if (!replayMessages[opt.node.id]) {
+                        replayMessages[opt.node.id] = {};
+                    }
+                    replayMessages[opt.node.id][msg.topic] = state = { id: opt.node.id };
+                }
             }
             state.disabled = !msg.enabled;
             io.emit(updateValueEventName, state); // dcj mu
@@ -331,7 +336,12 @@ function add(opt) {
 
             if (opt.persistentFrontEndValue) {
                 // replayMessages[opt.node.id] = toStore;
-                replayMessages[newId] = toStore;
+                if (toStore.msg && toStore.msg.topic) {
+                    if (!replayMessages[newId]) {
+                        replayMessages[newId] = {};
+                    }
+                    replayMessages[newId][toStore.msg.topic] = toStore;
+                }
             }
 
             // Handle the node output
@@ -357,7 +367,12 @@ function add(opt) {
             if (opt.storeFrontEndInputAsState === true) {
                 currentValues[msg.id] = converted;
                 if (opt.persistentFrontEndValue) {
-                    replayMessages[msg.id] = msg;
+                    if (msg && msg.topic) {
+                        if (!replayMessages[msg.id]) {
+                            replayMessages[msg.id] = {};
+                        }
+                        replayMessages[msg.id][msg.topic] = msg;
+                    }
                 }
             }
             var toSend = { payload: converted };
@@ -494,13 +509,15 @@ function init(server, app, log, redSettings) {
         updateUi(socket);
 
         socket.on(updateValueEventName, ev.emit.bind(ev, updateValueEventName));
-        socket.on('ui-replay-state', function () {
-            var ids = Object.getOwnPropertyNames(replayMessages);
-            setTimeout(function () {
-                ids.forEach(function (id) {
-                    socket.emit(updateValueEventName, replayMessages[id]);
-                });
-            }, 50);
+        socket.on('ui-replay-state', function (data) {
+            if (data && data.id && replayMessages && replayMessages[data.id]) {
+                setTimeout(function () {
+                    let messages = Object.values(replayMessages[data.id]);
+                    for (let msg of messages) {
+                        socket.emit(updateValueEventName, msg);
+                    }
+                }, 50);
+            }
             socket.emit('ui-replay-done');
         });
         socket.on('ui-change', function (folderIndex, pageIndex) {
