@@ -53,7 +53,13 @@ module.exports = function (RED) {
                 accessBehavior: config.accessBehavior || 'disable',
             },
             beforeEmit: function (msg) {
-                return msg;
+                let newMsg = {};
+                for (let property in msg) {
+                    if (property[0] !== '_' && property !== 'qos' && property !== 'retain') {
+                        newMsg[property] = msg[property];
+                    }
+                }
+                return { msg: newMsg };
             },
             beforeSend: function (msg, fromUI) {
                 if (fromUI && fromUI.hasOwnProperty('msg') && fromUI.msg !== null) {
