@@ -26,7 +26,9 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                 this.updateValue(msg);
             }
         });
-        this.webSocketService.emit('ui-replay-state', {});
+        this.webSocketService.emit('ui-replay-state', {
+            id: this.nodeId
+        });
 
         // Add send event to jQuery element
         if (this.container) {
