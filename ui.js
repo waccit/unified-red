@@ -100,6 +100,24 @@ function beforeSend(msg) {
     //do nothing
 }
 
+function setCurrentValue(id, topic, value) {
+    if (!currentValues[id]) {
+        currentValues[id] = {};
+    }
+    currentValues[id][topic] = value;
+}
+
+function getCurrentValue(id, topic) {
+    return currentValues[id] ? currentValues[id][topic] : null;
+}
+
+function setReplayMessage(id, topic, value) {
+    if (!replayMessages[id]) {
+        replayMessages[id] = {};
+    }
+    replayMessages[id][topic] = value;
+}
+
 /* This is the handler for inbound msg from previous nodes...
 options:
   node - the node that represents the control on a flow
@@ -150,10 +168,8 @@ function add(opt) {
             var state = replayMessages[opt.node.id];
             if (!state) {
                 if (msg.topic) {
-                    if (!replayMessages[opt.node.id]) {
-                        replayMessages[opt.node.id] = {};
-                    }
-                    replayMessages[opt.node.id][msg.topic] = state = { id: opt.node.id };
+                    state = { id: opt.node.id };
+                    setReplayMessage(opt.node.id, msg.topic, state);
                 }
             }
             state.disabled = !msg.enabled;
@@ -169,7 +185,7 @@ function add(opt) {
         }
 
         // Retrieve the dataset for this node
-        var oldValue = currentValues[opt.node.id];
+        var oldValue = getCurrentValue(opt.node.id, msg.topic);
 
         // let any arriving msg.ui_control message mess with control parameters
         if (
@@ -225,7 +241,7 @@ function add(opt) {
 
         // If we have something new to emit
         if (newPoint !== undefined || !opt.emitOnlyNewValues || oldValue != fullDataset) {
-            currentValues[opt.node.id] = fullDataset;
+            setCurrentValue(opt.node.id, msg.topic, fullDataset);
 
             // Determine what to emit over the websocket
             // (the new point or the full dataset).
@@ -335,12 +351,8 @@ function add(opt) {
             emitSocket(updateValueEventName, toEmit);
 
             if (opt.persistentFrontEndValue) {
-                // replayMessages[opt.node.id] = toStore;
                 if (toStore.msg && toStore.msg.topic) {
-                    if (!replayMessages[newId]) {
-                        replayMessages[newId] = {};
-                    }
-                    replayMessages[newId][toStore.msg.topic] = toStore;
+                    setReplayMessage(newId, toStore.msg.topic, toStore);
                 }
             }
 
@@ -360,18 +372,15 @@ function add(opt) {
             return;
         } // ignore if not us
         if (settings.readOnly === true) {
-            msg.value = currentValues[msg.id];
+            msg.value = getCurrentValue(msg.id, msg.topic);
         } // don't accept input if we are in read only mode
         else {
             var converted = opt.convertBack(msg.value);
             if (opt.storeFrontEndInputAsState === true) {
-                currentValues[msg.id] = converted;
+                setCurrentValue(msg.id, msg.topic, converted);
                 if (opt.persistentFrontEndValue) {
                     if (msg && msg.topic) {
-                        if (!replayMessages[msg.id]) {
-                            replayMessages[msg.id] = {};
-                        }
-                        replayMessages[msg.id][msg.topic] = msg;
+                        setReplayMessage(msg.id, msg.topic, msg);
                     }
                 }
             }
