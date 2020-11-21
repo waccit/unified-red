@@ -9,7 +9,13 @@ const http = require('http');
 const https = require('https');
 
 module.exports = {
-    sessionExpiryTime: 86400, // expire token after 1 day
+    
+    // Increased sessionExpiryTime to allow Node-RED session to extend beyond Unified-RED sessions.
+    // Once a Node-RED session expires, the end-user will not be able to deploy schedules without
+    // reauthenticating with Node-RED or logging in and out of Unified-RED.
+    // TODO: Revoke Node-RED JWT token whenever Unified-RED JWT token expires.
+    sessionExpiryTime: 365*86400, // expire Node-RED token after 1 year
+    
     type: 'credentials',
     users: function (username) {
         return new Promise(function (resolve) {
@@ -30,7 +36,7 @@ module.exports = {
             };
             const req = http.request(options, (res) => {
                 if (res.statusCode === 200) {
-                    // Successful login. Resolve with the user object
+                    // Succeessful login. Resolve with the user object
                     resolve({ username: username, permissions: '*' });
                 } else {
                     // Resolve with null to indicate the username/password pair were not valid.
