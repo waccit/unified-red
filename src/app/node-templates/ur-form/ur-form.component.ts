@@ -18,8 +18,13 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
 
     updateValue(data: any) {
         super.updateValue(data);
-        if (data && data.topic && typeof data.payload !== 'undefined') {
-            this.data.formValue[data.topic] = data.payload;
+        if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
+            for (let field of this.data.options) {
+                if (data.msg.topic.includes(field.topic)) {
+                    this.data.formValue[field.topic] = data.msg.payload;
+                    break;
+                }
+            }
         }
     }
 
@@ -28,10 +33,10 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     }
 
     submit() {
-        for (const elem of this.data.options) {
-            const payload = this.data.formValue[elem.topic]
+        for (const field of this.data.options) {
+            const payload = this.data.formValue[field.topic]
             if (payload !== '') { // send only if form element has a value
-                this.send({ topic: elem.outtopic || elem.topic, payload });
+                this.send({ topic: field.outtopic || field.topic, payload });
             }
         }
         this.snackbar.success('Saved!');
