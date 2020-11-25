@@ -189,12 +189,13 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	private evaluate(exp: any, value?: any) {
 		try {
 			if (typeof value !== 'undefined') {
-				exp = exp.replace(/\{x\}/g, value);
+				exp = exp.replace(/\{x\}/gi, value);
 			}
 			return eval('(' + exp + '); ' + this.expressionGlobals);
 		} catch (error) {
 			// console.log("Evaluate error:", error);
 		}
+		return value;
 	}
 
 	// Example sub expressions:
