@@ -52,20 +52,10 @@ module.exports = function (RED) {
                 access: config.access || '',
                 accessBehavior: config.accessBehavior || 'disable',
             },
-            beforeEmit: function (msg) {
-                let newMsg = {};
-                for (let property in msg) {
-                    if (property[0] !== '_' && property !== 'qos' && property !== 'retain') {
-                        newMsg[property] = msg[property];
-                    }
-                }
-                return { msg: newMsg };
-            },
             beforeSend: function (msg, fromUI) {
-                if (fromUI && fromUI.hasOwnProperty('msg') && fromUI.msg !== null) {
+                if (fromUI && fromUI.msg) {
                     var om = fromUI.msg;
                     om.socketid = fromUI.socketid;
-                    om.topic = fromUI.msg.topic;
                     return om;
                 }
             },
