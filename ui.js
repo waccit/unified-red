@@ -92,12 +92,34 @@ function noConvert(value) {
     return value;
 }
 
-function beforeEmit(msg, value) {
-    return { value: value };
+function beforeEmit(msg) {
+    return msg;
 }
 
 function beforeSend(msg) {
     //do nothing
+}
+
+function enforceWebSocketsSchema(msg) {
+    /*
+    schema: {
+        id: string,
+        socketid: string,
+        msg: { ...mqtt message... }
+    }
+    */
+    let toEmit = { id: null, socketid: null, msg: {} };
+    if (msg.id && msg.socketid && msg.msg) {
+        toEmit.id = msg.id;
+        toEmit.socketid = msg.socketid;
+    }
+    let recvMsg = msg.msg || msg;
+    for (let property in recvMsg) {
+        if (property[0] !== '_' && property !== 'qos' && property !== 'retain') {
+            toEmit.msg[property] = recvMsg[property];
+        }
+    }
+    return toEmit;
 }
 
 function setCurrentValue(id, topic, value) {
@@ -247,10 +269,11 @@ function add(opt) {
             // (the new point or the full dataset).
 
             // Always store the full dataset.
-            var toStore = opt.beforeEmit(msg, fullDataset);
-            var toEmit;
+            var toStore;
+            var toEmit = toStore = enforceWebSocketsSchema(msg);
+            toStore.msg = opt.beforeEmit(toStore.msg, fullDataset);
             if (newPoint !== undefined && typeof newPoint !== 'boolean') {
-                toEmit = opt.beforeEmit(msg, newPoint);
+                toEmit.msg = opt.beforeEmit(toEmit.msg, newPoint);
             } else {
                 toEmit = toStore;
             }
@@ -368,6 +391,10 @@ function add(opt) {
 
     // This is the handler for messages coming back from the UI
     var handler = function (msg) {
+        let idParts = msg.id.split('.');
+        if (idParts.length === 3) { // is extended node id? (dynamic page)
+            msg.id = idParts[0] + '.' + idParts[1]; // set id to base node id
+        }
         if (msg.id !== opt.node.id) {
             return;
         } // ignore if not us
