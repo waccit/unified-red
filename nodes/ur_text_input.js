@@ -52,7 +52,7 @@ module.exports = function (RED) {
                 accessBehavior: config.accessBehavior || 'disable',
             },
             beforeSend: function (msg, fromUI) {
-                if (fromUI && fromUI.hasOwnProperty('msg') && fromUI.msg !== null) {
+                if (fromUI && fromUI.msg) {
                     var om = fromUI.msg;
                     om.socketid = fromUI.socketid;
                     om.topic = config.topic || msg.topic;

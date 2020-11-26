@@ -2,13 +2,10 @@ const { data } = require('jquery');
 
 module.exports = function (RED) {
     var ui = require('../ui')(RED);
-    var socketio = require('../socket');
 
     function TableNode(config) {
         RED.nodes.createNode(this, config);
         var node = this;
-        this.cache = {};
-        let io = socketio.connection();
 
         var tab = RED.nodes.getNode(config.tab);
         if (!tab) {
@@ -54,20 +51,7 @@ module.exports = function (RED) {
                     topicPattern: config.topicPattern || '',
                     access: config.access || '',
                     accessBehavior: config.accessBehavior || 'disable',
-                },
-                beforeEmit: function (msg, value) {
-                    return {
-                        msg: {
-                            payload: value,
-                            topic: msg.topic,
-                        },
-                    };
-                },
-                beforeSend: function (msg, orig) {
-                    if (orig) {
-                        return orig.msg;
-                    }
-                },
+                }
             });
         } catch (e) {
             console.log(e);
@@ -78,21 +62,6 @@ module.exports = function (RED) {
                 done();
             }
         });
-
-        node.on('input', function (msg) {
-            node.cache[msg.topic] = msg;
-        });
-
-        // io.on('connection', function (socket) {
-        io.on('ui-replay-state', function () {
-            for (let topic in node.cache) {
-                let msg = node.cache[topic];
-                msg.socketid = node.id;
-                console.log('msg', msg);
-                ui.emitSocket('update-value', { msg: msg });
-            }
-        });
-        // });
     }
 
     RED.nodes.registerType('ur_table', TableNode);
