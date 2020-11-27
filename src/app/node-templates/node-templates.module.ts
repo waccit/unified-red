@@ -34,7 +34,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { InjectionService } from '@swimlane/ngx-charts/lib/common/tooltip/injection.service';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
     declarations: [
@@ -66,6 +66,7 @@ import { InjectionService } from '@swimlane/ngx-charts/lib/common/tooltip/inject
         MatSlideToggleModule,
         MatSidenavModule,
         MatTooltipModule,
+        MatTabsModule,
         FullCalendarModule,
         PerfectScrollbarModule,
         DragDropModule,
