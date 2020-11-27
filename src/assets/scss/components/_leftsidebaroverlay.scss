@@ -5,17 +5,18 @@
  */
 @import '../theme/theme-color-variables';
 
-.overlay {
-    position: fixed;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    z-index: 10;
-}
+// Commented out overlay class because it collides with d3 / ngx-charts overlay class and breaks the timeline feature
+// .overlay {
+//     position: fixed;
+//     cursor: pointer;
+//     top: 0;
+//     left: 0;
+//     right: 0;
+//     bottom: 0;
+//     background-color: rgba(0, 0, 0, 0.5);
+//     display: none;
+//     z-index: 10;
+// }
 
 .overlay-open {
     .sidebar {
