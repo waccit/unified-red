@@ -72,16 +72,16 @@
                 </div> -->
                 <div class="rightSetting">
                     <p>SIDEBAR MENU COLORS</p>
-                    <mat-button-toggle-group class="mt-2" value="light">
-                        <mat-button-toggle (click)="lightSidebarBtnClick()" value="light">Light</mat-button-toggle>
-                        <mat-button-toggle (click)="darkSidebarBtnClick()" value="dark">Dark</mat-button-toggle>
+                    <mat-button-toggle-group class="mt-2" [value]="menuOption">
+                        <mat-button-toggle (click)="lightSidebar()" value="menu_light">Light</mat-button-toggle>
+                        <mat-button-toggle (click)="darkSidebar()" value="menu_dark">Dark</mat-button-toggle>
                     </mat-button-toggle-group>
                 </div>
                 <div class="rightSetting">
                     <p>THEME COLORS</p>
-                    <mat-button-toggle-group class="mt-2" value="light">
-                        <mat-button-toggle (click)="lightThemeBtnClick()" value="light">Light</mat-button-toggle>
-                        <mat-button-toggle (click)="darkThemeBtnClick()" value="dark">Dark</mat-button-toggle>
+                    <mat-button-toggle-group class="mt-2" [value]="theme">
+                        <mat-button-toggle (click)="lightTheme()" value="light">Light</mat-button-toggle>
+                        <mat-button-toggle (click)="darkTheme()" value="dark">Dark</mat-button-toggle>
                     </mat-button-toggle-group>
                 </div>
                 <div class="rightSetting">
