@@ -173,8 +173,8 @@
 
                         let instance = opt.instance;
 
-                        let rawInstanceNames = instance.name;
-                        let rawInstanceNums = instance.number;
+                        let rawInstanceNames = instance.name || '';
+                        let rawInstanceNums = instance.number || '';
                         let instanceNames = [];
                         let instanceNums = [];
 
@@ -271,8 +271,10 @@
                     },
                 });
 
-            for (let i = 0; i < this.instances.length; i++) {
-                $('#node-config-input-instances-list').editableList('addItem', { instance: this.instances[i] });
+            if (this.instances) {
+                for (let i = 0; i < this.instances.length; i++) {
+                    $('#node-config-input-instances-list').editableList('addItem', { instance: this.instances[i] });
+                }
             }
         },
         oneditsave: function () {
