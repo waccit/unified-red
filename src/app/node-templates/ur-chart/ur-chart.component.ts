@@ -4,6 +4,8 @@ import { BaseNode } from '../ur-base-node';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 
+declare const $: any;
+
 interface Unit {
     value: string;
     viewValue: string;
@@ -40,6 +42,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private _liveSub: Subscription;
 
     chartOpt = {
+        animation: false,
+        legend: true,
+        legendPosition: 'right',
+        timeline: true,
         autoScale: true,
         showYAxisLabel: false,
         showXAxisLabel: true,
@@ -51,7 +57,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         yScaleMax: null,
         colorScheme: {
             domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5'],
-        }
+        },
     };
 
     queryParams: any;
@@ -111,17 +117,13 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.getData();
     }
 
-    // endTime(event: any) {
-    //     this.queryParams.endTimestamp = event.target.value;
-    //     this.getData();
-    // }
-
     graphChart(live: any) {
         this.currentTime = new Date();
         this.queryParams = {
-            topic: this.topics, //['some/sensor/a','some/sensor/b'],
+            limit: 60000,
+            topic: this.topics,
             startTimestamp: new Date(this.currentTime.getTime() - this.timeValue * this.selectedUnit * 1000),
-            endTimestamp: this.currentTime,
+            // endTimestamp: this.currentTime,
             // value: any,
             lowValue: parseFloat(this.config.ymin),
             highValue: parseFloat(this.config.ymax),
@@ -138,7 +140,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.chartOpt.yScaleMax = this.queryParams.highValue;
         this.getData();
         if (live) {
-            this._liveSub = this.webSocketService.listen('ur-datalog-update').subscribe(this.liveData);
+            this._liveSub = this.webSocketService.listen('ur-datalog-update').subscribe(data => {
+                this.liveData(data);
+            });
         } else {
             if (this._liveSub) {
                 this._liveSub.unsubscribe();
@@ -172,14 +176,35 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     liveData(data: any) {
-        this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
-        this.chartOpt.xScaleMin = new Date(
-            this.chartOpt.xScaleMax.getTime() - this.timeValue * this.selectedUnit * 1000
-        );
-        this.dataSource[data.payload.topic].series.push({
-            name: new Date(data.payload.timestamp),
-            value: data.payload.value,
-        });
+        if (data.payload && typeof this.dataSource !== 'undefined') {
+            this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
+            this.chartOpt.xScaleMin = new Date(
+                this.chartOpt.xScaleMax.getTime() - this.timeValue * this.selectedUnit * 1000
+            );
+
+            // add point to dataSource
+            let alias = this.alias[data.payload.topic] || data.payload.topic;
+            let newEntry = {
+                name: new Date(data.payload.timestamp),
+                value: data.payload.value,
+            };
+            this.dataSource[alias].series.push(newEntry);
+
+            // add point to graphed results
+            const isShown = this.showSeries[alias];
+            if (isShown) {
+                for (let dataPoint of this.graphedResults) {
+                    if (dataPoint.name === alias) {
+                        dataPoint.series.shift(); // delete first entry
+                        dataPoint.series.push(newEntry); // append new entry
+                        break;
+                    }
+                }
+            }
+
+            // refresh chart
+            this.graphedResults = [ ... this.graphedResults ];
+        }
     }
 
     onActivate(data): void {
@@ -190,21 +215,21 @@ export class UrChartComponent extends BaseNode implements OnInit {
         // console.log('Deactivate', JSON.parse(JSON.stringify(data)));
     }
 
-    onSelect(name) {
-        let data = JSON.parse(JSON.stringify(this.graphedResults)); // clone data
-        const isShown = this.showSeries[name]; //data.some(t => t.name === name && t.series.length);
+    onSelect(alias) {
+        let data = $.extend(true, [], this.graphedResults); // deep copy/clone data
+        const isShown = this.showSeries[alias];
         if (isShown) {
             // topic shown, so hide
-            this.showSeries[name] = false;
+            this.showSeries[alias] = false;
             for (let entry of data) {
-                if (entry.name === name) {
+                if (entry.name === alias) {
                     entry.series = [];
                     break;
                 }
             }
         } else {
             // topic hidden, so show
-            this.showSeries[name] = true;
+            this.showSeries[alias] = true;
             // rebuild data when showing series in ngx-charts as work around for ngx-charts bug
             // if you add the data series only (and do not rebuild), ngx-charts will graph the data series to the right of the existing chart
             for (let entry of data) {

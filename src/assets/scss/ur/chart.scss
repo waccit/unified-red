@@ -1,4 +1,10 @@
-app-ur-chart .mat-tab-label {
-    padding:0;
-    min-width: 48px;
+app-ur-chart {
+    .mat-tab-label {
+        padding:0;
+        min-width: 48px;
+    }
+
+    .chart-legend .legend-label {
+        color: #888;
+    }
 }
