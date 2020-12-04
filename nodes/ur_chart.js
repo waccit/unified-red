@@ -48,7 +48,7 @@ module.exports = function (RED) {
                 legend: config.legend || false,
                 interpolate: config.interpolate,
                 nodata: config.nodata,
-                width: parseInt(config.width || group.config.width || 6),
+                width: parseInt(config.width || group.config.width || 12),
                 height: parseInt(config.height || group.config.width / 2 + 1 || 4),
                 xrange: config.xrange,
                 xrangeunits: config.xrangeunits,
