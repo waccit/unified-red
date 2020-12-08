@@ -6,7 +6,8 @@
             "group": "Group",
             "page": "Page",
             "folder": "Folder",
-            "tab": "Tab"
+            "tab": "Tab",
+            "unassigned": "unassigned"
         }
     }
 }
