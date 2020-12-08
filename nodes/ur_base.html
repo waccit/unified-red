@@ -1200,28 +1200,28 @@
                         if (item.page) {
                             item.node.page = item.page;
                         }
+
+                        listElements[item.node.id] = container;
+                        RED.nodes.add(item.node);
+                        RED.history.push({
+                            t: 'add',
+                            nodes: [item.node.id],
+                            dirty: RED.nodes.dirty(),
+                        });
+                        RED.nodes.dirty(true);
+
+                        if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
+                            RED.nodes.updateConfigNodeUsers(item.node);
+                        }
                     } else if (item.type === undefined) {
                         item.type = item.node.type;
                     }
-
-                    listElements[item.node.id] = container;
-                    RED.nodes.add(item.node);
-                    // RED.history.push({
-                    //     t: 'add',
-                    //     nodes: [item.node.id],
-                    //     dirty: RED.nodes.dirty(),
-                    // });
-                    // RED.nodes.dirty(true);
-
-                    // if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                    //     RED.nodes.updateConfigNodeUsers(item.node);
-                    // }
 
                     return item;
                 };
 
                 /**
-                 * Add a new Folder, `Page, Group, Menu Entity
+                 * Add a new Folder, Page, Group, or Tab
                  *
                  * @param {string} container - the jQuery DOM element to which any row content should be added
                  * @param {Number} i - the index of the row
@@ -1243,16 +1243,6 @@
                     }
 
                     item.children = item.children || [];
-                    RED.history.push({
-                        t: 'add',
-                        nodes: [item.node.id],
-                        dirty: RED.nodes.dirty(),
-                    });
-                    RED.nodes.dirty(true);
-
-                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                        RED.nodes.updateConfigNodeUsers(item.node);
-                    }
                     // title
                     let titleRow = $('<div>', {
                         class: titleClass,
@@ -1409,17 +1399,6 @@
 
                     item.groups = item.groups || [];
 
-                    RED.history.push({
-                        t: 'add',
-                        nodes: [item.node.id],
-                        dirty: RED.nodes.dirty(),
-                    });
-                    RED.nodes.dirty(true);
-
-                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                        RED.nodes.updateConfigNodeUsers(item.node);
-                    }
-
                     let pageNode = item.node;
                     elementParents[pageNode.id] = item.node.folder;
 
@@ -1569,17 +1548,6 @@
                     let groupNode = item.node;
                     elementParents[groupNode.id] = item.node.page;
 
-                    RED.history.push({
-                        t: 'add',
-                        nodes: [item.node.id],
-                        dirty: RED.nodes.dirty(),
-                    });
-                    RED.nodes.dirty(true);
-
-                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                        RED.nodes.updateConfigNodeUsers(item.node);
-                    }
-
                     // title row
                     let titleRow = $('<div>', {
                         class: 'nr-db-sb-list-header nr-db-sb-group-list-header',
@@ -1714,18 +1682,6 @@
 
                     let tabNode = item.node;
                     elementParents[tabNode.id] = item.node.group;
-                    // listElements[tabNode.id] = container;
-
-                    RED.history.push({
-                        t: 'add',
-                        nodes: [item.node.id],
-                        dirty: RED.nodes.dirty(),
-                    });
-                    RED.nodes.dirty(true);
-
-                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                        RED.nodes.updateConfigNodeUsers(item.node);
-                    }
 
                     // title row
                     let titleRow = $('<div>', {
@@ -1781,7 +1737,6 @@
                             connectWith: '.nr-db-sb-widget-list',
                             addItem: function (container, i, widgetNode) {
                                 elementParents[widgetNode.id] = tabNode.id;
-                                widgetNode.order = i + 1;
 
                                 var titleRow = $('<div>', {
                                     class: 'nr-db-sb-list-header nr-db-sb-widget-list-header',
@@ -2184,11 +2139,13 @@
                     var pages = {}; // a dictionary of pages
                     var groups = {}; // a dictionary of groups
                     var tabs = {}; // a dictionary of tabs
-                    var elements = []; // a dictionary of widgets
-                    var tabElements = {}; // a dictionary of widgets by parent tab id
+                    var widgets = []; // an array of widgets
+                    var tabWidgets = {}; // a dictionary of widgets by parent tab id
                     var groupTabs = {}; // a dictionary of tabs by parent group id
                     var pageGroups = {}; // a dictionary of groups by parent page id
-                    var folderChildren = {}; // a dictionary of any folder's children <key: parent folder's id, value: array of children (items & pages)>
+                    var folderChildren = {}; // a dictionary of any folder's children <key: parent folder's id, value: array of children (folders & pages)>
+                    var tabId;
+                    var tab;
                     var groupId;
                     var group;
                     var pageId;
@@ -2236,47 +2193,42 @@
                         }
                     });
 
-                    for (folderId in childFolders) {
-                        if (childFolders.hasOwnProperty(folderId)) {
-                            folder = childFolders[folderId];
-                            if (folders.hasOwnProperty(folder.folder) || childFolders.hasOwnProperty(folder.folder)) {
-                                folderChildren[folder.folder] = folderChildren[folder.folder] || [];
-                                folderChildren[folder.folder].push(folder);
-                            }
+                    for (folderId in folders) {
+                        folder = folders[folderId];
+
+                        if (folders.hasOwnProperty(folder.folder) || childFolders.hasOwnProperty(folder.folder)) {
+                            folderChildren[folder.folder] = folderChildren[folder.folder] || [];
+                            folderChildren[folder.folder].push(folder);
                         }
                     }
 
                     for (pageId in pages) {
-                        if (pages.hasOwnProperty(pageId)) {
-                            page = pages[pageId];
-                            if (folders.hasOwnProperty(page.folder) || childFolders.hasOwnProperty(page.folder)) {
-                                folderChildren[page.folder] = folderChildren[page.folder] || [];
-                                folderChildren[page.folder].push(page);
-                            }
+                        page = pages[pageId];
+
+                        if (folders.hasOwnProperty(page.folder) || childFolders.hasOwnProperty(page.folder)) {
+                            folderChildren[page.folder] = folderChildren[page.folder] || [];
+                            folderChildren[page.folder].push(page);
                         }
                     }
 
                     for (groupId in groups) {
-                        if (groups.hasOwnProperty(groupId)) {
-                            group = groups[groupId];
-                            if (pages.hasOwnProperty(group.page)) {
-                                // This group belongs to a page
-                                pageGroups[group.page] = pageGroups[group.page] || [];
-                                pageGroups[group.page].push(group);
-                            }
-                            // else {
-                            //     unknownGroups++;
-                            // }
+                        group = groups[groupId];
+
+                        if (pages.hasOwnProperty(group.page)) {
+                            pageGroups[group.page] = pageGroups[group.page] || [];
+                            pageGroups[group.page].push(group);
                         }
+                        // else {
+                        //     unknownGroups++;
+                        // }
                     }
 
                     for (tabId in tabs) {
-                        if (tabs.hasOwnProperty(tabId)) {
-                            tab = tabs[tabId];
-                            if (groups.hasOwnProperty(tab.group)) {
-                                groupTabs[tab.group] = groupTabs[tab.group] || [];
-                                groupTabs[tab.group].push(tab);
-                            }
+                        tab = tabs[tabId];
+
+                        if (groups.hasOwnProperty(tab.group)) {
+                            groupTabs[tab.group] = groupTabs[tab.group] || [];
+                            groupTabs[tab.group].push(tab);
                         }
                     }
 
@@ -2284,8 +2236,8 @@
                     RED.nodes.eachNode(function (node) {
                         if (/^ur_/.test(node.type)) {
                             if (tabs.hasOwnProperty(node.tab)) {
-                                tabElements[node.tab] = tabElements[node.tab] || [];
-                                tabElements[node.tab].push(node);
+                                tabWidgets[node.tab] = tabWidgets[node.tab] || [];
+                                tabWidgets[node.tab].push(node);
                             }
                             // else if (
                             //     node.type !== 'ur_toast' &&
@@ -2312,10 +2264,10 @@
                     // }
 
                     // Sort each tab's array of widgets
-                    for (tabId in tabElements) {
-                        if (tabElements.hasOwnProperty(tabId)) {
-                            group = tabElements[tabId];
-                            tabElements[tabId] = group
+                    for (tabId in tabWidgets) {
+                        if (tabWidgets.hasOwnProperty(tabId)) {
+                            widgets = tabWidgets[tabId];
+                            tabWidgets[tabId] = widgets
                                 .map(function (v, i) {
                                     return { n: v, i: i };
                                 })
@@ -2336,9 +2288,9 @@
 
                     // Sort each group's array of tabs
                     for (groupId in groupTabs) {
-                        if (groupTabs.hasOwnProperty(tabId)) {
-                            tab = groupTabs[tabId];
-                            groupTabs[tabId] = tab
+                        if (groupTabs.hasOwnProperty(groupId)) {
+                            tab = groupTabs[groupId];
+                            groupTabs[groupId] = tab
                                 .map((v, i) => {
                                     return { n: v, i: i };
                                 })
@@ -2403,6 +2355,7 @@
                         }
                     }
 
+                    // make an array of root-level folderIds (sorted)
                     var folderIds = Object.keys(folders)
                         .map(function (v, i) {
                             return { n: folders[v], i: i };
@@ -2481,11 +2434,11 @@
                                 }
                                 break;
                             case 'ur_tab':
-                                if (tabElements.hasOwnProperty(parent.id)) {
+                                if (tabWidgets.hasOwnProperty(parent.id)) {
                                     result =
                                         format === 'dashboard'
-                                            ? tabElements[parent.id]
-                                            : tabElements[parent.id].map((element) => element.id);
+                                            ? tabWidgets[parent.id]
+                                            : tabWidgets[parent.id].map((element) => element.id);
                                 }
                                 break;
                         }
@@ -2504,15 +2457,7 @@
                         newList.push(folderForNewList);
                     });
 
-                    // console.log('folders: ', folders);
-                    // console.log('pages: ', pages);
-                    // console.log('folderChildren: ', folderChildren);
-                    // console.log('dashboard: ', dashboard);
-                    // console.log('newList: ', newList);
-                    // console.log('currentList: ', currentList);
-
-                    if (JSON.stringify(newList) != JSON.stringify(currentList)) {
-                        // console.log('currentList does not match newList...');
+                    if (JSON.stringify(newList) !== JSON.stringify(currentList)) {
                         listElements = {};
                         tabLists = {};
                         groupLists = {};
@@ -2651,7 +2596,7 @@
                             //     globalDashboardNode.theme.themeState = editorObject.theme;
                             // }
                             //
-                            // //If custom theme is chosen, update the elements and current state
+                            // //If custom theme is chosen, update the widgets and current state
                             // if (globalDashboardNode.theme.name === 'theme-custom') {
                             //     //globalDashboardNode.theme.customTheme.baseColor = globalDashboardNode.theme.themeState['base-color'].default;
                             //     generateColours(globalDashboardNode.theme.customTheme.baseColor);
@@ -2853,8 +2798,6 @@
                                         .text(l);
                                 }
                             } else {
-                                console.log('node: ', node);
-                                console.log('tabLists: ', tabLists);
                                 if (tabLists[node.tab]) {
                                     if (node.order === 0) {
                                         node.order = tabLists[node.tab].editableList('length');
@@ -2909,7 +2852,6 @@
                 var pendingAdd = [];
                 var pendingAddTimer = null;
 
-                // handlePendingAdds working correctly now. Added
                 function handlePendingAdds() {
                     var hasFolders = false;
                     var hasChildFolders = false;
@@ -2932,9 +2874,9 @@
 
                         if (A.type === B.type) {
                             if (A.type === 'ur_folder') {
-                                if (A.folder == undefined && B.folder !== undefined) {
+                                if (A.folder === undefined && B.folder !== undefined) {
                                     return -1;
-                                } else if (A.folder !== undefined && B.folder == undefined) {
+                                } else if (A.folder !== undefined && B.folder === undefined) {
                                     return 1;
                                 }
                             }
