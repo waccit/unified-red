@@ -1201,7 +1201,6 @@
                             item.node.page = item.page;
                         }
 
-                        listElements[item.node.id] = container;
                         RED.nodes.add(item.node);
                         RED.history.push({
                             t: 'add',
@@ -1216,6 +1215,8 @@
                     } else if (item.type === undefined) {
                         item.type = item.node.type;
                     }
+
+                    listElements[item.node.id] = container;
 
                     return item;
                 };
@@ -2232,7 +2233,7 @@
                         }
                     }
 
-                    // Find all ui widgets - list them by their tab id
+                    // Find all widgets - list them by their tab id
                     RED.nodes.eachNode(function (node) {
                         if (/^ur_/.test(node.type)) {
                             if (tabs.hasOwnProperty(node.tab)) {
