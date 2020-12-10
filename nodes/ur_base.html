@@ -1193,12 +1193,18 @@
                         item.node.order = i + 1;
                         item.node.name += ' ' + item.node.order;
 
+                        listElements[item.node.id] = container;
+
                         if (item.folder) {
                             item.node.folder = item.folder;
                         }
 
                         if (item.page) {
                             item.node.page = item.page;
+                        }
+
+                        if (item.group) {
+                            item.node.group = item.group;
                         }
 
                         RED.nodes.add(item.node);
