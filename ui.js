@@ -270,6 +270,7 @@ function add(opt) {
 
             // Always store the full dataset.
             var toStore;
+            // prettier-ignore
             var toEmit = toStore = enforceWebSocketsSchema(msg);
             toStore.msg = opt.beforeEmit(toStore.msg, fullDataset);
             if (newPoint !== undefined && typeof newPoint !== 'boolean') {
@@ -345,24 +346,19 @@ function add(opt) {
             if (opt.page.config.isDynamic) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
-                // console.log('topicPatter rcvd: ', topicPattern);
 
                 // find and replace wildcard (*)
                 let topicRegex = topicPattern.replace(/\*/g, '.*');
-                // console.log('topicRegex replaced *: ', topicRegex);
                 // find and escape square-brackets
                 topicRegex = topicRegex.replace(/\[/g, '\\[');
                 topicRegex = topicRegex.replace(/\]/g, '\\]');
                 // find and replace capture group (x)
                 topicRegex = topicRegex.replace(/\{x\}/gi, '([\\w\\. ]+)');
-                // console.log('topicRegex replaced {x}: ', topicRegex);
                 // make new regex
                 topicRegex = new RegExp('^' + topicRegex + '$');
-                // console.log('topicRegex done: ', topicRegex);
-                // console.log('topic: ', topic);
 
                 let topicArr = topicRegex.exec(topic);
-                // console.log('topicArr: ', topicArr);
+
                 if (topicArr) {
                     let destinationInstNum = topicArr[1];
                     newId += '.' + destinationInstNum;
@@ -392,6 +388,7 @@ function add(opt) {
     // This is the handler for messages coming back from the UI
     var handler = function (msg) {
         let idParts = msg.id.split('.');
+        // prettier-ignore
         if (idParts.length === 3) { // is extended node id? (dynamic page)
             msg.id = idParts[0] + '.' + idParts[1]; // set id to base node id
         }
@@ -989,7 +986,7 @@ function addControl(folders, page, group, tab, control) {
                     let instancePage = {
                         id: page.id + '.' + instanceNums[i],
                         isPage: true,
-                        order: parseFloat(page.config.order + '.' + i),
+                        order: page.config.order + '.' + i,
                         disabled: page.config.disabled,
                         hidden: page.config.hidden,
                         instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
