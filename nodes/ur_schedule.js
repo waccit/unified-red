@@ -16,7 +16,7 @@ module.exports = function (RED) {
         if (!tab) {
             return;
         }
-        var group = RED.nodes.getNode(config.group);
+        var group = RED.nodes.getNode(tab.config.group);
         if (!group) {
             return;
         }
