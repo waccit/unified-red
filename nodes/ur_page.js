@@ -3,6 +3,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         this.config = {
             pathName: config.name.replace(/ /g, '').toLowerCase(),
+            // pathName: encodeURIComponent(config.name.replace(/ /g, '').toLowerCase()),
             name: config.name,
             disp: config.disp,
             width: config.width,

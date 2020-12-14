@@ -12,30 +12,7 @@ module.exports = function (RED) {
         this.valuePriority = { holiday: null, date: null, weekday: null };
         var node = this;
 
-        var tab = RED.nodes.getNode(config.tab);
-        if (!tab) {
-            return;
-        }
-        var group = RED.nodes.getNode(tab.config.group);
-        if (!group) {
-            return;
-        }
-        var page = RED.nodes.getNode(group.config.page);
-        if (!page) {
-            return;
-        }
-        var folder = RED.nodes.getNode(page.config.folder);
-        if (!folder) {
-            return;
-        }
-
-        // folder tree stack (First In Last Out)
-        var folders = [];
-        folders.push(folder);
-        while (folder.config.folder) {
-            folder = RED.nodes.getNode(folder.config.folder);
-            folders.push(folder);
-        }
+        var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
         /*
         HELPER FUNCTIONS
