@@ -16,6 +16,7 @@ module.exports = function (RED) {
         toFloat: toNumber.bind(null, true),
         updateUi: updateUi,
         ev: ev,
+        makeMenuTree: makeMenuTree,
     };
 };
 
@@ -1330,6 +1331,37 @@ function addBaseConfig(config) {
     // mani.background_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
     // mani.theme_color = config.theme.themeState['page-titlebar-backgroundColor'].value;
     updateUi();
+}
+
+// Helper Functions for nodes
+
+function makeMenuTree(RED, config) {
+    let tab = RED.nodes.getNode(config.tab);
+    if (!tab) {
+        return;
+    }
+    let group = RED.nodes.getNode(tab.config.group);
+    if (!group) {
+        return;
+    }
+    let page = RED.nodes.getNode(group.config.page);
+    if (!page) {
+        return;
+    }
+    let folder = RED.nodes.getNode(page.config.folder);
+    if (!folder) {
+        return;
+    }
+
+    // folder tree stack (First In Last Out)
+    let folders = [];
+    folders.push(folder);
+    while (folder.config.folder) {
+        folder = RED.nodes.getNode(folder.config.folder);
+        folders.push(folder);
+    }
+
+    return { tab, group, page, folders };
 }
 
 // function getTheme() {
