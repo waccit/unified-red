@@ -3,11 +3,12 @@ const router = app.Router();
 const datalogService = require('./datalog.service');
 const authorize = require('../authorize');
 const Role = require('../users/role.model');
+const jsonParser = require('body-parser').json();
 
 router.get('/', authorize(Role.Level01), list);
-router.put('/', authorize(Role.Level01), getLogger);
-router.post('/', authorize(Role.Level01), configureLogger);
-router.delete('/', authorize(Role.Level01), deleteLogger);
+router.put('/', jsonParser, authorize(Role.Level01), getLogger);
+router.post('/', jsonParser, authorize(Role.Level01), configureLogger);
+router.delete('/', jsonParser, authorize(Role.Level01), deleteLogger);
 
 module.exports = router;
 
