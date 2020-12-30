@@ -10,7 +10,7 @@ export class WebSocketService {
     socket: any;
 
     constructor() {
-        this.socket = io(window.location.origin, { path: '/ui/socket.io' });
+        this.socket = io(window.location.origin, { path: '/socket.io' });
     }
 
     // connect(onUiLoaded: Function, replaydone: Function) {

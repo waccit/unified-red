@@ -462,7 +462,7 @@ function init(server, app, log, redSettings) {
     if (uiSettings.hasOwnProperty('path') && typeof uiSettings.path === 'string') {
         settings.path = uiSettings.path;
     } else {
-        settings.path = 'ui';
+        settings.path = '/';
     }
     if (uiSettings.hasOwnProperty('readOnly') && typeof uiSettings.readOnly === 'boolean') {
         settings.readOnly = uiSettings.readOnly;
