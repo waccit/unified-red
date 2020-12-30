@@ -22,6 +22,8 @@ export class InitialSetupComponent implements OnInit {
     dbProgress = false;
     smtpServerOk = false;
     smtpProgress = false;
+    urURL = window.location.protocol + '//' + window.location.host;
+    nrURL = window.location.protocol + '//' + window.location.host + '/admin';
 
     constructor(
         private formBuilder: FormBuilder,
