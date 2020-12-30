@@ -3,16 +3,17 @@ const router = app.Router();
 const alarmService = require('./alarm.service');
 const authorize = require('../authorize');
 const Role = require('../users/role.model');
+const jsonParser = require('body-parser').json();
 
-router.get('/all/',                 authorize(Role.Level01), getAll);
-router.get('/summary/',             authorize(Role.Level01), getSummary);
-router.get('/recent/:state/',       authorize(Role.Level01), getRecent);
-router.get('/:id',                  authorize(Role.Level01), getById);
-router.post('/topic/',              authorize(Role.Level01), getByTopic);
-router.put('/:id',                  authorize(Role.Level01), update);
-router.get('/ack/:id',              authorize(Role.Level01), ackById);
-router.post('/ack/',                authorize(Role.Level01), ackByTopic);
-router.delete('/:id',               authorize(Role.Level01), _delete);
+router.get('/all/', authorize(Role.Level01), getAll);
+router.get('/summary/', authorize(Role.Level01), getSummary);
+router.get('/recent/:state/', authorize(Role.Level01), getRecent);
+router.get('/:id', authorize(Role.Level01), getById);
+router.post('/topic/', jsonParser, authorize(Role.Level01), getByTopic);
+router.put('/:id', jsonParser, authorize(Role.Level01), update);
+router.get('/ack/:id', authorize(Role.Level01), ackById);
+router.post('/ack/', jsonParser, authorize(Role.Level01), ackByTopic);
+router.delete('/:id', authorize(Role.Level01), _delete);
 
 module.exports = router;
 
@@ -31,7 +32,7 @@ function getSummary(req, res, next) {
 }
 
 function getRecent(req, res, next) {
-    let state = req.params.state.toString().toLowerCase() === "active";
+    let state = req.params.state.toString().toLowerCase() === 'active';
     alarmService
         .getRecent(state, req.query.limit)
         .then((alarms) => res.json(alarms))

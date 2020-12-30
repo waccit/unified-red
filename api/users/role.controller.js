@@ -3,9 +3,10 @@ const router = app.Router();
 const roleService = require('./role.service');
 const authorize = require('../authorize');
 const Role = require('./role.model');
+const jsonParser = require('body-parser').json();
 
-router.get('/',    authorize(Role.Level01), getAll);
-router.put('/:level', authorize(Role.Level01), update);
+router.get('/', authorize(Role.Level01), getAll);
+router.put('/:level', jsonParser, authorize(Role.Level01), update);
 
 module.exports = router;
 

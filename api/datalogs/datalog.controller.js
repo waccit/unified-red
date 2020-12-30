@@ -3,8 +3,9 @@ const router = app.Router();
 const datalogService = require('./datalog.service');
 const authorize = require('../authorize');
 const Role = require('../users/role.model');
+const jsonParser = require('body-parser').json();
 
-router.put('/', authorize(Role.Level01), query);
+router.put('/', jsonParser, authorize(Role.Level01), query);
 
 module.exports = router;
 

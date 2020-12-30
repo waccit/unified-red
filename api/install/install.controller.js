@@ -1,11 +1,12 @@
 const app = require('express');
 const router = app.Router();
 const installService = require('./install.service');
+const jsonParser = require('body-parser').json();
 
-router.get('/',  isInstalled);
-router.post('/', install);
-router.post('/testdb/', testDbConnection);
-router.post('/testsmtp/', testSmtpServer);
+router.get('/', isInstalled);
+router.post('/', jsonParser, install);
+router.post('/testdb/', jsonParser, testDbConnection);
+router.post('/testsmtp/', jsonParser, testSmtpServer);
 
 module.exports = router;
 
