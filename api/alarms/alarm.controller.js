@@ -5,15 +5,25 @@ const authorize = require('../authorize');
 const Role = require('../users/role.model');
 const jsonParser = require('body-parser').json();
 
+/*
+Alarm Access:
+        1 2 3 4 5 6 7 8 9 10    Functions
+View	Y Y Y Y Y - - - Y Y     getAll, getSummary, getRecent, getById, getByTopic
+Enable	N Y Y Y Y - - - Y Y
+Ack		N Y Y Y Y - - - Y Y     ackById, ackByTopic
+Add	    N N N N N - - - Y Y
+Edit	N N Y Y Y - - - Y Y     update
+Delete	N N N N N - - - Y Y     delete
+*/
 router.get('/all/', authorize(Role.Level01), getAll);
 router.get('/summary/', authorize(Role.Level01), getSummary);
 router.get('/recent/:state/', authorize(Role.Level01), getRecent);
 router.get('/:id', authorize(Role.Level01), getById);
 router.post('/topic/', jsonParser, authorize(Role.Level01), getByTopic);
-router.put('/:id', jsonParser, authorize(Role.Level01), update);
-router.get('/ack/:id', authorize(Role.Level01), ackById);
-router.post('/ack/', jsonParser, authorize(Role.Level01), ackByTopic);
-router.delete('/:id', authorize(Role.Level01), _delete);
+router.put('/:id', jsonParser, authorize(Role.Level03), update);
+router.get('/ack/:id', authorize(Role.Level02), ackById);
+router.post('/ack/', jsonParser, authorize(Role.Level02), ackByTopic);
+router.delete('/:id', authorize(Role.Level09), _delete);
 
 module.exports = router;
 

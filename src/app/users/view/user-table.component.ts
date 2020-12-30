@@ -52,7 +52,7 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
-                    this.userService.register(result).subscribe((data) => {
+                    this.userService.add(result).subscribe((data) => {
                         this.snackbar.success('Added user successfully!');
                         this.refreshTable();
                     });

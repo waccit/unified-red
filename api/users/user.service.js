@@ -11,11 +11,13 @@ const { v4: uuidv4 } = require('uuid');
 const emailService = require('../email.service');
 const socketio = require('../../socket');
 const User = db.User;
+const Role = require('./role.model');
 var _settings;
 
 module.exports = {
     authenticate,
     canRegister,
+    register,
     getAll,
     getById,
     create,
@@ -54,6 +56,14 @@ async function getAll() {
 
 async function getById(id) {
     return await User.findById(id);
+}
+
+async function register(userParam) {
+    if (await canRegister()) {
+        userParam.role = Role.Level10; // Make first user to an admin
+        return create(userParam);
+    }
+    throw 'Cannot register';
 }
 
 async function create(userParam) {

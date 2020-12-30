@@ -17,12 +17,21 @@ router.get('/register', canRegister);
 router.get('/forgot/:username', forgot);
 router.post('/reset/:token', jsonParser, resetPassword);
 
+/*
+Users Access:
+        1 2 3 4 5 6 7 8 9 10    Functions
+View	Y Y Y Y Y - - - Y Y     getCurrent
+Add		N N N N Y - - - Y Y     add
+Edit	N N N N Y - - - Y Y     getAll, getById, update
+Delete	N N N N Y - - - Y Y     delete
+*/
 // protected routes
-router.get('/', authorize(Role.Level01), getAll);
+router.get('/', authorize(Role.Level05), getAll);
 router.get('/current', authorize(Role.Level01), getCurrent);
-router.get('/:id', authorize(Role.Level01), getById);
-router.put('/:id', jsonParser, authorize(Role.Level01), update);
-router.delete('/:id', authorize(Role.Level01), _delete);
+router.get('/:id', authorize(Role.Level05), getById);
+router.post('/', jsonParser, authorize(Role.Level05), add);
+router.put('/:id', jsonParser, authorize(Role.Level05), update);
+router.delete('/:id', authorize(Role.Level05), _delete);
 
 module.exports = router;
 
@@ -50,7 +59,7 @@ function canRegister(req, res, next) {
 // curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "user", "password": "Password123", "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/register
 function register(req, res, next) {
     userService
-        .create(req.body)
+        .register(req.body)
         .then((user) => res.json(user))
         .catch((err) => next(err));
 }
@@ -79,6 +88,15 @@ function getById(req, res, next) {
     userService
         .getById(req.params.id)
         .then((user) => (user ? res.json(user) : res.sendStatus(404)))
+        .catch((err) => next(err));
+}
+
+// curl test:
+// curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "user", "password": "Password123", "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/
+function add(req, res, next) {
+    userService
+        .create(req.body)
+        .then((user) => res.json(user))
         .catch((err) => next(err));
 }
 
