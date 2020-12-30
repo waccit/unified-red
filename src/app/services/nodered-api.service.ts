@@ -5,6 +5,7 @@ import { tap, concatMap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class NodeRedApiService {
+    private httpAdminRoot = '/admin';
     private tokenSubject: BehaviorSubject<any>;
     public token: Observable<any>;
 
@@ -25,7 +26,7 @@ export class NodeRedApiService {
             body.set('scope', '');
             body.set('username', username);
             body.set('password', password);
-            return this.http.post<any>('/auth/token', body.toString(), { headers }).pipe(tap(response => {
+            return this.http.post<any>(this.httpAdminRoot + '/auth/token', body.toString(), { headers }).pipe(tap(response => {
                 localStorage.setItem('auth-tokens', JSON.stringify(response));
                 this.tokenSubject.next(response);
             }));
@@ -51,7 +52,7 @@ export class NodeRedApiService {
                 'Node-RED-API-Version': 'v2',
                 Authorization: `Bearer ${this.accessToken}`
             });
-            return this.http.get('/flows', { headers }).pipe(concatMap((data: any) => {
+            return this.http.get(this.httpAdminRoot + '/flows', { headers }).pipe(concatMap((data: any) => {
                 if (data.flows) {
                     // replace existing node with new node
                     data.flows = data.flows.map(existing => {
@@ -60,7 +61,7 @@ export class NodeRedApiService {
                         }
                         return existing;
                     });
-                    return this.http.post('/flows', data, { headers: new HttpHeaders({
+                    return this.http.post(this.httpAdminRoot + '/flows', data, { headers: new HttpHeaders({
                         'Node-RED-API-Version': 'v2',
                         'Node-RED-Deployment-Type': 'nodes', // important: tells node red only to update the changed nodes
                         Authorization: `Bearer ${this.accessToken}`
