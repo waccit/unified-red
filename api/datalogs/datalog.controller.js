@@ -5,6 +5,16 @@ const authorize = require('../authorize');
 const Role = require('../users/role.model');
 const jsonParser = require('body-parser').json();
 
+/*
+Data Log Access:
+        1 2 3 4 5 6 7 8 9 10    Functions
+View	Y Y Y Y Y - - - Y Y     query
+Enable	N Y Y Y Y - - - Y Y
+Clear	N Y Y Y Y - - - Y Y
+Add	N N N N N - - - Y Y
+Edit	N N Y Y Y - - - Y Y     
+Delete	N N N N N - - - Y Y     
+*/
 router.put('/', jsonParser, authorize(Role.Level01), query);
 
 module.exports = router;

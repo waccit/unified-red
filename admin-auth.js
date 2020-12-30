@@ -36,8 +36,27 @@ module.exports = {
             };
             const req = http.request(options, (res) => {
                 if (res.statusCode === 200) {
-                    // Succeessful login. Resolve with the user object
-                    resolve({ username: username, permissions: '*' });
+                    res.setEncoding('utf8');
+                    let rawData = '';
+                    res.on('data', (chunk) => {
+                        rawData += chunk;
+                    });
+                    res.on('end', () => {
+                        try {
+                            const user = JSON.parse(rawData);
+                            /* Allow tech (9) and admin (10) level users access */
+                            if (user.role == 9 || user.role == 10) {
+                                // Succeessful login. Resolve with the user object
+                                resolve({ username: username, permissions: '*' });
+                            }
+                            else {
+                                // Resolve with null to indicate that the user does not have permissons to access the Node-RED Editor
+                                resolve(null);
+                            }
+                        } catch (e) {
+                            console.error(e.message);
+                        }
+                    });
                 } else {
                     // Resolve with null to indicate the username/password pair were not valid.
                     resolve(null);

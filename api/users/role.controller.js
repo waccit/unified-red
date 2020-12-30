@@ -5,8 +5,14 @@ const authorize = require('../authorize');
 const Role = require('./role.model');
 const jsonParser = require('body-parser').json();
 
+/*
+Roles Access:
+        1 2 3 4 5 6 7 8 9 10    Functions
+View	Y Y Y Y Y - - - Y Y     getAll
+Edit	N N N N Y - - - Y Y     update
+*/
 router.get('/', authorize(Role.Level01), getAll);
-router.put('/:level', jsonParser, authorize(Role.Level01), update);
+router.put('/:level', jsonParser, authorize(Role.Level05), update);
 
 module.exports = router;
 

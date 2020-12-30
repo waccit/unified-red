@@ -35,6 +35,10 @@ export class UserService {
         return this.http.get<User>(`/api/users/${id}`);
     }
 
+    add(user: User) {
+        return this.http.post(`/api/users`, user);
+    }
+
     update(id: string, user: any) {
         return this.http.put<User>(`/api/users/${id}`, user);
     }

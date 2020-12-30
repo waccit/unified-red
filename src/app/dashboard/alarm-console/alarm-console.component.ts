@@ -20,7 +20,8 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
     displayedColumns = ['severity', 'name', 'topic', 'value', 'state', 'acktime', 'timestamp', 'actions'];
     dataSource: AlarmDataSource;
     private _wsSubscription: Subscription;
-    isAdmin = false;
+    canAck = false;
+    canClear = false;
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -52,7 +53,9 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
             }
         });
         this.refreshData();
-        this.isAdmin = this.authenticationService.getUserRole() === Role.Level10;
+        let userRole = this.authenticationService.getUserRole();
+        this.canAck = userRole >= Role.Level2;
+        this.canClear = userRole >= Role.Level9;
     }
 
     ngOnDestroy(): void {
@@ -71,15 +74,19 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
     }
 
     ackAlarm(row) {
-        this.alarmService.ackByTopic(row.topic).subscribe((alarms) => {
-            this.snackbar.success(row.name + ' acknowledged');
-        });
+        if (this.canAck) {
+            this.alarmService.ackByTopic(row.topic).subscribe((alarms) => {
+                this.snackbar.success(row.name + ' acknowledged');
+            });
+        }
     }
 
-    deleteAlarm(row) {
-        this.alarmService.delete(row.id).subscribe((data) => {
-            this.snackbar.success(row.name + ' deleted');
-        });
+    clearAlarm(row) {
+        if (this.canClear) {
+            this.alarmService.delete(row.id).subscribe((data) => {
+                this.snackbar.success(row.name + ' deleted');
+            });
+        }
     }
 
     openAlarmDialog(row) {

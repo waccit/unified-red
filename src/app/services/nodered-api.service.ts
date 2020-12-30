@@ -14,6 +14,28 @@ export class NodeRedApiService {
         this.token = this.tokenSubject.asObservable();
     }
 
+    /*
+    NODE-RED ADMIN API METHODS
+    METHOD  END POINT               PERMISSION
+    GET     /auth/login
+    POST    /auth/token
+    POST    /auth/revoke
+    GET     /settings               settings.read
+    GET     /flows                  flows.read
+    POST    /flows                  flows.write
+    POST    /flow                   flows.write
+    GET     /flow/:id               flows.read
+    PUT     /flow/:id               flows.write
+    DELETE  /flow/:id               flows.write
+    GET     /nodes                  nodes.read
+    POST    /nodes                  nodes.write
+    GET     /nodes/:module          nodes.read
+    PUT     /nodes/:module          nodes.write
+    DELETE  /nodes/:module          nodes.write
+    GET     /nodes/:module/:set     nodes.read
+    PUT     /nodes/:module/:set     nodes.write
+    */
+
     login(username, password) {
         try {
             const headers = new HttpHeaders({
