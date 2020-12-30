@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const emailService = require('../email.service');
-const socketio = require("../../socket");
+const socketio = require('../../socket');
 const User = db.User;
 var _settings;
 
@@ -126,7 +126,8 @@ async function generateResetToken(req, username) {
     await update(user.id, { resetToken: token });
 
     // build email message
-    let rootPath = '/ui';
+    let rootPath = '/';
+    // let rootPath = '/ui';
     if (typeof settings().ui !== 'undefined' && typeof settings().ui.path !== 'undefined') {
         rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
     }

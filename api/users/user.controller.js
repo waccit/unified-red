@@ -8,20 +8,21 @@ const router = app.Router();
 const userService = require('./user.service');
 const authorize = require('../authorize');
 const Role = require('./role.model');
+const jsonParser = require('body-parser').json();
 
 // public routes
-router.post('/authenticate', authenticate);
-router.post('/register', register);
+router.post('/authenticate', jsonParser, authenticate);
+router.post('/register', jsonParser, register);
 router.get('/register', canRegister);
 router.get('/forgot/:username', forgot);
-router.post('/reset/:token', resetPassword);
+router.post('/reset/:token', jsonParser, resetPassword);
 
 // protected routes
-router.get('/',         authorize(Role.Level01), getAll);
-router.get('/current',  authorize(Role.Level01), getCurrent);
-router.get('/:id',      authorize(Role.Level01), getById);
-router.put('/:id',      authorize(Role.Level01), update);
-router.delete('/:id',   authorize(Role.Level01), _delete);
+router.get('/', authorize(Role.Level01), getAll);
+router.get('/current', authorize(Role.Level01), getCurrent);
+router.get('/:id', authorize(Role.Level01), getById);
+router.put('/:id', jsonParser, authorize(Role.Level01), update);
+router.delete('/:id', authorize(Role.Level01), _delete);
 
 module.exports = router;
 
@@ -31,11 +32,7 @@ function authenticate(req, res, next) {
     userService
         .authenticate(req.body)
         .then((user) =>
-            user
-                ? res.json(user)
-                : res
-                      .status(400)
-                      .json({ message: 'Username or password is incorrect' })
+            user ? res.json(user) : res.status(400).json({ message: 'Username or password is incorrect' })
         )
         .catch((err) => next(err));
 }
