@@ -1,4 +1,4 @@
-<mat-tab-group>
+<mat-tab-group [ngIf]="access.read || data.accessBehavior !== 'hide'">
     <mat-tab>
         <ng-template mat-tab-label>
             <mat-icon>trending_up</mat-icon>
