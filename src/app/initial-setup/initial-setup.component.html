@@ -188,8 +188,14 @@
                                 <ng-template matStepLabel>Done</ng-template>
                                 <p>
                                     You are now done. Click install to commit your settings.<br>
+                                    <br>
                                     <span class="font-weight-bold">
-                                        Note: Installation will cause Node-RED to be shutdown and must be manually restarted.
+                                        Important Notes: <br>
+                                        <ul>
+                                            <li class="pt-2">Installation will cause Node-RED to be shutdown and must be manually restarted.</li>
+                                            <li class="pt-2 pb-2">After restart, Unified-RED will be accessible from <a [href]="urURL">{{ urURL }}</a><br>
+                                                and Node-RED will be acccessible from <a [href]="nrURL">{{ nrURL }}</a></li>
+                                        </ul>
                                     </span>
                                 </p>
                                 <div>
