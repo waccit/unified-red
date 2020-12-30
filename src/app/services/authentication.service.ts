@@ -15,7 +15,7 @@ export class AuthenticationService {
     public token: Observable<string>;
     private decodedJwtPayload;
 
-    constructor(private http: HttpClient, private red : NodeRedApiService) {
+    constructor(private http: HttpClient, private red: NodeRedApiService) {
         this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
         this.token = this.tokenSubject.asObservable();
         this.decodedJwtPayload = this.decodeJwt();
@@ -54,15 +54,14 @@ export class AuthenticationService {
     }
 
     resetPassword(resetToken: string, password: string) {
-        return this.http
-            .post<any>(`/api/users/reset/${resetToken}`, { password });
+        return this.http.post<any>(`/api/users/reset/${resetToken}`, { password });
     }
 
     private decodeJwt() {
         try {
             return JSON.parse(atob(this.tokenSubject.value.split('.')[1]));
-        } catch (e) { }
-        return { role:0 };
+        } catch (e) {}
+        return { role: 0 };
     }
 
     getUserRole() {

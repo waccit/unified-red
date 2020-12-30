@@ -399,7 +399,7 @@
         var nodesAddEventHandler;
         var nodesRemoveEventHandler;
         var layoutUpdateEventHandler; // Dashboard layout tool
-        var uip = 'ui';
+        var uip = '';
 
         // convert to i18 text
         function c_(x) {
@@ -3824,7 +3824,7 @@
                             text: 'setup',
                             class: 'primary',
                             click: function (e) {
-                                window.open('./ui/#/initial-setup', '_blank');
+                                window.open('./#/initial-setup', '_blank');
                                 notification.close();
                             },
                         },
