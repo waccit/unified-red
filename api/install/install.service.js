@@ -26,7 +26,7 @@ async function isInstalled() {
         settings &&
         settings.adminAuth &&
         settings.httpStatic &&
-        settings.httpAdminRoot && settings.httpAdminRoot === '/admin' &&
+        settings.httpAdminRoot && settings.httpAdminRoot === '/admin/' &&
         settings.ui && settings.ui.path && settings.ui.path === '/' &&
         config &&
         config.mongoConnection &&
@@ -81,9 +81,9 @@ async function install(setup) {
             let staticPath = setup.staticPath || defaultStaticPath;
             data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2');
         }
-        if (!settings.httpAdminRoot || settings.httpAdminRoot !== '/admin') {
+        if (!settings.httpAdminRoot || settings.httpAdminRoot !== '/admin/') {
             log.info('Setting Node-RED httpAdminRoot path on ' + settings.settingsFile);
-            data = data.replace(/(\/\/[\s]*)?(httpAdminRoot[\s]*\:.*\n)/i, 'httpAdminRoot: "/admin",\n// $2');
+            data = data.replace(/(\/\/[\s]*)?(httpAdminRoot[\s]*\:.*\n)/i, 'httpAdminRoot: "/admin/",\n// $2');
         }
         if (!settings.ui || !settings.ui.path || settings.ui.path !== '/') {
             log.info('Setting Node-RED ui path on ' + settings.settingsFile);
