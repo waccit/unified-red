@@ -54,4 +54,51 @@
 </script>
 
 <script type="text/html" data-help-name="ur_alarm_console">
+    <p>Logs alarm messages and notifies the alarm console web interface.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>alarm message payload</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>alarm message topic</dd>
+        <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
+        <dd>causes alarm messages received to be ignored</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object</span></dt>
+        <dd>alarm message payload</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>alarm message topic</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>
+        When an alarm message is received it is logged in the database, published to the alarm console web interface,
+        and sent on the output. Can be connected to other nodes for messaging, e.g. an email node to send email alerts.
+        Alarm messages are expected to have the following payload: 
+        <pre>{
+    severity: string,
+    name: string,
+    value: any,
+    state: boolean,
+    ackreq: boolean
+}</pre>
+    </p>
+    <p>
+        Setting <code>msg.inhibit</code> to <code>true</code> will cause alarm messages received to be ignored.
+        Setting it to a <code>number</code> will cause alarm messages received to be ignored for the number of seconds set. 
+        Setting it to <code>false</code> or <code>0</code> will cause alarm messages to be processed.
+    </p>
+    <p> Acknowledging alarms are typically done through the alarm console web interface, however you can also acknowledge
+        alarms by setting <code>msg.payload.action</code> to <code>ack</code> and <code>msg.payload.id</code> to the alarm's id. 
+        If no alarm id is provided, <code>msg.topic</code> will be used instead.
+    </p>
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Topic Filter</b> filters received messages on their topic.</p>
+    <p><b>Severity Filter</b> filters received messages on <code>msg.payload.severity</code>.</p>
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
 </script>
