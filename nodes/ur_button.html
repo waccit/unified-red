@@ -81,7 +81,7 @@
         <input type="text" id="node-input-tooltip" placeholder="optional tooltip" />
     </div>
     <div class="form-row">
-        <label for="node-input-color"><i class="fa fa-tint"></i> Colour</label>
+        <label for="node-input-color"><i class="fa fa-tint"></i> Color</label>
         <input type="text" id="node-input-color" placeholder="optional text/icon color" />
     </div>
     <div class="form-row">
@@ -140,31 +140,74 @@
 
 <script type="text/html" data-help-name="ur_button">
     <p>Adds a button to the user interface.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">any</span></dt>
+        <dd>any value triggers a button click</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>the MQTT topic to publish to.</dd>
+        <dt class="optional">enable <span class="property-type">boolean</span></dt>
+        <dd>disables the input when set to false</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>new value sent by a button click</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property that can be configured in the node.</dd>
+    </dl>
+    <h3>Details</h3>
     <p>
         Clicking the button generates a message with <code>msg.payload</code> set to the <b>Payload</b> field. If no
-        payload is specified, the node id is used.
+        payload is specified, the node id is used. If set to ‘pass through mode’, an arriving <code>msg.payload</code> 
+        will act like pressing the button. The output payload will be as defined in the node configuration.
     </p>
-    <p>The <b>Size</b> defaults to 3 by 1.</p>
-    <p>
-        The <b>Icon</b> can be defined, as either a
-        <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
-        <i>(e.g. 'check', 'close')</i> or a
-        <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i>,
-        or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>. You
-        can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
-    </p>
-    <p>
-        The colours of the text and background may be set. They can also be set by a message property by setting the
-        field to the name of the property, for example <code>{{msg.background}}</code>.
-    </p>
-    <p>
-        The label can also be set by a message property by setting the field to the name of the property, for example
-        <code>{{msg.topic}}</code>.
-    </p>
-    <p>
-        If set to pass through mode a message arriving on the input will act like pressing the button. The output
-        payload will be as defined in the node configuration.
-    </p>
-    <p>The <b>Topic</b> field can be used to set the <code>msg.topic</code> property that is output.</p>
     <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the button.</p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+    
+    <p>
+        <b>Icon</b> can be defined as a <a href="https://material.io/resources/icons/" target="_blank">Material icon</a>
+        <i>e.g. 'check', 'close'</i> 
+        <!-- or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i> -->
+        .
+        You can use the full set of Google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
+    </p>
+    <p><b>Colors</b> of the text and background may be set.</p>
+    <p><b>Label</b> is the button text.</p>
+    <p><b>Topic</b> is added to the message as <code>msg.topic</code> when provided.</p>
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+
+    <!-- TOPIC PATTERN / ACCESS 2020-12-30 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
+        The pattern must include one <code>{x}</code> which identifies the intended instance number in the topic. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. Example: <code>*/nvoSpaceTemp{x}/*</code>
+    </p>
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- TOPIC PATTERN / ACCESS 2020-12-30 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
 </script>
