@@ -34,14 +34,19 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     }
 
     submit() {
-        console.log(this.data.options);
-        for (const field of this.data.options) {
-            const payload = this.data.formValue[field.topic]
-            if (payload !== '') { // send only if form element has a value
-                this.send({ topic: field.outtopic || field.intopic || field.topic, payload });
-            }
+        if (this.data.singleMsg === "true") {
+            this.send({ topic: this.data.singleMsgTopic, payload: this.data.formValue });
+            this.snackbar.success('Saved!');
         }
-        this.snackbar.success('Saved!');
+        else {
+            for (const field of this.data.options) {
+                const payload = this.data.formValue[field.topic];
+                if (payload !== '') { // send only if form element has a value
+                    this.send({ topic: field.outtopic || field.intopic || field.topic, payload });
+                }
+            }
+            this.snackbar.success('Saved!');
+        }
     }
 
     reset() {
