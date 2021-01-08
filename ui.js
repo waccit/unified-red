@@ -709,7 +709,7 @@ var dynamicTabs = {};
 var dynamicWidgets = {};
 
 function addControl(folders, page, group, tab, control) {
-    if (typeof control.type !== 'string') {
+    if (typeof control.type !== 'string' || !folders.length || !page || !group || !tab) {
         return function () {};
     }
 
@@ -1336,81 +1336,35 @@ function addBaseConfig(config) {
 // Helper Functions for nodes
 
 function makeMenuTree(RED, config) {
-    let tab = RED.nodes.getNode(config.tab);
-    if (!tab) {
-        return;
+    let tab = null;
+    let group = null;
+    let page = null;
+    let folder = null;
+
+    tab = RED.nodes.getNode(config.tab);
+
+    if (tab) {
+        group = RED.nodes.getNode(tab.config.group);
     }
-    let group = RED.nodes.getNode(tab.config.group);
-    if (!group) {
-        return;
+
+    if (group) {
+        page = RED.nodes.getNode(group.config.page);
     }
-    let page = RED.nodes.getNode(group.config.page);
-    if (!page) {
-        return;
-    }
-    let folder = RED.nodes.getNode(page.config.folder);
-    if (!folder) {
-        return;
+
+    if (page) {
+        folder = RED.nodes.getNode(page.config.folder);
     }
 
     // folder tree stack (First In Last Out)
     let folders = [];
-    folders.push(folder);
-    while (folder.config.folder) {
-        folder = RED.nodes.getNode(folder.config.folder);
+    if (folder) {
         folders.push(folder);
+
+        while (folder.config && folder.config.folder) {
+            folder = RED.nodes.getNode(folder.config.folder);
+            folders.push(folder);
+        }
     }
 
     return { tab, group, page, folders };
 }
-
-// function getTheme() {
-//     if (
-//         baseConfiguration &&
-//         baseConfiguration.hasOwnProperty("theme") &&
-//         typeof baseConfiguration.theme !== "undefined"
-//     ) {
-//         return baseConfiguration.theme.themeState;
-//     } else {
-//         return undefined;
-//     }
-// }
-
-// function getSizes() {
-//     if (
-//         baseConfiguration &&
-//         baseConfiguration.hasOwnProperty('site') &&
-//         typeof baseConfiguration.site !== 'undefined' &&
-//         baseConfiguration.site.hasOwnProperty('sizes')
-//     ) {
-//         return baseConfiguration.site.sizes;
-//     } else {
-//         return { sx: 48, sy: 48, gx: 6, gy: 6, cx: 6, cy: 6, px: 0, py: 0 };
-//     }
-// }
-
-// function isDark() {
-//     if (
-//         baseConfiguration &&
-//         baseConfiguration.hasOwnProperty("theme") &&
-//         baseConfiguration.theme.hasOwnProperty("themeState")
-//     ) {
-//         var rgb = parseInt(
-//             baseConfiguration.theme.themeState[
-//                 "page-sidebar-backgroundColor"
-//             ].value.substring(1),
-//             16
-//         );
-//         var luma =
-//             0.2126 * ((rgb >> 16) & 0xff) +
-//             0.7152 * ((rgb >> 8) & 0xff) +
-//             0.0722 * ((rgb >> 0) & 0xff); // per ITU-R BT.709
-//         if (luma > 128) {
-//             return false;
-//         } else {
-//             return true;
-//         }
-//     } else {
-//         return false;
-//     } // if in doubt - let's say it's light.
-// }
