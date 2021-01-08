@@ -29,13 +29,20 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         }
     }
 
-    valueChange(field: string, value: any) {
+    valueChange(field: string, value: any, fieldType: string) {
+        if (fieldType === "number" && !isNaN(value)) {
+            value = parseFloat(value);
+        }
         this.data.formValue[field] = value;
     }
 
     submit() {
         if (this.data.singleMsg === "true") {
-            this.send({ topic: this.data.singleMsgTopic, payload: this.data.formValue });
+            let combinedPayload = {};
+            for (const field of this.data.options) {
+                combinedPayload[field.outtopic] = this.data.formValue[field.topic];
+            }
+            this.send({ topic: this.data.singleMsgTopic, payload: combinedPayload });
             this.snackbar.success('Saved!');
         }
         else {
