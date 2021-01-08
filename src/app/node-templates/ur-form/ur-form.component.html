@@ -11,7 +11,7 @@
                 <input matInput [type]="field.type"
                     [value]="access.read ? precision(data.formValue[field.topic], field.options.precision) : ''"
                     [disabled]="!access.write && data.accessBehavior === 'disable'" 
-                    (change)="valueChange(field.topic, $event.target.value)" />
+                    (change)="valueChange(field.topic, $event.target.value, field.type)" />
                 <span matSuffix *ngIf="field.options.units">{{ field.options.units }}</span>
             </mat-form-field>
 
@@ -20,7 +20,7 @@
                 <textarea matInput [rows]="field.options.rows"
                     [value]="access.read ? data.formValue[field.topic] : ''"
                     [disabled]="!access.write && data.accessBehavior === 'disable'" 
-                    (change)="valueChange(field.topic, $event.target.value)"></textarea>
+                    (change)="valueChange(field.topic, $event.target.value, field.type)"></textarea>
             </mat-form-field>
 
             <mat-form-field class="example-full-width" appearance="outline" *ngIf="field.type === 'select'">
@@ -28,7 +28,7 @@
                 <select matNativeControl
                     [value]="access.read ? data.formValue[field.topic] : ''"
                     [disabled]="!access.write && data.accessBehavior === 'disable'" 
-                    (change)="valueChange(field.topic, $event.target.value)">
+                    (change)="valueChange(field.topic, $event.target.value, field.type)">
                     <option *ngFor="let opt of field.options | keyvalue" [value]="opt.value">{{ opt.key }}</option>
                 </select>
             </mat-form-field>
