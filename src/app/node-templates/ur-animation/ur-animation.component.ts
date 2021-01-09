@@ -108,7 +108,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
                 else if (typeof value === 'string') {
                     value = '"' + value + '"';
                 }
-                exp = exp.replace(/\{x\}/g, value);
+                exp = exp.replace(/\{x\}/ig, value); //{x} is an animation expression variable not a topic variable
             }
             return eval('(' + exp + '); ' + this.expressionGlobals);
         } catch (error) {

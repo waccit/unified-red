@@ -70,12 +70,28 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     send(msg: any) {
         if (this.nodeId) {
-            // handle dynamic page. substitute {x}
-            if (this.data?.instance?.number && msg.topic) {
-                msg.topic = msg.topic.replace(/\{x\}/ig, this.data.instance.number);
-            }
+            // handle dynamic page. substitute {variables}
+            msg.topic = this.evalVariables(msg.topic, this.data?.instance);
             this.webSocketService.emit({ id: this.nodeId, msg });
         }
+    }
+
+    evalVariables(str, instance) {
+        // handle dynamic page. substitute {variables}
+        if (instance?.parameters && str) {
+            let variables = str.toLowerCase().match(/\{[^\}\/\+\#]+\}/g);
+            for (let variable of variables) {
+                variable = variable.slice(1,-1); // remove braces
+                let param = instance.parameters[variable];
+                if (typeof param !== 'undefined') {
+                    str = str.replace(new RegExp('\{' + variable + '\}', 'ig'), param);
+                }
+            }
+        }
+        else if (instance?.number && str) { // old. TODO: remove
+            str = str.replace(/\{x\}/ig, instance.number);
+        }
+        return str;
     }
 
     format(data) {
