@@ -189,7 +189,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	private evaluate(exp: any, value?: any) {
 		try {
 			if (typeof value !== 'undefined') {
-				exp = exp.replace(/\{x\}/gi, value);
+				exp = exp.replace(/\{x\}/ig, value); //{x} is a table expression variable not a topic variable
 			}
 			return eval('(' + exp + '); ' + this.expressionGlobals);
 		} catch (error) {

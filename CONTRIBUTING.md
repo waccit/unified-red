@@ -13,7 +13,7 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 Please raise any bug reports on our [GitHub issue tracker](https://github.com/waccit/unified-red/issues/). When creating a new issue, please select the *Bug report* template. Be sure to search the list to see if your issue has already been raised. Also, we highly encourage that potential bugs be discussed on the [discussion forum](https://groups.google.com/g/unified-red) prior to submitting a bug report.
 
-A good bug report is one that make it easy for us to understand what you were trying to do and what went wrong.
+A good bug report is one that makes it easy for us to understand what you were trying to do and what went wrong.
 
 Provide as much context as possible so we can try to recreate the issue. If possible, include the relevant part of your flow. To do this, select the relevant nodes, press Ctrl-E and copy the flow data from the Export dialog.
 
