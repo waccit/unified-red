@@ -23,6 +23,8 @@ module.exports = function (RED) {
                 // height: config.height || config.options.length,
                 options: config.options,
                 formValue: config.formValue,
+                singleMsg: config.singleMsg,
+                singleMsgTopic: config.singleMsgTopic,
                 submit: config.submit,
                 cancel: config.cancel,
                 topicPattern: config.topicPattern || '',

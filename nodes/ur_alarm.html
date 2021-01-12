@@ -386,3 +386,73 @@ Modeled after Node-RED's Switch core node.
         <ol id="node-input-info-container"></ol>
     </div>
 </script>
+
+<script type="text/html" data-help-name="ur_alarm">
+    <p>Detects and sends an alarm message.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>message payload to evaluate</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic</dd>
+        <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
+        <dd>causes messages received to be ignored</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object</span></dt>
+        <dd>alarm message payload</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>alarm message topic</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>
+        When a message arrives, the node will evaluate each of the defined conditions and send an alarm message when a 
+        set of conditions evaluates true. Multiple sets of conditions are available of varying severity - <i>'info', 
+        'warning', 'alert',</i> and <i>'critical'</i>. If multiple sets of conditions evaluate true, the highest severity
+        is used to produce the alarm message - <i>critical</i> being the highest and <i>info</i> being the lowest. Alarm
+        messages are also sent when a true condition changes to false or when a higher severity condition becomes true.
+    </p>
+    <p>
+        The conditions can be evaluated against an individual message property, a flow or global context property, 
+        environment variable or the result of a JSONata expression.
+    </p>
+    <p>
+        Alarm messages sent will have the following payload: 
+        <pre>{
+    severity: string,
+    name: string,
+    value: any,
+    state: boolean,
+    ackreq: boolean
+}</pre>
+    </p>
+    <p>
+        Setting <code>msg.inhibit</code> to <code>true</code> will cause messages received to be ignored.
+        Setting it to a <code>number</code> will cause messages received to be ignored for the number of seconds set. 
+        Setting it to <code>false</code> or <code>0</code> will cause messages to be processed.
+    </p>
+    <p><b>Name</b> is the alarm description to be included in the alarm message.</p>
+    <p><b>Value</b> defines the property or expression to evaluate conditions against.</p>
+    <p><b>On/Off Delay</b> (in seconds) delays the output of an alarm message.</p>
+    <p><b>Process by</b> configures the node to process all conditions or to stop evaluating when it finds the first matching condition.</p>
+    <p><b>Acknowledgement required</b> sets the <code>msg.payload.ackreq</code> property which is used by the alarm console.</p>
+    <h4>Conditions</h4>
+    <p>There are two types of conditions:</p>
+    <ol>
+        <li><b>Value</b> conditions are evaluated against the configured property</li>
+        <li>A JSONata <b>Expression</b> can be provided that will be evaluated
+            against the whole message and will match if the expression returns
+            a true value.</li>
+    </ol>
+    <p>The <code>is true/false</code> and <code>is null</code> conditions perform strict
+        comparisons against those types. They do not convert between types.</p>
+    <p>The <code>is empty</code> conditions passes for Strings, Arrays and Buffers that have
+        a length of 0, or Objects that have no properties. It does not pass for <code>null</code>
+        or <code>undefined</code> values.</p>
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>
