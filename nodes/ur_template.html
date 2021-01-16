@@ -266,36 +266,98 @@
 </script>
 
 <script type="text/html" data-help-name="ur_template">
-        <p>The template widget can contain any valid html and jQuery.</p>
-        <p>This node can be used to create a dynamic user interface element that changes its appearance
-        based on the input message and can send back messages to Node-RED.</p>
-        <p><b>For example:</b><br>
+    <p>Creates a user interface element via user-defined HTML and jQuery.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>updates feedback element values in the template</dd>
+    </dl>
+    <dl class="message-properties">
+        <dt>template<span class="property-type">string</span></dt>
+        <dd>updates the template content so you can use external files for example. Template will be reloaded 
+            on input if it has changed. Code written in the Template field will be ignored when 
+            <code>msg.template</code> is present.
+        </dd>
+    </dl>
+    <h3>Details</h3>
+    <p>
+        This node can be used to create a custom user interface element that changes its appearance
+        based on the input message and can send back messages to Node-RED.
+    </p>
+    <p>
+        <b>For example:</b><br>
         <pre style="font-size:smaller;">&lt;div feedback=&quot;some/fb/point&quot;&gt;&lt;/div&gt;</pre>
-        Will display the <code>msg.payload</code> for the topic "some/fb/point".<br/>
-        The next example shows how watch for any incoming message and update HTML elements using jQuery.</p>
+        Will display the <code>msg.payload</code> for the topic "some/fb/point".</p>
+    <p>
+        To watch incoming messages and update HTML elements using jQuery:
         <pre style="font-size:smaller;">&lt;div class=&quot;js-point&quot;&gt;&lt;/div&gt;
-    &lt;script&gt;
-    $node.on(&quot;update-value&quot;, function(evt, data) {
-        $node.find(&quot;.js-point&quot;).html(data.msg.payload);
-    });
-    &lt;/script&gt;</pre>
-        <p>Templates made in this way can be copied and remain independent of each other.</p>
-        <p><b>Sending a message:</b><br>
-            <pre style="font-size:smaller;">&lt;input feedback=&quot;some/fb/point&quot; request=&quot;some/rq/point&quot;&gt;
-    &lt;button class=&quot;mat-raised-button mat-primary&quot;&gt;Send&lt;/button&gt;
-    &lt;script&gt;
-    $node.find(&quot;button&quot;).click(function() {
-        $node.trigger(&quot;send&quot;, &quot;Hello world&quot;);
-    });
-    &lt;/script&gt;</pre>
+&lt;script&gt;
+$node.on(&quot;update-value&quot;, function(evt, data) {
+    $node.find(&quot;.js-point&quot;).html(data.msg.payload);
+});
+&lt;/script&gt;</pre>
+    </p>
+    <p>Templates made in this way can be copied and remain independent of each other.</p>
+    <p>
+        <b>Sending a message:</b><br>
+        <pre style="font-size:smaller;">&lt;input feedback=&quot;some/fb/point&quot; request=&quot;some/rq/point&quot;&gt;
+&lt;button class=&quot;mat-raised-button mat-primary&quot;&gt;Send&lt;/button&gt;
+&lt;script&gt;
+$node.find(&quot;button&quot;).click(function() {
+    $node.trigger(&quot;send&quot;, &quot;Hello world&quot;);
+});
+&lt;/script&gt;</pre>
         Will display a text input and a button. Changing the value in the text input will send the new value to Node-RED.
-        Clicking the button will send a message <code>'Hello world'</code>.</p>
-        <p><b>Using <code>msg.template</code>:</b><br>
-        You can also define the template content via <code>msg.template</code>, so you can use external files for example.<br>
-        Template will be reloaded on input if it has changed.<br>
-        Code written in the Template field will be ignored when <code>msg.template</code> is present.</p>
-        <p>The following icon fonts are available: <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a>
-        <i>(e.g. 'check', 'close')</i> or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a>
-        <i>(e.g. 'fa-fire')</i>, or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
-        You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.</p>
+        Clicking the button will send a message <code>'Hello world'</code>.
+    </p>
+    <p>
+        <b>Template Type</b> allows the template code to be inserted into the widget or into the site's HTML head 
+        section. The head section is a container typically used to include styles, scripts, and other meta information 
+        that is not displayed on the page.
+    </p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Template</b> contains HTML and jQuery code to create the user interface.</p>
+    <p>
+        The following icon fonts are available: 
+        <!-- <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a> <i>(e.g. 'check', 'close')</i>, or a  -->
+        <a href="https://fontawesome.com/icons" target="_blank">Font Awesome Free 5.3.1 icon</a> <i>(e.g. 'fas fa-fire')</i>
+        <!-- , or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
+        You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'. -->
+    </p>
+
+    <!-- TOPIC PATTERN / ACCESS 2020-12-30 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
+        The pattern must include one <code>{x}</code> which identifies the intended instance number in the topic. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. Example: <code>*/nvoSpaceTemp{x}/*</code>
+    </p>
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- TOPIC PATTERN / ACCESS 2020-12-30 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
 </script>

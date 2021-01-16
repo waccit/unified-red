@@ -395,3 +395,75 @@
             <ol id="node-input-conditions-container"></ol>
         </div>
     </script>
+
+    <script type="text/html" data-help-name="ur_compare">
+        <p>Compares multiple topic payloads against a set of conditions</p>
+        <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload<span class="property-type">string</span></dt>
+            <dd>message payload to evaluate</dd>
+            <dt>topic <span class="property-type">string</span></dt>
+            <dd>message topic</dd>
+            <dt class="optional">reset <span class="property-type">any</span></dt>
+            <dd>resets the latch flag</dd>
+            <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
+            <dd>causes messages received to be ignored</dd>
+        </dl>
+        <h3>Outputs</h3>
+        <dl class="message-properties">
+            <dt>payload<span class="property-type">object</span></dt>
+            <dd>comparison state</dd>
+            <dt>topic <span class="property-type">string</span></dt>
+            <dd>message output topic</dd>
+        </dl>
+        <h3>Details</h3>
+        <p>
+            When a message arrives, the node will evaluate each of the defined conditions and send a comparison state message 
+            as well as forward the message to the corresponding outputs when a set of conditions evaluates true.
+            Messages are also sent when a true condition changes to false.
+        </p>
+        <p>
+            The conditions can be evaluated against an individual message property, a flow or global context property, 
+            environment variable or the result of a JSONata expression.
+        </p>
+        <p>
+            Comparison state messages sent will have the following payload: 
+            <pre style="font-size:smaller">{
+    compareState: boolean,
+    variableName1: any,
+    variableName2: any,
+    ...
+}</pre>
+        </p>
+        <p>
+            Setting <code>msg.inhibit</code> to <code>true</code> will cause messages received to be ignored.
+            Setting it to a <code>number</code> will cause messages received to be ignored for the number of seconds set. 
+            Setting it to <code>false</code> or <code>0</code> will cause messages to be processed.
+        </p>
+        <p><b>Name</b> is the name of a node in the workspace.</p>
+        <p><b>Output Topic</b> is the topic sent on the first output.</p>
+        <p><b>Latching</b> configure the node to hold a true state until a <code>msg.reset</code> is received.</p>
+        <h4>Input Topics</h4>
+        <ul>
+            <li><b>Variable Name</b>: Name of variable to be used when evaluating <b>Conditions</b>.</li>
+            <li><b>Topic</b>: Message topic to be associated with this variable.</li>
+            <li><b>Property</b>: Message property to be referenced as the variable value.</li>
+        </ul>
+        <p><b>Process by</b> configures the node to process all conditions or to stop evaluating when it finds the first matching condition.</p>
+        <h4>Conditions</h4>
+        <p>
+            Each condition compares two values, where the first value is the value of the selected variable and the second value is another 
+            variable, a value, property, or a JSONata <b>Expression</b>. Optionally, a deadband can be applied.
+        </p>
+        <p>The <code>is true/false</code> and <code>is null</code> conditions perform strict
+            comparisons against those types. They do not convert between types.</p>
+        <p>The <code>is empty</code> conditions passes for Strings, Arrays and Buffers that have
+            a length of 0, or Objects that have no properties. It does not pass for <code>null</code>
+            or <code>undefined</code> values.</p>
+    
+        <!-- <h3>References</h3>
+        <ul>
+            <li></li>
+        </ul> -->
+    </script>
+    
