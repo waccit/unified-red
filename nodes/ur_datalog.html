@@ -27,3 +27,59 @@
         <input type="text" id="node-input-name">
     </div>
 </script>
+
+<script type="text/html" data-help-name="ur_datalog">
+    <p>Records an incoming message to a database</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>message payload to record</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic</dd>
+        <dt class="optional">status <span class="property-type">string</span></dt>
+        <dd>message health status such as <i>normal</i> or <i>down</i></dd>
+        <dt class="optional">units <span class="property-type">string</span></dt>
+        <dd>changes units of measurement for the data</dd>
+        <dt class="optional">newTopic <span class="property-type">string</span></dt>
+        <dd>changes the topic of existing records where <code>msg.topic</code> is the existing topic value</dd>
+        <dt class="optional">maxDays <span class="property-type">number</span></dt>
+        <dd>changes the data retention setting</dd>
+        <dt class="optional">presets <span class="property-type">object</span></dt>
+        <dd>changes preset values used to create enumerations</dd>
+        <dt class="optional">tags <span class="property-type">array</span></dt>
+        <dd>changes metatags associated with the data</dd>
+        <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
+        <dd>causes messages received to be ignored</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>Records an incoming message to a datalog database. Use the ur_chart wdiget to access the datalog database.</p>
+    <p>
+        <b>Data Retention</b>: Data automatically expires and is purged from the database after 1 day by default. To 
+        increase the data retention for a particular topic set <code>msg.maxDays</code> to the number of days data
+        should be stored.
+    </p>
+    <p>
+        <b>Presets</b>: To map numeric values to text (enumerations), set <code>msg.presets</code> to a key-value pair 
+        object where each key is the text value.<br>
+        For example: <code>{'on':'1', 'off':'0'}</code>
+    </p>
+    <p>
+        <b>Tags</b>: To associate metadata with a topic, set <code>msg.tags</code> to an array of text tag names. 
+        Applying metadata makes data more easily searchable and creates real-world relationships to the data.<br>
+        For example: <code>['outside', 'temp']</code> for a topic that represents outside air temperature.
+    </p>
+    <p>
+        See <a href="https://project-haystack.org/tag" target="_blank">Project Haystack</a> for more information and
+        a standard list of tags.
+    </p>
+    <p>
+        Setting <code>msg.inhibit</code> to <code>true</code> will cause messages received to be ignored.
+        Setting it to a <code>number</code> will cause messages received to be ignored for the number of seconds set. 
+        Setting it to <code>false</code> or <code>0</code> will cause  messages to be processed.
+    </p>
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>
