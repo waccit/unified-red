@@ -4,28 +4,102 @@ module.exports = function (RED) {
     function PagerDutyNode(config) {
         RED.nodes.createNode(this, config);
         let node = this;
-        node.apikey = RED.nodes.getNode(config.apikey).apikey;
+        let configNode = RED.nodes.getNode(config.apikey);
+        this.apikey = configNode ? configNode.apikey : null;
+        this.inhibit = false;
+        this.inhibitTimer = null;
 
-        node.on('input', function (msg, send, done) {
-            let name = msg.payload && msg.payload.name ? msg.payload.name : node.name;
-            let source = msg.payload && msg.payload.source ? msg.payload.source : config.source;
-            let severity = msg.payload && msg.payload.severity ? msg.payload.severity : config.severity;
-            let apikey = msg.payload && msg.payload.apikey ? msg.payload.apikey : node.apikey;
+        let checkInhibit = function (msg) {
+            if (msg.hasOwnProperty('inhibit')) {
+                try {
+                    let inhibit = msg.inhibit.toString().toLowerCase().trim();
+                    if (inhibit === '0' || inhibit === 'false') {
+                        node.inhibit = false;
+                        node.status({});
+                        clearTimeout(node.inhibitTimer);
+                        node.inhibitTimer = null;
+                    } else if (inhibit === 'true') {
+                        node.inhibit = true;
+                        node.status({ fill: 'grey', shape: 'dot', text: 'inhibited' });
+                        clearTimeout(node.inhibitTimer);
+                        node.inhibitTimer = null;
+                    } else if (!isNaN(inhibit)) {
+                        inhibit = parseInt(inhibit);
+                        if (inhibit > 0) {
+                            node.inhibit = true;
+                            let d = new Date();
+                            d.setSeconds(d.getSeconds() + inhibit);
+                            node.status({ fill: 'grey', shape: 'dot', text: 'inhibited until ' + d.toLocaleString() });
+                            node.inhibitTimer = setTimeout(() => {
+                                // clear inhibit after timer elapses
+                                node.inhibit = false;
+                                node.status({});
+                            }, inhibit * 1000);
+                        }
+                    }
+                } catch (e) {
+                    node.warn(e);
+                }
+            }
+            return node.inhibit;
+        };
+
+        let requireField = function (obj, prop, defValue) {
+            let field = obj && obj[prop] ? obj[prop] : defValue;
+            if (!field) {
+                node.status({ fill: 'red', shape: 'dot', text: 'Missing ' + prop });
+                return;
+            }
+            return field;
+        }
+
+        this.on('input', function (msg) {
+            if (checkInhibit(msg)) {
+                return;
+            }
+
+            let name = requireField(msg.payload, 'name', node.name);
+            let source = requireField(msg.payload, 'source', config.source);
+            let severity = requireField(msg.payload, 'severity', config.severity);
+            let apikey = requireField(msg.payload, 'apikey', node.apikey);
+
+            if (!name || !source || !severity || !apikey) {
+                return;
+            }
+
+            if (severity === 'alert') {
+                severity = 'error';
+            }
+
+            let customDetails = [];
+            if (msg.payload) {
+                if (msg.payload.value) {
+                    customDetails.push('Value: ' + msg.payload.value);
+                }
+                if (msg.payload.state) {
+                    customDetails.push('State: ' + msg.payload.state);
+                }
+                if (msg.payload.ackreq) {
+                    customDetails.push('Acknowledgement Required: ' + msg.payload.ackreq);
+                }
+            }
+            customDetails = customDetails.length ? customDetails.join(', ') : null;
 
             if (apikey) {
+                // https://developer.pagerduty.com/docs/events-api-v2/trigger-events/
                 let payload = {
-                    'routing_key': apikey,
-                    'event_action': 'trigger',
+                    'routing_key': apikey, //Required
+                    'event_action': 'trigger', //Required
                     'dedup_key': source,
                     'payload': {
-                        'summary': name,
-                        'source': source,
-                        'severity': severity,
+                        'summary': name, //Required
+                        'source': source, //Required
+                        'severity': severity, //Required
                         'timestamp': null,
                         'component': null,
                         'group': null,
                         'class': null,
-                        'custom_details': null,
+                        'custom_details': customDetails,
                     },
                     'images': null,
                     'links': null,
@@ -41,15 +115,9 @@ module.exports = function (RED) {
 
                 request(options, (err, res, body) => {
                     if (err) {
-                        msg.payload = err.toString() + ' : pagerduty';
-                        msg.statusCode = err.code;
-                        send(msg);
-                        done(err);
+                        node.status({ fill: 'red', shape: 'dot', text: err.code + ': ' + err.toString() });
                     } else {
-                        msg.payload = body;
-                        msg.statusCode = res.statusCode;
-                        send(msg);
-                        done();
+                        node.status({ fill: 'green', shape: 'dot', text: body });
                     }
                 });
             }

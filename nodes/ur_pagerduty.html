@@ -9,7 +9,7 @@
             severity: { value: 'warning' }
         },
         inputs: 1,
-        outputs: 1,
+        outputs: 0,
         align: "right",
         icon: "font-awesome/fa-bell",
         paletteLabel: 'pagerduty',
@@ -42,4 +42,46 @@
 </script>
 
 <script type="text/html" data-help-name="ur_pagerduty">
+    <p>Creates PagerDuty incident alerts.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>alarm message payload</dd>
+        <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
+        <dd>causes messages received to be ignored</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>When a message is received, an alarm or <i>incident</i> sent to the PagerDuty Event API v2 service.</p>
+    <p>
+        Optionally, alarm messages can be received from ur_alarm or ur_alarm_console nodes. Alarm messages are 
+        expected to have the following payload: 
+        <pre style="font-size:smaller">{
+    severity: string,
+    name: string,
+    value: any,
+    state: boolean,
+    ackreq: boolean
+}</pre>
+    </p>
+    <p>
+        <b>API Key</b> is required to connect to the PagerDuty service.
+        Field will be ignored when <code>msg.payload.apikey</code> is present.
+    </p>
+    <p>
+        <b>Source</b> is the name or location of the affected system.
+        Field will be ignored when <code>msg.payload.source</code> is present.
+    </p>
+    <p>
+        <b>Severity</b> is the severity of the alarm - <i>info</i>, <i>warning</i>, <i>error</i>, or <i>critical</i>.
+        <i>Critical</i> being the highest and <i>info</i> being the lowest.
+        Field will be ignored when <code>msg.payload.severity</code> is present.
+    </p>
+    <p>
+        <b>Name</b> is the name or brief description of the alarm event. 
+        Field will be ignored when <code>msg.payload.name</code> is present.
+    </p>
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
 </script>
