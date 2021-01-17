@@ -159,11 +159,11 @@ You can use Material <!-- and Themify --> icons in any of the Icon fields. You m
 
 ### Dynamic Pages
 
-Dynamic pages are pseudo-pages used to simplify creating pages with identical groups, tabs, and widgets across multiple building automation devices. In building automation systems, it is very common to use the HMI graphic across multiple devices of the same type, e.g. VAV controllers. Instead of building an individual page for each device, simply make the page **Dynamic** and provide it with instance information to map incoming messages to their corresponding widgets.
+Dynamic pages are pseudo-pages used to simplify creating pages with identical groups, tabs, and widgets across multiple building automation devices. In building automation systems, it is very common to use the same HMI graphic across multiple devices of the same type, e.g. VAV controllers. Instead of building an individual page for each device, simply make the page **Dynamic** and provide it with instance information to map incoming messages to their corresponding widgets.
 
 A Dynamic page requires:
  - **Instance Name Expression** - must include {x}.
- - **Instances** - the lists of instance **names** and **numbers** must match in length, where **names** refer to the displayed name or perhaps equipment tag and **number** refers to a logical address included in the message topic, such as a device ID or device address.
+ - **Instances** - the lists of instance **names** and **parameters** must match in length, where **names** refer to the displayed name or perhaps equipment tag and **parameters** refers to a set parameters included in the message topic, such as a device ID, device address, or array index.
 
 
 ## Discussions and suggestions
