@@ -246,35 +246,47 @@
 </script>
 
 <script type="text/html" data-help-name="ur_table">
-    <p>The table widget can will generate a table element.</p>
-    <p>This node can be used to create a dynamic table that the appearance
-    changes based on the input message.</p>
-    <h4>Table Format</h4>
-    <p>
-        <ul>
-            <li><b>Label</b>
-                Is the field header label (row label when pivoted).
-                It's a simple static string and we display it on the web
-                page exactly as provided.
-            </li>
-            <li><b>Format</b>
-                Defines how we'd like the data to be displayed
-                -- string, number (with or without precision),
-                link, etc.
-            </li>
-            <li><b>Display</b>
-                Defines what part of the message to display --
-                topic or payload.
-            </li>
-
-            <li><b>Device Filter</b>
-                Defines how we filter for each device
-                -- compares the topic to a predefined regex expression
-                this is where the magic happens to associate message
-                data with the input device.
-            </li>
-
-            <li><b>Parameter</b> Provides point definitions to be filtered into the table rows or element in payload (i.e. "payload.element").</li>
-        </ul>
-    </p>
+    <p>The table widget will generate a table element.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>updates the table based on provided <b>Rules</b></dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>the MQTT topic used to filter the msg</dd>
+        
+    </dl>
+    <h3>Details</h3>
+    <p><b>Label</b> is the field header label.  It is a simple static string and will be display on the
+    page exactly as provided.<p>
+    <p><b>Format</b> defines how the data is to display.</p>
+    <b>For exapmple:</b>
+    <ul>
+        <li>Using <code>{x}</code> will display the <code>payload</code> as is comes in.</li>
+        <li>Using math operations (+, -, *, /) changes the <code>payload</code> as shown below:
+            <pre style="font-size:smaller;">1 + {x} / 100<br>{x} * 100<br>{x} + 100</pre>
+        </li>
+        <li>String formatting changes the definition of an object as shown below:
+            <pre style="font-size:smaller;">{"0": "Offline","1": "Cooling","2": "Economizer","3": "Reheat"}</pre></li>
+    </ul>
+    <p><b>Link format</b> generates a redirect link with the input text.</p>
+    <p><b>Units</b> defines what units are being used.</p>
+    <b>For example</b>
+    <ul>
+        <li><code>Units</code> appends units in the input text to the <code>payload</code>.</li>
+        <li><code>No Units</code> appends nothing to the <code>payload</code>.</li>
+    </ul>
+    <p><b>Display</b> defines what part of the message to display.</p>
+    <ul>
+        <li>Use <code>payload</code> in the input text to dispay the payload of <code>msg.payload</code>. Any child of  
+            <code>msg.payload</code> can be displayed by using <code>msg.payload.{child}</code>.</li>
+    </ul>
+    <p><b>Device Filter</b> defines how we filter for each device.</p>
+    <ul>
+        <li>Using <code>Smart Server IoT</code> filters out the topic of the messgaes 
+        for each of the devices on the Smart Server IoT topics.</li>
+        <li>Using <code>Custom</code> allows you to write a unique regex expresison to filter out the incoming topic.</li>
+    </ul>
+    <p><b>Parameter</b> is the point definition that filters the table rows or element in payload.<p>
+    
+    
 </script>
