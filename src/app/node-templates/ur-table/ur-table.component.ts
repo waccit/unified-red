@@ -1,23 +1,5 @@
-import { Component, OnInit, Input, ViewChild, AfterViewInit } from '@angular/core';
-import { WebSocketService } from '../../services';
+import { Component, AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
-
-export interface data {
-	topic: string;
-	payload: string;
-}
-
-export interface configuration {
-	label: string;
-	formatType: string;
-	format: string;
-	display: string;
-	device: string;
-	deviceType: string;
-	param: string;
-	unitType: string;
-	unit: string;
-}
 
 @Component({
 	selector: 'app-ur-table',
@@ -31,38 +13,9 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 			return Math.max(minOut, Math.min(maxOut, out));
 		}
 	`;
-	name: string;
-	field: string;
-	device: string;
-	point: string;
-	config: configuration[];
-	devices: any[];
-	points: any[];
-	pivot: Boolean;
-	lep: RegExp;
-	glp: RegExp;
-	regexPoints: RegExp;
-	regex: RegExp;
-	displayedColumns: string[] = [];
-	dataSource: {};
-	dataLink: {};
-	label: string;
-	regexIndex: RegExp;
-
-	ngOnInit(): void {
-		this.name = this.data.label;
-		this.devices = new Array();
-		this.points = new Array();
-		this.config = this.data.fields;
-		this.pivot = this.data.pivot;
-		this.dataSource = {};
-		this.dataLink = {};
-		this.regexPoints = /(\d+)(\_)/;
-		this.regexIndex = /(.*)(\_)(\d+)/;
-		this.lep = /([^\/]+)\/(if|fb)\/([^\/]+)\/([^\/]+)\/([^\/]+)\/([^\/]+)/;
-		this.glp = /([^\/]+)\/(if|fb)\/(Web Server)\/(\d+)\/(.*)/;
-		// console.log('fields',this.config);
-	}
+	sortedDeviceList = [];
+	dataSource = {};
+	dataLink = {};
 
 	ngAfterViewInit(): void {
 		super.ngAfterViewInit();
@@ -72,119 +25,50 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	updateValue(data: any) {
 		super.updateValue(data);
 		if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
-			// console.log('data',data);
-			let found = null;
-			this.config.forEach(element => {
-				this.field = element.display;
-				this.device;
-				this.point;
-				let devIndex;
-
+			this.data.fields.forEach(element => {
+				let prop = element.display;
+				let deviceName = null;
+				let pointName = null;
 				try {
+					let regex = /glp\/.+\/fb\/dev\/(.+\/if\/[^\/]+\/\d+)\/(.*)/; // default to SSIoT
 					switch (element.deviceType) {
-						// case 'lep': this.device = this.lep.exec(data.msg.topic)[1]; break;
-						case 'webApp':
-							let isGLP = data.msg.topic.startsWith('glp');
-							let nv = '';
-							// console.log('isGLP: ', isGLP);
-							if (isGLP) {
-								this.device = this.glp.exec(data.msg.topic)[4];
-								devIndex = this.glp.exec(data.msg.topic)[5];
-								// console.log('this.device', this.device);
-								this.point = 'Web Server[' + this.device + ']' + devIndex;
-								// console.log('this.point 1: ', this.point);
-							} else {
-								this.device = this.lep.exec(data.msg.topic)[3];
-								nv = this.lep.exec(data.msg.topic)[5];
-								devIndex = this.regexIndex.exec(nv)[1];
-								this.point = this.device + devIndex;
-								// console.log('this.point 2: ', this.point);
-							}
-							break;
-						case 'custom':
-							this.regex = new RegExp(element.device);
-							this.device = this.regex.exec(data.msg.topic)[1];
-							break;
-						default: this.device = 'not valid'; break;
+						case 'custom': regex = new RegExp(element.device); break;
 					}
-				} catch (error) {
-					// console.log(error);
-				}
-				found = this.devices.find(v => v.name == this.device);
-				if (!found && (this.device !== undefined)) {
-					this.devices.push({
-						name: this.device,
-					});
-					this.devices.sort(this.compareValues('name'));
-				}
-				found = this.points.find(v => v.name == this.point);
-				if (!found && (this.point !== undefined)) {
-					this.points.push({
-						name: this.point,
-					});
-					this.points.sort(this.compareValues('name'));
-				}
+					let parts = regex.exec(data.msg.topic);
+					deviceName = parts[1];
+					pointName = parts[2];
+				} catch (ignore) {}
 
-				if (this.point) {
-					if (!this.dataSource[this.point]) {
-						this.dataSource[this.point] = {};
-					}
-					if (!this.dataLink[this.point]) {
-						this.dataLink[this.point] = {};
-					}
-					if (data.msg.topic.includes(element.param) || element.formatType == 'link') {
-						if (element.formatType == 'link') {
-							if (devIndex) {
-								this.dataSource[this.point][this.field] = element.param.replace('{x}', devIndex);
-								this.dataLink[this.point][this.field] = element.format.replace('{x}', devIndex);
-							} else {
-								this.dataSource[this.point][this.field] = element.param.replace('{x}', this.device);
-								this.dataLink[this.point][this.field] = element.format.replace('{x}', this.device);
-							}
-						} else {
-							let values = element.display.split('.');
-							let result = data.msg;
-							try {
-								for (let i = 0; i < values.length; i++) {
-									result = result[values[i]];
-								}
-								switch (element.formatType) {
-									case 'fText': this.dataSource[this.point][this.field] = this.sub(element.format, element.unit, result); break;
-									default: this.dataSource[this.point][this.field] = result; break;
-								}
-								// console.log('this.dataSource[this.point][this.field]', this.dataSource[this.point][this.field],'field', this.field, 'point', this.point);
-							} catch (e) { }
+				if (deviceName && pointName && pointName.includes(element.param)) {
+					if (element.formatType === 'link') {
+						if (!this.dataLink[deviceName]) {
+							this.dataLink[deviceName] = {};
 						}
+						let text = this.evalVariables(element.format, this.data?.instance);
+						let href = this.evalVariables(element.display, this.data?.instance);
+						this.dataLink[deviceName][pointName] = { href, text };
 					}
+					if (!this.dataSource[deviceName]) {
+						this.dataSource[deviceName] = {};
+						this.sortedDeviceList.push(deviceName);
+						this.sortedDeviceList.sort();
+					}
+					let point = this.dataSource[deviceName][pointName] || {};
+					let values = element.display.split('.');
+					let result = data.msg;
+					try {
+						for (let i of values) {
+							result = result[i];
+						}
+						point[prop] = element.formatType === 'fText' 
+							? this.sub(element.format, element.unit, result)
+							: result;
+					} catch (ignore) {}
+					this.dataSource[deviceName][pointName] = point;
 				}
 			});
 		}
 	};
-
-
-	private compareValues(key, order = 'asc') {
-		return function innerSort(a, b) {
-			if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
-				// property doesn't exist on either object
-				return 0;
-			}
-
-			const varA = (typeof a[key] === 'string')
-				? a[key].toUpperCase() : a[key];
-			const varB = (typeof b[key] === 'string')
-				? b[key].toUpperCase() : b[key];
-
-			let comparison = 0;
-			if (varA > varB) {
-				comparison = 1;
-			} else if (varA < varB) {
-				comparison = -1;
-			}
-			return (
-				(order === 'desc') ? (comparison * -1) : comparison
-			);
-		};
-	}
 
 	private evaluate(exp: any, value?: any) {
 		try {
@@ -192,9 +76,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 				exp = exp.replace(/\{x\}/ig, value); //{x} is a table expression variable not a topic variable
 			}
 			return eval('(' + exp + '); ' + this.expressionGlobals);
-		} catch (error) {
-			// console.log("Evaluate error:", error);
-		}
+		} catch (ignore) {}
 		return value;
 	}
 
@@ -206,18 +88,13 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	// parseInt( interpolate({x}, 0, 100, 1, 10) )
 	// Enumeration {"0": "Offline","1": "Cooling","2": "Economizer","3": "Reheat","4": "Heat","5": "Zero CFM","6": "Air Balance","7": "Forced Damper","8": "Forced CFM","9": "Forced Reheat","10": "Forced Setpoint","11": "Forced Damper and Reheat","12": "Forced Damper and Setpoint","13": "Forced Damper, Reheat, and Setpoint","14": "Forced CFM and Reheat","15": "Forced CFM and Setpoint","16": "Forced CFM, Reheat, and Setpoint","17": "Forced Reheat and Setpoint","18": "Morning Warm-Up","19": "Ventilation"}
 	private sub(exp, unit, payload) {
-		// console.log('exp',exp, 'unit', unit, 'payload', payload)
-		let expObj;
-		let result;
 		try {
-			if (!exp.includes('{x}')) {
-				expObj = JSON.parse(exp);
-				result = expObj[payload];
-				// console.log('exp', expObj, 'payload', payload, 'result', result);
-				return result;
+			if (!exp.toLowerCase().includes('{x}')) {
+				let expObj = JSON.parse(exp);
+				return expObj[payload];
 			}
-		} catch (e) { console.log(e) }
-		result = this.evaluate(exp, payload);
+		} catch (ignore) {}
+		let result = this.evaluate(exp, payload);
 		if (unit !== 'nothing') {
 			result = result + ' ' + unit;
 		}
