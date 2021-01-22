@@ -1,18 +1,20 @@
 <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
-    <div *ngIf="!pivot" class="table-responsive">
+    <div *ngIf="!data.pivot" class="table-responsive">
         <table class="table table-bordered table-hover w-100 table-striped">
             <thead>
-                <th  *ngFor="let c of config"> {{ c.label  }}</th>
+                <th *ngFor="let c of data.fields">{{ c.label }}</th>
             </thead>
             <tbody>
-                <tr *ngFor="let point of points">
-                    <ng-container *ngIf="dataSource[point.name]">
-                        <ng-container *ngFor="let c of config">
-                            <ng-container *ngIf="c.formatType !== 'link'">
-                                <td> {{ dataSource[point.name][c.display] }} </td>
-                            </ng-container>
-                            <ng-container *ngIf="c.formatType == 'link'">
-                                <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                <tr *ngFor="let device of sortedDeviceList">
+                    <ng-container *ngFor="let c of data.fields">
+                        <ng-container *ngFor="let point of dataSource[device] | keyvalue">
+                            <ng-container *ngIf="point.key.includes(c.param)">
+                                <ng-container *ngIf="c.formatType !== 'link'">
+                                    <td>{{ point.value[c.display] }}</td>
+                                </ng-container>
+                                <ng-container *ngIf="c.formatType === 'link'">
+                                    <td><a href="{{ dataLink[device][point.key].href }}">{{ dataLink[device][point.key].text }}</a></td>
+                                </ng-container>
                             </ng-container>
                         </ng-container>
                     </ng-container>
@@ -21,21 +23,21 @@
         </table>
     </div>
 
-    <div *ngIf="pivot" class="table-responsive">
+    <div *ngIf="data.pivot" class="table-responsive">
         <table class="table table-bordered table-hover w-100 table-striped">
-            <!-- <thead>
-                <th>Label</th>
-                <th *ngFor="let point of points">{{point.name}}</th>
-            </thead> -->
             <tbody>
-                <tr *ngFor="let c of config">
+                <tr *ngFor="let c of data.fields">
                     <th>{{ c.label }}</th>
-                    <ng-container *ngFor="let point of points">
-                        <ng-container *ngIf="c.formatType !== 'link' && point.name.includes(c.param)">
-                            <td> {{ dataSource[point.name][c.display] }} </td>
-                        </ng-container>
-                        <ng-container *ngIf="c.formatType == 'link'">
-                            <td><a href="{{ dataLink[point.name][c.display] }}">{{ dataSource[point.name][c.display] }}</a></td>
+                    <ng-container *ngFor="let device of sortedDeviceList">
+                        <ng-container *ngFor="let point of dataSource[device] | keyvalue">
+                            <ng-container *ngIf="point.key.includes(c.param)">
+                                <ng-container *ngIf="c.formatType !== 'link'">
+                                    <td>{{ point.value[c.display] }}</td>
+                                </ng-container>
+                                <ng-container *ngIf="c.formatType === 'link'">
+                                    <td><a href="{{ dataLink[device][point.key].href }}">{{ dataLink[device][point.key].text }}</a></td>
+                                </ng-container>
+                            </ng-container>
                         </ng-container>
                     </ng-container>
                 </tr>

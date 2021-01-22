@@ -82,6 +82,7 @@
                             class: 'node-input-field-format',
                             type: 'text',
                             style: 'margin-left: 5px; width: 15%;',
+                            placeholder: 'format'
                         })
                             .appendTo(row)
                             .val(field.format)
@@ -117,7 +118,7 @@
                             .appendTo(row)
                             .val(field.display);
                         //Regex Select
-                        var optionWebApp = { value: 'webApp', label: 'Smart Server IoT', hasValue: false };
+                        var optionSSIoT = { value: 'webApp', label: 'SmartServer IoT', hasValue: false };
                         var optionCustom = { value: 'custom', label: 'Custom', hasValue: true };
                         $('<input/>', {
                             class: 'node-input-field-device',
@@ -130,7 +131,7 @@
                             .typedInput({
                                 default: field.deviceType,
                                 typeField: $('<input/>', { class: '.node-input-field-deviceType', type: 'hidden' }),
-                                types: [optionWebApp, optionCustom],
+                                types: [optionSSIoT, optionCustom],
                             });
                         //param input
                         $('<input/>', {
@@ -246,47 +247,97 @@
 </script>
 
 <script type="text/html" data-help-name="ur_table">
-    <p>The table widget will generate a table element.</p>
+    <p>Adds a table to the user interface.</p>
     <h3>Inputs</h3>
     <dl class="message-properties">
-        <dt>payload<span class="property-type">string</span></dt>
-        <dd>updates the table based on provided <b>Rules</b></dd>
+        <dt>payload<span class="property-type">any</span></dt>
+        <dd>updates a table cell value</dd>
         <dt>topic <span class="property-type">string</span></dt>
-        <dd>the MQTT topic used to filter the msg</dd>
-        
+        <dd>message topic associated with a table cell</dd>
     </dl>
     <h3>Details</h3>
-    <p><b>Label</b> is the field header label.  It is a simple static string and will be display on the
-    page exactly as provided.<p>
-    <p><b>Format</b> defines how the data is to display.</p>
-    <b>For exapmple:</b>
+    <p>Display the payloads of multiple messages with different topics in a table format.</p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Fields</b> define the data columns to display. Selecting <b>Pivot Table</b> allows fields to be displayed as rows.</p>
+    <p>Each field contains following components:</p>
     <ul>
-        <li>Using <code>{x}</code> will display the <code>payload</code> as is comes in.</li>
-        <li>Using math operations (+, -, *, /) changes the <code>payload</code> as shown below:
-            <pre style="font-size:smaller;">1 + {x} / 100<br>{x} * 100<br>{x} + 100</pre>
+        <li><b>Label</b> : Field header label.</li>
+        <li>
+            <b>Format</b> : Formats the value to be displayed when set to <b>Text</b> and displays a hyperlink with the provided 
+            text when set to <b>Link</b>
         </li>
-        <li>String formatting changes the definition of an object as shown below:
-            <pre style="font-size:smaller;">{"0": "Offline","1": "Cooling","2": "Economizer","3": "Reheat"}</pre></li>
+        <li><b>Units</b> : Units of measurement to be displayed.</li>
+        <li>
+            <b>Display</b> : The <code>msg</code> property to be displayed. For example, set to <code>payload</code> to display 
+            <code>msg.payload</code> or <code>payload.<i>property</i></code> to display a property of <code>msg.payload</code>, e.g.
+            <code>payload.value</code>. When <b>Format</b> is set to <b>Link</b>, this property will be used as the hyperlink URL.
+        </li>
+        <li>
+            <b>Device Filter</b> : Used to generate rows (or columns when pivoted) based on the messages received. Setting to 
+            <code>SmartServer IoT</code> will detect devices using the SmartServer IoT IAP topic schema. <code>Custom</code> allows you 
+            to provide a regular expresison that will be applied to incoming messages. When providing a custom regular expression, two 
+            <i>capture groups</i> should be provided. Group 1 should be a unique segment of the message topic that represents the device
+            name or instance. Similarly, group 2 should indicate the data point segment within the topic.
+            Group 2 is used by <b>Parameter Filter</b>.
+        </li>
+        <li><b>Parameter Filter</b> : The data point name (or a portion of it) used to map the data point to a cell.</li>
     </ul>
-    <p><b>Link format</b> generates a redirect link with the input text.</p>
-    <p><b>Units</b> defines what units are being used.</p>
-    <b>For example</b>
+
+    <p>
+        <b>Text Format</b> uses an <code>{x}</code> variable to display the value. JavaScript can be used to perform operations on 
+        the value, for example using 
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#binary_logical_operators" target="_blank">boolean</a>
+        (||, &&) and
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#arithmetic_operators" target="_blank">arithmetic</a>
+        operators (+, -, *, /) as well as standard built-in objects
+        (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math" target="_blank">Math</a> functions,
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a> functions,
+        etc):
+        <pre style="font-size:smaller;">1 + {x} / 100
+Math.floor({x} * 100)
+interpolate({x},0,100,1,10)</pre>
+        Values can also be mapped to text enumerations by providing a JSON object, for example:
+        <pre style="font-size:smaller;">{
+    "0": "Off",
+    "1": "Cooling",
+    "2": "Fan Only",
+    "3": "Heating"
+}</pre>
+    </p>
+
+    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
     <ul>
-        <li><code>Units</code> appends units in the input text to the <code>payload</code>.</li>
-        <li><code>No Units</code> appends nothing to the <code>payload</code>.</li>
-    </ul>
-    <p><b>Display</b> defines what part of the message to display.</p>
-    <ul>
-        <li>Use <code>payload</code> in the input text to dispay the payload of <code>msg.payload</code>. Any child of  
-            <code>msg.payload</code> can be displayed by using <code>msg.payload.{child}</code>.</li>
-    </ul>
-    <p><b>Device Filter</b> defines how we filter for each device.</p>
-    <ul>
-        <li>Using <code>Smart Server IoT</code> filters out the topic of the messgaes 
-        for each of the devices on the Smart Server IoT topics.</li>
-        <li>Using <code>Custom</code> allows you to write a unique regex expresison to filter out the incoming topic.</li>
-    </ul>
-    <p><b>Parameter</b> is the point definition that filters the table rows or element in payload.<p>
-    
-    
+        <li></li>
+    </ul> -->
 </script>
