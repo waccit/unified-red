@@ -298,12 +298,6 @@
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
-        <label for="node-input-holidays"
-            ><i class="fa fa-sun-o"></i> <span data-i18n="ur_schedule.label.holidays"></span
-        ></label>
-        <input type="text" id="node-input-holidays" />
-    </div>
-    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_schedule.label.name"></span></label>
         <input type="text" id="node-input-name" />
     </div>
@@ -336,6 +330,12 @@
     </div>
     <div class="form-row node-input-date-container-row">
         <ol id="node-input-date-container"></ol>
+    </div>
+    <div class="form-row">
+        <label for="node-input-holidays"
+            ><i class="fa fa-sun-o"></i> <span data-i18n="ur_schedule.label.holidays"></span
+        ></label>
+        <input type="text" id="node-input-holidays" />
     </div>
     <div class="form-row" id="topic-pattern">
         <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
@@ -403,7 +403,6 @@
     </p>
     <!-- TAB / SIZE 2020-12-30 - END -->
 
-    <p><b>Holidays</b> references a holiday configuration for holiday schedules to observe.</p>
     <p><b>Name</b> is the name of a node in the workspace.</p>
     <p><b>Topic</b> is added to the message as <code>msg.topic</code>.</p>
     <p>
@@ -433,8 +432,9 @@
             <li><b>Minute</b>: Minute event should fire, e.g. <i>0</i></li>
         </ol>
     </p>
-
-     <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
+    <p><b>Holidays</b> references a holiday configuration for holiday schedules to observe.</p>
+ 
+    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
      <p>
         <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
         member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
