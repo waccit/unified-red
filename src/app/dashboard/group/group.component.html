@@ -1,5 +1,5 @@
 <div class="card">
-    <div class="header">
+    <div class="header" style="padding-bottom:0">
         <h2>{{ header }}</h2>
         <!-- <ul class="header-dropdown m-r--5">
             <li class="dropdown">
@@ -28,12 +28,14 @@
         </ul> -->
     </div>
     <div class="body">
-        <ng-template group-host></ng-template>
-        <mat-tab-group *ngIf="tabs.length > 1">
-            <mat-tab *ngFor="let tab of tabs" label="{{ tab.header }}">
-                <app-tab [widgets]="tab.widgets"></app-tab>
-            </mat-tab>
-            <!-- <ng-template group-host></ng-template> -->
-        </mat-tab-group>
+        <div class="row">
+            <ng-template group-host></ng-template>
+            <mat-tab-group *ngIf="tabs.length > 1">
+                <mat-tab *ngFor="let tab of tabs" label="{{ tab.header }}">
+                    <app-tab [widgets]="tab.widgets"></app-tab>
+                </mat-tab>
+                <!-- <ng-template group-host></ng-template> -->
+            </mat-tab-group>
+        </div>
     </div>
 </div>
