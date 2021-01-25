@@ -1,10 +1,40 @@
 app-ur-chart {
     .mat-tab-label {
-        padding:0;
+        padding: 0;
         min-width: 48px;
     }
 
     .chart-legend .legend-label {
         color: #888;
+    }
+
+    .legend-label .dim {
+        .legend-label-text {
+            color: #ccc;
+        }
+        .legend-label-color {
+            background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #fff9 3px, #fff9 6px);
+        }
+    }
+
+    .series-color {
+        input[type='color'] {
+            width: 87px;
+            text-align: center;
+            padding: 0;
+            height: 46px;
+        }
+        input[type='color']::-webkit-color-swatch {
+            border: none;
+        }
+    }
+
+    mat-row, mat-header-row {
+        height: auto;
+        min-height: 20px;
+    }
+
+    mat-cell, mat-header-cell {
+        padding: 1px 0px;
     }
 }

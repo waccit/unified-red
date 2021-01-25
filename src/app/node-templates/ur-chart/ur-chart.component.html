@@ -1,19 +1,19 @@
-<mat-tab-group [ngIf]="access.read || data.accessBehavior !== 'hide'">
-    <mat-tab>
+<mat-tab-group #container [id]="data.id" *ngIf="access.view || data.accessBehavior !== 'hide'">
+
+    <mat-tab *ngIf="data.chartType === 'line'">
         <ng-template mat-tab-label>
-            <mat-icon>trending_up</mat-icon>
+            <mat-icon>timeline</mat-icon>
         </ng-template>
-        <div class="pt-4" style="min-height:300px;">
+        <div class="pt-4" [ngStyle]="{ 'height.px': 56 * data.height }">
             <ngx-charts-line-chart 
                 [view]="" 
                 [scheme]="chartOpt.colorScheme" 
-                [legend]="chartOpt.legend" 
+                [legend]="data.legend" 
                 [legendPosition]="chartOpt.legendPosition" 
                 [animations]="chartOpt.animation"
                 [xAxis]="true" 
                 [yAxis]="true"
-                [showRefLines]="true"
-                [timeline]="chartOpt.timeline"
+                [timeline]="data.timeline"
                 [showXAxisLabel]="chartOpt.showXAxisLabel"
                 [showYAxisLabel]="chartOpt.showYAxisLabel" 
                 [xAxisLabel]="chartOpt.xAxisLabel"
@@ -23,6 +23,9 @@
                 [yScaleMin]="chartOpt.yScaleMin"
                 [yScaleMax]="chartOpt.yScaleMax"
                 [autoScale]="chartOpt.autoScale"
+                [curve]="chartOpt.curve"
+                [showRefLines]="data.showRefLines"
+                [referenceLines]="data.referenceLines"
                 [results]="graphedResults"
                 (select)="onSelect($event)"
                 (activate)="onActivate($event)"
@@ -30,22 +33,238 @@
             </ngx-charts-line-chart>
         </div>
     </mat-tab>
+
+    <mat-tab *ngIf="data.chartType === 'table'">
+        <ng-template mat-tab-label>
+            <mat-icon>grid_on</mat-icon>
+        </ng-template>
+        <div class="pt-4" [ngStyle]="{ 'height.px': 56 * data.height }">
+            <mat-table #table [dataSource]="tableDataSource" class="mat-cell">
+                <ng-container matColumnDef="timestamp">
+                    <mat-header-cell *matHeaderCellDef>Timestamp</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
+                    </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                    <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{row.name}}</mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="value">
+                    <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+                    <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
+                </ng-container>
+                <mat-header-row *matHeaderRowDef="tableDisplayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: tableDisplayedColumns;" matRipple>
+                </mat-row>
+            </mat-table>
+        </div>
+    </mat-tab>
+
     <mat-tab>
         <ng-template mat-tab-label>
             <mat-icon>settings</mat-icon>
         </ng-template>
-        <div class="pt-4">
-            <mat-form-field class="mr-3" appearance="outline">
-                <mat-label>Range</mat-label>
-                <input matInput type="number" (change)="startTimeValue($event.target.value)" [value]="config.xrange" />
-            </mat-form-field>
-            <mat-form-field class="mr-3" appearance="outline">
-                <mat-label>Units</mat-label>
-                <select matNativeControl [ngModel]="selectedUnit" (change)="startTimeUnits($event.target.value)">
-                    <option *ngFor="let unit of units" [value]="unit.value">{{ unit.viewValue }}</option>
-                </select>
-            </mat-form-field>
-            <mat-checkbox [checked]="config.live" (change)="graphChart($event.checked)">Live Chart</mat-checkbox>
-        </div>        
+        <div class="row">
+            <div class="col-12 pt-4">
+                <mat-form-field class="mr-3" appearance="outline">
+                    <mat-label>Type</mat-label>
+                    <select matNativeControl [(ngModel)]="data.chartType" (change)="setDirty()"> 
+                        <option value="line">Line Chart</option>
+                        <option value="table">Table</option>
+                    </select>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="font-weight-bold p-l-10 font-17">Topics</div>
+                <mat-table [dataSource]="data.topics" class="mat-cell">
+                    <!-- label -->
+                    <ng-container matColumnDef="label">
+                        <mat-header-cell *matHeaderCellDef>Label</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{row.label}}</mat-cell>
+                    </ng-container>
+                    <!-- topic -->
+                    <ng-container matColumnDef="topic">
+                        <mat-header-cell *matHeaderCellDef>Topic</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{row.topic}}</mat-cell>
+                    </ng-container>
+                    <!-- actions -->
+                    <ng-container matColumnDef="actions">
+                        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                        <mat-cell *matCellDef="let row; let i=index;">
+                            <button mat-icon-button class="btn-tbl-edit" (click)="removeTopic(row)">
+                                <mat-icon aria-label="Remove" class="col-white">delete</mat-icon>
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+                    <mat-header-row *matHeaderRowDef="topicsDisplayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: topicsDisplayedColumns;" matRipple></mat-row>
+                </mat-table>
+                <form [formGroup]="topicForm" (ngSubmit)="addTopic()">
+                    <div class="row">
+                        <div class="col-5 pr-0">
+                            <mat-form-field appearance="outline" style="width:100%">
+                                <mat-label>Label</mat-label>
+                                <input matInput type="text" formControlName="label" required />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-5 pr-0 pl-1">
+                            <mat-form-field appearance="outline" style="width:100%">
+                                <mat-label>Topic</mat-label>
+                                <select matNativeControl formControlName="topic" required>
+                                    <option></option>
+                                    <option *ngFor="let topic of availableTopics" [value]="topic">{{ topic }}</option>
+                                </select>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-2 pl-2 p-t-10">
+                            <button mat-raised-button color="primary" type="submit">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
+            <div class="col-12 mt-2 mb-2">
+                <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
+                    [disabled]="!dirty || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
+            </div>
+        </div>
     </mat-tab>
+
+    <mat-tab *ngIf="data.chartType === 'line'">
+        <ng-template mat-tab-label>
+            <mat-icon>multiline_chart</mat-icon>
+        </ng-template>
+        <div class="row">
+            <div class="col-12 pt-4">
+                <div class="font-weight-bold p-b-10 p-l-10 font-17">Line Chart Settings</div>
+            </div>
+            <div class="col-9">
+                <div class="row">
+                    <div class="col-4">
+                        <mat-form-field appearance="outline" style="width:100%">
+                            <mat-label>Range</mat-label>
+                            <input matInput type="number" (change)="setXRange($event.target.value)" [value]="data.xrange" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-4">
+                        <mat-form-field appearance="outline" style="width:100%">
+                            <mat-label>Units</mat-label>
+                            <select matNativeControl [ngModel]="data.xrangeunits" (change)="setXRangeUnits($event.target.value)">
+                                <option value="1">seconds</option>
+                                <option value="60">minutes</option>
+                                <option value="3600">hours</option>
+                                <option value="86400">days</option>
+                                <option value="2592000">months</option>
+                                <option value="31104000">years</option>
+                            </select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <mat-form-field appearance="outline" style="width:100%">
+                            <mat-label>Y-Axis Min</mat-label>
+                            <input matInput type="number" (change)="setYAxisMin($event.target.value); setDirty()" [value]="data.ymin" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-4">
+                        <mat-form-field appearance="outline" style="width:100%">
+                            <mat-label>Y-Axis Max</mat-label>
+                            <input matInput type="number" (change)="setYAxisMax($event.target.value); setDirty()" [value]="data.ymax" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-4">
+                        <mat-form-field appearance="outline" style="width:100%">
+                            <mat-label>Curve</mat-label>
+                            <select matNativeControl [ngModel]="data.curve" (change)="setCurve($event.target.value); setDirty()">
+                                <option value="curveLinear">Linear</option>
+                                <option value="curveNatural">Natural</option>
+                                <option value="curveBasis">Basis</option>
+                                <option value="curveMonotoneX">Monotone X</option>
+                                <option value="curveMonotoneY">Monotone Y</option>
+                                <option value="curveStep">Step</option>
+                                <option value="curveStepAfter">Step After</option>
+                                <option value="curveStepBefore">Step Before</option>
+                            </select>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <mat-checkbox [(ngModel)]="data.live" (change)="live.next($event.checked); setDirty()">Live</mat-checkbox><br>
+                <mat-checkbox [(ngModel)]="data.legend" (change)="setDirty()">Legend</mat-checkbox><br>
+                <mat-checkbox [(ngModel)]="sampled" (change)="setDirty()">Sampled</mat-checkbox><br>
+                <mat-checkbox [(ngModel)]="data.showRefLines" (change)="setDirty()">Reference Lines</mat-checkbox><br>
+                <mat-checkbox [(ngModel)]="data.timeline" (change)="setDirty()">Timeline</mat-checkbox>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <div class="font-weight-bold p-l-10 font-17">Reference Lines</div>
+                <mat-table [dataSource]="data.referenceLines" class="mat-cell">
+                    <!-- label -->
+                    <ng-container matColumnDef="name">
+                        <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{row.name}}</mat-cell>
+                    </ng-container>
+                    <!-- topic -->
+                    <ng-container matColumnDef="value">
+                        <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+                        <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
+                    </ng-container>
+                    <!-- actions -->
+                    <ng-container matColumnDef="actions">
+                        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                        <mat-cell *matCellDef="let row; let i=index;">
+                            <button mat-icon-button class="btn-tbl-edit" (click)="removeRefLine(row)">
+                                <mat-icon aria-label="Remove" class="col-white">delete</mat-icon>
+                            </button>
+                        </mat-cell>
+                    </ng-container>
+                    <mat-header-row *matHeaderRowDef="refLinesDisplayedColumns"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: refLinesDisplayedColumns;" matRipple></mat-row>
+                </mat-table>
+                <form [formGroup]="referenceLineForm" (ngSubmit)="addRefLine()">
+                    <div class="row">
+                        <div class="col-5 pr-0">
+                            <mat-form-field appearance="outline" style="width:100%">
+                                <mat-label>Name</mat-label>
+                                <input matInput type="text" formControlName="name" required />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-5 pr-0 pl-1">
+                            <mat-form-field appearance="outline" style="width:100%">
+                                <mat-label>Value</mat-label>
+                                <input matInput type="text" formControlName="value" required />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-2 pl-2 p-t-10">
+                            <button mat-raised-button color="primary" type="submit">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-6 series-color">
+                <form [formGroup]="colorForm">
+                    <div class="font-weight-bold p-b-10 p-l-10 font-17">Colors</div>
+                    <input matInput type="color" formControlName="color1" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color2" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color3" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color4" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color5" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color6" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color7" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color8" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color9" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color10" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color11" (change)="updateColor()" />
+                    <input matInput type="color" formControlName="color12" (change)="updateColor()" />
+                </form>
+            </div>
+        </div>
+    </mat-tab>
+
 </mat-tab-group>

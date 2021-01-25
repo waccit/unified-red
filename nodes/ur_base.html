@@ -3148,9 +3148,14 @@
                     var maxWidth = 12;
                     var maxHeight = 1;
                     var fixedWidth = true;
-                    var fixedHeight = true;
                     // var fixedWidth = false;
-                    // var fixedHeight = false;
+                    var fixedHeight = false;
+                    if (that.options.hasOwnProperty('height')) {
+                        maxHeight = Math.max(6, +height + 1);
+                    }
+                    else {
+                        fixedHeight = true;
+                    }
                     // var group = $(that.options.group).val();
                     // if (group) {
                     //     var groupNode = RED.nodes.node(group);
