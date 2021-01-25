@@ -1,6 +1,6 @@
 <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
     <div class="example-container">
-        <div *ngIf="data.label" class="font-weight-bold p-b-10 p-l-10 font-17">{{ data.label }}</div>
+        <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
         <div *ngFor="let field of data.options">
             <mat-form-field class="example-full-width" appearance="outline"
                 *ngIf="field.type !== 'multiline' && field.type !== 'checkbox' && field.type !== 'select' && field.type !== 'switch'">

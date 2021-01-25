@@ -10,6 +10,7 @@
                 value: 0,
             },
             height: { value: 0 },
+            label: { value: '' },
             fields: {
                 value: [
                     {
@@ -202,10 +203,12 @@
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class='form-row'>
-        <label for='node-input-name'>
-            <i class='fa fa-tag'></i> <span data-i18n='node-red:common.label.name'></span>
-        </label>
+        <label for='node-input-name'><i class='fa fa-tag'></i> <span data-i18n='node-red:common.label.name'></span></label>
         <input type='text' id='node-input-name' data-i18n='[placeholder]node-red:common.label.name'>
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional table title" />
     </div>
     <div class="form-row node-input-field-container-row">
         <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Fields</label>
@@ -270,6 +273,7 @@
     <!-- TAB / SIZE 2020-12-30 - END -->
 
     <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Label</b> is the table title text.</p>
     <p><b>Fields</b> define the data columns to display. Selecting <b>Pivot Table</b> allows fields to be displayed as rows.</p>
     <p>Each field contains following components:</p>
     <ul>
