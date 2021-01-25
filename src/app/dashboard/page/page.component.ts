@@ -99,6 +99,7 @@ export class PageComponent implements OnInit {
                             widgets: this.widgetService.getWidgets(t.items),
                         };
                     }),
+                    displayHeader: !!g.disp
                 });
             });
         }
@@ -153,6 +154,7 @@ export class PageComponent implements OnInit {
             const componentRef = this.viewContainerRef.createComponent(componentFactory);
 
             componentRef.instance.header = group.header;
+            componentRef.instance.displayHeader = group.displayHeader;
 
             for (const size in group.cols) {
                 if (size) {

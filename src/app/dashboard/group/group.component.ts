@@ -20,6 +20,7 @@ export class GroupComponent implements OnInit, OnDestroy {
     header: string;
     cols: string;
     tabs: Tab[];
+    displayHeader: boolean;
     @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
 
     constructor(
