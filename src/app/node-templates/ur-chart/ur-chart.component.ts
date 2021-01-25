@@ -51,6 +51,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
      */
     tableDisplayedColumns: string[] = ['timestamp', 'name', 'value'];
     tableDataSource: DataLogDataSource;
+    exporterOpt = {};
 
     /*
      *      Settings Members
@@ -124,6 +125,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
                 }
             }
         });
+        this.exporterOpt = {
+            fileName: 'Unified Datalog' + (this.data.label.length ? ' ' + this.data.label : '')
+        };
+    
 
         // Init table and graph
         this.queryParams = {

@@ -20,6 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatTableExporterModule } from 'mat-table-exporter';
 
 import { UrTextComponent } from './ur-text/ur-text.component';
 import { UrButtonComponent } from './ur-button/ur-button.component';
@@ -67,6 +68,7 @@ import { MatTabsModule } from '@angular/material/tabs';
         MatSlideToggleModule,
         MatSidenavModule,
         MatTableModule,
+        MatTableExporterModule,
         MatTooltipModule,
         MatTabsModule,
         FullCalendarModule,
