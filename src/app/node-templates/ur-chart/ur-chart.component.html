@@ -1,7 +1,5 @@
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
-    <div *ngIf="data.label" class="font-weight-bold p-b-10 p-l-10 font-17">
-        {{ data.label }}
-    </div>
+    <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
     <mat-tab-group #container [id]="data.id">
         <mat-tab *ngIf="data.chartType === 'line'">
             <ng-template mat-tab-label>
@@ -88,7 +86,7 @@
             </div>
             <div class="row">
                 <div class="col-12">
-                    <div class="font-weight-bold p-l-10 font-17">Topics</div>
+                    <div class="p-b-10 p-l-10 font-17">Topics</div>
                     <mat-table [dataSource]="data.topics" class="mat-cell">
                         <!-- label -->
                         <ng-container matColumnDef="label">
@@ -150,7 +148,7 @@
             </ng-template>
             <div class="row">
                 <div class="col-12 pt-4">
-                    <div class="font-weight-bold p-b-10 p-l-10 font-17">Line Chart Settings</div>
+                    <div class="p-b-10 p-l-10 font-17">Line Chart Settings</div>
                 </div>
                 <div class="col-9">
                     <div class="row">
@@ -213,7 +211,7 @@
                 <div class="col-6">
                     <div class="row">
                         <div class="col-6">
-                            <div class="font-weight-bold p-l-10 font-17">Reference Lines</div>
+                            <div class="p-l-10 font-17">Reference Lines</div>
                         </div>
                         <div class="col-6">
                             <mat-checkbox class="pull-right pt-1" [(ngModel)]="data.showRefLines" (change)="setDirty()">Show</mat-checkbox>
@@ -264,7 +262,7 @@
                 </div>
                 <div class="col-6 series-color">
                     <form [formGroup]="colorForm">
-                        <div class="font-weight-bold p-b-10 p-l-10 font-17">Colors</div>
+                        <div class="p-b-10 p-l-10 font-17">Colors</div>
                         <input matInput type="color" formControlName="color1" (change)="updateColor()" />
                         <input matInput type="color" formControlName="color2" (change)="updateColor()" />
                         <input matInput type="color" formControlName="color3" (change)="updateColor()" />

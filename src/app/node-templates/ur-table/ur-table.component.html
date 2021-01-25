@@ -1,4 +1,5 @@
 <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
+    <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
     <div *ngIf="!data.pivot" class="table-responsive">
         <table class="table table-sm table-bordered table-hover w-100 table-striped">
             <thead>
