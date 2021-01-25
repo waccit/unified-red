@@ -1,6 +1,6 @@
 <div class="card">
     <div class="header" style="padding-bottom:0">
-        <h2>{{ header }}</h2>
+        <h2 *ngIf="displayHeader">{{ header }}</h2>
         <!-- <ul class="header-dropdown m-r--5">
             <li class="dropdown">
                 <a

@@ -897,6 +897,7 @@ function addControl(folders, page, group, tab, control) {
                                     g.widthLg = group.config.widthLg;
                                     g.widthMd = group.config.widthMd;
                                     g.widthSm = group.config.widthSm;
+                                    g.disp = group.config.disp;
 
                                     if (dynamicTabs[tab.id]) {
                                         g.items.forEach((t) => {
@@ -946,6 +947,7 @@ function addControl(folders, page, group, tab, control) {
                                 widthMd: group.config.widthMd,
                                 widthSm: group.config.widthSm,
                                 items: [],
+                                disp: group.config.disp
                             };
 
                             let instanceTab = {
@@ -1009,6 +1011,7 @@ function addControl(folders, page, group, tab, control) {
                         widthMd: group.config.widthMd,
                         widthSm: group.config.widthSm,
                         items: [],
+                        disp: group.config.disp
                     };
 
                     let instanceTab = {
@@ -1197,6 +1200,7 @@ function addControl(folders, page, group, tab, control) {
                     widthMd: group.config.widthMd,
                     widthSm: group.config.widthSm,
                     items: [],
+                    disp: group.config.disp
                 };
                 foundPage.items.push(foundGroup);
             }
