@@ -120,6 +120,7 @@
         "jquery-sparkline": "^2.4.0",
         "jsonwebtoken": "^8.5.1",
         "mat-progress-buttons": "^9.1.1",
+        "mat-table-exporter": "^9.1.0",
         "material-design-iconic-font": "^2.2.0",
         "moment": "^2.24.0",
         "mongodb": "^3.5.6",

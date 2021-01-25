@@ -1,5 +1,7 @@
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
-    <div *ngIf="data.label" class="font-weight-bold p-b-10 p-l-10 font-17">{{ data.label }}</div>
+    <div *ngIf="data.label" class="font-weight-bold p-b-10 p-l-10 font-17">
+        {{ data.label }}
+    </div>
     <mat-tab-group #container [id]="data.id">
         <mat-tab *ngIf="data.chartType === 'line'">
             <ng-template mat-tab-label>
@@ -39,8 +41,8 @@
             <ng-template mat-tab-label>
                 <mat-icon>grid_on</mat-icon>
             </ng-template>
-            <div class="pt-4" [ngStyle]="{ 'height.px': 56 * data.height }">
-                <mat-table #table [dataSource]="tableDataSource" class="mat-cell">
+            <div class="pt-3" [ngStyle]="{ 'height.px': 56 * data.height }">
+                <mat-table #table [dataSource]="tableDataSource" matTableExporter #exporter="matTableExporter" class="mat-cell">
                     <ng-container matColumnDef="timestamp">
                         <mat-header-cell *matHeaderCellDef>Timestamp</mat-header-cell>
                         <mat-cell *matCellDef="let row">{{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
@@ -54,10 +56,17 @@
                         <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
                         <mat-cell *matCellDef="let row">{{row.value}}</mat-cell>
                     </ng-container>
-                    <mat-header-row *matHeaderRowDef="tableDisplayedColumns"></mat-header-row>
+                    <mat-header-row *matHeaderRowDef="tableDisplayedColumns; sticky: true"></mat-header-row>
                     <mat-row *matRowDef="let row; columns: tableDisplayedColumns;" matRipple>
                     </mat-row>
                 </mat-table>
+            </div>
+            <div class="dropup ur-dropup-menu">
+                <button class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                <ul class="dropdown-menu">
+                    <li><a href="return false;" (click)="exporter.exportTable('csv', exporterOpt)">Save as CSV</a></li>
+                    <li><a href="return false;" (click)="exporter.exportTable('xls', exporterOpt)">Save as Excel</a></li>
+                </ul>
             </div>
         </mat-tab>
 
