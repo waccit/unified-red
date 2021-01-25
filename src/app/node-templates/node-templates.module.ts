@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatTableModule } from '@angular/material/table';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -65,6 +66,7 @@ import { MatTabsModule } from '@angular/material/tabs';
         MatRadioModule,
         MatSlideToggleModule,
         MatSidenavModule,
+        MatTableModule,
         MatTooltipModule,
         MatTabsModule,
         FullCalendarModule,

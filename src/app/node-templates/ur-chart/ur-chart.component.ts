@@ -1,25 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../../services';
+import { CurrentUserService, DataLogService, NodeRedApiService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
-import { HttpClient } from '@angular/common/http';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { LargestTriangleThreeBuckets } from './LargestTriangleThreeBuckets';
+import * as shape from 'd3-shape';
+import { first } from 'rxjs/operators';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DataLogDataSource, DataLogQuery } from '../../data';
 
 declare const $: any;
-
-interface Unit {
-    value: string;
-    viewValue: string;
-}
-export interface chartConfiguration {
-    xrange: string;
-    xrangeunits: string;
-    xmax: string;
-    xmin: string;
-    ymin: string;
-    ymax: string;
-    live: boolean;
-    topics: any[];
-}
 
 @Component({
     selector: 'app-ur-chart',
@@ -27,25 +16,12 @@ export interface chartConfiguration {
     styleUrls: ['./ur-chart.component.sass'],
 })
 export class UrChartComponent extends BaseNode implements OnInit {
-    units: Unit[] = [
-        { value: '1', viewValue: 'sec' },
-        { value: '60', viewValue: 'min' },
-        { value: '3600', viewValue: 'hr' },
-        { value: '86400', viewValue: 'day(s)' },
-        { value: '2592000', viewValue: 'month(s)' },
-        { value: '31104000', viewValue: 'year(s)' },
-    ];
-
-    config: chartConfiguration;
-    dataSource: {};
-    graphedResults: any[];
-    private _liveSub: Subscription;
-
+    /*
+     *      Chart Members
+     */
     chartOpt = {
         animation: false,
-        legend: true,
         legendPosition: 'right',
-        timeline: true,
         autoScale: true,
         showYAxisLabel: false,
         showXAxisLabel: true,
@@ -55,119 +31,168 @@ export class UrChartComponent extends BaseNode implements OnInit {
         xScaleMax: null,
         yScaleMin: null,
         yScaleMax: null,
+        curve: null,
         colorScheme: {
             domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5'],
         },
     };
 
-    queryParams: any;
-    topics: Array<string> = [];
-    alias = {};
-    currentTime: Date;
-    timeValue: number;
-    selectedUnit: number;
-    showSeries = {};
+    private liveSubscription: Subscription;
+    private graphDataSource: {};
+    graphedResults: any[];
+    private queryParams: DataLogQuery;
+    private topics: Array<string> = [];
+    private labels = {};
+    private showSeries = {};
+    private lttb = new LargestTriangleThreeBuckets();
+
+    /*
+     *      Table Members
+     */
+    tableDisplayedColumns: string[] = ['timestamp', 'name', 'value'];
+    tableDataSource: DataLogDataSource;
+
+    /*
+     *      Settings Members
+     */
+    topicForm: FormGroup;
+    referenceLineForm: FormGroup;
+    colorForm: FormGroup;
+    topicsDisplayedColumns: string[] = ['label', 'topic', 'actions'];
+    refLinesDisplayedColumns: string[] = ['name', 'value', 'actions'];
+    availableTopics = [];
+    dirty = false;
+    sampled = true;
+    live = new BehaviorSubject<boolean>(false);
 
     constructor(
         protected webSocketService: WebSocketService,
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService,
-        protected http: HttpClient
+        private dataLogService: DataLogService,
+        private formBuilder: FormBuilder,
+        private red: NodeRedApiService
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
     }
 
     ngOnInit(): void {
-        this.config = this.data;
-        this.timeValue = parseFloat(this.config.xrange);
-        for (const topic of this.config.topics) {
-            this.topics.push(topic.def);
-            this.alias[topic.def] = topic.alias;
-            this.showSeries[topic.alias] = true;
+        for (const topic of this.data.topics) {
+            this.topics.push(topic.topic);
+            this.labels[topic.topic] = topic.label;
+            this.showSeries[topic.label] = true;
         }
-        this.selectedUnit = parseFloat(this.config.xrangeunits);
-        this.graphChart(this.config.live);
+
+        // Init settings
+        this.dataLogService.listTopics().pipe(first()).subscribe(
+            (data: any) => { this.availableTopics = data; },
+            (error) => { this.snackbar.error(error); }
+        );
+        this.topicForm = this.formBuilder.group({ 
+            label: ['', Validators.required],
+            topic: ['', Validators.required]
+        });
+        this.referenceLineForm = this.formBuilder.group({ 
+            name: ['', Validators.required],
+            value: ['', Validators.required]
+        });
+        this.colorForm = this.formBuilder.group({ 
+            color1: [ this.data.colors[0], Validators.required ],
+            color2: [ this.data.colors[1], Validators.required ],
+            color3: [ this.data.colors[2], Validators.required ],
+            color4: [ this.data.colors[3], Validators.required ],
+            color5: [ this.data.colors[4], Validators.required ],
+            color6: [ this.data.colors[5], Validators.required ],
+            color7: [ this.data.colors[6], Validators.required ],
+            color8: [ this.data.colors[7], Validators.required ],
+            color9: [ this.data.colors[8], Validators.required ],
+            color10: [ this.data.colors[9], Validators.required ],
+            color11: [ this.data.colors[10], Validators.required ],
+            color12: [ this.data.colors[11], Validators.required ],
+        });
+        this.live.subscribe(live => {
+            if (live) {
+                if (!this.liveSubscription) {
+                    this.liveSubscription = this.webSocketService.listen('ur-datalog-update').subscribe(data => {
+                        this.liveData(data);
+                    });
+                }
+            } else {
+                if (this.liveSubscription) {
+                    this.liveSubscription.unsubscribe();
+                }
+            }
+        });
+
+        // Init table and graph
+        this.queryParams = {
+            limit: 50000,
+            topic: this.topics,
+            startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
+            // endTimestamp: this.currentTime,
+            // value: any,
+            // lowValue: parseFloat(this.data.ymin),
+            // highValue: parseFloat(this.data.ymax),
+            // status: string,
+            // tags: string[]
+        };
+        if (this.data.chartType === 'table') { // init table
+            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
+        }
+        else { // init graph
+            this.initGraph();
+        }
+        this.live.next(this.data.live);
     }
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
-        this.setupDatapointAccess();
+        this.setupTrendsAccess();
     }
 
     ngOnDestroy(): void {
-        if (this._liveSub) {
-            this._liveSub.unsubscribe();
+        if (this.liveSubscription) {
+            this.liveSubscription.unsubscribe();
         }
     }
 
-    startTimeValue(timeValue: any) {
-        this.timeValue = parseFloat(timeValue);
+    /*
+     *      Chart Functions
+     */
+
+    initGraph() {
+        this.setYAxisMin(this.data.ymin);
+        this.setYAxisMax(this.data.ymax);
+        this.setCurve(this.data.curve);
+        this.chartOpt.colorScheme.domain = this.data.colors;
+        this.queryGraphData();
+    }
+
+    private refreshTime() {
         this.queryParams.startTimestamp = new Date(
-            this.currentTime.getTime() - this.timeValue * this.selectedUnit * 1000
+            new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000
         );
-        this.getData();
+        this.queryGraphData();
     }
 
-    startTimeUnits(value: any) {
-        this.selectedUnit = parseFloat(value);
-        this.queryParams.startTimestamp = new Date(
-            this.currentTime.getTime() - this.timeValue * this.selectedUnit * 1000
-        );
-        this.getData();
-    }
-
-    graphChart(live: any) {
-        this.currentTime = new Date();
-        this.queryParams = {
-            limit: 60000,
-            topic: this.topics,
-            startTimestamp: new Date(this.currentTime.getTime() - this.timeValue * this.selectedUnit * 1000),
-            // endTimestamp: this.currentTime,
-            // value: any,
-            lowValue: parseFloat(this.config.ymin),
-            highValue: parseFloat(this.config.ymax),
-            // status: string,
-            // tags: string[]
-        };
-        if (isNaN(this.queryParams.lowValue)) {
-            this.chartOpt.autoScale = true;
-            this.chartOpt.yScaleMin = null;
-        } else {
-            this.chartOpt.autoScale = false;
-            this.chartOpt.yScaleMin = this.queryParams.lowValue;
-        }
-        this.chartOpt.yScaleMax = this.queryParams.highValue;
-        this.getData();
-        if (live) {
-            this._liveSub = this.webSocketService.listen('ur-datalog-update').subscribe(data => {
-                this.liveData(data);
-            });
-        } else {
-            if (this._liveSub) {
-                this._liveSub.unsubscribe();
-            }
-        }
-    }
-
-    getData() {
-        this.http
-            .put('/api/datalog/', this.queryParams)
+    queryGraphData() {
+        this.dataLogService.query(this.queryParams)
             .pipe()
             .subscribe(
                 (data: any) => {
-                    this.dataSource = data.reduce((out, entry) => {
-                        let alias = this.alias[entry.topic] || entry.topic;
-                        if (!out.hasOwnProperty(alias)) {
-                            out[alias] = {
-                                name: alias,
+                    this.graphDataSource = data.reduce((out, entry) => {
+                        let label = this.labels[entry.topic] || entry.topic;
+                        if (!out.hasOwnProperty(label)) {
+                            out[label] = {
+                                name: label,
                                 series: [],
                             };
                         }
-                        out[alias].series.push({ name: new Date(entry.timestamp), value: entry.value });
+                        out[label].series.push({ name: new Date(entry.timestamp), value: entry.value });
                         return out;
                     }, {});
-                    this.graphedResults = Object.values(this.dataSource);
+                    this.updateGraphedResults(Object.values(this.graphDataSource));
                 },
                 (error) => {
                     this.snackbar.error(error);
@@ -175,71 +200,211 @@ export class UrChartComponent extends BaseNode implements OnInit {
             );
     }
 
+    updateGraphedResults(data: any[]) {
+        if (this.sampled) {
+            for (let i = 0; i < data.length; i++) {
+                // let origLen = data[i].series.length.toString();
+                data[i].series = this.lttb.sample(data[i].series, 1440, 'name', 'value');
+                // console.log("series " + data[i].name + " reduced from length " + origLen + " to " + data[i].series.length);
+            }
+        }
+        this.graphedResults = data;
+    }
+
     liveData(data: any) {
-        if (data.payload && typeof this.dataSource !== 'undefined') {
-            this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
-            this.chartOpt.xScaleMin = new Date(
-                this.chartOpt.xScaleMax.getTime() - this.timeValue * this.selectedUnit * 1000
-            );
+        if (data.payload && this.topics.includes(data.payload.topic)) {
+            if (this.data.chartType === 'table' && this.tableDataSource) {
+                this.tableDataSource.add(data.payload);
+            }
+            else if (typeof this.graphDataSource !== 'undefined') {
+                this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
+                this.chartOpt.xScaleMin = new Date(
+                    this.chartOpt.xScaleMax.getTime() - this.data.xrange * this.data.xrangeunits * 1000
+                );
 
-            // add point to dataSource
-            let alias = this.alias[data.payload.topic] || data.payload.topic;
-            let newEntry = {
-                name: new Date(data.payload.timestamp),
-                value: data.payload.value,
-            };
-            this.dataSource[alias].series.push(newEntry);
+                // add point to dataSource
+                let label = this.labels[data.payload.topic] || data.payload.topic;
+                let newEntry = {
+                    name: new Date(data.payload.timestamp),
+                    value: data.payload.value,
+                };
+                this.graphDataSource[label].series.push(newEntry);
 
-            // add point to graphed results
-            const isShown = this.showSeries[alias];
-            if (isShown) {
-                for (let dataPoint of this.graphedResults) {
-                    if (dataPoint.name === alias) {
-                        dataPoint.series.shift(); // delete first entry
-                        dataPoint.series.push(newEntry); // append new entry
-                        break;
+                // add point to graphed results
+                const isShown = this.showSeries[label];
+                if (isShown) {
+                    for (let dataPoint of this.graphedResults) {
+                        if (dataPoint.name === label) {
+                            dataPoint.series.shift(); // delete first entry
+                            dataPoint.series.push(newEntry); // append new entry
+                            break;
+                        }
                     }
                 }
-            }
 
-            // refresh chart
-            this.graphedResults = [ ... this.graphedResults ];
+                // refresh chart
+                this.updateGraphedResults([ ... this.graphedResults ]);
+            }
         }
     }
 
-    onActivate(data): void {
-        // console.log('Activate', JSON.parse(JSON.stringify(data)));
+    onActivate(): void {
+        // console.log('Activate', data);
     }
 
-    onDeactivate(data): void {
-        // console.log('Deactivate', JSON.parse(JSON.stringify(data)));
+    onDeactivate(): void {
+        // console.log('Deactivate', data);
     }
 
-    onSelect(alias) {
+    onSelect(label) {
+        if (typeof label !== 'string') { // legend clicks return strings. series clicks return objects.
+            return;
+        }
+        let legendLabel = $(".legend-label span[title='"+label+"']")
         let data = $.extend(true, [], this.graphedResults); // deep copy/clone data
-        const isShown = this.showSeries[alias];
+        const isShown = this.showSeries[label];
         if (isShown) {
             // topic shown, so hide
-            this.showSeries[alias] = false;
+            this.showSeries[label] = false;
             for (let entry of data) {
-                if (entry.name === alias) {
+                if (entry.name === label) {
                     entry.series = [];
                     break;
                 }
             }
+            legendLabel.addClass("dim");
         } else {
             // topic hidden, so show
-            this.showSeries[alias] = true;
+            this.showSeries[label] = true;
             // rebuild data when showing series in ngx-charts as work around for ngx-charts bug
             // if you add the data series only (and do not rebuild), ngx-charts will graph the data series to the right of the existing chart
             for (let entry of data) {
                 if (this.showSeries[entry.name]) {
-                    entry.series = this.dataSource[entry.name].series;
+                    entry.series = this.graphDataSource[entry.name].series;
                 } else {
                     entry.series = [];
                 }
             }
+            legendLabel.removeClass("dim");
         }
-        this.graphedResults = data;
+        this.updateGraphedResults(data);
+    }
+
+    /*
+     *      Settings Functions
+     */
+
+     setDirty() {
+        this.dirty = true;
+     }
+
+    setCurve(value: any) {
+        this.chartOpt.curve = shape[value];
+        this.data.curve = value;
+    }
+
+    setXRange(value: any) {
+        this.data.xrange = parseFloat(value);
+        this.refreshTime();
+        this.setDirty();
+    }
+
+    setXRangeUnits(value: any) {
+        this.data.xrangeunits = parseFloat(value);
+        this.refreshTime();
+        this.setDirty();
+    }
+
+    setYAxisMin(value: any) {
+        this.data.ymin = parseFloat(value);
+        if (isNaN(value)) {
+            this.chartOpt.autoScale = true;
+            this.chartOpt.yScaleMin = null;
+        } else {
+            this.chartOpt.autoScale = false;
+            this.chartOpt.yScaleMin = this.data.ymin;
+        }
+    }
+
+    setYAxisMax(value: any) {
+        this.data.ymax = parseFloat(value);
+        this.chartOpt.yScaleMax = this.data.ymax;
+    }
+
+    addTopic() {
+        if (this.topicForm.invalid) {
+            return;
+        }
+        if (!this.data.topics.find(t => t.topic === this.topicForm.value.topic)) {
+            this.data.topics = [ ... this.data.topics, this.topicForm.value ];
+            this.setDirty();
+        }
+    }
+
+    removeTopic(topic) {
+        this.data.topics = this.data.topics.filter(t => {
+            return t.label !== topic.label && t.topic !== topic.topic;
+        });
+        this.setDirty();
+    }
+
+    addRefLine() {
+        if (this.referenceLineForm.invalid) {
+            return;
+        }
+        if (!this.data.referenceLines.find(r => r.value === this.referenceLineForm.value.value)) {
+            this.data.referenceLines = [ ... this.data.referenceLines, this.referenceLineForm.value ];
+            this.setDirty();
+        }
+    }
+
+    removeRefLine(line) {
+        this.data.referenceLines = this.data.referenceLines.filter(r => {
+            return r.name !== line.name && r.value !== line.value;
+        });
+        this.setDirty();
+    }
+
+    updateColor() {
+        if (this.colorForm.invalid) {
+            return;
+        }
+        let cf = this.colorForm.value;
+        this.data.colors = [ 
+            cf.color1, cf.color2, cf.color3, cf.color4, cf.color5, cf.color6, 
+            cf.color7, cf.color8, cf.color9, cf.color10, cf.color11, cf.color12
+        ];
+        this.chartOpt.colorScheme.domain = this.data.colors;
+        this.setDirty();
+    }
+
+    deploy() {
+        const nodesToReplace = [this.data.id];
+        this.red
+            .deployNodes(nodesToReplace, (existing) => {
+                switch (existing.id) {
+                    case this.data.id:
+                        existing.chartType = this.data.chartType;
+                        existing.topics = this.data.topics;
+                        existing.xrange = this.data.xrange;
+                        existing.xrangeunits = this.data.xrangeunits;
+                        existing.curve = this.data.curve;
+                        existing.live = this.data.live;
+                        existing.legend = this.data.legend;
+                        existing.showRefLines = this.data.showRefLines;
+                        existing.referenceLines = this.data.referenceLines;
+                        existing.timeline = this.data.timeline;
+                        existing.ymin = this.data.ymin;
+                        existing.ymax = this.data.ymax;
+                        existing.colors = this.data.colors;
+                        break;
+                }
+                return existing;
+            })
+            .subscribe((response: any) => {
+                if (response?.rev) {
+                    this.snackbar.success('Deployed successfully!');
+                }
+            });
     }
 }

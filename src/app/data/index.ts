@@ -7,3 +7,6 @@ export * from './roleName.model';
 export * from './alarm-datasource';
 export * from './alarmdialog-datasource';
 export * from './alarm.model';
+export * from './datalog.model';
+export * from './datalog-query.model';
+export * from './datalog-datasource';

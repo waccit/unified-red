@@ -7,3 +7,4 @@ export * from './web-socket.service';
 export * from './snackbar.service';
 export * from './nodered-api.service';
 export * from './alarm.service';
+export * from './datalog.service';
