@@ -1,6 +1,6 @@
 <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
     <div *ngIf="!data.pivot" class="table-responsive">
-        <table class="table table-bordered table-hover w-100 table-striped">
+        <table class="table table-sm table-bordered table-hover w-100 table-striped">
             <thead>
                 <th *ngFor="let c of data.fields">{{ c.label }}</th>
             </thead>
@@ -24,7 +24,7 @@
     </div>
 
     <div *ngIf="data.pivot" class="table-responsive">
-        <table class="table table-bordered table-hover w-100 table-striped">
+        <table class="table table-sm table-bordered table-hover w-100 table-striped">
             <tbody>
                 <tr *ngFor="let c of data.fields">
                     <th>{{ c.label }}</th>
