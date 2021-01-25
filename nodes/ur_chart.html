@@ -92,12 +92,8 @@
             });
             $('#node-input-chartType').on('change', function () {
                 if ($(this).val() === 'line') {
-                    // $('#x-axis-show').show();
-                    // $('#x-axis-label-show').show();
                     $('#line-chart-options').show();
                 } else {
-                    // $('#x-axis-show').hide();
-                    // $('#x-axis-label-show').hide();
                     $('#line-chart-options').hide();
                 }
             });
@@ -263,9 +259,13 @@
             <option value="line">Line Chart</option>
             <option value="table">Table</option>
         </select>
+        <span>
+            <input type="checkbox" id="node-input-live" style="width: auto; vertical-align: baseline; margin-left: 10px;">
+            <label for="node-input-live" style="width: auto">Live</label>
+        </span>
     </div>
     <div class="form-row">
-        <label for="node-input-xrange">Range</label>
+        <label for="node-input-xrange">X-Axis</label>
         <input type="number" id="node-input-xrange" style="width: 35%" />
         <select id="node-input-xrangeunits" style="width: 35%">
             <option value="1">seconds</option>
@@ -278,57 +278,29 @@
     </div>
     <span id="line-chart-options">
         <div class="form-row">
+            <label id="y-label-show" for="node-input-ymin">Y-Axis</label>
+            <label for="node-input-ymin" style="width:auto">min</label>
+            <input type="text" id="node-input-ymin" style="width: 30%" placeholder="Auto" />
+            <label for="not-input-ymax" style="width:auto; margin-left:10px;">max</label>
+            <input type="text" id="node-input-ymax" style="width: 26%" placeholder="Auto" />
+        </div>
+        <div class="form-row">
             <label for="node-input-curve">Curve</label>
             <select id="node-input-curve" style="width:35%;">
                 <option value="curveLinear">Linear</option>
-                
-                <!-- Natural: Produces a natural cubic spline with the second derivative of the spline set to zero at the endpoints. -->
                 <option value="curveNatural">Natural</option>
-
-                <!-- Basis: Produces a cubic basis spline using the specified control points. The first and last points are triplicated 
-                    such that the spline starts at the first point and ends at the last point, and is tangent to the line between the 
-                    first and second points, and to the line between the penultimate and last points. -->
                 <option value="curveBasis">Basis</option>
-
-                <!-- Monotone X: Produces a cubic spline that preserves monotonicity in y, assuming monotonicity in x, as proposed by 
-                    Steffen in A simple method for monotonic interpolation in one dimension: “a smooth curve with continuous first-order 
-                    derivatives that passes through any given set of data points without spurious oscillations. Local extrema can occur 
-                    only at grid points where they are given by the data, but not in between two adjacent grid points.” -->
-                <option value="curveMonotoneX">Monotone X</option>
-                
-                <!-- Monotone Y: Produces a cubic spline that preserves monotonicity in x, assuming monotonicity in y, as proposed by 
-                    Steffen in A simple method for monotonic interpolation in one dimension: “a smooth curve with continuous first-order 
-                    derivatives that passes through any given set of data points without spurious oscillations. Local extrema can occur 
-                    only at grid points where they are given by the data, but not in between two adjacent grid points.” -->
-                <option value="curveMonotoneY">Monotone Y</option>
-                
-                <!-- Step: Produces a piecewise constant function (a step function) consisting of alternating horizontal and vertical 
-                    lines. The y-value changes at the midpoint of each pair of adjacent x-values. -->
+                <option value="curveMonotoneX">Monotone</option>
                 <option value="curveStep">Step</option>
-                
-                <!-- Step After: Produces a piecewise constant function (a step function) consisting of alternating horizontal and 
-                    vertical lines. The y-value changes after the x-value. -->
                 <option value="curveStepAfter">Step After</option>
-                
-                <!-- Step Before: Produces a piecewise constant function (a step function) consisting of alternating horizontal and 
-                    vertical lines. The y-value changes before the x-value. -->
                 <option value="curveStepBefore">Step Before</option>
             </select>
             <span>
-                <input type="checkbox" id="node-input-live">
-                <label for="node-input-live" style="width: auto">Live</label>
                 <input type="checkbox" id="node-input-legend">
                 <label for="node-input-legend" style="width: auto">Legend</label>
                 <input type="checkbox" id="node-input-timeline">
                 <label for="node-input-timeline" style="width: auto">Timeline</label>
             </span>
-        </div>
-        <div class="form-row">
-            <label id="y-label-show" for="node-input-ymin">Y-axis</label>
-            <label for="node-input-ymin" style="width:auto">min</label>
-            <input type="text" id="node-input-ymin" style="width: 30%" placeholder="Auto" />
-            <label for="not-input-ymax" style="width:auto; margin-left:10px;">max</label>
-            <input type="text" id="node-input-ymax" style="width: 26%" placeholder="Auto" />
         </div>
         <div class="form-row">
             <label for="node-input-color1">Colors</label>
@@ -391,41 +363,95 @@
 </script>
 
 <script type="text/html" data-help-name="ur_chart">
+    <p>Plots datalog values on a time-based line chart or table.</p>
+    <h3>Details</h3>
     <p>
-        Plots the input values on a chart. This can either be a time based line chart, a bar chart (vertical or
-        horizontal), or a pie chart.
+        Multiple series can be shown on the same chart by adding a topics.
+    </p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
     </p>
     <p>
-        Each input <code>msg.payload</code> value will be converted to a number. If the conversion fails, the message is
-        ignored.
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
     </p>
-    <p>Minimum and Maximum <b>Y</b> axis values are optional. The graph will auto-scale to any values received.</p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Label</b> is the chart title text.</p>
     <p>
-        Multiple series can be shown on the same chart by using a different <code>msg.topic</code> value on each input
-        message. Multiple bars of the same series can be shown by using the <code>msg.label</code> property.
+        <b>Topics</b> are message topics to be retrieved from the datalog and includes a <b>Label</b> field for each topic used as 
+        the data series name.
+    </p>
+    <p><b>Type</b> defines the chart as a <i>line chart</i> or as a <i>table</i>.</p>
+    <p><b>Live</b> automatically shows datalog updates.</p>
+    <p><b>X-Axis</b> defines the time window to display.</p>
+    <p>
+        <b>Y-Axis</b> specifies the chart minimum and maximum Y-axis scale. When either are blank, the chart will automatically scale
+        to the data.
+    </p>
+    <p><b>Curve</b> interpolates line chart data using a curve function.</p>
+    <p><b>Legend</b> shows the line chart legend.</p>
+    <p><b>Timeline</b> shows the line chart timeline used to zoom and pan within the chart.</p>
+    <p><b>Colors</b> sets the line colors.</p>
+    <p><b>Reference Lines</b> shows horizontal lines in the chart that are typically used to show data boundaries.</p>
+    <p>
+        <h5>Available Curves:</h5>
+        <ul>
+            <li><b>Linear</b>: Produces a straight line through the specified points.</li>
+            <li>
+                <b>Natural</b>: Produces a natural cubic spline with the second derivative of the spline set to zero at the endpoints.
+            </li>
+            <li>
+                <b>Basis</b>: Produces a cubic basis spline using the specified data points. The first and last points are triplicated 
+                such that the spline starts at the first point and ends at the last point, and is tangent to the line between the 
+                first and second points, and to the line between the penultimate and last points.
+            </li>
+            <li>
+                <b>Monotone</b>: Produces a smooth curve with continuous first-order derivatives that passes through any given set of data 
+                points without spurious oscillations. Local extrema can occur only at grid points where they are given by the data, but not
+                in between two adjacent grid points.
+            </li>
+            <li>
+                <b>Step</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes at 
+                the midpoint of each pair of adjacent x-values.
+            </li>
+            <li>
+                <b>Step After</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes
+                after the x-value.
+            </li>
+            <li>
+                <b>Step Before</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes 
+                before the x-value.
+            </li>
+        </ul>
+    </p>
+
+    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
     </p>
     <p>
-        The <b>X</b> axis defines a time window or a maximum number of points to display. Older data will be
-        automatically removed from the graph. The axis labels can be formatted using a
-        <a href="https://momentjs.com/docs/#/displaying/format/" target="_blank"> Moment.js time formatted</a> string.
-    </p>
-    <p>Inputting a <code>msg.payload</code> containing a blank array <code>[]</code> will clear the chart.</p>
-    <p>
-        See
-        <b
-            ><a href="https://github.com/node-red/node-red-dashboard/blob/master/Charts.md" target="_new"
-                >this information</a
-            ></b
-        >
-        for how to pre-format data to be passed in as a complete chart.
-    </p>
-    <p>The <b>Blank label</b> topic can be used to display some text before any valid data is received.</p>
-    <p>
-        The label can also be set by a message property by setting the topic to the name of the property, for example
-        <code>{{msg.topic}}</code>.
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
     </p>
     <p>
-        The node output contains an array of the chart state that can be persisted if needed. This can be passed into
-        the chart node to re-display the persisted data.
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
     </p>
+    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+
 </script>
