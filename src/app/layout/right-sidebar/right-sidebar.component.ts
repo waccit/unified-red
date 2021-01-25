@@ -27,7 +27,7 @@ export class RightSidebarComponent implements OnInit {
     ) {
         this.dataService.currentStatus.subscribe((data: boolean) => {
             this.isOpenSidebar = data;
-            this.showSettings = this.authenticationService.getUserRole() === Role.Level4; // show/hide settings tab
+            this.showSettings = this.authenticationService.getUserRole() >= Role.Level5; // show/hide settings tab
         });
     }
 
