@@ -161,7 +161,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
      *      Chart Functions
      */
 
-    initGraph() {
+    private initGraph() {
         this.setYAxisMin(this.data.ymin);
         this.setYAxisMax(this.data.ymax);
         this.setCurve(this.data.curve);
@@ -176,20 +176,18 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.queryGraphData();
     }
 
-    queryGraphData() {
+    private queryGraphData() {
         this.dataLogService.query(this.queryParams)
             .pipe()
             .subscribe(
                 (data: any) => {
                     this.graphDataSource = data.reduce((out, entry) => {
-                        let label = this.labels[entry.topic] || entry.topic;
+                        let label = this.chartLabel(entry);
+                        let newEntry = this.chartEntry(entry);
                         if (!out.hasOwnProperty(label)) {
-                            out[label] = {
-                                name: label,
-                                series: [],
-                            };
+                            out[label] = { name: label, series: [] };
                         }
-                        out[label].series.push({ name: new Date(entry.timestamp), value: entry.value });
+                        out[label].series.push(newEntry);
                         return out;
                     }, {});
                     this.updateGraphedResults(Object.values(this.graphDataSource));
@@ -200,7 +198,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
             );
     }
 
-    updateGraphedResults(data: any[]) {
+    private updateGraphedResults(data: any[]) {
         if (this.sampled) {
             for (let i = 0; i < data.length; i++) {
                 // let origLen = data[i].series.length.toString();
@@ -211,7 +209,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.graphedResults = data;
     }
 
-    liveData(data: any) {
+    private liveData(data: any) {
         if (data.payload && this.topics.includes(data.payload.topic)) {
             if (this.data.chartType === 'table' && this.tableDataSource) {
                 this.tableDataSource.add(data.payload);
@@ -223,11 +221,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
                 );
 
                 // add point to dataSource
-                let label = this.labels[data.payload.topic] || data.payload.topic;
-                let newEntry = {
-                    name: new Date(data.payload.timestamp),
-                    value: data.payload.value,
-                };
+                let label = this.chartLabel(data.payload);
+                let newEntry = this.chartEntry(data.payload);
                 this.graphDataSource[label].series.push(newEntry);
 
                 // add point to graphed results
@@ -246,6 +241,21 @@ export class UrChartComponent extends BaseNode implements OnInit {
                 this.updateGraphedResults([ ... this.graphedResults ]);
             }
         }
+    }
+
+    private chartLabel(entry) {
+        let label = this.labels[entry.topic] || entry.topic;
+        if (entry.units) {
+            label += " (" + entry.units + ")";
+        }
+        return label;
+    }
+ 
+    private chartEntry(entry) {
+        return {
+            name: new Date(entry.timestamp),
+            value: entry.value,
+        };
     }
 
     onActivate(): void {
