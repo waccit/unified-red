@@ -10,7 +10,6 @@ export interface AclReadWrite {
 
 export interface AclTrend {
     view: boolean;
-    enable: boolean;
     clear: boolean;
     add: boolean;
     edit: boolean;
@@ -19,7 +18,6 @@ export interface AclTrend {
 
 export interface AclAlarm {
     view: boolean;
-    enable: boolean;
     ack: boolean;
     add: boolean;
     edit: boolean;
@@ -28,7 +26,6 @@ export interface AclAlarm {
 
 export interface AclSchedule {
     view: boolean;
-    enable: boolean;
     add: boolean;
     edit: boolean;
     delete: boolean;
@@ -61,9 +58,9 @@ export class RoleService {
         '1': { // Viewer (1)
             datapoint: { read: true, write: false },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: false, clear: false, add: false, edit: false, delete: false },
-            alarms: { view: true, enable: false, ack: false, add: false, edit: false, delete: false },
-            schedules: { view: true, enable: false, add: false, edit: false, delete: false },
+            trends: { view: true, clear: false, add: false, edit: false, delete: false },
+            alarms: { view: true, ack: false, add: false, edit: false, delete: false },
+            schedules: { view: true, add: false, edit: false, delete: false },
             users: { read: false, write: false },
             roles: { read: false, write: false },
             audit: { read: false, write: false }, // future
@@ -74,9 +71,9 @@ export class RoleService {
         '2': { // Limited Operator (2)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: false, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: false, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: false, delete: false },
+            trends: { view: true, clear: true, add: false, edit: false, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: false, delete: false },
+            schedules: { view: true, add: false, edit: false, delete: false },
             users: { read: false, write: false },
             roles: { read: false, write: false },
             audit: { read: false, write: false }, // future
@@ -87,9 +84,9 @@ export class RoleService {
         '3': { // Standard Operator (3)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: true, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: true, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: true, delete: false },
+            trends: { view: true, clear: true, add: false, edit: true, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: true, delete: false },
+            schedules: { view: true, add: false, edit: true, delete: false },
             users: { read: false, write: false },
             roles: { read: false, write: false },
             audit: { read: false, write: false }, // future
@@ -100,9 +97,9 @@ export class RoleService {
         '4': { // IT Operator (4)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: true, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: true, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: true, delete: false },
+            trends: { view: true, clear: true, add: false, edit: true, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: true, delete: false },
+            schedules: { view: true, add: false, edit: true, delete: false },
             users: { read: false, write: false },
             roles: { read: false, write: false },
             audit: { read: false, write: false }, // future
@@ -113,9 +110,9 @@ export class RoleService {
         '5': { // Security Operator (5)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: true, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: true, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: true, delete: false },
+            trends: { view: true, clear: true, add: false, edit: true, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: true, delete: false },
+            schedules: { view: true, add: false, edit: true, delete: false },
             users: { read: true, write: true },
             roles: { read: true, write: true },
             audit: { read: true, write: true }, // future
@@ -126,9 +123,9 @@ export class RoleService {
         '6': { // Reserved (6)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: true, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: true, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: true, delete: false },
+            trends: { view: true, clear: true, add: false, edit: true, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: true, delete: false },
+            schedules: { view: true, add: false, edit: true, delete: false },
             users: { read: true, write: true },
             roles: { read: true, write: true },
             audit: { read: true, write: true }, // future
@@ -139,9 +136,9 @@ export class RoleService {
         '7': { // Reserved (7)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: true, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: true, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: true, delete: false },
+            trends: { view: true, clear: true, add: false, edit: true, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: true, delete: false },
+            schedules: { view: true, add: false, edit: true, delete: false },
             users: { read: true, write: true },
             roles: { read: true, write: true },
             audit: { read: true, write: true }, // future
@@ -152,9 +149,9 @@ export class RoleService {
         '8': { // Reserved (8)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: false },
-            trends: { view: true, enable: true, clear: true, add: false, edit: true, delete: false },
-            alarms: { view: true, enable: true, ack: true, add: false, edit: true, delete: false },
-            schedules: { view: true, enable: true, add: false, edit: true, delete: false },
+            trends: { view: true, clear: true, add: false, edit: true, delete: false },
+            alarms: { view: true, ack: true, add: false, edit: true, delete: false },
+            schedules: { view: true, add: false, edit: true, delete: false },
             users: { read: true, write: true },
             roles: { read: true, write: true },
             audit: { read: true, write: true }, // future
@@ -165,9 +162,9 @@ export class RoleService {
         '9': { // Tech (9)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: true },
-            trends: { view: true, enable: true, clear: true, add: true, edit: true, delete: true },
-            alarms: { view: true, enable: true, ack: true, add: true, edit: true, delete: true },
-            schedules: { view: true, enable: true, add: true, edit: true, delete: true },
+            trends: { view: true, clear: true, add: true, edit: true, delete: true },
+            alarms: { view: true, ack: true, add: true, edit: true, delete: true },
+            schedules: { view: true, add: true, edit: true, delete: true },
             users: { read: false, write: false },
             roles: { read: false, write: false },
             audit: { read: false, write: false }, // future
@@ -178,9 +175,9 @@ export class RoleService {
         '10': { // Admin (10)
             datapoint: { read: true, write: true },
             dashboards: { read: true, write: true },
-            trends: { view: true, enable: true, clear: true, add: true, edit: true, delete: true },
-            alarms: { view: true, enable: true, ack: true, add: true, edit: true, delete: true },
-            schedules: { view: true, enable: true, add: true, edit: true, delete: true },
+            trends: { view: true, clear: true, add: true, edit: true, delete: true },
+            alarms: { view: true, ack: true, add: true, edit: true, delete: true },
+            schedules: { view: true, add: true, edit: true, delete: true },
             users: { read: true, write: true },
             roles: { read: true, write: true },
             audit: { read: true, write: true }, // future
