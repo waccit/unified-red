@@ -1,6 +1,6 @@
 <div class="card">
-    <div class="header" style="padding-bottom:0">
-        <h2 *ngIf="displayHeader">{{ header }}</h2>
+    <div class="header" style="padding-bottom:0" *ngIf="displayHeader">
+        <h2>{{ header }}</h2>
         <!-- <ul class="header-dropdown m-r--5">
             <li class="dropdown">
                 <a
@@ -28,7 +28,7 @@
         </ul> -->
     </div>
     <div class="body">
-        <div class="row">
+        <div [class.row]="tabs.length === 1">
             <ng-template group-host></ng-template>
             <mat-tab-group *ngIf="tabs.length > 1">
                 <mat-tab *ngFor="let tab of tabs" label="{{ tab.header }}">
