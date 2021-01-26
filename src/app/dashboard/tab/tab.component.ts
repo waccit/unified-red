@@ -45,7 +45,7 @@ export class TabComponent implements OnInit, OnDestroy {
 
                 const componentRef = this.viewContainerRef.createComponent(componentFactory);
                 componentRef.instance.data = widget.data;
-                const colWidth = widget.data.width !== 0 ? widget.data.width : 12;
+                const colWidth = +widget.data.width || 12;
                 const colClass = 'col-' + colWidth;
 
                 if (widget.data.type !== 'button' && widget.data.type !== 'schedule') {
