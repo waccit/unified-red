@@ -44,8 +44,8 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 						if (!this.dataLink[deviceName]) {
 							this.dataLink[deviceName] = {};
 						}
-						let text = this.evalVariables(element.format, this.data?.instance);
-						let href = this.evalVariables(element.display, this.data?.instance);
+						let text = this.evalVariables(element.format);
+						let href = this.evalVariables(element.display);
 						this.dataLink[deviceName][pointName] = { href, text };
 					}
 					if (!this.dataSource[deviceName]) {

@@ -1,6 +1,6 @@
 <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
     <mat-form-field class="example-full-width" appearance="fill" *ngIf="data.mode !== 'tel'">
-        <mat-label>{{ label }}</mat-label>
+        <mat-label>{{ data.label }}</mat-label>
         <span matPrefix *ngIf="data.mode === 'email'">
             <mat-icon class="mr-2">email</mat-icon>
         </span>
@@ -15,7 +15,7 @@
     </mat-form-field>
 
     <mat-form-field class="example-full-width" appearance="fill" *ngIf="data.mode === 'tel'">
-        <mat-label>{{ label }}</mat-label>
+        <mat-label>{{ data.label }}</mat-label>
         <span matPrefix>
             <mat-icon class="mr-2">phone</mat-icon>
         </span>
