@@ -347,14 +347,18 @@ function add(opt) {
             if (opt.page.config.isDynamic) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
+                let idVar = opt.control._idVar;
 
                 // find and replace wildcard (*)
                 let topicRegex = topicPattern.replace(/\*/g, '.*');
                 // find and escape square-brackets
                 topicRegex = topicRegex.replace(/\[/g, '\\[');
                 topicRegex = topicRegex.replace(/\]/g, '\\]');
-                // find and replace capture group (x)
-                topicRegex = topicRegex.replace(/\{x\}/gi, '([\\w\\. ]+)');
+                // find and replace capture group (idVar)
+                topicRegex = topicRegex.replace(new RegExp('{' + idVar + '}', 'gi'), '([\\w\\. ]+)');
+                // find and replace ignored {variables}
+                topicRegex = topicRegex.replace(/\{.*}/g, '[\\w\\. ]+');
+
                 // make new regex
                 topicRegex = new RegExp('^' + topicRegex + '$');
 
@@ -362,7 +366,7 @@ function add(opt) {
 
                 if (topicArr) {
                     let destinationInstNum = topicArr[1];
-                    newId += '.' + destinationInstNum;
+                    newId += '.' + idVar + destinationInstNum;
                 }
             }
 
@@ -833,32 +837,27 @@ function addControl(folders, page, group, tab, control) {
             let pageTitlePrefix = expressionArr[1];
             let pageTitleSuffix = expressionArr[3];
 
-            // determine instance numbers
+            // determine instance properties
             let instanceNames = [];
-            let instanceNums = [];
+            let instanceParams = [];
+            let instanceIds = [];
+            let firstParamVar = '';
 
-            let instanceMap = page.config.instances;
+            let instances = page.config.instances;
 
-            for (let i = 0; i < instanceMap.length; i++) {
-                let rawInstanceNames = instanceMap[i].name;
-                let rawInstanceNums = instanceMap[i].number;
-                rawInstanceNames = rawInstanceNames.split(/[ ,]+/);
-                rawInstanceNums = rawInstanceNums.split(/[ ,]+/);
+            instances.forEach((instance) => {
+                instanceNames = instanceNames.concat(instance.names._arr);
+                instanceParams = instanceParams.concat(instance.param._arr);
 
-                for (let i = 0; i < rawInstanceNames.length; i++) {
-                    let tempName = explodeRange(rawInstanceNames[i]).split(',');
-                    instanceNames = instanceNames.concat(tempName);
-                }
-
-                for (let i = 0; i < rawInstanceNums.length; i++) {
-                    let tempNum = explodeRange(rawInstanceNums[i]).split(',');
-                    instanceNums = instanceNums.concat(tempNum);
-                }
-            }
+                firstParamVar = instance.param.input[0].variable; // grab first variable to be used in the IDs
+                instance.param._arr.forEach((p) => {
+                    instanceIds.push(firstParamVar + p[firstParamVar]);
+                });
+            });
 
             let incomingSettings = {
-                instanceNums,
                 instanceNames,
+                instanceParams,
                 pageTitle: {
                     pageTitlePrefix,
                     pageTitleSuffix,
@@ -908,30 +907,34 @@ function addControl(folders, page, group, tab, control) {
                                                 if (dynamicWidgets[control.id]) {
                                                     t.items.forEach((w) => {
                                                         if (w.id.startsWith(control.id)) {
-                                                            control.instance = p.instance;
-                                                            let newCtrlId = control.id + '.' + control.instance.number;
-                                                            w = { ...control, 'id': newCtrlId };
+                                                            // control.instance = p.instance;
+                                                            let newCtrlId = control.id + '.' + p.instance._id;
+                                                            w = { ...control, 'id': newCtrlId, 'instance': p.instance };
                                                         }
                                                     });
                                                 } else {
-                                                    control.instance = p.instance;
-                                                    let newCtrlId = control.id + '.' + control.instance.number;
-                                                    t.items.push({ ...control, 'id': newCtrlId });
+                                                    // control.instance = p.instance;
+                                                    let newCtrlId = control.id + '.' + p.instance._id;
+                                                    t.items.push({
+                                                        ...control,
+                                                        'id': newCtrlId,
+                                                        'instance': p.instance,
+                                                    });
                                                     t.items.sort(itemSorter);
                                                 }
                                             }
                                         });
                                     } else {
                                         let instanceTab = {
-                                            id: tab.id + '.' + p.instance.number,
+                                            id: tab.id + '.' + p.instance._id,
                                             header: tab.config.name,
                                             order: tab.config.order,
                                             items: [],
                                         };
 
-                                        control.instance = p.instance;
-                                        let newCtrlId = control.id + '.' + control.instance.number;
-                                        instanceTab.items.push({ ...control, 'id': newCtrlId });
+                                        // control.instance = p.instance;
+                                        let newCtrlId = control.id + '.' + p.instance._id;
+                                        instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': p.instance });
 
                                         g.items.push(instanceTab);
                                         g.items.sort(itemSorter);
@@ -940,7 +943,7 @@ function addControl(folders, page, group, tab, control) {
                             });
                         } else {
                             let instanceGroup = {
-                                id: group.id + '.' + p.instance.number,
+                                id: group.id + '.' + p.instance._id,
                                 header: group.config.name,
                                 order: group.config.order,
                                 widthLg: group.config.widthLg,
@@ -951,15 +954,15 @@ function addControl(folders, page, group, tab, control) {
                             };
 
                             let instanceTab = {
-                                id: tab.id + '.' + p.instance.number,
+                                id: tab.id + '.' + p.instance._id,
                                 header: tab.config.name,
                                 order: tab.config.order,
                                 items: [],
                             };
 
-                            control.instance = p.instance;
-                            let newCtrlId = control.id + '.' + control.instance.number;
-                            instanceTab.items.push({ ...control, 'id': newCtrlId });
+                            // control.instance = p.instance;
+                            let newCtrlId = control.id + '.' + p.instance._id;
+                            instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': p.instance });
 
                             instanceGroup.items.push(instanceTab);
 
@@ -983,16 +986,20 @@ function addControl(folders, page, group, tab, control) {
                     return !page.id.startsWith(page.id);
                 });
 
-                for (let i = 0; i < instanceNums.length; i++) {
+                for (let i = 0; i < instanceIds.length; i++) {
                     let pageTitle = pageTitlePrefix + instanceNames[i] + pageTitleSuffix;
 
                     let instancePage = {
-                        id: page.id + '.' + instanceNums[i],
+                        id: page.id + '.' + instanceIds[i],
                         isPage: true,
                         order: page.config.order + '.' + i,
                         disabled: page.config.disabled,
                         hidden: page.config.hidden,
-                        instance: { 'name': instanceNames[i], 'number': instanceNums[i] },
+                        instance: {
+                            'name': instanceNames[i],
+                            'parameters': instanceParams[i],
+                            '_id': instanceIds[i],
+                        },
                         items: [],
                         // Atrio sidebarItems properties:
                         path: '/d/' + foldersPath + pageTitle.replace(/ /g, '').toLowerCase(),
@@ -1004,7 +1011,7 @@ function addControl(folders, page, group, tab, control) {
                     };
 
                     let instanceGroup = {
-                        id: group.id + '.' + instanceNums[i],
+                        id: group.id + '.' + instanceIds[i],
                         header: group.config.name,
                         order: group.config.order,
                         widthLg: group.config.widthLg,
@@ -1015,16 +1022,16 @@ function addControl(folders, page, group, tab, control) {
                     };
 
                     let instanceTab = {
-                        id: tab.id + '.' + instanceNums[i],
+                        id: tab.id + '.' + instanceIds[i],
                         header: tab.config.name,
                         order: tab.config.order,
                         items: [],
                     };
 
-                    control.instance = instancePage.instance;
-                    let newCtrlId = control.id + '.' + instanceNums[i];
+                    // control.instance = instancePage.instance;
+                    let newCtrlId = control.id + '.' + instanceIds[i];
 
-                    instanceTab.items.push({ ...control, 'id': newCtrlId });
+                    instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': instancePage.instance });
                     instanceTab.items.sort(itemSorter);
 
                     instanceGroup.items.push(instanceTab);
@@ -1044,8 +1051,8 @@ function addControl(folders, page, group, tab, control) {
                 dynamicTabs[tab.id] = true;
                 dynamicGroups[group.id] = true;
                 dynamicPages[page.id] = {
-                    instanceNums: [...instanceNums],
                     instanceNames: [...instanceNames],
+                    instanceParams: [...instanceParams],
                     pageTitle: { pageTitlePrefix, pageTitleSuffix },
                 };
             }
@@ -1124,6 +1131,9 @@ function addControl(folders, page, group, tab, control) {
             }
 
             removeFunc = dynamicRemove;
+
+            // save a copy of the variable name used in instance IDs
+            control['_idVar'] = firstParamVar;
         } else {
             if (dynamicPages.hasOwnProperty(page.id)) {
                 foundFolder.items = foundFolder.items.filter(function (page) {
