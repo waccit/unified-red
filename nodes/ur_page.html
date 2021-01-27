@@ -47,7 +47,18 @@
                 },
             },
             instances: {
-                value: [{ name: '', number: '' }],
+                value: [
+                    {
+                        names: {
+                            input: '',
+                            _arr: [],
+                        },
+                        param: {
+                            input: [{ variable: '', values: '' }],
+                            _arr: [],
+                        },
+                    },
+                ],
             },
         },
         sort: function (A, B) {
@@ -144,23 +155,7 @@
                 $('#instances-map').hide();
             }
 
-            let explodeRange = function (exp) {
-                if (exp.indexOf('-') === -1) {
-                    return exp;
-                }
-                let [a, b] = exp.split('-');
-                a = parseInt(a);
-                b = parseInt(b);
-                let start = Math.min(a, b);
-                let end = Math.max(a, b);
-                let range = [];
-                while (start <= end) {
-                    range.push(start++);
-                }
-                return range.join(',');
-            };
-
-            $('#node-config-input-instances-list')
+            $('#node-config-input-instance-expressions-list')
                 .css('min-height', '150px')
                 .editableList({
                     sortable: true,
@@ -168,33 +163,16 @@
                     addButton: true,
                     addItem: function (container, index, opt) {
                         if (!opt.hasOwnProperty('instance')) {
-                            opt.instance = {};
+                            opt.instance = {
+                                names: { input: '', _arr: [] },
+                                param: { input: [], _arr: [] },
+                            };
                         }
 
                         let instance = opt.instance;
 
-                        let rawInstanceNames = instance.name || '';
-                        let rawInstanceNums = instance.number || '';
-                        let instanceNames = [];
-                        let instanceNums = [];
-
-                        if (rawInstanceNames && rawInstanceNames.length > 0) {
-                            rawInstanceNames = rawInstanceNames.split(/[ ,]+/).filter((x) => x);
-                            for (let i = 0; i < rawInstanceNames.length; i++) {
-                                let tempName = explodeRange(rawInstanceNames[i]).split(',');
-                                if (tempName.length !== 0) {
-                                    instanceNames = instanceNames.concat(tempName);
-                                }
-                            }
-                        }
-
-                        if (rawInstanceNums && rawInstanceNums.length > 0) {
-                            rawInstanceNums = rawInstanceNums.split(/[ ,]+/).filter((x) => x);
-                            for (let i = 0; i < rawInstanceNums.length; i++) {
-                                let tempNum = explodeRange(rawInstanceNums[i]).split(',');
-                                instanceNums = instanceNums.concat(tempNum);
-                            }
-                        }
+                        let rawInstanceNames = instance.names.input || '';
+                        let arrInstanceNames = [...rawToArr(rawInstanceNames)];
 
                         container.css({
                             overflow: 'hidden',
@@ -205,75 +183,125 @@
                             .css({ display: 'flex', 'justify-content': 'space-evenly' })
                             .appendTo(container);
 
-                        var instNameField = $('<input/>', {
+                        var instNamesInputField = $('<input/>', {
                             class: 'node-config-input-instance-name',
                             id: 'instance-name-' + index,
                             type: 'text',
-                            style: 'width: 47%',
+                            style: 'width: 40%',
                             placeholder: 'instance name',
                         })
                             .appendTo(row)
-                            .val(instance.name);
+                            .val(rawInstanceNames);
 
-                        var instNumField = $('<input/>', {
-                            class: 'node-config-input-instance-number',
-                            id: 'instance-number-' + index,
-                            type: 'text',
-                            style: 'width: 47%',
-                            placeholder: 'instance number',
+                        var addInstanceParamBtn = $(
+                            '<a href="#" class="editor-button-small" style="align-self: flex-end"> <i class="fa fa-plus"></i></a>'
+                        ).css({ 'text-align': 'center', padding: '0' });
+
+                        addInstanceParamBtn.on('click', function (evt) {
+                            instanceParamField.editableList('addItem', {});
+                            evt.stopPropagation();
+                            evt.preventDefault();
+                        });
+
+                        var instanceParamField = $('<ol>', {
+                            class: 'node-config-input-instance-parameters-list',
+                            id: 'node-config-input-instance-parameters-list-' + index,
                         })
                             .appendTo(row)
-                            .val(instance.number);
+                            .editableList({
+                                header: $('<div>')
+                                    .append(
+                                        $.parseHTML(
+                                            '<div id="instance-param-field-header" style="color: #5d5d5d; font-size: 14px;">instance parameters</div>'
+                                        )
+                                    )
+                                    .append(addInstanceParamBtn)
+                                    .css({ display: 'flex', padding: '6px 8px', 'justify-content': 'space-between' }),
+                                addButton: false,
+                                removable: true,
+                                height: 'auto',
+                                connectWith: '.node-config-input-instance-parameter',
+                                addItem: function (container, i, parameter) {
+                                    container.css({ padding: '0' });
 
-                        let valid = instanceNames.length === instanceNums.length;
-                        instNameField.toggleClass('input-error', !valid);
-                        instNumField.toggleClass('input-error', !valid);
+                                    let idx = i;
 
-                        if (instanceNames.length === 0) {
-                            instNameField.addClass('input-error');
-                        }
-
-                        if (instanceNums.length === 0) {
-                            instNumField.addClass('input-error');
-                        }
-
-                        instNameField.on('change keyup paste', function () {
-                            rawInstanceNames = instNameField.val();
-                            instanceNames = [];
-                            if (rawInstanceNames && rawInstanceNames.length > 0) {
-                                rawInstanceNames = rawInstanceNames.split(/[ ,]+/).filter((x) => x);
-                                for (let i = 0; i < rawInstanceNames.length; i++) {
-                                    let tempName = explodeRange(rawInstanceNames[i]).split(',');
-                                    if (tempName.length !== 0) {
-                                        instanceNames = instanceNames.concat(tempName);
+                                    if (!parameter.hasOwnProperty('input')) {
+                                        parameter.input = [{ variable: '', values: '' }];
+                                        idx = 0;
                                     }
-                                }
-                            }
-                            let valid = instanceNames.length === instanceNums.length && instanceNames.length > 0;
-                            instNameField.toggleClass('input-error', !valid);
-                            instNumField.toggleClass('input-error', !valid);
-                        });
 
-                        instNumField.on('change keyup paste', function () {
-                            rawInstanceNums = instNumField.val();
-                            instanceNums = [];
-                            if (rawInstanceNums && rawInstanceNums.length > 0) {
-                                rawInstanceNums = rawInstanceNums.split(/[ ,]+/).filter((x) => x);
-                                for (let i = 0; i < rawInstanceNums.length; i++) {
-                                    let tempNum = explodeRange(rawInstanceNums[i]).split(',');
-                                    instanceNums = instanceNums.concat(tempNum);
-                                }
+                                    let param = parameter;
+
+                                    let rawValues = param.input[idx].values;
+                                    let arrValues = rawToArr(rawValues);
+
+                                    var paramRow = $('<div>', {
+                                        class: 'node-input-instance-parameter-' + index + '-' + i,
+                                    })
+                                        .css({ display: 'flex', 'justify-content': 'space-evenly', padding: 0 })
+                                        .appendTo(container);
+
+                                    var instParamVarInputField = $('<input/>', {
+                                        class: 'node-config-input-instance-parameter-variable',
+                                        id: 'instance-parameter-variable-' + index + '-' + i,
+                                        type: 'text',
+                                        // style: 'width: 43%; font-size: 10px',
+                                        placeholder: 'variable',
+                                    })
+                                        .appendTo(paramRow)
+                                        .val(param.input[idx].variable);
+
+                                    var instParamValInputField = $('<input/>', {
+                                        class: 'node-config-input-instance-parameter-value',
+                                        id: 'instance-parameter-values-' + index + '-' + i,
+                                        type: 'text',
+                                        // style: 'width: 43%; font-size: 10px',
+                                        placeholder: 'values',
+                                    })
+                                        .appendTo(paramRow)
+                                        .val(param.input[idx].values);
+
+                                    instNamesInputField
+                                        .add(instParamValInputField)
+                                        .on('change keyup paste', function () {
+                                            rawInstanceNames = instNamesInputField.val();
+                                            rawValues = instParamValInputField.val();
+
+                                            arrInstanceNames = rawToArr(rawInstanceNames);
+                                            arrValues = rawToArr(rawValues);
+
+                                            let valid =
+                                                arrInstanceNames.length !== 0 &&
+                                                arrValues.length !== 0 &&
+                                                arrInstanceNames.length === arrValues.length;
+
+                                            instNamesInputField.toggleClass('input-error', !valid);
+                                            instParamValInputField.toggleClass('input-error', !valid);
+                                            $(
+                                                '#node-config-input-instance-expressions-list .red-ui-editableList-header'
+                                            ).toggleClass('input-error', !valid);
+                                        });
+                                },
+                            });
+
+                        if (instance.param && instance.param.input.length > 0) {
+                            let size = instance.param.input.length;
+                            for (let i = 0; i < size; i++) {
+                                $('#node-config-input-instance-parameters-list-' + index).editableList(
+                                    'addItem',
+                                    instance.param
+                                );
                             }
-                            let valid = instanceNames.length === instanceNums.length && instanceNames.length > 0;
-                            instNameField.toggleClass('input-error', !valid);
-                            instNumField.toggleClass('input-error', !valid);
-                        });
+                        }
                     },
                 });
 
             if (this.instances) {
                 for (let i = 0; i < this.instances.length; i++) {
-                    $('#node-config-input-instances-list').editableList('addItem', { instance: this.instances[i] });
+                    $('#node-config-input-instance-expressions-list').editableList('addItem', {
+                        instance: this.instances[i],
+                    });
                 }
             }
         },
@@ -282,21 +310,100 @@
             this.hidden = $('#node-config-input-hidden').prop('checked');
             this.isDynamic = $('#node-config-input-isDynamic').prop('checked');
 
-            let instances = $('#node-config-input-instances-list').editableList('items');
+            let instances = $('#node-config-input-instance-expressions-list').editableList('items');
             let node = this;
 
             node.instances = [];
 
-            instances.each(function (inst) {
+            instances.each(function (index, inst) {
                 let container = $(this);
+
+                let parameters = $('#node-config-input-instance-parameters-list-' + index).editableList('items');
+
+                let rawNames = container.find('#instance-name-' + index).val();
+                let namesArr = rawToArr(rawNames);
+
+                let rawParams = [];
+                let paramsArr = [];
+
+                // build rawParams
+                parameters.each((i, p) => {
+                    let rawParamVar = $(this)
+                        .find('#instance-parameter-variable-' + index + '-' + i)
+                        .val();
+                    let rawParamVals = $(this)
+                        .find('#instance-parameter-values-' + index + '-' + i)
+                        .val();
+
+                    rawParams.push({ variable: rawParamVar, values: rawParamVals });
+                });
+
+                // build paramsArr
+                namesArr.forEach((n, i) => {
+                    let paramObj = {};
+
+                    parameters.each((ii, p) => {
+                        let rawParamVar = $(this)
+                            .find('#instance-parameter-variable-' + index + '-' + ii)
+                            .val();
+                        let rawParamVals = rawToArr(
+                            $(this)
+                                .find('#instance-parameter-values-' + index + '-' + ii)
+                                .val()
+                        );
+
+                        paramObj[rawParamVar] = rawParamVals[i];
+                    });
+
+                    paramsArr.push(paramObj);
+                });
+
                 let i = {
-                    name: container.find('.node-config-input-instance-name').val(),
-                    number: container.find('.node-config-input-instance-number').val(),
+                    names: {
+                        input: container.find('#instance-name-' + index).val(),
+                        _arr: [...namesArr],
+                    },
+                    param: {
+                        input: [...rawParams],
+                        _arr: [...paramsArr],
+                    },
                 };
+
                 node.instances.push(i);
             });
         },
     });
+
+    var explodeRange = function (exp) {
+        if (exp.indexOf('-') === -1) {
+            return exp;
+        }
+        let [a, b] = exp.split('-');
+        a = parseInt(a);
+        b = parseInt(b);
+        let start = Math.min(a, b);
+        let end = Math.max(a, b);
+        let range = [];
+        while (start <= end) {
+            range.push(start++);
+        }
+        return range.join(',');
+    };
+
+    var rawToArr = function (raw) {
+        let result = [];
+        let rawCopy = raw;
+
+        rawCopy = rawCopy.split(/[ ,]+/).filter((x) => x);
+        for (let i = 0; i < rawCopy.length; i++) {
+            let temp = explodeRange(rawCopy[i]).split(',');
+            if (temp.length !== 0) {
+                result = result.concat(temp);
+            }
+        }
+
+        return result;
+    };
 </script>
 
 <script type="text/html" data-template-name="ur_page">
@@ -372,7 +479,7 @@
         <label for="node-config-input-instances"
             ><i class="fa fa-tags"></i> <span data-i18n="ur_page.label.instances"></span
         ></label>
-        <ol id="node-config-input-instances-list"></ol>
+        <ol id="node-config-input-instance-expressions-list"></ol>
     </div>
     <div class="form-tips" data-i18n="[html]ur_page.tip"></div>
 </script>
