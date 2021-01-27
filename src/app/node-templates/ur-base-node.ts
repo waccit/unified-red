@@ -6,7 +6,6 @@ import { User } from '../data';
 declare var $: any;
 
 export class BaseNode implements AfterViewInit, OnDestroy {
-    label = 'default';
     access: any = {};
     private _data: any;
     private _wsSubscription: Subscription;
@@ -59,10 +58,16 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     set data(data: any) {
         this._data = data;
-        this.label = this.data.label;
     }
 
     updateValue(data: any) {
+        if (data.msg.hasOwnProperty('health') && data.msg.health !== 'normal' && data.msg.hasOwnProperty('payload')) {
+                let symbol = '';
+                switch (data.msg.health.toLowerCase()) {
+                    case 'down': symbol = '\u2757'; break;
+                }
+                data.msg.payload = symbol + data.msg.payload;
+        }
         if (this.container && this.container.length) {
             this.container.trigger([data]);
         }
@@ -71,13 +76,14 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     send(msg: any) {
         if (this.nodeId) {
             // handle dynamic page. substitute {variables}
-            msg.topic = this.evalVariables(msg.topic, this.data?.instance);
+            msg.topic = this.evalVariables(msg.topic);
             this.webSocketService.emit({ id: this.nodeId, msg });
         }
     }
 
-    evalVariables(str, instance) {
+    evalVariables(str) {
         // handle dynamic page. substitute {variables}
+        let instance = this.data?.instance;
         if (instance?.parameters && str) {
             let variables = str.toLowerCase().match(/\{[^\}\/\+\#]+\}/g);
             for (let variable of variables) {

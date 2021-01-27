@@ -27,7 +27,7 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         // Substitute any $node references in the template code
         let html = this.data.format.replace(/\$node/g, `$("#${nodeId}")`);
         // handle dynamic page. substitute {variables}
-        html = this.evalVariables(html, this.data?.instance);
+        html = this.evalVariables(html);
         this.container.html($(html));
         // process any elements with request topic attributes
         if (this.access.write) {
