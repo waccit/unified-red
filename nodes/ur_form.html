@@ -261,14 +261,13 @@
                     outtopic: option.find('.node-input-option-outtopic').val(),
                 };
                 if (o.type === 'text' || o.type === 'number' || o.type === 'multiline' || o.type === 'select') {
-                    o.options = o.options
-                        .trim()
-                        .split(/\s*,\s*/g)
+                    o.options = o.options.trim();
+                    o.options = o.options.length ? o.options.split(/\s*,\s*/g)
                         .reduce((a, b) => {
                             var v = b.split(/\s*[:=]\s*/);
                             a[v[0]] = v[1];
                             return a;
-                        }, {});
+                        }, {}) : {};
                 }
                 node.formValue[o.topic] = o.type == 'checkbox' || o.type == 'switch' ? false : '';
                 node.options.push(o);
