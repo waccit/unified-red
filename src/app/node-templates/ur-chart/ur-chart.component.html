@@ -62,8 +62,8 @@
             <div class="dropup ur-dropup-menu">
                 <button class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
                 <ul class="dropdown-menu">
-                    <li><a href="return false;" (click)="exporter.exportTable('csv', exporterOpt)">Save as CSV</a></li>
-                    <li><a href="return false;" (click)="exporter.exportTable('xls', exporterOpt)">Save as Excel</a></li>
+                    <li><a href="javascript:void" (click)="exporter.exportTable('csv', exporterOpt)">Save as CSV</a></li>
+                    <li><a href="javascript:void" (click)="exporter.exportTable('xls', exporterOpt)">Save as Excel</a></li>
                 </ul>
             </div>
         </mat-tab>
