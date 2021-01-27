@@ -18,7 +18,6 @@
                 values: [],
                 weekdays: [],
                 dates: [],
-                topicPattern: { value: '' },
                 access: { value: '' },
                 accessBehavior: { value: '' },
             },
@@ -337,12 +336,6 @@
         ></label>
         <input type="text" id="node-input-holidays" />
     </div>
-    <div class="form-row" id="topic-pattern">
-        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
-            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
-        >
-        <input type="text" id="node-input-topicPattern" />
-    </div>
     <div class="form-row">
         <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
         <select id="node-input-access" style="width: 35%">
@@ -434,13 +427,7 @@
     </p>
     <p><b>Holidays</b> references a holiday configuration for holiday schedules to observe.</p>
  
-    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
-     <p>
-        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
-        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
-        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
-    </p>
+    <!-- ACCESS 2021-01-17 - START -->
     <p>
         <b>Access</b> controls the user's read/write access to this widget based on 
         <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
@@ -451,7 +438,7 @@
         When the user is denied access, the user interface can degrade to <code>show/hide</code> or
         <code>enable/disable</code> the text field.
     </p>
-    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - END -->
+    <!-- ACCESS 2021-01-17 - END -->
     
     <!-- <h3>References</h3>
     <ul>
