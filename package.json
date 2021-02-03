@@ -62,7 +62,8 @@
             "ur_pagerduty_config": "nodes/ur_pagerduty_config.js",
             "ur_pagerduty": "nodes/ur_pagerduty.js",
             "ur_schedule": "nodes/ur_schedule.js",
-            "ur_schedule_holidays_config": "nodes/ur_schedule_holidays_config.js"
+            "ur_schedule_holidays_config": "nodes/ur_schedule_holidays_config.js",
+            "ur_link": "nodes/ur_link.js"
         }
     },
     "dependencies": {
