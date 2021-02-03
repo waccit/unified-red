@@ -46,6 +46,9 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
+            try {
+                data.msg.payload = JSON.parse(data.msg.payload);
+            } catch (ignore) {}
             this.container.trigger('update-value', data);
             // process any elements with feedback topic attributes
             const elements = this.container.find('[feedback]').filter(function() {
