@@ -846,13 +846,14 @@ function addControl(folders, page, group, tab, control) {
             let instances = page.config.instances;
 
             instances.forEach((instance) => {
-                instanceNames = instanceNames.concat(instance.names._arr);
-                instanceParams = instanceParams.concat(instance.param._arr);
-
-                firstParamVar = instance.param.input[0].variable; // grab first variable to be used in the IDs
-                instance.param._arr.forEach((p) => {
-                    instanceIds.push(firstParamVar + p[firstParamVar]);
-                });
+                if (instance.names && instance.param) {
+                    instanceNames = instanceNames.concat(instance.names._arr);
+                    instanceParams = instanceParams.concat(instance.param._arr);
+                    firstParamVar = instance.param.input[0].variable; // grab first variable to be used in the IDs
+                    instance.param._arr.forEach((p) => {
+                        instanceIds.push(firstParamVar + p[firstParamVar]);
+                    });
+                }
             });
 
             let incomingSettings = {
