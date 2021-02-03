@@ -349,11 +349,11 @@ function add(opt) {
                 let topicPattern = opt.control.topicPattern;
                 let idVar = opt.control._idVar;
 
+                // find and escape hyphen, brackets, parentheses, plus, punctuation, backslash,
+                // caret, dollar, vertical bar, and pound symbols
+                let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
                 // find and replace wildcard (*)
-                let topicRegex = topicPattern.replace(/\*/g, '.*');
-                // find and escape square-brackets
-                topicRegex = topicRegex.replace(/\[/g, '\\[');
-                topicRegex = topicRegex.replace(/\]/g, '\\]');
+                topicRegex = topicRegex.replace(/\*/g, '.*');
                 // find and replace capture group (idVar)
                 topicRegex = topicRegex.replace(new RegExp('{' + idVar + '}', 'gi'), '([\\w\\. ]+)');
                 // find and replace ignored {variables}
