@@ -86,11 +86,13 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         let instance = this.data?.instance;
         if (instance?.parameters && str) {
             let variables = str.toLowerCase().match(/\{[^\}\/\+\#]+\}/g);
-            for (let variable of variables) {
-                variable = variable.slice(1,-1); // remove braces
-                let param = instance.parameters[variable];
-                if (typeof param !== 'undefined') {
-                    str = str.replace(new RegExp('\{' + variable + '\}', 'ig'), param);
+            if (variables) {
+                for (let variable of variables) {
+                    variable = variable.slice(1,-1); // remove braces
+                    let param = instance.parameters[variable];
+                    if (typeof param !== 'undefined') {
+                        str = str.replace(new RegExp('\{' + variable + '\}', 'ig'), param);
+                    }
                 }
             }
         }
