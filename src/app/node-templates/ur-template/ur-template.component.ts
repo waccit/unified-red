@@ -46,6 +46,7 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
+            const that = this;
             try {
                 data.msg.payload = JSON.parse(data.msg.payload);
             } catch (ignore) {}
@@ -54,8 +55,14 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
             const elements = this.container.find('[feedback]').filter(function() {
                 return data.msg.topic.indexOf($(this).attr('feedback')) !== -1;
             });
-            elements.filter('input, select').val(data.msg.payload);
-            elements.not('img, input, select').html(data.msg.payload);
+            elements.filter('input, select').each(function() {
+                let format = $(this).attr('format') || '{{msg.payload.value}}';
+                $(this).val(that.formatFromData(data, format));
+            });
+            elements.not('img, input, select').each(function() {
+                let format = $(this).attr('format') || '{{msg.payload.value}}';
+                $(this).html(that.formatFromData(data, format));
+            });
         }
     }
 }
