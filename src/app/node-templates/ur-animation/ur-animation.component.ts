@@ -9,13 +9,6 @@ declare var $: any;
     styleUrls: ['./ur-animation.component.sass'],
 })
 export class UrAnimationComponent extends UrTemplateComponent implements AfterViewInit {
-    private expressionGlobals = `
-    function interpolate(value, minIn, maxIn, minOut, maxOut) {
-        let out = minOut + (maxOut - minOut) * ((value - minIn) / (maxIn - minIn));
-        return Math.max(minOut, Math.min(maxOut, out));
-    }
-    `;
-
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         if (!this.data || !this.data.format) {
