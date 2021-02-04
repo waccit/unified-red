@@ -286,8 +286,10 @@
     </p>
     <p>
         <b>For example:</b><br>
-        <pre style="font-size:smaller;">&lt;div feedback=&quot;some/fb/point&quot;&gt;&lt;/div&gt;</pre>
-        Will display the <code>msg.payload</code> for the topic "some/fb/point".</p>
+        <pre style="font-size:smaller;">&lt;div feedback=&quot;some/fb/point&quot; format=&quot;{{msg.payload.value}}&quot;&gt;&lt;/div&gt;</pre>
+        Will display the <code>msg.payload.value</code> for the topic "some/fb/point". If the format attribute is not specified,
+        <code>{{msg.payload.value}}</code> will be used as the default format.
+    </p>
     <p>
         To watch incoming messages and update HTML elements using jQuery:
         <pre style="font-size:smaller;">&lt;div class=&quot;js-point&quot;&gt;&lt;/div&gt;
