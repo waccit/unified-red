@@ -94,8 +94,8 @@
                                 types: [optionText, optionLink],
                             });
                         // Units select
-                        var optionNothing = { value: 'nothing', label: 'No Units', hasValue: false };
-                        var optionUnit = { value: 'unit', label: 'Units', hasValue: true };
+                        var optionAuto = { value: 'nothing', label: 'payload.units', hasValue: false };
+                        var optionManual = { value: 'unit', label: 'Manual', hasValue: true };
                         $('<input/>', {
                             class: 'node-input-field-unit',
                             type: 'text',
@@ -107,7 +107,7 @@
                             .typedInput({
                                 default: field.unitType,
                                 typeField: $('<input/>', { class: '.node-input-field-unitType', type: 'hidden' }),
-                                types: [optionNothing, optionUnit],
+                                types: [optionAuto, optionManual],
                             });
                         //display input
                         $('<input/>', {
