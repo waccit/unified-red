@@ -9,7 +9,7 @@
             height: { value: 0 },
             name: { value: '' },
             label: { value: 'text' },
-            format: { value: '{{msg.payload}}' },
+            format: { value: '{{msg.payload.value}}' },
             layout: { value: 'row-spread' },
             topicPattern: { value: '' },
             access: { value: '' },
@@ -68,12 +68,16 @@
         <button class="editor-button" id="node-input-size"></button>
     </div>
     <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row">
         <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
         <input type="text" id="node-input-label" />
     </div>
     <div class="form-row">
         <label for="node-input-format"><i class="fa fa-i-cursor"></i> Value format</label>
-        <input type="text" id="node-input-format" placeholder="{{msg.payload}}" />
+        <input type="text" id="node-input-format" placeholder="{{msg.payload.value}}" />
     </div>
     <div class="form-row">
         <label style="vertical-align: top"><i class="fa fa-th-large"></i> Layout</label>
@@ -109,10 +113,6 @@
                 </a>
             </div>
         </div>
-    </div>
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" />
     </div>
     <div class="form-row" id="topic-pattern">
         <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
@@ -258,6 +258,7 @@
     </p>
     <!-- TAB / SIZE 2020-12-30 - END -->
 
+    <p><b>Name</b> is the name of a node in the workspace.</p>
     <p><b>Label</b> provides a description of the text field in the user interface.</p>
     <p>
         <b>Value Format</b> is a
@@ -265,7 +266,6 @@
         used to evaluate the value displayed in the text field.
     </p>
     <p><b>Layout</b> controls the arrangement and alignment of the text field label and value in the user interface.</p>
-    <p><b>Name</b> is the name of a node in the workspace.</p>
 
     <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
     <p>
