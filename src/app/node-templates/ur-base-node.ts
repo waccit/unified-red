@@ -102,7 +102,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         return str;
     }
 
-    format(data) {
+    formatFromData(data) {
         let ret = data;
         const expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
         if (expression.length >= 2) {
@@ -111,6 +111,29 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             }
         }
         return ret;
+    }
+
+    formatAndSend(topic, value) {
+        let data = { 
+            msg: { topic: topic }
+        };
+        const expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
+        if (expression.length >= 2 && value) {
+            let walk = data;
+            const parts = expression[1].split('.');
+            for (let i = 0; i < parts.length; i++) {
+                if (i === parts.length - 1) {
+                    walk[ parts[i] ] = value;
+                }
+                else {
+                    if (!walk[ parts[i] ]) {
+                        walk[ parts[i] ] = {};
+                    }
+                    walk = walk[ parts[i] ];
+                }
+            }
+        }
+        this.send(data.msg);
     }
 
     setupAccess(aclkey: string) {

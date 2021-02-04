@@ -9,6 +9,7 @@
             order: { value: 0 },
             width: { value: 12 },
             height: { value: 0 },
+            format: { value: '{{msg.payload.value}}' },
             options: {
                 value: [{ topic: '', label: '', type: '', outtopic: '' }],
                 validate: function (value) {
@@ -353,6 +354,10 @@
         <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
         <input type="text" id="node-input-label" placeholder="optional label" />
     </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-i-cursor"></i> Value format</label>
+        <input type="text" id="node-input-format" placeholder="{{msg.payload.value}}" />
+    </div>
     <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:520px">
         <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Form elements</label>
         <div style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
@@ -468,6 +473,11 @@
 
     <p><b>Name</b> is the name of a node in the workspace.</p>
     <p><b>Label</b> is the form title text.</p>
+    <p>
+        <b>Value Format</b> is a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the value displayed in the text field.
+    </p>
     <p>
         <b>Send as</b> configures the node to send each field as an individual message or combined into a single message.
         <b>Single Message Topic</b> used as the <code>msg.topic</code> property when sending as a single message.

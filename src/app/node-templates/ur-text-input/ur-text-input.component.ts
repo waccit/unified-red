@@ -30,7 +30,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && typeof data.msg.payload !== 'undefined') {
-            let value = this.format(data);
+            let value = this.formatFromData(data);
             this.valueSubject.next(value);
         }
     }
@@ -44,28 +44,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
         this.send();
     }
 
-    setFormatValue(value) {
-        let ret = {};
-        const expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
-        if (expression.length >= 2 && value) {
-            let walk = ret;
-            const parts = expression[1].split('.');
-            for (let i = 0; i < parts.length; i++) {
-                if (i === parts.length - 1) {
-                    walk[ parts[i] ] = value;
-                }
-                else {
-                    walk[ parts[i] ] = {};
-                    walk = walk[ parts[i] ];
-                }
-            }
-        }
-        return ret;
-    }
-
     send() {
-        let data: any = this.setFormatValue(this.valueSubject.value);
-        data.msg.topic = this.data.topic;
-        super.send(data.msg);
+        this.formatAndSend(this.data.topic, this.valueSubject.value);
     }
 }
