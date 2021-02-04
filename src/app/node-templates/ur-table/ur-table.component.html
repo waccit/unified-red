@@ -11,7 +11,7 @@
                         <ng-container *ngFor="let point of dataSource[device] | keyvalue">
                             <ng-container *ngIf="point.key.includes(c.param)">
                                 <ng-container *ngIf="c.formatType !== 'link'">
-                                    <td>{{ point.value[c.display] }}</td>
+                                    <td>{{ point.value[c.label] }}</td>
                                 </ng-container>
                                 <ng-container *ngIf="c.formatType === 'link'">
                                     <td><a href="{{ dataLink[device][point.key].href }}">{{ dataLink[device][point.key].text }}</a></td>
@@ -33,7 +33,7 @@
                         <ng-container *ngFor="let point of dataSource[device] | keyvalue">
                             <ng-container *ngIf="point.key.includes(c.param)">
                                 <ng-container *ngIf="c.formatType !== 'link'">
-                                    <td>{{ point.value[c.display] }}</td>
+                                    <td>{{ point.value[c.label] }}</td>
                                 </ng-container>
                                 <ng-container *ngIf="c.formatType === 'link'">
                                     <td><a href="{{ dataLink[device][point.key].href }}">{{ dataLink[device][point.key].text }}</a></td>

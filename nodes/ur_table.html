@@ -17,7 +17,6 @@
                         label: '',
                         format: '',
                         formatType: '',
-                        display: '',
                         device: '',
                         deviceType: '',
                         param: '',
@@ -52,7 +51,7 @@
             });
             $('#node-input-field-container')
                 .css('min-height', '150px')
-                .css('min-width', '950px')
+                .css('min-width', '860px')
                 .editableList({
                     addItem: function (container, index, opt) {
                         if (!opt.hasOwnProperty('field')) {
@@ -72,7 +71,7 @@
                             class: 'node-input-field-label',
                             type: 'text',
                             placeholder: 'label',
-                            style: 'margin-left: 5px; width: 15%;',
+                            style: 'margin-left: 5px; width: 20%;',
                         })
                             .appendTo(row)
                             .val(field.label);
@@ -82,8 +81,8 @@
                         $('<input/>', {
                             class: 'node-input-field-format',
                             type: 'text',
-                            style: 'margin-left: 5px; width: 15%;',
-                            placeholder: 'format'
+                            style: 'margin-left: 5px; width: 32%;',
+                            placeholder: '{{msg.payload.value}}'
                         })
                             .appendTo(row)
                             .val(field.format)
@@ -109,15 +108,6 @@
                                 typeField: $('<input/>', { class: '.node-input-field-unitType', type: 'hidden' }),
                                 types: [optionAuto, optionManual],
                             });
-                        //display input
-                        $('<input/>', {
-                            class: 'node-input-field-display',
-                            type: 'text',
-                            placeholder: 'display',
-                            style: 'margin-left: 5px; width: 15%;',
-                        })
-                            .appendTo(row)
-                            .val(field.display);
                         //Regex Select
                         var optionSSIoT = { value: 'webApp', label: 'SmartServer IoT', hasValue: false };
                         var optionCustom = { value: 'custom', label: 'Custom', hasValue: true };
@@ -148,7 +138,6 @@
                     removable: true,
                     addButton: true,
                 });
-            // $("#node-input-field-container").editableList('addItems', this.fields);
             for (let i = 0; i < this.fields.length; i++) {
                 $('#node-input-field-container').editableList('addItem', { field: this.fields[i] });
             }
@@ -164,7 +153,6 @@
                     label: container.find('.node-input-field-label').val(),
                     format: container.find('.node-input-field-format').val(),
                     formatType: container.find('.node-input-field-format').typedInput('type'),
-                    display: container.find('.node-input-field-display').val(),
                     deviceType: container.find('.node-input-field-device').typedInput('type'),
                     device: container.find('.node-input-field-device').val(),
                     param: container.find('.node-input-field-param').val(),
@@ -279,7 +267,7 @@
     <ul>
         <li><b>Label</b> : Field header label.</li>
         <li>
-            <b>Format</b> : Formats the value to be displayed when set to <b>Text</b> and displays a hyperlink with the provided 
+            <b>Value Format</b> : Formats the value to be displayed when set to <b>Text</b> and displays a hyperlink with the provided 
             text when set to <b>Link</b>
         </li>
         <li><b>Units</b> : Units of measurement to be displayed.</li>
@@ -300,8 +288,9 @@
     </ul>
 
     <p>
-        <b>Text Format</b> uses an <code>{x}</code> variable to display the value. JavaScript can be used to perform operations on 
-        the value, for example using 
+        <b>Value Format</b> when set to text is a 
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a> used to evaluate the value displayed.
+        Additionally, JavaScript can be used to perform operations on the value, for example using 
         <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#binary_logical_operators" target="_blank">boolean</a>
         (||, &&) and
         <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#arithmetic_operators" target="_blank">arithmetic</a>
@@ -309,16 +298,11 @@
         (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math" target="_blank">Math</a> functions,
         <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a> functions,
         etc):
-        <pre style="font-size:smaller;">1 + {x} / 100
-Math.floor({x} * 100)
-interpolate({x},0,100,1,10)</pre>
+        <pre style="font-size:smaller;">1 + {{msg.payload.value}} / 100
+Math.floor({{msg.payload.value}} * 100)
+interpolate({{msg.payload.value}},0,100,1,10)</pre>
         Values can also be mapped to text enumerations by providing a JSON object, for example:
-        <pre style="font-size:smaller;">{
-    "0": "Off",
-    "1": "Cooling",
-    "2": "Fan Only",
-    "3": "Heating"
-}</pre>
+        <pre style="font-size:smaller;">{{msg.payload.value | enum: '0:Off, 1:Cooling, 2:Fan Only, 3:Heating'}}</pre>
     </p>
 
     <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
