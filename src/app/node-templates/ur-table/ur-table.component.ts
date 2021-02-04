@@ -60,9 +60,18 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 						for (let i of values) {
 							result = result[i];
 						}
-						point[prop] = element.formatType === 'fText' 
-							? this.sub(element.format, element.unit, result)
-							: result;
+						if (element.formatType === 'fText') {
+							// Add units
+							if (element.unitType === 'unit') {
+								result += ' ' + element.unit;
+							} else if (data.msg.payload && data.msg.payload.units) {
+								result += ' ' + data.msg.payload.units;
+							}
+							point[prop] = this.sub(element.format, result);
+						}
+						else {
+							point[prop] = result;
+						}
 					} catch (ignore) {}
 					this.dataSource[deviceName][pointName] = point;
 				}
@@ -87,7 +96,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	// Math.round({x} / 10)
 	// parseInt( interpolate({x}, 0, 100, 1, 10) )
 	// Enumeration {"0": "Offline","1": "Cooling","2": "Economizer","3": "Reheat","4": "Heat","5": "Zero CFM","6": "Air Balance","7": "Forced Damper","8": "Forced CFM","9": "Forced Reheat","10": "Forced Setpoint","11": "Forced Damper and Reheat","12": "Forced Damper and Setpoint","13": "Forced Damper, Reheat, and Setpoint","14": "Forced CFM and Reheat","15": "Forced CFM and Setpoint","16": "Forced CFM, Reheat, and Setpoint","17": "Forced Reheat and Setpoint","18": "Morning Warm-Up","19": "Ventilation"}
-	private sub(exp, unit, payload) {
+	private sub(exp, payload) {
 		try {
 			if (!exp.toLowerCase().includes('{x}')) {
 				let expObj = JSON.parse(exp);
@@ -95,9 +104,6 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 			}
 		} catch (ignore) {}
 		let result = this.evaluate(exp, payload);
-		if (unit !== 'nothing') {
-			result = result + ' ' + unit;
-		}
 		return result;
 	}
 }
