@@ -128,6 +128,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                 for (const part of inner.split('.')) {
                     value = value[part];
                 }
+
                 if (enums && enums.length) {
                     try {
                         let enumMap = enums.split(/\s*,\s*/g)
@@ -139,6 +140,19 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                         value = enumMap[value];
                     } catch (ignore) {}
                 }
+
+                if (typeof value !== 'undefined') {
+                    if (typeof value === 'object') {
+                        value = '(' + JSON.stringify(value) + ')';
+                    }
+                    else if (!isNaN(value)) {
+                        value = parseFloat(value);
+                    }
+                    else if (typeof value === 'string') {
+                        value = '"' + value + '"';
+                    }
+                }
+    
                 let escapedExp = exp.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
                 ret = ret.replace(new RegExp(escapedExp, 'g'), value);
             }

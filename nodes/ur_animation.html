@@ -483,7 +483,7 @@
                 <b>Property</b> is the <code>&lt;img&gt;</code> property to be modified.<br>
                 <i>visible</i> : Shows or hides the image<br>
                 <i>src</i> : Specifies the path of a new image to display<br>
-                <i>src sub</i> : Substitutes <code>{x}</code> variable in the src property<br>
+                <i>src sub</i> : Substitutes the sequence number in the src property, e.g. image01.png<br>
                 <i>css class</i> : Adds or removes a CSS class on the image<br>
                 <i>css style</i> : Applies CSS style to the image<br>
             </li>
@@ -496,15 +496,15 @@
             <li><b>Image Name</b>: damper</li>
             <li><b>Topic</b>: fb/vav/damper</li>
             <li><b>Property</b>: src sub</li>
-            <li><b>Expression</b>: <code style="font-size:smaller;">parseInt(interpolate({x},0,100,1,10))</code></li>
+            <li><b>Expression</b>: <code style="font-size:smaller;">parseInt(interpolate({{msg.payload.value}},0,100,1,10))</code></li>
         </ul>
-        Will animate the damper image by substituting the <code>&lt;img&gt;</code> src property's <code>{x}</code> variable.
+        Will animate the damper image by substituting the sequence number in the <code>&lt;img&gt;</code> src property.
     </p>
     <p>
-        The incoming <code>msg.payload</code> for topic <i>fb/vav/damper</i> will be rescaled from a 0-to-100 value to a 1-to-10 using
-        the <code>interplate()</code> function and then converted into an integer using the <code>parseInt()</code>
-        function. <code>{x}</code> variable will then be substituted in the <code>&lt;img&gt;</code> src, such that 
-        <code>damper{x}.jpg</code> will be evaluated to <code>damper1.jpg</code>, ... <code>damper10.jpg</code>.
+        The incoming <code>msg.payload.value</code> for topic <i>fb/vav/damper</i> will be rescaled from a 0-to-100 value to a
+        1-to-10 using the <code>interplate()</code> function and then converted into an integer using the <code>parseInt()</code>
+        function. The sequence number will then be detected and substituted in the <code>&lt;img&gt;</code> src, such that 
+        <code>damper1.jpg</code> will be evaluated to <code>damper1.jpg</code>, ... <code>damper10.jpg</code>.
     </p>
     <p>
         or for example:<br>
@@ -512,12 +512,12 @@
             <li>Image Name: <code>coil</code></li>
             <li>Topic: <code>fb/vav/reheat</code></li>
             <li>Property: <code>css style</code></li>
-            <li>Expression: <code>{ opacity: {x}/100 }</code></li>
+            <li>Expression: <code>{ opacity: {{msg.payload.value}}/100 }</code></li>
         </ul>
         Will animate the coil image by varying its opacity.
     </p>
     <p>
-        The incoming <code>msg.payload</code> for topic <i>fb/vav/reheat</i> will be divided by 100 then applied to the 
+        The incoming <code>msg.payload.value</code> for topic <i>fb/vav/reheat</i> will be divided by 100 then applied to the 
         image's opacity style.
     </p>
     <p>Note: The CSS opacity style expects a value between 0.0 (completely transparent) and 1.0 (completely opaque).</p>

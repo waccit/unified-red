@@ -68,52 +68,32 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     updateValue(data:any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
-            this.processRule(data.msg);
+            this.processRule(data);
         }
     }
 
-    private processRule(msg:any) {
+    private processRule(data:any) {
         for (const rule of this.data.rules) {
-            if (msg.topic.indexOf(rule.topic) !== -1) {
+            if (data.msg.topic.indexOf(rule.topic) !== -1) {
                 const element = this.container.find(`[animated][name='${rule.img}']`);
                 if (element.length) {
                     switch (rule.prop) {
-                        case 'vis': this.vis(element, rule.exp, msg.payload); break;
-                        case 'src': this.src(element, rule.exp, msg.payload); break;
-                        case 'sub': this.sub(element, rule.exp, msg.payload); break;
-                        case 'cls': this.cls(element, rule.exp, msg.payload); break;
-                        case 'css': this.css(element, rule.exp, msg.payload); break;
+                        case 'vis': this.vis(element, rule.exp, data); break;
+                        case 'src': this.src(element, rule.exp, data); break;
+                        case 'sub': this.sub(element, rule.exp, data); break;
+                        case 'cls': this.cls(element, rule.exp, data); break;
+                        case 'css': this.css(element, rule.exp, data); break;
                     }
                 }
             }
         }
     }
 
-    private evaluate(exp:any, value?:any) {
-        try {
-            if (typeof value !== 'undefined') {
-                if (typeof value === 'object') {
-                    value = '(' + JSON.stringify(value) + ')';
-                }
-                else if (!isNaN(value)) {
-                    value = parseFloat(value);
-                }
-                else if (typeof value === 'string') {
-                    value = '"' + value + '"';
-                }
-                exp = exp.replace(/\{x\}/ig, value); //{x} is an animation expression variable not a topic variable
-            }
-            return eval('(' + exp + '); ' + this.expressionGlobals);
-        } catch (error) {
-            console.log('Animation evaluate error:', error);
-        }
-    }
-
     // Example vis expressions:
     // {x} > 0
     // {x} === "On"
-    private vis(element, exp, payload?) {
-        const result = this.evaluate(exp, payload);
+    private vis(element, exp, data?) {
+        const result = this.formatFromData(data, exp);
         if (result) {
             element.show();
         }
@@ -126,12 +106,12 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     // Example src expressions:
     // {x} > 0 ? "valve_open.png" : "valve_closed.png"
     // if ({x} === "On") { return "fan_on.gif"; } else { return "fan_off.gif" }
-    private src(element, exp, payload) {
+    private src(element, exp, data) {
         if (!element.is('img')) {
             console.log('Animation failed to process source rule because element is not an image (img)', element);
             return;
         }
-        const result = this.evaluate(exp, payload);
+        const result = this.formatFromData(data, exp);
         element.attr('src', result);
         return result;
     }
@@ -142,7 +122,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     // parseInt(1 + {x} / (100 / 9))
     // Math.round({x} / 10)
     // parseInt( interpolate({x}, 0, 100, 1, 10) )
-    private sub(element, exp, payload) {
+    private sub(element, exp, data) {
         if (!element.is('img')) {
             console.log('Animation failed to process source substitution rule because element is not an image (img)', element);
             return;
@@ -164,7 +144,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
             '    Any file path that ends in one or more digits before the file extension:\n'+
             '        any.thing/you_want0000.png\n', srcParts);
         }
-        const result = this.evaluate(exp, payload);
+        const result = this.formatFromData(data, exp);
         const newSrc = srcParts[1] + result + srcParts[3];
         element.attr('src', newSrc);
         return newSrc;
@@ -173,8 +153,8 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     // Example cls expressions:
     // { "alarm": {x} === "Alarm", "success": {x} !== "Alarm" }
     // { "success": {x} === "On" }
-    private cls(element, exp, payload) {
-        const result = this.evaluate(exp, payload);
+    private cls(element, exp, data) {
+        const result = this.formatFromData(data, exp);
         Object.keys(result).forEach(classname => {
             if (!result[classname]) {
                 element.removeClass(classname);
@@ -191,16 +171,9 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     // { background: ({x} === "On" ? "green" : "") }
     // { opacity: {x} / 100 }
     // { opacity: ({x} > 0 ? 1.0 : 0.5) }
-    private css(element, exp, payload) {
-        const result = this.evaluate(exp, payload);
+    private css(element, exp, data) {
+        const result = this.formatFromData(data, exp);
         element.css(result);
         return result;
     }
-}
-
-interface AnimationRule {
-    img: string;
-    topic: string;
-    prop: string;
-    exp: string;
 }
