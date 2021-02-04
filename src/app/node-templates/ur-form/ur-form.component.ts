@@ -22,7 +22,12 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             for (let field of this.data.options) {
                 if (data.msg.topic.includes(field.topic)) {
                     field.intopic = data.msg.topic;
-                    this.data.formValue[field.topic] = data.msg.payload;
+                    if (!field.options?.units && data.msg.payload.units) {
+                        let options = field.options || {};
+                        options.units = data.msg.payload.units;
+                        field.options = options;
+                    }
+                    this.data.formValue[field.topic] = this.formatFromData(data);
                     break;
                 }
             }
@@ -42,14 +47,15 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             for (const field of this.data.options) {
                 combinedPayload[field.outtopic] = this.data.formValue[field.topic];
             }
-            this.send({ topic: this.data.singleMsgTopic, payload: combinedPayload });
+            this.formatAndSend(this.data.singleMsgTopic, combinedPayload);
             this.snackbar.success('Saved!');
         }
         else {
             for (const field of this.data.options) {
                 const payload = this.data.formValue[field.topic];
                 if (payload !== '') { // send only if form element has a value
-                    this.send({ topic: field.outtopic || field.intopic || field.topic, payload });
+                    let topic = field.outtopic || field.intopic || field.topic;
+                    this.formatAndSend(topic, payload);
                 }
             }
             this.snackbar.success('Saved!');

@@ -17,7 +17,7 @@ export class UrTextComponent extends BaseNode implements AfterViewInit {
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && typeof data.msg.payload !== 'undefined') {
-            this.text = this.format(data);
+            this.text = this.formatFromData(data);
         }
     }
 }

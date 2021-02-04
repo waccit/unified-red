@@ -18,6 +18,7 @@ module.exports = function (RED) {
                 type: 'form',
                 label: config.label,
                 order: config.order,
+                format: config.format,
                 value: config.payload || node.id,
                 width: config.width || 12,
                 // height: config.height || config.options.length,
