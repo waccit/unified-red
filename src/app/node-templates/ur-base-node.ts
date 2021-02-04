@@ -6,6 +6,13 @@ import { User } from '../data';
 declare var $: any;
 
 export class BaseNode implements AfterViewInit, OnDestroy {
+    protected expressionGlobals = `
+        function interpolate(value, minIn, maxIn, minOut, maxOut) {
+            let out = minOut + (maxOut - minOut) * ((value - minIn) / (maxIn - minIn));
+            return Math.max(minOut, Math.min(maxOut, out));
+        }
+    `;
+
     access: any = {};
     private _data: any;
     private _wsSubscription: Subscription;
@@ -102,22 +109,51 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         return str;
     }
 
-    formatFromData(data) {
-        let ret = data;
-        const expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
-        if (expression.length >= 2) {
-            for (const part of expression[1].split('.')) {
-                ret = ret[part];
+    // Example format expressions:
+	// {{msg.payload.value}}
+	// parseInt({{msg.payload.value}} / 10)
+	// parseInt(1 + {{msg.payload.value}} / (100 / 9))
+	// Math.round({{msg.payload.value}} / 10)
+	// parseInt( interpolate({{msg.payload.value}}, 0, 100, 1, 10) )
+	// Enumeration {{msg.payload.value | enum: '0:Offline, 1:Cooling, 2:Economizer, 3:Reheat, 4:Heat'}}
+    formatFromData(data, format = this.data.format) {
+        let ret = format;
+        const expression = format.match(/\{\{[^\}]*\}\}/g);
+        if (expression.length) {
+            for (const exp of expression) {
+                let value = data;
+                let pipedExp = /\{\{([^\}\s]+)(?:\s*\|\s*enum\:\s*['"]([^\}]+)['"])?\}\}/g.exec(exp);
+                let inner = pipedExp[1];
+                let enums = pipedExp[2];
+                for (const part of inner.split('.')) {
+                    value = value[part];
+                }
+                if (enums && enums.length) {
+                    try {
+                        let enumMap = enums.split(/\s*,\s*/g)
+                            .reduce((a, b) => {
+                                var v = b.split(/\s*[:=]\s*/);
+                                a[v[0]] = v[1];
+                                return a;
+                            }, {});
+                        value = enumMap[value];
+                    } catch (ignore) {}
+                }
+                let escapedExp = exp.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+                ret = ret.replace(new RegExp(escapedExp, 'g'), value);
             }
         }
-        return ret;
+        try {
+			return eval('(' + ret + '); ' + this.expressionGlobals);
+		} catch (ignore) {}
+		return ret;
     }
 
-    formatAndSend(topic, value) {
+    formatAndSend(topic, value, format = this.data.format) {
         let data = { 
             msg: { topic: topic }
         };
-        const expression = /^\{\{([^\}]*)\}\}$/.exec(this.data.format);
+        const expression = /^\{\{([^\}]*)\}\}$/.exec(format);
         if (expression.length >= 2 && value) {
             let walk = data;
             const parts = expression[1].split('.');
