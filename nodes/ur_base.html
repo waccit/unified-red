@@ -1094,7 +1094,7 @@
                     })
                     .appendTo(buttonGroup);
 
-                // Add Item button
+                // Add Folder button
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
                         c_('layout.folder') +
@@ -1172,10 +1172,10 @@
                         users: [],
                         name: 'Tab',
                     },
-                    'ur_menu_link': {
-                        type: 'ur_menu_link',
+                    'ur_link': {
+                        type: 'ur_link',
                         users: [],
-                        icon: 'open_in_browser',
+                        icon: 'new-window',
                         name: 'Link',
                         target: 'newtab',
                     },
@@ -1292,6 +1292,13 @@
                             '</a>'
                     ).appendTo(buttonGroup);
 
+                    // link button
+                    var addLinkButton = $(
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
+                            c_('layout.link') +
+                            '</a>'
+                    ).appendTo(buttonGroup);
+
                     // edit button
                     let editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
@@ -1393,9 +1400,66 @@
                         evt.preventDefault();
                     });
 
+                    addLinkButton.click(function (evt) {
+                        folderContentContainer.editableList('addItem', { type: 'ur_link', folder: item.node.id });
+                        evt.stopPropagation();
+                        evt.preventDefault();
+                    });
+
                     item.children.forEach(function (child) {
                         child.child = true;
                         folderContentContainer.editableList('addItem', child);
+                    });
+                };
+
+                var addLink = function (container, i, item) {
+                    console.log('container: ', container);
+                    console.log('i: ', i);
+                    console.log('item: ', item);
+
+                    if (!item.node.folder && item.folder) {
+                        item.node.folder = item.folder;
+                    }
+
+                    let linkNode = item.node;
+                    elementParents[linkNode.id] = item.node.folder;
+
+                    container.addClass('nr-db-sb-link-list-item');
+
+                    // title row
+                    let titleRow = $('<div>', {
+                        class: 'nr-db-sb-list-header nr-db-sb-folder-content-list-header',
+                    }).appendTo(container);
+
+                    // handle
+                    $('<i class="nr-db-sb-list-handle nr-db-sb-link-list-handle fa fa-bars"></i>').appendTo(titleRow);
+
+                    // chevron
+                    let chevron = $('<i class="fa fa-angle-down nr-db-sb-list-chevron">', {
+                        style: 'width:10px;',
+                    }).appendTo(titleRow);
+
+                    // icon
+                    $('<i class="fa fa-external-link nr-db-sb-icon"></i>').appendTo(titleRow);
+
+                    // title
+                    $('<span class="nr-db-sb-title">')
+                        .text(item.node.name || 'untitled')
+                        .appendTo(titleRow);
+
+                    // buttons
+                    var buttonGroup = $('<div>', { class: 'nr-db-sb-list-header-button-group' }).appendTo(titleRow);
+
+                    var editButton = $(
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
+                            c_('layout.edit') +
+                            '</a>'
+                    ).appendTo(buttonGroup);
+
+                    editButton.on('click', function (evt) {
+                        RED.editor.editConfig('', item.type, item.node.id);
+                        evt.stopPropagation();
+                        evt.preventDefault();
                     });
                 };
 
@@ -1428,6 +1492,7 @@
                     let staticIcon = $('<i>', { class: 'nr-db-sb-icon nr-db-sb-page-icon fa fa-file-o' }).appendTo(
                         titleRow
                     );
+
                     let dynamicIcon = $('<i>', {
                         class: 'nr-db-sb-icon nr-db-sb-dynamic-page-icon fa fa-files-o',
                     }).appendTo(titleRow);
@@ -1880,8 +1945,9 @@
                         case 'ur_tab':
                             addTab(container, i, item);
                             break;
-                        case 'ur_menu_link':
-                            addMenuLink(container, i, item);
+                        case 'ur_link':
+                            addLink(container, i, item);
+                            break;
                         default:
                             console.log(
                                 'Add Menu Entity Error: Incorrect or Missing node type.\n Got: ',

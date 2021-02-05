@@ -681,23 +681,6 @@ function findFolderById(container, id) {
     return result;
 }
 
-// credit to Samy Arbid (/nodes/ur_schedule.js)
-let explodeRange = function (exp) {
-    if (exp.indexOf('-') === -1) {
-        return exp;
-    }
-    let [a, b] = exp.split('-');
-    a = parseInt(a);
-    b = parseInt(b);
-    let start = Math.min(a, b);
-    let end = Math.max(a, b);
-    let range = [];
-    while (start <= end) {
-        range.push(start++);
-    }
-    return range.join(',');
-};
-
 // helper function to detect changes in dynamic page
 // NB: limitations of using JSON.stringify:
 //      1. 'undefined' values will be replaced as 'null'
@@ -750,13 +733,13 @@ function addControl(folders, page, group, tab, control) {
             foldersPath += currFolder.config.pathName + '/';
 
             if (isRoot) {
-                foundFolder = find(menu, function (mi) {
-                    return mi.id === currFolder.id;
+                foundFolder = find(menu, function (f) {
+                    return f.id === currFolder.id;
                 });
             } else {
                 parent = findFolderById(menu, currFolder.config.folder);
-                foundFolder = find(parent.items, function (mi) {
-                    return mi.id == currFolder.id;
+                foundFolder = find(parent.items, function (f) {
+                    return f.id == currFolder.id;
                 });
             }
 
@@ -869,12 +852,12 @@ function addControl(folders, page, group, tab, control) {
                 dynamicPages.hasOwnProperty(page.id) &&
                 (dynamicPagesNeedUpdate(dynamicPages[page.id], incomingSettings) || pathNeedsUpdate)
             ) {
-                foundFolder.items = foundFolder.items.filter(function (page) {
-                    return !page.id.startsWith(page.id);
+                foundFolder.items = foundFolder.items.filter(function (p) {
+                    return !p.id.startsWith(page.id);
                 });
 
-                foundFolder.submenu = foundFolder.submenu.filter(function (page) {
-                    return !page.id.startsWith(page.id);
+                foundFolder.submenu = foundFolder.submenu.filter(function (p) {
+                    return !p.id.startsWith(page.id);
                 });
 
                 delete dynamicPages[page.id];
@@ -951,7 +934,7 @@ function addControl(folders, page, group, tab, control) {
                                 widthMd: group.config.widthMd,
                                 widthSm: group.config.widthSm,
                                 items: [],
-                                disp: group.config.disp
+                                disp: group.config.disp,
                             };
 
                             let instanceTab = {
@@ -979,12 +962,13 @@ function addControl(folders, page, group, tab, control) {
                 dynamicGroups[group.id] = true;
                 dynamicWidgets[control.id] = true;
             } else {
-                foundFolder.items = foundFolder.items.filter(function (page) {
-                    return !page.id.startsWith(page.id);
+                console.log('foundFolder: ', foundFolder);
+                foundFolder.items = foundFolder.items.filter(function (p) {
+                    return !p.id.startsWith(page.id);
                 });
 
-                foundFolder.submenu = foundFolder.submenu.filter(function (page) {
-                    return !page.id.startsWith(page.id);
+                foundFolder.submenu = foundFolder.submenu.filter(function (p) {
+                    return !p.id.startsWith(page.id);
                 });
 
                 for (let i = 0; i < instanceIds.length; i++) {
@@ -1019,7 +1003,7 @@ function addControl(folders, page, group, tab, control) {
                         widthMd: group.config.widthMd,
                         widthSm: group.config.widthSm,
                         items: [],
-                        disp: group.config.disp
+                        disp: group.config.disp,
                     };
 
                     let instanceTab = {
@@ -1108,7 +1092,7 @@ function addControl(folders, page, group, tab, control) {
                     if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
                         // grab a copy of folders stack
                         let foldersStack = [...folders];
-                        let curr = foldersStack.find((mi) => mi.id === foundFolder.id);
+                        let curr = foldersStack.find((f) => f.id === foundFolder.id);
 
                         // travel up the menu tree and remove childless folders
                         do {
@@ -1119,7 +1103,7 @@ function addControl(folders, page, group, tab, control) {
                                     parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
                                     parent.submenu = parent.submenu.filter((item) => item.id !== currInMenu.id);
                                 }
-                                curr = foldersStack.find((mi) => mi.id === parent.id);
+                                curr = foldersStack.find((f) => f.id === parent.id);
                             } else {
                                 menu = menu.filter((item) => item.id !== curr.id);
                                 curr = null;
@@ -1137,12 +1121,12 @@ function addControl(folders, page, group, tab, control) {
             control['_idVar'] = firstParamVar;
         } else {
             if (dynamicPages.hasOwnProperty(page.id)) {
-                foundFolder.items = foundFolder.items.filter(function (page) {
-                    return !page.id.startsWith(page.id);
+                foundFolder.items = foundFolder.items.filter(function (p) {
+                    return !p.id.startsWith(page.id);
                 });
 
-                foundFolder.submenu = foundFolder.submenu.filter(function (page) {
-                    return !page.id.startsWith(page.id);
+                foundFolder.submenu = foundFolder.submenu.filter(function (p) {
+                    return !p.id.startsWith(page.id);
                 });
 
                 delete dynamicPages[page.id];
@@ -1150,8 +1134,8 @@ function addControl(folders, page, group, tab, control) {
             delete dynamicGroups[group.id];
             delete dynamicWidgets[control.id];
 
-            var foundPage = find(foundFolder.items, function (mp) {
-                return mp.id === page.id;
+            var foundPage = find(foundFolder.items, function (p) {
+                return p.id === page.id;
             });
 
             if (foundPage && (pathNeedsUpdate || needsUpdate(foundPage, page))) {
@@ -1211,7 +1195,7 @@ function addControl(folders, page, group, tab, control) {
                     widthMd: group.config.widthMd,
                     widthSm: group.config.widthSm,
                     items: [],
-                    disp: group.config.disp
+                    disp: group.config.disp,
                 };
                 foundPage.items.push(foundGroup);
             }
@@ -1271,7 +1255,7 @@ function addControl(folders, page, group, tab, control) {
                                             // If the folder is now empty, find parent, remove self and check whether parent should be removed
                                             if (foundFolder.items.length === 0) {
                                                 let foldersStack = [...folders];
-                                                let curr = foldersStack.find((mi) => mi.id === foundFolder.id);
+                                                let curr = foldersStack.find((f) => f.id === foundFolder.id);
 
                                                 do {
                                                     let parent = findFolderById(menu, curr.config.folder);
@@ -1288,7 +1272,7 @@ function addControl(folders, page, group, tab, control) {
                                                                 (item) => item.id !== currInMenu.id
                                                             );
                                                         }
-                                                        curr = foldersStack.find((mi) => mi.id === parent.id);
+                                                        curr = foldersStack.find((f) => f.id === parent.id);
                                                     } else {
                                                         menu = menu.filter((item) => item.id !== curr.id);
                                                         curr = null;
@@ -1314,27 +1298,129 @@ function addControl(folders, page, group, tab, control) {
     }
 }
 
-function addLink(name, link, icon, order, target) {
-    var newLink = {
-        name: name,
-        link: link,
-        icon: icon,
+// menu is NOT guaranteed to be complete.... or exist at all... because menu is built
+// by other widgets (control) && ur_link is alphabetically(?) higher than e.g. ur_text!
+// so.. we must find a way to add to the menu and have the control gracefully take care
+// or overwriting(?) the menu correctly...
+
+// dashboard was able to accomplish this because they just add directly to the menu @ root level
+// and rely on link.order & itemSorter.. we are required to add dummy folder(s) and have the control (add())
+// take care of recognizing dummy folders & correctly adding required data...
+function addLink(id, name, folders, link, icon, order, target) {
+    let newLink = {
+        id,
+        name,
+        // folders,
+        link,
+        icon,
         order: order || 1,
-        target: target,
+        target,
     };
 
-    menu.push(newLink);
-    menu.sort(itemSorter);
-    updateUi();
+    // console.log('folders: ', folders);
 
-    return function () {
-        var index = menu.indexOf(newLink);
-        if (index < 0) {
-            return;
+    let foldersStack = [...folders];
+    let parent = null;
+    let isRoot = true;
+    let foundFolder;
+    let currFolder;
+
+    while (foldersStack.length > 0) {
+        currFolder = foldersStack.pop();
+
+        if (isRoot) {
+            foundFolder = find(menu, function (f) {
+                return f.id === currFolder.id;
+            });
+            isRoot = false;
+        } else {
+            parent = findFolderById(menu, currFolder.config.folder);
+            foundFolder = find(parent.items, function (f) {
+                return f.id === currFolder.id;
+            });
         }
-        menu.splice(index, 1);
+
+        if (!foundFolder) {
+            foundFolder = {
+                id: currFolder.id,
+                isRoot: isRoot,
+                order: parseFloat(currFolder.config.order),
+                disabled: currFolder.config.disabled,
+                hidden: currFolder.config.hidden,
+                items: [],
+                // Atrio sidebarItems properties:
+                path: '',
+                title: currFolder.config.name,
+                icon: currFolder.config.icon,
+                class: isRoot ? 'menu-toggle' : 'ml-sub-menu',
+                groupTitle: false,
+                submenu: [],
+            };
+
+            if (parent) {
+                parent.items.push(foundFolder);
+                parent.submenu.push(foundFolder);
+                parent.items.sort(itemSorter);
+                parent.submenu.sort(itemSorter);
+            } else {
+                menu.push(foundFolder);
+                menu.sort(itemSorter);
+            }
+        }
+    }
+
+    // console.log('foundFolder: ', foundFolder);
+
+    // foundFolder.items.push(newLink);
+    // foundFolder.submenu.push(newLink);
+
+    // foundFolder.items.sort(itemSorter);
+    // foundFolder.submenu.sort(itemSorter);
+    // let parentFolder = findFolderById(menu, folders);
+    // console.log('parentFolder: ', parentFolder);
+
+    if (foundFolder) {
+        // console.log('menu: ', menu);
+        // console.log('folder: ', folder);
+        // console.log('foundFolder: ', foundFolder);
+        foundFolder.items.push(newLink);
+        foundFolder.submenu.push(newLink);
+
+        foundFolder.items.sort(itemSorter);
+        foundFolder.submenu.sort(itemSorter);
+
         updateUi();
-    };
+        // console.log('menu: ', JSON.stringify(menu, null, 2));
+    } else {
+        menu.push(newLink);
+        menu.sort(itemSorter);
+        updateUi();
+    }
+
+    // let removeLink = folder
+    //     ? function () {
+    //           let parentFolder = menu.findFolderById(menu, folder);
+    //           let itemsIdx = parentFolder.items.indexOf(newLink);
+    //           let submenuIdx = parentFolder.submenu.indexOf(newLink);
+
+    //           if (itemsIdx === submenuIdx && itemsIdx > 0) {
+    //               parentFolder.items.splice(itemsIdx, 1);
+    //               parentFolder.submenu.splice(submenuIdx, 1);
+    //               updateUi();
+    //           }
+    //       }
+    //     : function () {
+    //           let index = menu.indexOf(newLink);
+    //           if (index < 0) {
+    //               return;
+    //           }
+    //           menu.splice(index, 1);
+    //           updateUi();
+    //       };
+
+    // return removeLink;
+
+    return function () {};
 }
 
 function addBaseConfig(config) {
@@ -1351,12 +1437,14 @@ function addBaseConfig(config) {
 // Helper Functions for nodes
 
 function makeMenuTree(RED, config) {
-    let tab = null;
-    let group = null;
-    let page = null;
-    let folder = null;
+    let tab = config.tab ? RED.nodes.getNode(config.tab) : null;
+    let group = config.group || null;
+    let page = config.page || null;
+    let folder = config.folder || null;
 
-    tab = RED.nodes.getNode(config.tab);
+    // if (config.hasOwnProperty('tab')) {
+    //     tab = RED.nodes.getNode(config.tab);
+    // }
 
     if (tab) {
         group = RED.nodes.getNode(tab.config.group);
@@ -1373,6 +1461,10 @@ function makeMenuTree(RED, config) {
     // folder tree stack (First In Last Out)
     let folders = [];
     if (folder) {
+        if (!folder.hasOwnProperty('config')) {
+            folder = RED.nodes.getNode(folder);
+        }
+
         folders.push(folder);
 
         while (folder.config && folder.config.folder) {
