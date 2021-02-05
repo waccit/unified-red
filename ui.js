@@ -1090,25 +1090,27 @@ function addControl(folders, page, group, tab, control) {
 
                     // if foundFolder is now childless
                     if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
-                        // grab a copy of folders stack
-                        let foldersStack = [...folders];
-                        let curr = foldersStack.find((f) => f.id === foundFolder.id);
+                        cleanupChildlessFolders(foundFolder, folders);
 
-                        // travel up the menu tree and remove childless folders
-                        do {
-                            let parent = findFolderById(menu, curr.config.folder);
-                            let currInMenu = findFolderById(menu, curr.id);
-                            if (parent) {
-                                if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
-                                    parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
-                                    parent.submenu = parent.submenu.filter((item) => item.id !== currInMenu.id);
-                                }
-                                curr = foldersStack.find((f) => f.id === parent.id);
-                            } else {
-                                menu = menu.filter((item) => item.id !== curr.id);
-                                curr = null;
-                            }
-                        } while (curr);
+                        // // grab a copy of folders stack
+                        // let foldersStack = [...folders];
+                        // let curr = foldersStack.find((f) => f.id === foundFolder.id);
+
+                        // // travel up the menu tree and remove childless folders
+                        // do {
+                        //     let parent = findFolderById(menu, curr.config.folder);
+                        //     let currInMenu = findFolderById(menu, curr.id);
+                        //     if (parent) {
+                        //         if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
+                        //             parent.items = parent.items.filter((item) => item.id !== currInMenu.id);
+                        //             parent.submenu = parent.submenu.filter((item) => item.id !== currInMenu.id);
+                        //         }
+                        //         curr = foldersStack.find((f) => f.id === parent.id);
+                        //     } else {
+                        //         menu = menu.filter((item) => item.id !== curr.id);
+                        //         curr = null;
+                        //     }
+                        // } while (curr);
                     }
                     delete dynamicWidgets[control.id];
                     updateUi();
@@ -1254,30 +1256,31 @@ function addControl(folders, page, group, tab, control) {
 
                                             // If the folder is now empty, find parent, remove self and check whether parent should be removed
                                             if (foundFolder.items.length === 0) {
-                                                let foldersStack = [...folders];
-                                                let curr = foldersStack.find((f) => f.id === foundFolder.id);
+                                                cleanupChildlessFolders(foundFolder, folders);
+                                                // let foldersStack = [...folders];
+                                                // let curr = foldersStack.find((f) => f.id === foundFolder.id);
 
-                                                do {
-                                                    let parent = findFolderById(menu, curr.config.folder);
-                                                    let currInMenu = findFolderById(menu, curr.id);
-                                                    if (parent) {
-                                                        if (
-                                                            currInMenu.items.length === 0 &&
-                                                            currInMenu.submenu.length === 0
-                                                        ) {
-                                                            parent.items = parent.items.filter(
-                                                                (item) => item.id !== currInMenu.id
-                                                            );
-                                                            parent.submenu = parent.submenu.filter(
-                                                                (item) => item.id !== currInMenu.id
-                                                            );
-                                                        }
-                                                        curr = foldersStack.find((f) => f.id === parent.id);
-                                                    } else {
-                                                        menu = menu.filter((item) => item.id !== curr.id);
-                                                        curr = null;
-                                                    }
-                                                } while (curr);
+                                                // do {
+                                                //     let parent = findFolderById(menu, curr.config.folder);
+                                                //     let currInMenu = findFolderById(menu, curr.id);
+                                                //     if (parent) {
+                                                //         if (
+                                                //             currInMenu.items.length === 0 &&
+                                                //             currInMenu.submenu.length === 0
+                                                //         ) {
+                                                //             parent.items = parent.items.filter(
+                                                //                 (item) => item.id !== currInMenu.id
+                                                //             );
+                                                //             parent.submenu = parent.submenu.filter(
+                                                //                 (item) => item.id !== currInMenu.id
+                                                //             );
+                                                //         }
+                                                //         curr = foldersStack.find((f) => f.id === parent.id);
+                                                //     } else {
+                                                //         menu = menu.filter((item) => item.id !== curr.id);
+                                                //         curr = null;
+                                                //     }
+                                                // } while (curr);
                                             }
                                         }
                                     }
@@ -1397,30 +1400,53 @@ function addLink(id, name, folders, link, icon, order, target) {
         updateUi();
     }
 
-    // let removeLink = folder
-    //     ? function () {
-    //           let parentFolder = menu.findFolderById(menu, folder);
-    //           let itemsIdx = parentFolder.items.indexOf(newLink);
-    //           let submenuIdx = parentFolder.submenu.indexOf(newLink);
+    let removeLink = foundFolder
+        ? function () {
+              foundFolder.items = foundFolder.items.filter((item) => {
+                  return item.id !== newLink.id;
+              });
 
-    //           if (itemsIdx === submenuIdx && itemsIdx > 0) {
-    //               parentFolder.items.splice(itemsIdx, 1);
-    //               parentFolder.submenu.splice(submenuIdx, 1);
-    //               updateUi();
-    //           }
-    //       }
-    //     : function () {
-    //           let index = menu.indexOf(newLink);
-    //           if (index < 0) {
-    //               return;
-    //           }
-    //           menu.splice(index, 1);
-    //           updateUi();
-    //       };
+              foundFolder.submenu = foundFolder.submenu.filter((item) => {
+                  return item.id !== newLink.id;
+              });
 
-    // return removeLink;
+              if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
+                  cleanupChildlessFolders(foundFolder, folders);
+              }
 
-    return function () {};
+              updateUi();
+          }
+        : function () {
+              let index = menu.indexOf(newLink);
+              if (index < 0) {
+                  return;
+              }
+              menu.splice(index, 1);
+              updateUi();
+          };
+
+    return removeLink;
+}
+
+function cleanupChildlessFolders(found, foldersArr) {
+    let stack = [...foldersArr];
+    let curr = stack.find((f) => f.id === found.id);
+
+    do {
+        let parent = findFolderById(menu, curr.config.folder);
+        let currInMenu = findFolderById(menu, curr.id);
+
+        if (parent) {
+            if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
+                parent.items = parent.items.filter((i) => i.id !== currInMenu.id);
+                parent.submenu = parent.submenu.filter((i) => i.id !== currInMenu.id);
+            }
+            curr = stack.find((f) => f.id === parent.id);
+        } else {
+            menu = menu.filter((i) => i.id !== curr.id);
+            curr = null;
+        }
+    } while (curr);
 }
 
 function addBaseConfig(config) {
