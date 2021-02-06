@@ -14,6 +14,9 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
         this.originalValues = { ... this.data.formValue };
+        for (let field of this.data.options) {
+            field.topic = this.evalVariables(field.topic);
+        }
     }
 
     updateValue(data: any) {
