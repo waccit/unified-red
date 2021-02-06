@@ -4,6 +4,6 @@
         [disabled]="!access.write && data.accessBehavior === 'disable'" 
         #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below">
         <mat-icon class="mr-2" *ngIf="data.icon">{{ data.icon }}</mat-icon>
-        {{ data.label }}
+        {{ label }}
     </button>
 </ng-template>
