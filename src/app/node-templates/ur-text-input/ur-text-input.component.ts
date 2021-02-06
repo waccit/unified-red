@@ -9,7 +9,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     styleUrls: ['./ur-text-input.component.sass'],
 })
 export class UrTextInputComponent extends BaseNode implements AfterViewInit {
-    valueSubject = new BehaviorSubject('');
+    valueIn = '';
+    valueSubject = new BehaviorSubject(this.valueIn);
     delay: number;
 
     ngAfterViewInit(): void {
@@ -22,7 +23,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                 .asObservable()
                 .pipe(debounceTime(this.delay), distinctUntilChanged())
                 .subscribe(() => {
-                    this.send();
+                    this.formatAndSend(this.data.topic, this.valueSubject.value);
                 });
         }
     }
@@ -30,8 +31,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && typeof data.msg.payload !== 'undefined') {
-            let value = this.formatFromData(data);
-            this.valueSubject.next(value);
+            this.valueIn = this.formatFromData(data);
         }
     }
 
@@ -40,11 +40,6 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     }
 
     change(value: string) {
-        this.valueSubject.next(value);
-        this.send();
-    }
-
-    send() {
-        this.formatAndSend(this.data.topic, this.valueSubject.value);
+        this.formatAndSend(this.data.topic, value);
     }
 }
