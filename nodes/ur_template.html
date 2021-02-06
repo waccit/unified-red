@@ -14,19 +14,19 @@
             width: { value: 12 },
             height: { value: 0 },
             format: {
-                value: `<input feedback="some\/fb\/point" request="some\/rq\/point">
-    <div feedback="some\/fb\/point"><\/div>
-    <div class="js-point"><\/div>
+                value: `<div feedback="some\/fb\/point" format="{{msg.payload.value}}"><\/div>
+<input feedback="some\/fb\/point" request="some\/rq\/point" format="{{msg.payload.value}}">
+<div class="js-point"><\/div>
 
-    <button class="mat-raised-button mat-primary">Send<\/button>
-    <script>
-    $node.on("update-value", function(evt, data) {
-        $node.find(".js-point").html(data.msg.payload);
-    });
-    $node.find("button").click(function() {
-        $node.trigger('send', 'some value');
-    });
-    <\/script>`,
+<button class="mat-raised-button mat-primary">Send<\/button>
+<script>
+$node.on("update-value", function(evt, data) {
+    $node.find(".js-point").html(data.msg.payload);
+});
+$node.find("button").click(function() {
+    $node.trigger('send', 'some value');
+});
+<\/script>`,
             },
             storeOutMessages: { value: true },
             fwdInMessages: { value: true },
@@ -302,7 +302,7 @@ $node.on(&quot;update-value&quot;, function(evt, data) {
     <p>Templates made in this way can be copied and remain independent of each other.</p>
     <p>
         <b>Sending a message:</b><br>
-        <pre style="font-size:smaller;">&lt;input feedback=&quot;some/fb/point&quot; request=&quot;some/rq/point&quot;&gt;
+        <pre style="font-size:smaller;">&lt;input feedback=&quot;some/fb/point&quot; request=&quot;some/rq/point&quot; format=&quot;{{msg.payload.value}}&quot;&gt;
 &lt;button class=&quot;mat-raised-button mat-primary&quot;&gt;Send&lt;/button&gt;
 &lt;script&gt;
 $node.find(&quot;button&quot;).click(function() {
