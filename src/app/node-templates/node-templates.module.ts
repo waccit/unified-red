@@ -37,6 +37,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatTabsModule } from '@angular/material/tabs';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
     declarations: [
@@ -52,6 +53,7 @@ import { MatTabsModule } from '@angular/material/tabs';
         UrChartComponent,
     ],
     imports: [
+        RouterModule,
         CommonModule,
         ReactiveFormsModule,
         MatFormFieldModule,

@@ -1,5 +1,3 @@
-const { data } = require('jquery');
-
 module.exports = function (RED) {
     var ui = require('../ui')(RED);
 
