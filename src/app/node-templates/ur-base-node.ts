@@ -86,7 +86,10 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     stripHTML(str: string) {
-        return str.replace(/<[^>]+>/g, '');
+        if (typeof str === 'string') {
+            return str.replace(/<[^>]+>/g, '');
+        }
+        return str;
     }
 
     send(msg: any) {
@@ -173,6 +176,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     formatAndSend(topic, value, format = this.data.format) {
+        value = this.stripHTML(value);
         let data = { 
             msg: { topic: topic }
         };

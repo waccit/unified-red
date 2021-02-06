@@ -13,7 +13,7 @@
             height: { value: 0 },
             passthru: { value: false },
             mode: { value: 'text', required: true },
-            delay: { value: 300, validate: RED.validators.number() },
+            delay: { value: 0, validate: RED.validators.number() },
             topic: { value: '' },
             topicPattern: { value: '' },
             access: { value: '' },
@@ -173,7 +173,7 @@
         <p>Not all browsers support the <i>time</i>, <i>week</i>, and <i>month</i> input types, and may return 
             <i>undefined</i>. Please test your target browser(s) before use.</p>
     </p>
-    <p><b>Delay</b> <i>(default : 300ms)</i> sets the amount of time in milliseconds before the output is sent.
+    <p><b>Delay</b> <i>(default : 0ms)</i> sets the amount of time in milliseconds before the output is sent.
         When set to <code>0</code>, the payload is sent when you change the value and click out of the input field.
     </p>
     <p><b>Topic</b> is added to the message as <code>msg.topic</code> when provided.</p>
