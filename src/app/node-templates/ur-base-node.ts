@@ -68,16 +68,25 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     updateValue(data: any) {
-        if (data.msg.hasOwnProperty('health') && data.msg.health !== 'normal' && data.msg.hasOwnProperty('payload')) {
-                let symbol = '';
-                switch (data.msg.health.toLowerCase()) {
-                    case 'down': symbol = '\u2757'; break;
-                }
-                data.msg.payload = symbol + data.msg.payload;
-        }
         if (this.container && this.container.length) {
             this.container.trigger([data]);
+            if (data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
+                data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
+                let health = data.msg.payload.health.toString().toLowerCase();
+                $(document).ready(() => {
+                    let indicator = this.container.find('[title="' + data.msg.topic + '"]').closest('.healthIndicator');
+                    if (health === 'down') {
+                        indicator.addClass('health-down');
+                    } else {
+                        indicator.removeClass('health-down');
+                    }
+                });
+            }
         }
+    }
+
+    stripHTML(str: string) {
+        return str.replace(/<[^>]+>/g, '');
     }
 
     send(msg: any) {
