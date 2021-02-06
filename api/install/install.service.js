@@ -27,6 +27,7 @@ async function isInstalled() {
         settings.adminAuth &&
         settings.httpStatic &&
         settings.httpAdminRoot && settings.httpAdminRoot === '/admin/' &&
+        settings.httpRoot === '/' &&
         settings.ui && settings.ui.path && settings.ui.path === '/' &&
         config &&
         config.mongoConnection &&
@@ -66,7 +67,7 @@ async function install(setup) {
 
         // Add settings to Node-RED settings file
         let data = fs.readFileSync(settings.settingsFile, { encoding: 'utf8' });
-        if (!settings.adminAuth) {
+        if (!settings.adminAuth || setup.adminAuthPath) {
             log.info('Self-installing Unified-RED adminAuth hook on ' + settings.settingsFile);
             let defaultAdminAuthPath = path.resolve(__dirname + '/../../admin-auth');
             let adminAuthPath = setup.adminAuthPath || defaultAdminAuthPath;
@@ -75,7 +76,7 @@ async function install(setup) {
                 'adminAuth: require("' + adminAuthPath + '"),\n// $2'
             );
         }
-        if (!settings.httpStatic) {
+        if (!settings.httpStatic || setup.staticPath || settings.httpStatic === '/usr/bin/apollo/node-red/js') {
             log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
             let defaultStaticPath = path.resolve(__dirname + '/../../static/');
             let staticPath = setup.staticPath || defaultStaticPath;
@@ -84,6 +85,10 @@ async function install(setup) {
         if (!settings.httpAdminRoot || settings.httpAdminRoot !== '/admin/') {
             log.info('Setting Node-RED httpAdminRoot path on ' + settings.settingsFile);
             data = data.replace(/(\/\/[\s]*)?(httpAdminRoot[\s]*\:.*\n)/i, 'httpAdminRoot: "/admin/",\n// $2');
+        }
+        if (settings.httpRoot !== '/') {
+            log.info('Removing Node-RED httpRoot setting');
+            data = data.replace(/(\/\/[\s]*)?(httpRoot[\s]*\:.*\n)/i, '// $2');
         }
         if (!settings.ui || !settings.ui.path || settings.ui.path !== '/') {
             log.info('Setting Node-RED ui path on ' + settings.settingsFile);
