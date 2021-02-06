@@ -2,7 +2,7 @@
     <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
         <mat-form-field class="example-full-width healthIndicator" appearance="outline" *ngIf="data.mode !== 'tel'">
             <span [innerHTML]="valueIn" hidden></span> <!-- health -->
-            <mat-label>{{ data.label }}</mat-label>
+            <mat-label>{{ label }}</mat-label>
             <span matPrefix *ngIf="data.mode === 'email'">
                 <mat-icon class="mr-2">email</mat-icon>
             </span>
@@ -18,7 +18,7 @@
 
         <mat-form-field class="example-full-width healthIndicator" appearance="outline" *ngIf="data.mode === 'tel'">
             <span [innerHTML]="valueIn" hidden></span> <!-- health -->
-            <mat-label>{{ data.label }}</mat-label>
+            <mat-label>{{ label }}</mat-label>
             <span matPrefix>
                 <mat-icon class="mr-2">phone</mat-icon>
             </span>
