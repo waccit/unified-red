@@ -79,7 +79,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     ngOnInit(): void {
-        for (const topic of this.data.topics) {
+        for (let topic of this.data.topics) {
+            topic.topic = this.evalVariables(topic.topic);
             this.topics.push(topic.topic);
             this.labels[topic.topic] = topic.label;
             this.showSeries[topic.label] = true;
