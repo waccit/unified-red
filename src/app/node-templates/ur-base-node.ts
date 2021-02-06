@@ -94,14 +94,13 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     send(msg: any) {
         if (this.nodeId) {
-            // handle dynamic page. substitute {variables}
-            msg.topic = this.evalVariables(msg.topic);
+            msg.topic = this.evalInstanceParameters(msg.topic); // handle multi-page. substitute {variables}
             this.webSocketService.emit({ id: this.nodeId, msg });
         }
     }
 
-    evalVariables(str) {
-        // handle dynamic page. substitute {variables}
+    evalInstanceParameters(str) {
+        // handle multi-page. substitute {variables}
         let instance = this.data?.instance;
         if (instance?.parameters && str) {
             let variables = str.toLowerCase().match(/\{[^\}\/\+\#]+\}/g);
@@ -114,9 +113,6 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                     }
                 }
             }
-        }
-        else if (instance?.number && str) { // old. TODO: remove
-            str = str.replace(/\{x\}/ig, instance.number);
         }
         return str;
     }

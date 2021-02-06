@@ -75,23 +75,47 @@
                         })
                             .appendTo(row)
                             .val(field.label);
-                        //format select
-                        var optionLink = { value: 'link', label: 'Link', hasValue: true };
-                        var optionText = { value: 'fText', label: 'Text', hasValue: true };
-                        $('<input/>', {
-                            class: 'node-input-field-format',
+
+                        //format type
+                        let formatTypeSelect = $('<select/>', {
+                            class: 'node-input-field-formatType',
+                            style: 'margin-left: 5px; width: 65px;'
+                        })
+                            .append(
+                                $('<option>', { value: 'text' }).text('Text'),
+                                $('<option>', { value: 'link' }).text('Link') )
+                            .appendTo(row);
+
+                        //format text
+                        let formatTextInput = $('<input/>', {
+                            class: 'node-input-field-format-text',
                             type: 'text',
-                            style: 'margin-left: 5px; width: 32%;',
+                            style: 'margin-left: 5px; width: 23%;',
                             placeholder: '{{msg.payload.value}}'
                         })
                             .appendTo(row)
                             .val(field.format)
-                            .change()
-                            .typedInput({
-                                default: field.formatType,
-                                typeField: $('<input/>', { class: '.node-input-field-formatType', type: 'hidden' }),
-                                types: [optionText, optionLink],
-                            });
+                            .change();
+
+                        //format link
+                        let formatLinkSelect = $('<select/>', {
+                            class: 'node-input-field-format-link',
+                            style: 'margin-left: 5px; width: 23%; display: none',
+                        }).appendTo(row);
+                        getUrPages(formatLinkSelect, field.format);
+
+                        formatTypeSelect.on('change', () => {
+                                if (formatTypeSelect.val() === 'link') {
+                                    formatTextInput.hide();
+                                    formatLinkSelect.show();
+                                }
+                                else {
+                                    formatLinkSelect.hide();
+                                    formatTextInput.show();
+                                }
+                            })
+                            .val(field.formatType || 'text').change();
+
                         // Units select
                         var optionAuto = { value: 'nothing', label: 'payload.units', hasValue: false };
                         var optionManual = { value: 'unit', label: 'Manual', hasValue: true };
@@ -148,11 +172,11 @@
             node.fields = [];
             fields.each(function (i) {
                 let container = $(this);
-
+                let formatType = container.find('.node-input-field-formatType').val();
                 let c = {
                     label: container.find('.node-input-field-label').val(),
-                    format: container.find('.node-input-field-format').val(),
-                    formatType: container.find('.node-input-field-format').typedInput('type'),
+                    format: container.find('.node-input-field-format-' + formatType).val(),
+                    formatType: formatType,
                     deviceType: container.find('.node-input-field-device').typedInput('type'),
                     device: container.find('.node-input-field-device').val(),
                     param: container.find('.node-input-field-param').val(),
@@ -176,6 +200,40 @@
             $('#node-input-field-container').editableList('height', height);
         },
     });
+
+    function getUrPages(select, value) {
+        var node_def = RED.nodes.getType('ur_page');
+        select.children().remove();
+
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
+
+        var configNodes = [];
+        RED.nodes.eachConfig(function(config) {
+            if (config.type == 'ur_page' && (!config.z || config.z === activeWorkspace.id)) {
+                var label = RED.utils.getNodeLabel(config,config.id);
+                config.__label__ = label+(config.d?" ["+RED._("workspace.disabled")+"]":"");
+                configNodes.push(config);
+            }
+        });
+        try {
+            configNodes.sort(function(A,B) {
+                if (A.__label__ < B.__label__) {
+                    return -1;
+                } else if (A.__label__ > B.__label__) {
+                    return 1;
+                }
+                return 0;
+            });
+        } catch(ignore) {}
+        configNodes.forEach(function(cn) {
+            $('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'></option>').text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__)).appendTo(select);
+            delete cn.__label__;
+        });
+        window.setTimeout(function() { select.trigger("change");},50);
+    }
 </script>
 
 <script type="text/html" data-template-name="ur_table">

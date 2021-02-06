@@ -1,4 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { CurrentUserService, MenuService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
 
 @Component({
@@ -10,10 +11,22 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	sortedDeviceList = [];
 	dataSource = {};
 	dataLink = {};
+	private pages = {};
+
+	constructor(
+        protected webSocketService: WebSocketService,
+        protected currentUserService: CurrentUserService,
+        protected roleService: RoleService,
+		protected snackbar: SnackbarService,
+		private menuService: MenuService
+    ) {
+		super(webSocketService, currentUserService, roleService, snackbar);
+	}
 
 	ngAfterViewInit(): void {
 		super.ngAfterViewInit();
 		this.setupDatapointAccess();
+		this.menuService.pages.subscribe(p => { this.pages = p });
 	}
 
 	updateValue(data: any) {
@@ -38,9 +51,8 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 						if (!this.dataLink[deviceName]) {
 							this.dataLink[deviceName] = {};
 						}
-						let text = this.evalVariables(element.format);
-						let href = this.evalVariables(element.display);
-						this.dataLink[deviceName][pointName] = { href, text };
+						let page = this.findPageInstanceByTopic(data.msg, element.format);
+						this.dataLink[deviceName][pointName] = { text: page.title, href: page.path };
 					}
 					if (!this.dataSource[deviceName]) {
 						this.dataSource[deviceName] = {};
@@ -49,7 +61,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 					}
 					let point = this.dataSource[deviceName][pointName] || {};
 					try {
-						if (element.formatType === 'fText') {
+						if (element.formatType === 'text') {
 							point[prop] = this.formatFromData(data, element.format);
 							// Add units
 							if (element.unitType === 'unit') {
@@ -66,5 +78,42 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 				}
 			});
 		}
-	};
+	}
+
+	findPageInstanceByTopic(msg, nodeId) {
+		let newId = nodeId;
+		let topic = msg.topic;
+		let topicPattern = this.data.topicPattern;
+		let firstPage = Object.values<any>(this.pages).find(p => p.id.startsWith(nodeId));
+		if (topic && topicPattern && firstPage && firstPage.instance && firstPage.instance._idVar) {
+			let idVar = firstPage.instance._idVar;
+	
+			//
+			// START --- Copied from ui.js at line 352 ---
+			//
+			// find and escape hyphen, brackets, parentheses, plus, punctuation, backslash,
+			// caret, dollar, vertical bar, and pound symbols
+			let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+			// find and replace wildcard (*)
+			topicRegex = topicRegex.replace(/\*/g, '.*');
+			// find and replace capture group (idVar)
+			topicRegex = topicRegex.replace(new RegExp('{' + idVar + '}', 'gi'), '([\\w\\. ]+)');
+			// find and replace ignored {variables}
+			topicRegex = topicRegex.replace(/\{.*}/g, '[\\w\\. ]+');
+	
+			// make new regex
+			topicRegex = new RegExp('^' + topicRegex + '$');
+	
+			let topicArr = topicRegex.exec(topic);
+	
+			if (topicArr) {
+				let destinationInstNum = topicArr[1];
+				newId += '.' + idVar + destinationInstNum;
+			}
+			//
+			// END --- Copied from ui.js at line 352 ---
+			//
+		}
+		return this.pages[newId];
+	}
 }

@@ -15,7 +15,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         this.setupDatapointAccess();
         this.originalValues = { ... this.data.formValue };
         for (let field of this.data.options) {
-            field.topic = this.evalVariables(field.topic);
+            field.topic = this.evalInstanceParameters(field.topic); // handle multi-page. substitute {variables}
         }
     }
 

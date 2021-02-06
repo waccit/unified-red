@@ -8,3 +8,4 @@ export * from './snackbar.service';
 export * from './nodered-api.service';
 export * from './alarm.service';
 export * from './datalog.service';
+export * from './menu.service';

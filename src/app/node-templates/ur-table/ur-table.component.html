@@ -15,7 +15,7 @@
                                         <td [innerHTML]="point.value[c.label]"></td>
                                     </ng-container>
                                     <ng-container *ngIf="c.formatType === 'link'">
-                                        <td><a href="{{ dataLink[device][point.key].href }}">{{ dataLink[device][point.key].text }}</a></td>
+                                        <td><a [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
                                     </ng-container>
                                 </ng-container>
                             </ng-container>
@@ -37,7 +37,7 @@
                                         <td [innerHTML]="point.value[c.label]"></td>
                                     </ng-container>
                                     <ng-container *ngIf="c.formatType === 'link'">
-                                        <td><a href="{{ dataLink[device][point.key].href }}">{{ dataLink[device][point.key].text }}</a></td>
+                                        <td><a [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
                                     </ng-container>
                                 </ng-container>
                             </ng-container>
