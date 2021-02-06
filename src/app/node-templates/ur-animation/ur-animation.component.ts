@@ -139,10 +139,11 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
         //         Followed by one or more digits
         //   Find the fewest number of characters (lazy / ungreedy)
         const srcParts = /(.*?)([\d]+)(\..+)$/i.exec(src);
-        if (srcParts.length !== 4) {
+        if (!srcParts || srcParts.length !== 4) {
             console.log('Animation failed to substitute image src property because the src attribute did not match the expected file path pattern:\n'+
             '    Any file path that ends in one or more digits before the file extension:\n'+
             '        any.thing/you_want0000.png\n', srcParts);
+            return;
         }
         const result = this.formatFromData(data, exp);
         const newSrc = srcParts[1] + result + srcParts[3];

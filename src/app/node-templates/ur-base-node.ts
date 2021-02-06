@@ -131,7 +131,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     formatFromData(data, format = this.data.format) {
         let ret = format;
         const expression = format.match(/\{\{[^\}]*\}\}/g);
-        if (expression.length) {
+        if (expression && expression.length) {
             for (const exp of expression) {
                 let value = data;
                 let pipedExp = /\{\{([^\}\s]+)(?:\s*\|\s*enum\:\s*['"]([^\}]+)['"])?\}\}/g.exec(exp);
