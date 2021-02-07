@@ -384,7 +384,7 @@
     <p><b>Label</b> is the chart title text.</p>
     <p>
         <b>Topics</b> are message topics to be retrieved from the datalog and includes a <b>Label</b> field for each topic used as 
-        the data series name. Topics can include instance parameter variables when use with Dynamic Pages.
+        the data series name. Topics can include instance parameter variables when used with Multi Pages.
     </p>
     <p><b>Type</b> defines the chart as a <i>line chart</i> or as a <i>table</i>.</p>
     <p><b>Live</b> automatically shows datalog updates.</p>
@@ -430,13 +430,16 @@
         </ul>
     </p>
 
-    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - START -->
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
     <p>
         <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
-        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/dynamic-pages.md" target="_blank">Dynamic Page</a>.
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
         The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
         may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
     </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
     <p>
         <b>Access</b> controls the user's read/write access to this widget based on 
         <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
@@ -447,7 +450,7 @@
         When the user is denied access, the user interface can degrade to <code>show/hide</code> or
         <code>enable/disable</code> the text field.
     </p>
-    <!-- TOPIC PATTERN / ACCESS 2021-01-17 - END -->
+    <!-- ACCESS 2021-01-17 - END -->
 
     <!-- <h3>References</h3>
     <ul>

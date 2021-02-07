@@ -1,14 +1,14 @@
-# unified-red Dynamic Pages
+# unified-red Multi Pages
 
-Dynamic pages are pseudo-pages used to simplify creating pages with identical groups, tabs, and widgets across multiple building automation devices. In building automation systems, it is very common to use the same HMI graphic across multiple devices of the same type, e.g. VAV controllers. Instead of building an individual page for each device, simply make the page **Dynamic** and provide it with instance information to map incoming messages to their corresponding widgets.
+Multi Pages are pseudo-pages used to simplify creating pages with identical groups, tabs, and widgets across multiple building automation devices. In building automation systems, it is very common to use the same HMI graphic across multiple devices of the same type, e.g. VAV controllers. Instead of building an individual page for each device, simply make the page a **Multi Page** and provide it with instance information to map incoming messages to their corresponding widgets.
 
-A Dynamic page requires:
+A Multi Page requires:
  - **Instance Name Expression** - must include {x}.
  - **Instances** - the lists of instance **names** and **parameters** must match in length, where **names** refer to the displayed name or perhaps equipment tag and **parameters** refers to a set parameters included in the message topic, such as a device ID, device address, or array index.
 
 &nbsp;  
-## Dynamic Page Property:
-When the dynamic page property is set on a page (ur_page node), the page will be interpreted as a placeholder within the Unified-RED menu system and not rendered. Instead, multiple instances of the dynamic page will be displayed based on the instance expression(s) provided.
+## Page Type Property:
+When the Page Type property on a page (ur_page node) is set to **Multi Page**, the page will be interpreted as a placeholder within the Unified-RED menu system and not rendered. Instead, multiple instances of the page will be displayed based on the instance expression(s) provided.
 
 &nbsp;  
 ## Instance Expressions Property:
@@ -33,9 +33,9 @@ Instance Names and Parameters can include single values, ranges, or comma-separa
 
 &nbsp;  
 ## Topic Patterns:
-Topic Patterns are used to filter incoming messages based on the topic and are required if this node is a member of a Dynamic Page. The pattern must include at least one Instance Parameter in braces, e.g. `{x}`. Optionally, the pattern may include `*` as wildcards to represent 0 or more characters in the topic. For example, `*/nvoSpaceTemp{x}/*`.
+Topic Patterns are used to filter incoming messages based on the topic and are required if this node is a member of a Multi Page. The pattern must include at least one Instance Parameter in braces, e.g. `{x}`. Optionally, the pattern may include `*` as wildcards to represent 0 or more characters in the topic. For example, `*/nvoSpaceTemp{x}/*`.
 
-To illustrate how parameters are substituted in a message topic, consider an air handler dynamic page for AHU-1, 2, and 3 where topics for each air handler are:
+To illustrate how parameters are substituted in a message topic, consider an air handler Multi Page for AHU-1, 2, and 3 where topics for each air handler are:
 
 | Point Description | Topic |
 | ----------------- | ----- |
