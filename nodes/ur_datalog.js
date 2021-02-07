@@ -5,8 +5,27 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         let node = this;
 
+        this.format = config.format;
+        this.maxDays = isNaN(config.maxDays) ? null : Math.max(parseInt(config.maxDays, 10), 1);
         this.inhibit = false;
         this.inhibitTimer = null;
+
+        let configCache = {};
+        let configCOV = function(msg, prop, value) {
+            if (typeof value === 'undefined') {
+                value = msg.payload[prop];
+            }
+            if (typeof value !== 'undefined') {
+                if (!configCache[msg.topic] || configCache[msg.topic][prop] !== value) {
+                    if (!configCache[msg.topic]) {
+                        configCache[msg.topic] = {};
+                    }
+                    configCache[msg.topic][prop] = value;
+                    return true;
+                }
+            }
+            return false;
+        };
 
         let processMessage = function (msg) {
             try {
@@ -14,34 +33,38 @@ module.exports = function (RED) {
                 let configure = false;
 
                 // configuration properties
-                if (typeof msg.newTopic === 'string') {
-                    entry.newTopic = msg.newTopic;
+                let maxDays = parseInt(msg.payload.maxDays || config.maxDays, 10);
+                if (configCOV(msg, 'maxDays', maxDays)) {
+                    entry.maxDays = maxDays;
                     configure = true;
                 }
-                if (typeof msg.maxDays === 'number') {
-                    entry.maxDays = msg.maxDays;
+                if (configCOV(msg, 'units')) {
+                    entry.units = msg.payload.units;
                     configure = true;
                 }
-                if (typeof msg.units === 'string') {
-                    entry.units = msg.units;
+                if (configCOV(msg, 'presets')) {
+                    entry.presets = msg.payload.presets;
                     configure = true;
                 }
-                if (msg.hasOwnProperty('presets')) {
-                    entry.presets = msg.presets;
+                if (Array.isArray(msg.payload.tags) && configCOV(msg, 'tags')) {
+                    entry.tags = msg.payload.tags;
                     configure = true;
                 }
-                if (Array.isArray(msg.tags)) {
-                    entry.tags = msg.tags;
+                if (typeof msg.payload.newTopic === 'string' && msg.topic !== msg.payload.newTopic) {
+                    entry.newTopic = msg.payload.newTopic;
                     configure = true;
+                    // map config cache entry to new topic
+                    configCache[msg.payload.newTopic] = configCache[msg.topic];
+                    delete configCache[msg.topic];
                 }
 
                 if (configure) {
                     datalogService.configureLogger(entry);
                 } else {
                     // log properties
-                    entry.value = msg.payload;
-                    if (typeof msg.status === 'string') {
-                        entry.status = msg.status;
+                    entry.value = format(msg);
+                    if (typeof msg.payload.health === 'string') {
+                        entry.health = msg.payload.health;
                     }
                     datalogService.log(entry);
                 }
@@ -114,6 +137,28 @@ module.exports = function (RED) {
             }
             return node.inhibit;
         };
+
+        // Example format expression: {{msg.payload.value}}
+        let format = function(msg) {
+            if (!node.format || node.format === '{{msg.payload.value}}') {
+                return msg.payload.value;
+            }
+            const expression = node.format.match(/\{\{[^\}]*\}\}/g);
+            if (expression && expression.length) {
+                let ret = node.format;
+                for (const exp of expression) {
+                    let value = { msg: msg };
+                    let inner = /\{\{([^\}\s]+)\}\}/g.exec(exp);
+                    for (const part of inner[1].split('.')) {
+                        value = value[part];
+                    }
+                    let escapedExp = exp.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+                    ret = ret.replace(new RegExp(escapedExp, 'g'), value);
+                }
+                return ret;
+            }
+            return msg.payload.value;
+        }
 
         this.on('input', function (msg) {
             if (checkInhibit(msg)) {
