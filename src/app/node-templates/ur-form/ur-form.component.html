@@ -33,7 +33,7 @@
                         [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
                         [disabled]="!access.write && data.accessBehavior === 'disable'" 
                         (change)="valueChange(field.topic, $event.target.value, field.type)">
-                        <option *ngFor="let opt of field.options | keyvalue" [value]="opt.value">{{ opt.key }}</option>
+                        <option *ngFor="let opt of field.options | keyvalue" [value]="opt.value || opt.key">{{ opt.key }}</option>
                     </select>
                 </mat-form-field>
 
