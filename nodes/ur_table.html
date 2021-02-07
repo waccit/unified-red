@@ -86,35 +86,20 @@
                                 $('<option>', { value: 'link' }).text('Link') )
                             .appendTo(row);
 
+                        let textFormatSection = $('<div>', { 
+                            style: 'width: 36.5%; display: inline-flex',
+                        }).appendTo(row);
+
                         //format text
                         let formatTextInput = $('<input/>', {
                             class: 'node-input-field-format-text',
                             type: 'text',
-                            style: 'margin-left: 5px; width: 23%;',
+                            style: 'margin-left: 5px; width: 63%;',
                             placeholder: '{{msg.payload.value}}'
                         })
-                            .appendTo(row)
+                            .appendTo(textFormatSection)
                             .val(field.format)
                             .change();
-
-                        //format link
-                        let formatLinkSelect = $('<select/>', {
-                            class: 'node-input-field-format-link',
-                            style: 'margin-left: 5px; width: 23%; display: none',
-                        }).appendTo(row);
-                        getUrPages(formatLinkSelect, field.format);
-
-                        formatTypeSelect.on('change', () => {
-                                if (formatTypeSelect.val() === 'link') {
-                                    formatTextInput.hide();
-                                    formatLinkSelect.show();
-                                }
-                                else {
-                                    formatLinkSelect.hide();
-                                    formatTextInput.show();
-                                }
-                            })
-                            .val(field.formatType || 'text').change();
 
                         // Units select
                         var optionAuto = { value: 'nothing', label: 'payload.units', hasValue: false };
@@ -122,9 +107,9 @@
                         $('<input/>', {
                             class: 'node-input-field-unit',
                             type: 'text',
-                            style: 'margin-left: 5px; width: 15%;',
+                            style: 'margin-left: 5px; width: 36%;',
                         })
-                            .appendTo(row)
+                            .appendTo(textFormatSection)
                             .val(field.unit)
                             .change()
                             .typedInput({
@@ -132,13 +117,33 @@
                                 typeField: $('<input/>', { class: '.node-input-field-unitType', type: 'hidden' }),
                                 types: [optionAuto, optionManual],
                             });
+
+                        //format link
+                        let formatLinkSelect = $('<select/>', {
+                            class: 'node-input-field-format-link',
+                            style: 'margin-left: 5px; width: 36%; display: none',
+                        }).appendTo(row);
+                        getUrPages(formatLinkSelect, field.format);
+
+                        formatTypeSelect.on('change', () => {
+                            if (formatTypeSelect.val() === 'link') {
+                                textFormatSection.hide();
+                                formatLinkSelect.show();
+                            }
+                            else {
+                                formatLinkSelect.hide();
+                                textFormatSection.show();
+                            }
+                        })
+                            .val(field.formatType || 'text').change();
+
                         //Regex Select
                         var optionSSIoT = { value: 'webApp', label: 'SmartServer IoT', hasValue: false };
                         var optionCustom = { value: 'custom', label: 'Custom', hasValue: true };
                         $('<input/>', {
                             class: 'node-input-field-device',
                             type: 'text',
-                            style: 'margin-left: 5px; width: 15%;',
+                            style: 'margin-left: 5px; width: 16%;',
                         })
                             .appendTo(row)
                             .val(field.device)
@@ -152,8 +157,8 @@
                         $('<input/>', {
                             class: 'node-input-field-param',
                             type: 'text',
-                            placeholder: 'param',
-                            style: 'margin-left: 5px; width: 15%;',
+                            placeholder: 'param filter',
+                            style: 'margin-left: 5px; width: 17%;',
                         })
                             .appendTo(row)
                             .val(field.param);
@@ -324,16 +329,12 @@
     <p>Each field contains following components:</p>
     <ul>
         <li><b>Label</b> : Field header label.</li>
+        <li><b>Value Type</b> : The type of value to be displayed - <b>Text</b> or <b>Link</b></li>
         <li>
-            <b>Value Format</b> : Formats the value to be displayed when set to <b>Text</b> and displays a hyperlink with the provided 
-            text when set to <b>Link</b>
+            <b>Text Format</b> : Formats the text value to be displayed. Units of measurement can be automatically appended to the value 
+            if they are included in <code>msg.payload.units</code> or can be manually set.</li>
         </li>
-        <li><b>Units</b> : Units of measurement to be displayed.</li>
-        <li>
-            <b>Display</b> : The <code>msg</code> property to be displayed. For example, set to <code>payload</code> to display 
-            <code>msg.payload</code> or <code>payload.<i>property</i></code> to display a property of <code>msg.payload</code>, e.g.
-            <code>payload.value</code>. When <b>Format</b> is set to <b>Link</b>, this property will be used as the hyperlink URL.
-        </li>
+        <li><b>Link</b> : Navigates the user to the selected page when the hyperlink is clicked.</li>
         <li>
             <b>Device Filter</b> : Used to generate rows (or columns when pivoted) based on the messages received. Setting to 
             <code>SmartServer IoT</code> will detect devices using the SmartServer IoT IAP topic schema. <code>Custom</code> allows you 
@@ -346,7 +347,7 @@
     </ul>
 
     <p>
-        <b>Value Format</b> when set to text is a 
+        <b>Text Format</b> is a 
         <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a> used to evaluate the value displayed.
         Additionally, JavaScript can be used to perform operations on the value, for example using 
         <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#binary_logical_operators" target="_blank">boolean</a>
