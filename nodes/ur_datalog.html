@@ -5,7 +5,7 @@
             color: '#81c784',
             defaults: {
                 name: { value: "" },
-                format: { value: '{{msg.payload.value}}' },
+                format: { value: 'msg.payload.value' },
                 maxDays: { value: 1 },
             },
             inputs: 1,
@@ -30,7 +30,7 @@
     </div>
     <div class="form-row">
         <label for="node-input-format"><i class="fa fa-i-cursor"></i> <span data-i18n="ur_datalog.label.format"></span></label>
-        <input type="text" id="node-input-format" placeholder="{{msg.payload.value}}" />
+        <input type="text" id="node-input-format" placeholder="msg.payload.value" />
     </div>
     <div class="form-row">
         <label for="node-input-maxDays"><i class="fa fa-tag"></i> <span data-i18n="ur_datalog.label.maxDays"></span></label>
