@@ -5,7 +5,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         let node = this;
 
-        this.format = config.format;
+        this.format = config.format || "msg.payload.value";
         this.maxDays = isNaN(config.maxDays) ? null : Math.max(parseInt(config.maxDays, 10), 1);
         this.inhibit = false;
         this.inhibitTimer = null;
@@ -62,7 +62,7 @@ module.exports = function (RED) {
                     datalogService.configureLogger(entry);
                 } else {
                     // log properties
-                    entry.value = format(msg);
+                    entry.value = RED.util.evaluateNodeProperty(node.format, 'msg', node, msg);
                     if (typeof msg.payload.health === 'string') {
                         entry.health = msg.payload.health;
                     }
@@ -137,28 +137,6 @@ module.exports = function (RED) {
             }
             return node.inhibit;
         };
-
-        // Example format expression: {{msg.payload.value}}
-        let format = function(msg) {
-            if (!node.format || node.format === '{{msg.payload.value}}') {
-                return msg.payload.value;
-            }
-            const expression = node.format.match(/\{\{[^\}]*\}\}/g);
-            if (expression && expression.length) {
-                let ret = node.format;
-                for (const exp of expression) {
-                    let value = { msg: msg };
-                    let inner = /\{\{([^\}\s]+)\}\}/g.exec(exp);
-                    for (const part of inner[1].split('.')) {
-                        value = value[part];
-                    }
-                    let escapedExp = exp.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-                    ret = ret.replace(new RegExp(escapedExp, 'g'), value);
-                }
-                return ret;
-            }
-            return msg.payload.value;
-        }
 
         this.on('input', function (msg) {
             if (checkInhibit(msg)) {
