@@ -218,6 +218,9 @@ module.exports = function (RED) {
                     return 'json';
                 case 'null':
                     return 'null';
+                case 'num':
+                case 'str':
+                    return varName;
             }
             let msg = node.msgCache[varName];
             if (msg) {

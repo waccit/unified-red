@@ -34,7 +34,7 @@
             defaults: {
                 name: { value: "" },
                 topic: { value: "" },
-                topics: { value: [{ name: "", topic: "", property: "payload" }] },
+                topics: { value: [{ name: "", topic: "", property: "msg.payload.value" }] },
                 conditions: { value: [{ varA: "", t: "eq", varB1: "", varB1t: "str", db: "", dbt: "" }] },
                 checkall: { value: "true", required: true },
                 latching: { value: "" },
@@ -74,7 +74,7 @@
                 let topicsContainer = $("#node-input-topics-container");
                 topicsContainer.css('min-height', '160px').css('min-width', '450px').editableList({
                     addItem: function (container, i, opt) {
-                        let value = opt.topic || { name: "", topic: "", property: "payload" };
+                        let value = opt.topic || { name: "", topic: "", property: "msg.payload.value" };
                         variables.push(value.name);
                         container.css({
                             overflow: 'hidden',
@@ -94,9 +94,9 @@
                         }
 
                         // topic field
-                        $('<input/>', { class: "node-input-topics-topic", type: "text", placeholder: "topic", style: "margin-left: 5px; width: 52%;" }).appendTo(row).val(value.topic);
+                        $('<input/>', { class: "node-input-topics-topic", type: "text", placeholder: "topic", style: "margin-left: 5px; width: 50%;" }).appendTo(row).val(value.topic);
                         // property field
-                        $('<input/>', { class: "node-input-topics-property", type: "text", placeholder: "msg property", style: "margin-left: 5px; width: 24%;" }).appendTo(row).val(value.property);
+                        $('<input/>', { class: "node-input-topics-property", type: "text", placeholder: "msg.payload.value", style: "margin-left: 5px; width: 26%;" }).appendTo(row).val(value.property);
                     },
                     sortable: true,
                     removable: true
