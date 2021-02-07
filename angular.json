@@ -32,9 +32,7 @@
                             "src/styles.scss"
                         ],
                         "scripts": [
-                            "src/assets/js/app.min.js",
-                            "src/assets/js/chart.min.js",
-                            "./node_modules/apexcharts/dist/apexcharts.min.js"
+                            "src/assets/js/app.min.js"
                         ],
                         "es5BrowserSupport": true
                     },
