@@ -40,6 +40,8 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         } else if (this.data.accessBehavior === 'disable') {
             this.container.find('input, select, button').attr('disabled', 'disabled');
         }
+        this.container.find('[title]').tooltip();
+        this.container.find('[popover],[data-toggle=popover]').popover();
     }
 
     updateValue(data: any) {
