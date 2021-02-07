@@ -149,10 +149,10 @@
                             break;
                         case 'select':
                             value = Object.entries(option.options)
-                                .map((o) => o[0] + ':' + o[1])
+                                .map((o) => o[0] + (o[1] ? ':' + o[1] : ''))
                                 .join(', ');
                             text = 'Options';
-                            placeholder = 'Options e.g. label1:value1, label2:value2';
+                            placeholder = 'Options e.g. value1, value2 ... or label1:value1, label2:value2';
                             row.show();
                             break;
                         default:
@@ -266,7 +266,7 @@
                     o.options = o.options.length ? o.options.split(/\s*,\s*/g)
                         .reduce((a, b) => {
                             var v = b.split(/\s*[:=]\s*/);
-                            a[v[0]] = v[1];
+                            a[v[0]] = v[1] || '';
                             return a;
                         }, {}) : {};
                 }
@@ -454,9 +454,15 @@
         <li><b>Label</b> : Value that will be the label of the element in the user interface</li>
         <li><b>Topic Filter</b> : Represents the topic or substring of the topic associated with <code>msg.payload</code></li>
         <li><b>Type</b> : Drop drown option to select the type of input element</li>
-        <li><b>Options</b> : for multiline, number of UI rows for multiline text input. for select, list of options label:value pairs.</li>
-        <li><b>Output</b> : used to override the <code>msg.topic</code> property when sending individual messages or used as a <code>msg.payload</code> property when sending as a single message.</li>
-        <li><b>Delete</b> : To remove the current element form the form</li>
+        <li>
+            <b>Options</b> : For text and number inputs, <code>units</code> of measurement and <code>precision</code> can be 
+            set. For multiline inputs, the number of <code>rows</code>. For select inputs, list of options as comma-separated
+            values or label:value pairs.
+        </li>
+        <li>
+            <b>Output</b> : Overrides the <code>msg.topic</code> property when sending individual messages or used as a 
+            <code>msg.payload</code> property when sending as a single message.
+        </li>
     </ul>
     <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the button.</p>
 
