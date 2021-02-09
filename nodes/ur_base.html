@@ -1280,31 +1280,43 @@
 
                     // folder button
                     var addFolderButton = $(
-                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.folder') +
-                            '</a>'
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"/> <i class="fa fa-folder-o"/> </a>'
                     ).appendTo(buttonGroup);
+                    // var addFolderButton = $(
+                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
+                    //         c_('layout.folder') +
+                    //         '</a>'
+                    // ).appendTo(buttonGroup);
 
                     // page button
                     var addPageButton = $(
-                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.page') +
-                            '</a>'
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"/> <i class="fa fa-file-o"/> </a>'
                     ).appendTo(buttonGroup);
+                    // var addPageButton = $(
+                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
+                    //         c_('layout.page') +
+                    //         '</a>'
+                    // ).appendTo(buttonGroup);
 
                     // link button
                     var addLinkButton = $(
-                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.link') +
-                            '</a>'
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"/> <i class="fa fa-link"/></a>'
                     ).appendTo(buttonGroup);
+                    // var addLinkButton = $(
+                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
+                    //         c_('layout.link') +
+                    //         '</a>'
+                    // ).appendTo(buttonGroup);
 
                     // edit button
                     let editButton = $(
-                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
-                            c_('layout.edit') +
-                            '</a>'
+                        '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"/></a>'
                     ).appendTo(buttonGroup);
+                    // let editButton = $(
+                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
+                    //         c_('layout.edit') +
+                    //         '</a>'
+                    // ).appendTo(buttonGroup);
 
                     editButton.on('click', function (evt) {
                         RED.editor.editConfig('', item.type, item.node.id);
