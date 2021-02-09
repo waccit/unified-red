@@ -32,6 +32,7 @@ import { UrScheduleComponent } from './ur-schedule/ur-schedule.component';
 import { UrScheduleFormDialogComponent } from './ur-schedule/ur-schedule-form-dialog.component';
 import { UrFormComponent } from './ur-form/ur-form.component';
 import { UrChartComponent } from './ur-chart/ur-chart.component';
+import { UrGaugeComponent } from './ur-gauge/ur-gauge.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -51,6 +52,7 @@ import { RouterModule } from '@angular/router';
         UrTableComponent,
         UrFormComponent,
         UrChartComponent,
+        UrGaugeComponent,
     ],
     imports: [
         RouterModule,

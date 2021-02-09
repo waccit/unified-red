@@ -56,3 +56,12 @@ app-ur-chart {
         }
     }
 }
+
+app-ur-gauge {
+    .ur-gauge-legend {
+        text-align: center;
+        .chart-legend .legend-label-text {
+            overflow: visible;
+        }
+    }
+}

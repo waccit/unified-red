@@ -9,6 +9,7 @@ import { UrScheduleComponent } from '../node-templates/ur-schedule/ur-schedule.c
 import { UrTableComponent } from '../node-templates/ur-table/ur-table.component';
 import { UrFormComponent } from '../node-templates/ur-form/ur-form.component';
 import { UrChartComponent } from '../node-templates/ur-chart/ur-chart.component';
+import { UrGaugeComponent } from '../node-templates/ur-gauge/ur-gauge.component';
 
 @Injectable({
     providedIn: 'root',
@@ -23,6 +24,8 @@ export class WidgetService {
                     return new Widget(UrButtonComponent, widget);
                 case 'chart':
                     return new Widget(UrChartComponent, widget);
+                case 'gauge':
+                    return new Widget(UrGaugeComponent, widget);
                 case 'text-input':
                     return new Widget(UrTextInputComponent, widget);
                 case 'template':
