@@ -1,0 +1,30 @@
+<div #container [id]="data.id">
+    <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
+        <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
+        <div class="ur-gauge-legend" *ngIf="data.legend">
+            <ngx-charts-legend class="chart-legend"
+                [data]="legendNames" 
+                [colors]="legendColors"
+                [horizontal]="true">
+            </ngx-charts-legend>
+        </div>
+        <div class="ur-gauge-container" [ngStyle]="{ 'height.px': 34 * data.height }">
+            <ngx-charts-gauge
+                [view]="gaugeOpt.view"
+                [scheme]="gaugeOpt.colorScheme"
+                [results]="graphedResults"
+                [legend]="false" 
+                [animations]="gaugeOpt.animation"
+                [bigSegments]="data.bigseg || 10"
+                [smallSegments]="data.smallseg || 5"
+                [startAngle]="gaugeOpt.startAngle"
+                [angleSpan]="gaugeOpt.angleSpan"
+                [min]="data.min"
+                [max]="data.max"
+                [showAxis]="!!data.showAxis"
+                [showText]="graphedResults?.length === 1"
+                [units]="data.units">
+            </ngx-charts-gauge>
+        </div>
+    </ng-template>
+</div>
