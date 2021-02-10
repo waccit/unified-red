@@ -3,17 +3,21 @@
         width: 87px !important;
         text-align: center;
     }
+
     input.series-color::-webkit-color-swatch {
         border: none;
     }
+
     input.node-input-topic-label {
         margin-left: 5px;
         width: 30% !important;
     }
+
     input.node-input-topic-topic {
         margin-left: 5px;
         width: 67% !important;
     }
+
     #line-chart-options input[type=checkbox] {
         width: auto;
         vertical-align: baseline;
@@ -33,7 +37,7 @@
             label: { value: '' },
             chartType: { value: 'line' },
             topic: { value: [] },
-            topics: { value: [ { label: '', topic: '' } ] },
+            topics: { value: [{ label: '', topic: '' }] },
             legend: { value: true },
             timeline: { value: true },
             curve: { value: 'curveLinear', required: true },
@@ -62,13 +66,18 @@
                     return value === '' || RED.validators.number();
                 },
             },
-            colors: { value: [
-                '#5899DA', '#E8743B', '#19A979', '#ED4A7B', '#945ECF', '#13A4B4', 
-                '#525DF4', '#BF399E', '#6C8893', '#EE6868', '#2F6497', '#5AA454'
-            ] },
+            colors: {
+                value: [
+                    '#5899DA', '#E8743B', '#19A979', '#ED4A7B', '#945ECF', '#13A4B4',
+                    '#525DF4', '#BF399E', '#6C8893', '#EE6868', '#2F6497', '#5AA454'
+                ]
+            },
             referenceLines: { value: [] },
             showRefLines: { value: false },
             outputs: { value: 0 },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
         },
         inputs: 0,
         outputs: 0,
@@ -139,16 +148,16 @@
                     b: parseInt(result[3], 16)
                 } : null;
             }
-            var setColour = function(id, value) {
+            var setColour = function (id, value) {
                 $(id).val(value);
                 $(id).css("background-color", value);
                 var rgb = hexToRgb(value);
-                var level = ((rgb.r*299) + (rgb.g*587) + (rgb.b*114))/1000;
+                var level = ((rgb.r * 299) + (rgb.g * 587) + (rgb.b * 114)) / 1000;
                 var textColor = (level >= 128) ? '#111111' : '#eeeeee';
                 $(id).css("color", textColor);
             }
-            $(".series-color").on("change", function() {
-                setColour("#"+$(this).attr("id"), $(this).val());
+            $(".series-color").on("change", function () {
+                setColour("#" + $(this).attr("id"), $(this).val());
             });
             if (!this.colors) {
                 this.colors = [
@@ -157,7 +166,7 @@
                 ];
             }
             for (let i = 0; i < this.colors.length; i++) {
-                setColour("#node-input-color" + (i+1), this.colors[i]);
+                setColour("#node-input-color" + (i + 1), this.colors[i]);
             }
 
             $('#node-input-referenceLines-container')
@@ -201,10 +210,10 @@
                 });
             });
 
-            this.colors = [ $("#node-input-color1").val(), $("#node-input-color2").val(), $("#node-input-color3").val(),
-                $("#node-input-color4").val(), $("#node-input-color5").val(), $("#node-input-color6").val(),
-                $("#node-input-color7").val(), $("#node-input-color8").val(), $("#node-input-color9").val(),
-                $("#node-input-color10").val(), $("#node-input-color11").val(), $("#node-input-color12").val() ];
+            this.colors = [$("#node-input-color1").val(), $("#node-input-color2").val(), $("#node-input-color3").val(),
+            $("#node-input-color4").val(), $("#node-input-color5").val(), $("#node-input-color6").val(),
+            $("#node-input-color7").val(), $("#node-input-color8").val(), $("#node-input-color9").val(),
+            $("#node-input-color10").val(), $("#node-input-color11").val(), $("#node-input-color12").val()];
 
             node.referenceLines = [];
             $('#node-input-referenceLines-container').editableList('items').each(function (i) {
