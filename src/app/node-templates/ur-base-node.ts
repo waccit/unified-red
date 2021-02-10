@@ -70,7 +70,10 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     updateValue(data: any) {
         if (this.container && this.container.length) {
             this.container.trigger([data]);
-            if (data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
+            // when health is available, insert hook into all point values, except for Animation and Template
+            if (this.constructor.name !== 'UrAnimationComponent' && 
+                this.constructor.name !== 'UrTemplateComponent' && 
+                data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
                 data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
                 let health = data.msg.payload.health.toString().toLowerCase();
                 $(document).ready(() => {
