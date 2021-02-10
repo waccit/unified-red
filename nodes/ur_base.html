@@ -2209,6 +2209,18 @@
                         }
                     }
 
+                    for (childFolderId in childFolders) {
+                        childFolder = childFolders[childFolderId];
+
+                        if (
+                            folders.hasOwnProperty(childFolder.folder) ||
+                            childFolders.hasOwnProperty(childFolder.folder)
+                        ) {
+                            folderChildren[childFolder.folder] = folderChildren[childFolder.folder] || [];
+                            folderChildren[childFolder.folder].push(childFolder);
+                        }
+                    }
+
                     for (pageId in pages) {
                         page = pages[pageId];
 
@@ -3152,8 +3164,7 @@
                     var fixedHeight = false;
                     if (that.options.hasOwnProperty('height')) {
                         maxHeight = Math.max(6, +height + 1);
-                    }
-                    else {
+                    } else {
                         fixedHeight = true;
                     }
                     // var group = $(that.options.group).val();
@@ -3810,9 +3821,8 @@
     }
 
     // TODO: MUST update this if root is changed
-    let apiInstallPath = window.location.pathname !== "/admin/" 
-        ? window.location.pathname + 'api/install/' 
-        : '/api/install/';
+    let apiInstallPath =
+        window.location.pathname !== '/admin/' ? window.location.pathname + 'api/install/' : '/api/install/';
     $.get(apiInstallPath, function (isInstalled) {
         if (!isInstalled) {
             var notification = RED.notify(

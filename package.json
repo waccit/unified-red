@@ -46,6 +46,7 @@
             "ur_compare": "nodes/ur_compare.js",
             "ur_chart": "nodes/ur_chart.js",
             "ur_datalog": "nodes/ur_datalog.js",
+            "ur_gauge": "nodes/ur_gauge.js",
             "ur_folder": "nodes/ur_folder.js",
             "ur_page": "nodes/ur_page.js",
             "ur_group": "nodes/ur_group.js",
