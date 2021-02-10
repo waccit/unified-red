@@ -129,6 +129,14 @@
             $("#node-input-max").on("change", function () {
                 $("#seg-max").text($(this).val());
             });
+            $("#node-input-gtype").on("change", function() {
+                let val = $(this).val();
+                if (val === "level-horz" || val === "level-vert" || val === "liquid") {
+                    $("#regular-gauge-options").hide();
+                } else {
+                    $("#regular-gauge-options").show();
+                }
+            });
         },
         oneditsave: function () {
             let node = this;
@@ -177,10 +185,17 @@
     <div class="form-row">
         <label for="node-input-gtype"><i class="fa fa-list"></i> Type</label>
         <select id="node-input-gtype" style="width:150px">
-            <option value="gauge">Gauge</option>
-            <option value="circle">Circle</option>
-            <option value="over">Over</option>
-            <option value="under">Under</option>
+            <optgroup label="Dial">
+                <option value="gauge">Regular</option>
+                <option value="circle">Circle</option>
+                <option value="over">Over</option>
+                <option value="under">Under</option>
+            </optgroup>
+            <optgroup label="Level">
+                <option value="level-horz">Horizontal</option>
+                <option value="level-vert">Vertical</option>
+                <option value="liquid">Liquid</option>
+            </optgroup>
         </select>
     </div>
     <div class="form-row" id="ui-gauge-format">
@@ -198,21 +213,23 @@
         <span for="node-input-max" style="margin-left:20px;">max</span>
         <input type="text" id="node-input-max" style="width:80px">
     </div>
-    <div class="form-row">
-        <label for="node-input-bigseg">Segments</label>
-        <span for="node-input-bigseg">big</span>
-        <input type="text" id="node-input-bigseg" style="width:80px">
-        <span for="node-input-smallseg" style="margin-left:20px;">small</span>
-        <input type="text" id="node-input-smallseg" style="width:80px">
-    </div>
-    <div class="form-row" id="line-chart-options">
-        <label for="node-input-legend">Options</label>
-        <span>
-            <input type="checkbox" id="node-input-legend" style="width: auto">
-            <label for="node-input-legend">Legend</label>
-            <input type="checkbox" id="node-input-showAxis" style="width: auto">
-            <label for="node-input-showAxis">Axis</label>
-        </span>
+    <div id="regular-gauge-options">
+        <div class="form-row">
+            <label for="node-input-bigseg">Segments</label>
+            <span for="node-input-bigseg">big</span>
+            <input type="text" id="node-input-bigseg" style="width:80px">
+            <span for="node-input-smallseg" style="margin-left:20px;">small</span>
+            <input type="text" id="node-input-smallseg" style="width:80px">
+        </div>
+        <div class="form-row">
+            <label for="node-input-legend">Options</label>
+            <span>
+                <input type="checkbox" id="node-input-legend" style="width: auto">
+                <label for="node-input-legend">Legend</label>
+                <input type="checkbox" id="node-input-showAxis" style="width: auto">
+                <label for="node-input-showAxis">Axis</label>
+            </span>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-input-color1">Colors</label>
@@ -265,7 +282,8 @@
     <h3>Details</h3>
     <p>
         The payload of each received message will be displayed on a gauge. Each unique topic received will be 
-        displayed on a separate line, therefore multiple values can be shown on the same gauge.
+        displayed on a separate line, therefore multiple values can be shown on the same dail gauge. Level 
+        gauges can only display single values therefore each unique topic will be shown on a separate gauge.
     </p>
 
     <!-- TAB / SIZE 2020-12-30 - START -->
@@ -286,8 +304,8 @@
         used as the data series name. Topics can include instance parameter variables when used with Multi Pages.
     </p>
     <p>
-        <b>Type</b> defines the style of gauge display - regular <i>gauge</i>, <i>circle</i>, <i>over</i> or 
-        <i>under</i> gauge.
+        <b>Type</b> defines the style of gauge display - <i>regular</i>, <i>circle</i>, <i>over</i>, or 
+        <i>under</i> dial gauges and <i>horizontal</i>, <i>vertical</i>, or <i>liquid</i> level gauges.
     </p>
     <p>
         <b>Value Format</b> is a
