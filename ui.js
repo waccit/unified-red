@@ -616,7 +616,7 @@ function updateUi(to) {
         //     o.theme = baseConfiguration.theme;
         // });
         to.emit('ui-controls', {
-            // site: baseConfiguration.site,
+            site: baseConfiguration.site,
             // theme: baseConfiguration.theme,
             menu: menu,
             globals: globals,
@@ -989,7 +989,7 @@ function addControl(folders, page, group, tab, control) {
 
                 for (let i = 0; i < instanceIds.length; i++) {
                     let pageTitle = pageTitlePrefix + instanceNames[i] + pageTitleSuffix;
-
+                    
                     let instancePage = {
                         id: page.id + '.' + instanceIds[i],
                         isPage: true,

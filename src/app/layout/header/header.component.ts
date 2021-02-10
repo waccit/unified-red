@@ -13,6 +13,7 @@ import { AuthenticationService, CurrentUserService, SnackbarService, AlarmServic
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
 import { Alarm } from '../../data';
 import { Subscription } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 
 const document: any = window.document;
 
@@ -24,7 +25,9 @@ const document: any = window.document;
 export class HeaderComponent implements OnInit, OnDestroy {
     newalarm = false;
     recentAlarms : Alarm[] = [];
+    site = { name:'', address: '', contactName:'', contactEmail:'', monitorServer:'' };
     private _wsSubscription: Subscription;
+    private _wsAlarmUpdate: Subscription;
 
     constructor(
         @Inject(DOCUMENT) private doc: Document,
@@ -38,6 +41,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         private snackbar: SnackbarService,
         private alarmService: AlarmService,
         private webSocketService: WebSocketService,
+        private titleService: Title
     ) {
         this.currentUserService.currentUser.subscribe(user => {
             if (user) {
@@ -51,7 +55,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.setStartupStyles();
-        this._wsSubscription = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
+        this._wsAlarmUpdate = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
 			if (msg && msg.payload) {
 				if (msg.action === 'create') {
                     if (msg.payload.state) { // active alarms only
@@ -68,10 +72,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
                     this.recentAlarms = this.recentAlarms.filter(a => a.id !== msg.payload.id);
 				}
 			}
-		});
+        });
+        this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
+            this.site = data.site;
+            if (this.site.name) {
+                this.titleService.setTitle(this.site.name + ' - Unified-RED');
+            }
+        });
     }
 
     ngOnDestroy(): void {
+        if (this._wsAlarmUpdate) {
+            this._wsAlarmUpdate.unsubscribe();
+        }
         if (this._wsSubscription) {
             this._wsSubscription.unsubscribe();
         }
