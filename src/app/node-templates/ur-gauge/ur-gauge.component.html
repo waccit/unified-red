@@ -8,23 +8,43 @@
                 [horizontal]="true">
             </ngx-charts-legend>
         </div>
-        <div class="ur-gauge-container" [ngStyle]="{ 'height.px': 34 * data.height }">
-            <ngx-charts-gauge
-                [view]="gaugeOpt.view"
-                [scheme]="gaugeOpt.colorScheme"
-                [results]="graphedResults"
+        <div class="ur-gauge-container" [ngStyle]="{ 'height.px': 34 * data.height }"
+            *ngIf="data.gtype !== 'level-vert' && data.gtype !== 'level-horz' && data.gtype !== 'liquid'">
+            <ngx-charts-gauge class="ur-gauge-dial"
+                [view]="dialGaugeOpt.view"
+                [scheme]="dialGaugeOpt.colorScheme"
+                [results]="dialGaugeResults"
                 [legend]="false" 
-                [animations]="gaugeOpt.animation"
+                [animations]="dialGaugeOpt.animation"
                 [bigSegments]="data.bigseg || 10"
                 [smallSegments]="data.smallseg || 5"
-                [startAngle]="gaugeOpt.startAngle"
-                [angleSpan]="gaugeOpt.angleSpan"
+                [startAngle]="dialGaugeOpt.startAngle"
+                [angleSpan]="dialGaugeOpt.angleSpan"
                 [min]="data.min"
                 [max]="data.max"
                 [showAxis]="!!data.showAxis"
-                [showText]="graphedResults?.length === 1"
+                [showText]="dialGaugeResults?.length === 1"
                 [units]="data.units">
             </ngx-charts-gauge>
+        </div>
+
+        <div class="ur-gauge-container" [ngStyle]="{ 'height.px': 34 * data.height }"
+            *ngIf="data.gtype === 'level-vert'">
+            <svg #levelGauge class="ur-gauge-level ur-gauge-level-vert" *ngFor="let topic of data.topics"
+                attr.width="{{ (100 - data.topics.length / 2) / data.topics.length }}%"
+                height="100%" style="margin-right:0.5%;"></svg>
+        </div>
+
+        <div class="ur-gauge-container" [ngStyle]="{ 'height.px': 34 * data.height }"
+            *ngIf="data.gtype === 'level-horz'">
+            <svg #levelGauge class="ur-gauge-level ur-gauge-level-horz" *ngFor="let topic of data.topics"
+                attr.height="{{ (100 - data.topics.length / 2) / data.topics.length }}%"
+                width="100%" style="margin-bottom:0.5%;"></svg>
+        </div>
+
+        <div class="ur-gauge-container" [ngStyle]="{ 'height.px': 34 * data.height }"
+            *ngIf="data.gtype === 'liquid'">
+            <svg #liquidGauge class="ur-gauge-liquid" *ngFor="let topic of data.topics"></svg>
         </div>
     </ng-template>
 </div>
