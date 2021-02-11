@@ -18,6 +18,9 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
         if (this.access.read || this.data.accessBehavior !== 'hide') {
             this.processImages();
         }
+        for (let rule of this.data.rules) {
+            rule.topic = this.evalInstanceParameters(rule.topic);
+        }
     }
 
     private processImages() {
@@ -36,7 +39,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
                     const that = this;
                     // load static image in the background to get the native image width and height
                     const nativeImg = new Image();
-                    nativeImg.onload = function() {
+                    nativeImg.onload = function () {
                         const img = this as HTMLImageElement;
                         that.convertToPercent(img.height, img.width);
                         img.remove();
@@ -51,28 +54,28 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     }
 
     convertToPercent(containerHeight, containerWidth) {
-        this.container.find('[animated]').each(function() {
+        this.container.find('[animated]').each(function () {
             const anime = $(this);
             const position = anime.position();
             const top = 100 * position.top / containerHeight;
             const left = 100 * position.left / containerWidth;
-            anime.css({ position:'absolute', top: top+'%', left: left+'%' });
+            anime.css({ position: 'absolute', top: top + '%', left: left + '%' });
             if (anime.is('img')) {
                 const width = anime.width();
                 const widthPerc = 100 * width / containerWidth;
-                anime.css({ width: widthPerc+'%', 'max-width': width+'px' });
+                anime.css({ width: widthPerc + '%', 'max-width': width + 'px' });
             }
         });
     }
 
-    updateValue(data:any) {
+    updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
             this.processRule(data);
         }
     }
 
-    private processRule(data:any) {
+    private processRule(data: any) {
         for (const rule of this.data.rules) {
             if (data.msg.topic.indexOf(rule.topic) !== -1) {
                 const element = this.container.find(`[animated][name='${rule.img}']`);
@@ -140,9 +143,9 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
         //   Find the fewest number of characters (lazy / ungreedy)
         const srcParts = /(.*?)([\d]+)(\..+)$/i.exec(src);
         if (!srcParts || srcParts.length !== 4) {
-            console.log('Animation failed to substitute image src property because the src attribute did not match the expected file path pattern:\n'+
-            '    Any file path that ends in one or more digits before the file extension:\n'+
-            '        any.thing/you_want0000.png\n', srcParts);
+            console.log('Animation failed to substitute image src property because the src attribute did not match the expected file path pattern:\n' +
+                '    Any file path that ends in one or more digits before the file extension:\n' +
+                '        any.thing/you_want0000.png\n', srcParts);
             return;
         }
         const result = this.formatFromData(data, exp);
