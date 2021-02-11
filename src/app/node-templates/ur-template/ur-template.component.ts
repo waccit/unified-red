@@ -1,4 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
 
 declare var $: any;
@@ -8,6 +9,16 @@ declare var $: any;
     styleUrls: ['./ur-template.component.sass'],
 })
 export class UrTemplateComponent extends BaseNode implements AfterViewInit {
+    constructor(
+        protected webSocketService: WebSocketService,
+        protected currentUserService: CurrentUserService,
+        protected roleService: RoleService,
+        protected snackbar: SnackbarService
+    ) {
+        super(webSocketService, currentUserService, roleService, snackbar);
+        this.processHealthIndicator = false;
+    }
+
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
@@ -50,17 +61,17 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
             const that = this;
             try {
                 data.msg.payload = JSON.parse(data.msg.payload);
-            } catch (ignore) {}
+            } catch (ignore) { }
             this.container.trigger('update-value', data);
             // process any elements with feedback topic attributes
-            const elements = this.container.find('[feedback]').filter(function() {
+            const elements = this.container.find('[feedback]').filter(function () {
                 return data.msg.topic.indexOf($(this).attr('feedback')) !== -1;
             });
-            elements.filter('input, select').each(function() {
+            elements.filter('input, select').each(function () {
                 let format = $(this).attr('format') || '{{msg.payload.value}}';
                 $(this).val(that.formatFromData(data, format));
             });
-            elements.not('img, input, select').each(function() {
+            elements.not('img, input, select').each(function () {
                 let format = $(this).attr('format') || '{{msg.payload.value}}';
                 $(this).html(that.formatFromData(data, format));
             });

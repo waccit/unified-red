@@ -17,13 +17,14 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     private _data: any;
     private _wsSubscription: Subscription;
     @ViewChild('container', { static: true }) private _container: ElementRef;
+    protected processHealthIndicator: Boolean = true;
 
     constructor(
         protected webSocketService: WebSocketService,
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService
-    ) {}
+    ) { }
 
     ngAfterViewInit(): void {
         this.webSocketService.join(this.nodeId);
@@ -71,8 +72,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         if (this.container && this.container.length) {
             this.container.trigger([data]);
             // when health is available, insert hook into all point values, except for Animation and Template
-            if (this.constructor.name !== 'UrAnimationComponent' && 
-                this.constructor.name !== 'UrTemplateComponent' && 
+            if (this.processHealthIndicator &&
                 data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
                 data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
                 let health = data.msg.payload.health.toString().toLowerCase();
@@ -109,7 +109,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             let variables = str.toLowerCase().match(/\{[^\}\/\+\#]+\}/g);
             if (variables) {
                 for (let variable of variables) {
-                    variable = variable.slice(1,-1); // remove braces
+                    variable = variable.slice(1, -1); // remove braces
                     let param = instance.parameters[variable];
                     if (typeof param !== 'undefined') {
                         str = str.replace(new RegExp('\{' + variable + '\}', 'ig'), param);
@@ -121,12 +121,12 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     // Example format expressions:
-	// {{msg.payload.value}}
-	// parseInt({{msg.payload.value}} / 10)
-	// parseInt(1 + {{msg.payload.value}} / (100 / 9))
-	// Math.round({{msg.payload.value}} / 10)
-	// parseInt( interpolate({{msg.payload.value}}, 0, 100, 1, 10) )
-	// Enumeration {{msg.payload.value | enum: '0:Offline, 1:Cooling, 2:Economizer, 3:Reheat, 4:Heat'}}
+    // {{msg.payload.value}}
+    // parseInt({{msg.payload.value}} / 10)
+    // parseInt(1 + {{msg.payload.value}} / (100 / 9))
+    // Math.round({{msg.payload.value}} / 10)
+    // parseInt( interpolate({{msg.payload.value}}, 0, 100, 1, 10) )
+    // Enumeration {{msg.payload.value | enum: '0:Offline, 1:Cooling, 2:Economizer, 3:Reheat, 4:Heat'}}
     formatFromData(data, format = this.data.format) {
         let ret = format;
         const expression = format.match(/\{\{[^\}]*\}\}/g);
@@ -149,7 +149,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                                 return a;
                             }, {});
                         value = enumMap[value];
-                    } catch (ignore) {}
+                    } catch (ignore) { }
                 }
 
                 if (typeof value !== 'undefined') {
@@ -163,20 +163,20 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                         value = '"' + value + '"';
                     }
                 }
-    
+
                 let escapedExp = exp.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
                 ret = ret.replace(new RegExp(escapedExp, 'g'), value);
             }
         }
         try {
-			return eval('(' + ret + '); ' + this.expressionGlobals);
-		} catch (ignore) {}
-		return ret;
+            return eval('(' + ret + '); ' + this.expressionGlobals);
+        } catch (ignore) { }
+        return ret;
     }
 
     formatAndSend(topic, value, format = this.data.format) {
         value = this.stripHTML(value);
-        let data = { 
+        let data = {
             msg: { topic: topic }
         };
         const expression = /^\{\{([^\}]*)\}\}$/.exec(format);
@@ -185,13 +185,13 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             const parts = expression[1].split('.');
             for (let i = 0; i < parts.length; i++) {
                 if (i === parts.length - 1) {
-                    walk[ parts[i] ] = value;
+                    walk[parts[i]] = value;
                 }
                 else {
-                    if (!walk[ parts[i] ]) {
-                        walk[ parts[i] ] = {};
+                    if (!walk[parts[i]]) {
+                        walk[parts[i]] = {};
                     }
-                    walk = walk[ parts[i] ];
+                    walk = walk[parts[i]];
                 }
             }
         }
