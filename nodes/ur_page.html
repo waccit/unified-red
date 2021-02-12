@@ -394,7 +394,7 @@
         let result = [];
         let rawCopy = raw;
 
-        rawCopy = rawCopy.split(/[ ,]+/).filter((x) => x);
+        rawCopy = rawCopy.split(/\s*,\s*/).filter((x) => x);
         for (let i = 0; i < rawCopy.length; i++) {
             let temp = explodeRange(rawCopy[i]).split(',');
             if (temp.length !== 0) {
