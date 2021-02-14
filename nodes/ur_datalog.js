@@ -56,9 +56,10 @@ module.exports = function (RED) {
 
                 if (configure) {
                     datalogService.configureLogger(entry);
-                } else {
-                    // log properties
-                    entry.value = RED.util.evaluateNodeProperty(node.format, 'msg', node, msg);
+                }
+
+                entry.value = RED.util.evaluateNodeProperty(node.format, 'msg', node, msg);
+                if (typeof entry.value !== 'undefined') {
                     if (typeof msg.payload.health === 'string') {
                         entry.health = msg.payload.health;
                     }
