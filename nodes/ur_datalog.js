@@ -42,10 +42,6 @@ module.exports = function (RED) {
                     entry.units = msg.payload.units;
                     configure = true;
                 }
-                if (configCOV(msg, 'presets')) {
-                    entry.presets = msg.payload.presets;
-                    configure = true;
-                }
                 if (Array.isArray(msg.payload.tags) && configCOV(msg, 'tags')) {
                     entry.tags = msg.payload.tags;
                     configure = true;
