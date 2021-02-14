@@ -1,4 +1,5 @@
 const { Sequelize, Op } = require('sequelize');
+const cron = require('node-cron');
 
 const operatorsAliases = {
     $eq: Op.eq,
@@ -81,6 +82,10 @@ module.exports = {
             return sequelizeStatus;
         }
 
+        function databaseMaintenance() {
+            sequelize.models.Datalog.destroy({ where: { expires: { $lte : new Date() } } });
+        }
+        
         (async () => {
             // setup associations/lookup models
             sequelize.models.Logger.hasMany(sequelize.models.Datalog);
@@ -95,6 +100,9 @@ module.exports = {
 
             // automatically setup tables
             await sequelize.sync({ hooks: true });
+
+            // schedule daily 3AM maintenance
+            cron.schedule('0 3 * * *', databaseMaintenance);
         })();
 
         function mongoDbAdapter(criteria, projection, options) {
