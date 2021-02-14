@@ -55,8 +55,6 @@
         <dd>changes the topic of existing records where <code>msg.topic</code> is the existing topic value</dd>
         <dt class="optional">payload.maxDays <span class="property-type">number</span></dt>
         <dd>changes the data retention setting</dd>
-        <dt class="optional">payload.presets <span class="property-type">object</span></dt>
-        <dd>changes preset values used to create enumerations</dd>
         <dt class="optional">payload.tags <span class="property-type">array</span></dt>
         <dd>changes metatags associated with the data</dd>
         <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
@@ -73,11 +71,6 @@
     <p>
         <b>Health</b>: When <code>msg.payload.health</code> is provided, the health status will be recorded with the value. 
         For example: <i>normal</i> or <i>down</i></p>
-    <p>
-        <b>Presets</b>: To map numeric values to text (enumerations), set <code>msg.payload.presets</code> to a key-value pair 
-        object where each key is the text value.<br>
-        For example: <code>{'on':'1', 'off':'0'}</code>
-    </p>
     <p>
         <b>Tags</b>: To associate metadata with a topic, set <code>msg.payload.tags</code> to an array of text tag names. 
         Applying metadata makes data more easily searchable and creates real-world relationships to the data.<br>
