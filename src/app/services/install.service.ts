@@ -9,12 +9,12 @@ export class InstallService {
         return this.http.get(`/api/install/`);
     }
     
-    install(mongoConnection, jwtsecret, smtp, adminAuthPath, staticPath) {
-        return this.http.post<any>('/api/install/', { mongoConnection, jwtsecret, smtp, adminAuthPath, staticPath });
+    install(dbConnection, jwtsecret, smtp, adminAuthPath, staticPath) {
+        return this.http.post<any>('/api/install/', { dbConnection, jwtsecret, smtp, adminAuthPath, staticPath });
     }
 
-    testDbConnection(mongoConnection) {
-        return this.http.post<any>('/api/install/testdb/', { mongoConnection });
+    testDbConnection(dbConnection) {
+        return this.http.post<any>('/api/install/testdb/', { dbConnection });
     }
 
     testSmtpServer(smtp) {

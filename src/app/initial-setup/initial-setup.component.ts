@@ -34,7 +34,7 @@ export class InitialSetupComponent implements OnInit {
 
     ngOnInit() {
         this.dbForm = this.formBuilder.group({
-            mongoConnection: ['mongodb://localhost:27017/unified-red', Validators.required],
+            dbConnection: ['mongodb://localhost:27017/unified-red', Validators.required],
         });
         this.jwtForm = this.formBuilder.group({
             jwtsecret: [this.generateKey(), Validators.required],
@@ -66,14 +66,14 @@ export class InitialSetupComponent implements OnInit {
             return;
         }
 
-        let mongoConnection = this.dbForm.controls.mongoConnection.value;
+        let dbConnection = this.dbForm.controls.dbConnection.value;
         let jwtsecret = this.jwtForm.controls.jwtsecret.value;
         let smtp = this.formSmtpObj();
         let adminAuthPath = this.nrForm.controls.adminAuthPath.value || undefined;
         let staticPath = this.nrForm.controls.staticPath.value || undefined;
 
         this.installService
-            .install(mongoConnection, jwtsecret, smtp, adminAuthPath, staticPath)
+            .install(dbConnection, jwtsecret, smtp, adminAuthPath, staticPath)
             .pipe(first())
             .subscribe(
                 (data) => {
@@ -102,8 +102,8 @@ export class InitialSetupComponent implements OnInit {
     testDb() {
         this.dbConnectionOk = false;
         this.dbProgress = true;
-        let mongoConnection = this.dbForm.controls.mongoConnection.value;
-        this.installService.testDbConnection(mongoConnection).subscribe((resp) => {
+        let dbConnection = this.dbForm.controls.dbConnection.value;
+        this.installService.testDbConnection(dbConnection).subscribe((resp) => {
             this.dbProgress = false;
             if (resp.result) {
                 this.dbConnectionOk = resp.result;

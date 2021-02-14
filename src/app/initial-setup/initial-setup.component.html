@@ -31,36 +31,120 @@
                                 <form [formGroup]="dbForm">
                                     <ng-template matStepLabel>Connect to database</ng-template>
                                     <mat-form-field class="example-full-width" appearance="outline">
-                                        <mat-label>MongoDB Connection</mat-label>
-                                        <input matInput formControlName="mongoConnection" required>
-                                        <mat-error *ngIf="dbForm.get('mongoConnection').hasError('required')">A MongoDB
+                                        <mat-label>Database Connection</mat-label>
+                                        <input matInput formControlName="dbConnection" required>
+                                        <mat-error *ngIf="dbForm.get('dbConnection').hasError('required')">A database
                                             connection is required
                                         </mat-error>
                                     </mat-form-field>
                                     <div>
-                                        Unified-RED requires a connection to a MongoDB database server.
-                                        <ul>
-                                            <li>
-                                                For instructions on installing MongoDB onto your local server, see
-                                                <a href="https://docs.mongodb.com/manual/installation/" target="_blank">
-                                                    Install MongoDB — MongoDB Manual
-                                                    <i class="fa fa-external-link" aria-hidden="true"></i>
-                                                </a>.
-                                            </li>
-                                            <li>
-                                                To setup a MongoDB in the cloud, see the
-                                                <a href="https://www.mongodb.com/cloud/atlas" target="_blank">
-                                                    MongoDB Atlas
-                                                    <i class="fa fa-external-link" aria-hidden="true"></i>
-                                                </a>cloud service.
-                                            </li>
-                                        </ul>
+                                        Unified-RED requires a connection to a MongoDB or SQLite database.
+                                        Postgres, MySQL, MariaDB, and Microsoft SQL Server are also supported with the
+                                        installation of additional database drivers.
+                                        <p class="mt-4 mb-4">
+                                            <mat-accordion>
+                                                <mat-expansion-panel>
+                                                    <mat-expansion-panel-header>
+                                                        <mat-panel-title>MongoDB (recommended)</mat-panel-title>
+                                                    </mat-expansion-panel-header>
+                                                    <p>For instructions on installing MongoDB onto your local server,
+                                                        see
+                                                        <a href="https://docs.mongodb.com/manual/installation/"
+                                                            target="_blank">
+                                                            Install MongoDB — MongoDB Manual
+                                                            <i class="fa fa-external-link" aria-hidden="true"></i></a>.
+                                                    </p>
+                                                    <p>To setup a MongoDB in the cloud, see the
+                                                        <a href="https://www.mongodb.com/cloud/atlas" target="_blank">
+                                                            MongoDB Atlas
+                                                            <i class="fa fa-external-link"
+                                                                aria-hidden="true"></i></a>cloud service.
+                                                    </p>
+                                                    <p>Example connection strings:</p>
+                                                    <table>
+                                                        <tr>
+                                                            <td class="pl-4">Local server:</td>
+                                                            <td class="pl-4"><code>mongodb://localhost:27017/unified-red</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">MongoDB Atlas:</td>
+                                                            <td class="pl-4" style="word-break: break-all;">
+                                                                <code>mongodb+srv://kay:myRealPassword@cluster0.mongodb.net/?serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000&w=majority</code>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </mat-expansion-panel>
+                                                <mat-expansion-panel>
+                                                    <mat-expansion-panel-header>
+                                                        <mat-panel-title>SQLite and others</mat-panel-title>
+                                                    </mat-expansion-panel-header>
+                                                    <p>SQLite is often included in Linux and embedded servers, however
+                                                        to download SQLite, see the
+                                                        <a href="https://www.sqlite.org/download.html" target="_blank">
+                                                            SQLite Download Page
+                                                            <i class="fa fa-external-link" aria-hidden="true"></i></a>.
+                                                    </p>
+                                                    <p>Example connection strings:</p>
+                                                    <table>
+                                                        <tr>
+                                                            <td class="pl-4">Relative path</td>
+                                                            <td class="pl-4"><code>sqlite:unified-red.db</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">Absolute path</td>
+                                                            <td class="pl-4"><code>sqlite:/media/sdcard/unified-red/unified-red.db</code></td>
+                                                        </tr>
+                                                    </table>
+                                                    <p class="mt-4">
+                                                        To connect to a Postgres, MySQL, MariaDB, or Microsoft SQL
+                                                        Server database, use NPM to install the respective database driver.</p>
+                                                    <table>
+                                                        <tr>
+                                                            <td class="pl-4">Postgres:</td>
+                                                            <td class="pl-4"><code>npm install --save pg pg-hstore</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">MySQL</td>
+                                                            <td class="pl-4"><code>npm install --save mysql2</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">MariaDB:</td>
+                                                            <td class="pl-4"><code>npm install --save mariadb</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">Microsoft SQL Server:</td>
+                                                            <td class="pl-4"><code>npm install --save tedious</code></td>
+                                                        </tr>
+                                                    </table>
+                                                    <p class="mt-3">Example connection strings:</p>
+                                                    <table>
+                                                        <tr>
+                                                            <td class="pl-4">Postgres:</td>
+                                                            <td class="pl-4"><code>postgres://user:pass@&lt;hostname&gt;:5432/unified-red</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">MySQL:</td>
+                                                            <td class="pl-4"><code>mysql://user:pass@&lt;hostname&gt;:3306/unified-red</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">MariaDB:</td>
+                                                            <td class="pl-4"><code>mariadb://user:pass@&lt;hostname&gt;:3306/unified-red</code></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="pl-4">Microsoft SQL Server:</td>
+                                                            <td class="pl-4"><code>mssql://user:pass@&lt;hostname&gt;:1433/unified-red</code></td>
+                                                        </tr>
+                                                    </table>
+                                                </mat-expansion-panel>
+                                            </mat-accordion>
+                                        </p>
                                     </div>
                                     <div>
                                         <button mat-button (click)="testDb()">
                                             Test<mat-progress-bar mode="buffer" *ngIf="dbProgress"></mat-progress-bar>
                                         </button>
-                                        <button mat-raised-button matStepperNext color="primary" [disabled]="!dbConnectionOk">Next</button>
+                                        <button mat-raised-button matStepperNext color="primary"
+                                            [disabled]="!dbConnectionOk">Next</button>
                                     </div>
                                 </form>
                             </mat-step>
@@ -68,8 +152,9 @@
                                 <form [formGroup]="jwtForm">
                                     <ng-template matStepLabel>Generate a JWT Secret</ng-template>
                                     <div class="mb-4">
-                                        JSON Web Token (JWT) is an open standard (RFC 7519) used to secure user logins in Unified-RED and Node-RED.
-                                        A unique secret key is required to digitally sign information and has been automatically generated for you.
+                                        JSON Web Token (JWT) is an open standard (RFC 7519) used to secure user logins
+                                        in Unified-RED and Node-RED. A unique secret key is required to digitally sign 
+                                        information and has been automatically generated for you.
                                         Click on the generate button if you'd like to generate a new key.
                                     </div>
                                     <mat-form-field class="example-full-width" appearance="outline">
@@ -158,7 +243,8 @@
                                         <button mat-button (click)="testSmtp()">
                                             Test<mat-progress-bar mode="buffer" *ngIf="smtpProgress"></mat-progress-bar>
                                         </button>
-                                        <button mat-raised-button matStepperNext color="primary" [disabled]="!smtpServerOk">Next</button>
+                                        <button mat-raised-button matStepperNext color="primary"
+                                            [disabled]="!smtpServerOk">Next</button>
                                     </div>
                                 </form>
                             </mat-step>
@@ -166,8 +252,9 @@
                                 <form [formGroup]="nrForm">
                                     <ng-template matStepLabel>Node-RED Overrides (Advanced)</ng-template>
                                     <div class="mb-4">
-                                        The following hooks are used to integrate Unified-RED with Node-RED and under normal circumstances 
-                                        should be left blank. However, if needed, you can override hook settings here.
+                                        The following hooks are used to integrate Unified-RED with Node-RED and under
+                                        normal circumstances should be left blank. However, if needed, you can override 
+                                        hook settings here.
                                     </div>
                                     <mat-form-field class="example-full-width" appearance="outline">
                                         <mat-label>Authentication Handler (blank by default)</mat-label>
@@ -192,9 +279,12 @@
                                     <span class="font-weight-bold">
                                         Important Notes: <br>
                                         <ul>
-                                            <li class="pt-2">Installation will cause Node-RED to be shutdown and must be manually restarted.</li>
-                                            <li class="pt-2 pb-2">After restart, Unified-RED will be accessible from <a [href]="urURL">{{ urURL }}</a><br>
-                                                and Node-RED will be acccessible from <a [href]="nrURL">{{ nrURL }}</a></li>
+                                            <li class="pt-2">Installation will cause Node-RED to be shutdown and must be
+                                                manually restarted.</li>
+                                            <li class="pt-2 pb-2">After restart, Unified-RED will be accessible from <a
+                                                    [href]="urURL">{{ urURL }}</a><br>
+                                                and Node-RED will be acccessible from <a [href]="nrURL">{{ nrURL }}</a>
+                                            </li>
                                         </ul>
                                     </span>
                                 </p>

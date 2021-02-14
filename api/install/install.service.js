@@ -30,7 +30,7 @@ async function isInstalled() {
         settings.httpRoot === '/' &&
         settings.ui && settings.ui.path && settings.ui.path === '/' &&
         config &&
-        config.mongoConnection &&
+        config.dbConnection &&
         config.jwtsecret &&
         config.smtp.host
     ) {
@@ -51,9 +51,9 @@ async function install(setup) {
     }
     try {
         // Add settings to config.json file
-        if (setup.mongoConnection || setup.jwtsecret || setup.smtp) {
-            if (setup.mongoConnection) {
-                config.mongoConnection = setup.mongoConnection;
+        if (setup.dbConnection || setup.jwtsecret || setup.smtp) {
+            if (setup.dbConnection) {
+                config.dbConnection = setup.dbConnection;
             }
             if (setup.jwtsecret) {
                 config.jwtsecret = setup.jwtsecret;
@@ -110,9 +110,9 @@ async function install(setup) {
     }
 }
 
-async function testDbConnection(mongoConnection) {
+async function testDbConnection(dbConnection) {
     try {
-        await db.test(mongoConnection);
+        await db.test(dbConnection);
         return { result: true };
     } catch (error) {
         return { result: false, error: error.message };

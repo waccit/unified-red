@@ -28,10 +28,10 @@ module.exports = {
 };
 
 async function authenticate({ username, password }) {
-    const user = await User.findOne({ username });
+    const user = await db.findOne(User, { username });
     checkValidUser(user);
     if (user && bcrypt.compareSync(password, user.hash)) {
-        let payload = { sub: user.id, role: user.role };
+        let payload = { sub: user._id, role: user.role };
         // Add expiration date if user is configured for session expiry
         if (user.sessionExpiration) {
             let today = parseInt(Date.now() / 1000);
@@ -47,15 +47,15 @@ async function authenticate({ username, password }) {
 
 async function canRegister() {
     // allow registration when no users exist
-    return (await User.countDocuments()) === 0;
+    return !(await db.findOne(User));
 }
 
 async function getAll() {
-    return await User.find();
+    return await db.find(User);
 }
 
 async function getById(id) {
-    return await User.findById(id);
+    return await db.findById(User, id);
 }
 
 async function register(userParam) {
@@ -68,7 +68,7 @@ async function register(userParam) {
 
 async function create(userParam) {
     // validate
-    if (await User.findOne({ username: userParam.username })) {
+    if (await db.findOne(User, { username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
     validateEmailAddress(userParam.email);
@@ -87,12 +87,12 @@ async function create(userParam) {
 }
 
 async function update(id, userParam) {
-    const user = await User.findById(id);
+    const user = await db.findById(User, id);
 
     if (!user) {
         throw 'User not found';
     }
-    if (user.username !== userParam.username && (await User.findOne({ username: userParam.username }))) {
+    if (userParam.username && user.username !== userParam.username && (await db.findOne(User, { username: userParam.username }))) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
     // validate email address if it was entered
@@ -116,34 +116,34 @@ async function update(id, userParam) {
 }
 
 async function _delete(id) {
-    if ((await User.countDocuments()) === 1) {
+    if (await db.count(User) === 1) {
         throw 'Unable to delete last user';
     }
-    const user = await User.findById(id);
+    const user = await db.findById(User, id);
     if (!user) {
         throw 'User not found';
     }
-    await User.findByIdAndRemove(id);
+    await db.findByIdAndRemove(User, id);
 }
 
 async function generateResetToken(req, username) {
     // TODO: decouple from http (req)
-    const user = await User.findOne({ 'username': username });
+    const user = await db.findOne(User, { 'username': username });
     checkValidUser(user);
 
     // generate reset token and save in user
     let token = uuidv4();
-    await update(user.id, { resetToken: token });
+    await update(user._id, { resetToken: token });
 
     // build email message
     let rootPath = '/';
     // let rootPath = '/ui';
-    if (typeof settings().ui !== 'undefined' && typeof settings().ui.path !== 'undefined') {
+    if (typeof settings().ui !== 'undefined' && typeof settings().ui.path !== 'undefined' && settings().ui.path !== '/') {
         rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
     }
-    let resetLink = req.protocol + '://' + req.get('host') + rootPath + '/#/authentication/reset-password/' + token;
+    let resetLink = req.protocol + '://' + req.get('host') + rootPath + '#/authentication/reset-password/' + token;
     let message =
-        "A password reset has been request for username '" +
+        "A password reset has been requested for username '" +
         user.username +
         "'. Please click this link to change your password: " +
         resetLink;
@@ -156,11 +156,11 @@ async function resetPassword(token, { password }) {
     // TODO: need web page to handle new password input
     // validate token and find user
     if (!token) throw 'Invalid or expired reset token';
-    const user = await User.findOne({ 'resetToken': token });
+    const user = await db.findOne(User, { 'resetToken': token });
     if (!user) throw 'Invalid or expired reset token';
 
     // update user password
-    return await update(user.id, { password: password, resetToken: null });
+    return await update(user._id, { password: password, resetToken: null });
 }
 
 function checkValidUser(user) {

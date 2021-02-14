@@ -20,7 +20,7 @@ These nodes require node.js version 8 or newer.
 
 ## Pre-requisites
 
-Unified-RED requires [Node-RED](https://nodered.org) and [MongoDB](https://www.mongodb.com) to be installed. Alternatively, [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/) can be used for cloud environments.
+Unified-RED requires [Node-RED](https://nodered.org) and either [MongoDB](https://www.mongodb.com) or [SQLite](https://www.sqlite.org) to be installed. Alternatively, [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/) can be used for cloud environments. Postgres, MySQL, MariaDB, and Microsoft SQL Server are also supported with the installation of additional database drivers.
 
 ## Install
 
@@ -58,7 +58,7 @@ For a typical installation, the initial setup provides you with everything you n
     ```
 ### Unified-RED's config.json File
 
-- **mongoConnection** - URL to the MongoDB server instance including the server hostname, port, username, password, and database name, e.g. `mongodb://user@password:localhost:27017/unified-red` for local instances
+- **dbConnection** - URL to the database server instance including the server hostname, port, username, password, and database name, e.g. `mongodb://user@password:localhost:27017/unified-red` for local instances
 - **jwtsecret** - Unique random encryption key used to secure logins. During initial setup a random key is generated for you, so you typically will never need to change this.
 - **smtp** - SMTP email server information used for system emails such as password resets. Includes server hostname, port, from address, username, password, and optional `ssl` encryption. If `ssl` is true the connection will use TLS when connecting to server. If false (the default) then TLS is used if server supports the STARTTLS extension. In most cases set this value to true if you are connecting to port 465. For port 587 or 25 keep it false. For example:
   ```json

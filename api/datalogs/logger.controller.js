@@ -23,7 +23,7 @@ router.delete('/', jsonParser, authorize(Role.Level09), deleteLogger);
 module.exports = router;
 
 // curl test:
-// curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWU2ZmQ1ZjJkNzc1MGNkNjg4N2M5MzIiLCJyb2xlIjoxMCwiaWF0IjoxNjAwOTkyMjAyfQ.zrn3AVBgLeKuhIIkj_iP39Rwg34V_nklRaD2ijjjlxk" http://localhost:1880/api/loggers
+// curl -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/loggers
 function list(req, res, next) {
     datalogService
         .list()
@@ -32,7 +32,7 @@ function list(req, res, next) {
 }
 
 // curl test:
-// curl -X PUT -d '{ "topic": "some/sensor/a" }' -H 'Content-Type: application/json' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWU2ZmQ1ZjJkNzc1MGNkNjg4N2M5MzIiLCJyb2xlIjoxMCwiaWF0IjoxNjAwOTkyMjAyfQ.zrn3AVBgLeKuhIIkj_iP39Rwg34V_nklRaD2ijjjlxk"  http://localhost:1880/api/loggers
+// curl -X PUT -d '{ "topic": "some/sensor/a" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN"  http://localhost:1880/api/loggers
 function getLogger(req, res, next) {
     datalogService
         .getLogger(req.body.topic)
@@ -41,7 +41,7 @@ function getLogger(req, res, next) {
 }
 
 // curl test:
-// curl -X POST -d '{ "topic": "some/sensor/a", "units": "%" }' -H 'Content-Type: application/json' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWU2ZmQ1ZjJkNzc1MGNkNjg4N2M5MzIiLCJyb2xlIjoxMCwiaWF0IjoxNjAwOTkyMjAyfQ.zrn3AVBgLeKuhIIkj_iP39Rwg34V_nklRaD2ijjjlxk" http://localhost:1880/api/loggers
+// curl -X POST -d '{ "topic": "some/sensor/a", "units": "%" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/loggers
 function configureLogger(req, res, next) {
     datalogService
         .configureLogger(req.body)
@@ -50,7 +50,7 @@ function configureLogger(req, res, next) {
 }
 
 // curl test:
-// curl -X DELETE -d '{ "topic": "some/sensor/a" }' -H 'Content-Type: application/json' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWU2ZmQ1ZjJkNzc1MGNkNjg4N2M5MzIiLCJyb2xlIjoxMCwiaWF0IjoxNjAwOTkyMjAyfQ.zrn3AVBgLeKuhIIkj_iP39Rwg34V_nklRaD2ijjjlxk"  http://localhost:1880/api/loggers
+// curl -X DELETE -d '{ "topic": "some/sensor/a" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN"  http://localhost:1880/api/loggers
 function deleteLogger(req, res, next) {
     datalogService
         .deleteLogger(req.body.topic)

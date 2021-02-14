@@ -56,7 +56,7 @@ function canRegister(req, res, next) {
 }
 
 // curl test:
-// curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "user", "password": "Password123", "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/register
+// curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "test", "password": "Password123", "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/register
 function register(req, res, next) {
     userService
         .register(req.body)
@@ -65,7 +65,7 @@ function register(req, res, next) {
 }
 
 // curl test:
-// curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/
+// curl -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/
 function getAll(req, res, next) {
     userService
         .getAll()
@@ -74,7 +74,7 @@ function getAll(req, res, next) {
 }
 
 // curl test:
-// curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/current
+// curl -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/current
 function getCurrent(req, res, next) {
     userService
         .getById(req.user.sub)
@@ -83,7 +83,7 @@ function getCurrent(req, res, next) {
 }
 
 // curl test:
-// curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/5ebb2e23ef03f345cd1d3b03
+// curl -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/$ID
 function getById(req, res, next) {
     userService
         .getById(req.params.id)
@@ -92,7 +92,7 @@ function getById(req, res, next) {
 }
 
 // curl test:
-// curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "user", "password": "Password123", "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/
+// curl -X POST -d '{ "firstName": "Jason", "lastName": "Watmore", "username": "test", "password": "Password123", "role":10, "email":"sarbid@wasocal.com", "expirationDate": "2021-05-13T21:18:57.008Z" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/
 function add(req, res, next) {
     userService
         .create(req.body)
@@ -101,8 +101,8 @@ function add(req, res, next) {
 }
 
 // curl test:
-// curl -X PUT -d '{ "enabled": false }' -H 'Content-Type: application/json' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/5ebb2e23ef03f345cd1d3b03
-// curl -X PUT -d '{ "expirationDate": "2020-05-11T21:18:57.008Z" }' -H 'Content-Type: application/json' -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/5ebb2e23ef03f345cd1d3b03
+// curl -X PUT -d '{ "enabled": false }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/$ID
+// curl -X PUT -d '{ "expirationDate": "2020-05-11T21:18:57.008Z" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/$ID
 function update(req, res, next) {
     userService
         .update(req.params.id, req.body)
@@ -111,7 +111,7 @@ function update(req, res, next) {
 }
 
 // curl test:
-// curl -X DELETE -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZWJiMTg2OWIxODUzOTNiZmJjMjExYzciLCJpYXQiOjE1ODkzMTk4NTh9.iuR2Z1n1POKFY6nt71GfETg4dK_frHr6zp_onF-7GV8" http://localhost:1880/api/users/5ebb0832baefe9371297c006
+// curl -X DELETE -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/$ID
 function _delete(req, res, next) {
     userService
         .delete(req.params.id)
@@ -129,7 +129,7 @@ function forgot(req, res, next) {
 }
 
 // curl test:
-// curl -X POST -d '{ "password": "Password123" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/reset/2a231b23-7020-4bed-aee5-2f5e6432968c
+// curl -X POST -d '{ "password": "Password1234" }' -H 'Content-Type: application/json' http://localhost:1880/api/users/reset/$RESET_TOKEN
 function resetPassword(req, res, next) {
     userService
         .resetPassword(req.params.token, req.body)

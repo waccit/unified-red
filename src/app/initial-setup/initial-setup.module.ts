@@ -11,6 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatStepperModule } from '@angular/material/stepper';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 import { InitialSetupComponent } from './initial-setup.component';
 import { InitialSetupConfirmation } from './initial-setup-confirmation.component';
@@ -30,6 +31,7 @@ import { InitialSetupConfirmation } from './initial-setup-confirmation.component
         MatInputModule,
         MatSnackBarModule,
         MatSlideToggleModule,
+        MatExpansionModule,
     ]
 })
 export class InitialSetupModule {}

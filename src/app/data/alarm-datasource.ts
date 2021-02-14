@@ -64,13 +64,6 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
 
     private reload() {
         if (this.summary) {
-            // summary mode
-            // server-side map reduce
-            // this.alarmService.getSummary().subscribe((data:any) => {
-            //     this.alarms = data.results.map(v => v.value);
-            //     this.alarmsSubject.next(this.alarms);
-            // });
-
             // client-side map reduce: opting for client-side map reduce to prevent server loading
             const result = {};
             for (const alarm of this.alarms) {
