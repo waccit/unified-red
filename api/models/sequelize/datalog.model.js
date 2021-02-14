@@ -20,5 +20,3 @@ module.exports = (sequelize) => {
 
     return model;
 };
-
-//schema.index({ expires: 1 }, { expireAfterSeconds: 0 }); // TODO: auto expire on sequelize?
