@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 const schema = new Schema({
     topic: { type: String, unique: true, required: true, index: true },
     units: { type: String },
-    presets: { type: Map, of: String },
     tags: { type: [String] },
     maxDays: { type: Number, required: true },
 }, {

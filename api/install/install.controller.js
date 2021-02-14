@@ -26,7 +26,7 @@ function install(req, res, next) {
 
 function testDbConnection(req, res, next) {
     installService
-        .testDbConnection(req.body.mongoConnection)
+        .testDbConnection(req.body.dbConnection)
         .then((result) => res.json(result))
         .catch((err) => next(err));
 }

@@ -12,12 +12,6 @@ export class AlarmService {
         return this.http.get<Alarm[]>(`/api/alarms/all/`, { params });
     }
 
-    getSummary(limit: number = 10000) {
-        let params = new HttpParams();
-        params = params.append('limit', limit + '');
-        return this.http.get<Alarm[]>(`/api/alarms/summary/`, { params });
-    }
-
     getRecentActive(limit: number = 10) {
         let params = new HttpParams();
         params = params.append('limit', limit + '');

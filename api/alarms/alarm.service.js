@@ -4,7 +4,6 @@ const Alarm = db.Alarm;
 
 module.exports = {
     getAll,
-    getSummary,
     getRecent,
     getById,
     getByTopic,
@@ -20,56 +19,23 @@ function maxLimit(l) {
 }
 
 async function getAll(limit) {
-    return await Alarm.find({}, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
-}
-
-async function getSummary(limit) {
-    return await Alarm.mapReduce({
-        map: function() {
-            emit(this.topic, {
-                severity: this.severity,
-                name: this.name,
-                topic: this.topic,
-                value: this.value,
-                state: this.state,
-                ackreq: this.ackreq,
-                timestamp: this.timestamp,
-                acktime: this.acktime || 0,
-                unackActive: this.state && !this.acktime ? 1 : 0
-            });
-        },
-        reduce: function(k, v) {
-            return v.reduce((prev, curr, index, array) => {
-                    var latest = curr.timestamp >= prev.timestamp ? curr : prev;
-                    latest.unackActive = prev.unackActive + curr.unackActive;
-                    return latest;
-                }
-            );
-        },
-        finalize: function(k, v) {
-            if (v.acktime === 0) {
-                delete v.acktime;
-            }
-            return v;
-        },
-        limit: maxLimit(limit)
-    });
+    return await db.find(Alarm, {}, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
 }
 
 async function getRecent(state, limit) {
-    return await Alarm.find({ "state" : !!state }, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
+    return await db.find(Alarm, { "state" : !!state }, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
 }
 
 async function getById(id) {
-    return await Alarm.findById(id);
+    return await db.findById(Alarm, id);
 }
 
 async function getByTopic(topic, limit) {
-    return await Alarm.find({ "topic" : topic }, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
+    return await db.find(Alarm, { "topic" : topic }, null, { sort: { "timestamp": -1 }, limit: maxLimit(limit) });
 }
 
 async function create(alarmParam) {
-    let prevAlarm = await Alarm.findOne({ "topic" : alarmParam.topic }, null, { sort: { "timestamp": -1 }});
+    let prevAlarm = await db.findOne(Alarm, { "topic" : alarmParam.topic }, null, { sort: { "timestamp": -1 }});
     if (prevAlarm && prevAlarm.severity === alarmParam.severity && prevAlarm.state === alarmParam.state) {
         throw 'Duplicate alarm for ' + alarmParam.topic;
     }
@@ -80,7 +46,7 @@ async function create(alarmParam) {
 }
 
 async function update(id, alarmParam) {
-    const alarm = await Alarm.findById(id);
+    const alarm = await db.findById(Alarm, id);
     if (!alarm) {
         throw 'Alarm not found';
     }
@@ -91,8 +57,8 @@ async function update(id, alarmParam) {
 }
 
 async function _ack(query) {    
-    query["$or"] = [ { "acktime" : { "$exists": false } }, { "acktime": 0 } ];
-    let alarms = await Alarm.find(query);
+    query["$or"] = [ { "acktime": null }, { "acktime": 0 } ];
+    let alarms = await db.find(Alarm, query);
     if (!alarms) {
         throw 'Alarm(s) not found';
     }
@@ -113,11 +79,11 @@ async function ackByTopic(topic) {
 }
 
 async function _delete(id) {
-    const alarm = await Alarm.findById(id);
+    const alarm = await db.findById(Alarm, id);
     if (!alarm) {
         throw 'Alarm not found';
     }
-    await Alarm.findByIdAndRemove(id);
+    await db.findByIdAndRemove(Alarm, id);
     socketio.connection().emit('ur-alarm-update', { "action": "delete", "payload": alarm });
 }
 

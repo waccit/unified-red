@@ -17,11 +17,11 @@ function maxLimit(l) {
 }
 
 async function list() {
-    return await Logger.distinct('topic');
+    return await db.distinct(Logger, 'topic');
 }
 
 async function getLogger(topic) {
-    const logger = await Logger.findOne({ topic: topic }, 'topic units presets tags capacity');
+    const logger = await db.findOne(Logger, { topic: topic }, 'topic units tags');
     if (!logger) {
         throw 'Logger not found';
     }
@@ -29,7 +29,7 @@ async function getLogger(topic) {
 }
 
 async function createLogger(param) {
-    let logger = await Logger.findOne({ topic: param.topic });
+    let logger = await db.findOne(Logger, { topic: param.topic });
     if (logger) {
         return logger;
     }
@@ -55,10 +55,10 @@ async function configureLogger(param) {
     return logger;
 }
 
-function deleteLogger(topic) {
-    const logger = Logger.findOneAndDelete({ topic: topic });
+async function deleteLogger(topic) {
+    const logger = await db.findOneAndDelete(Logger, { topic: topic });
     if (logger) {
-        Datalog.deleteMany({ logger: logger._id });
+        db.deleteMany(Datalog, { logger: logger._id });
     }
 }
 
@@ -68,13 +68,6 @@ function log(param) {
         datalog.logger = logger._id;
         datalog.expires = new Date(Date.now() + Math.max(logger.maxDays, 1) * 86400000);
         datalog.save();
-        let presetValue = '';
-        for (let preset in logger.presets) {
-            if (logger.presets[preset] + '' === datalog.value + '') {
-                presetValue = preset;
-                break;
-            }
-        }
         socketio.connection().emit('ur-datalog-update', {
             'action': 'log',
             'payload': {
@@ -83,7 +76,6 @@ function log(param) {
                 tags: logger.tags,
                 timestamp: datalog.timestamp,
                 value: datalog.value,
-                presetValue: presetValue,
                 status: datalog.status,
             },
         });
@@ -109,7 +101,6 @@ query returns:
         "timestamp": "2020-09-24T23:23:06.107Z",
         "value": 9.983341664682815,
         "units": "%",
-        "presetValue": "some preset",
         "tags": ["temp"],
         "status": "normal",
     },
@@ -121,10 +112,10 @@ async function query(param) {
     let criteria = [];
     if (param.topic) {
         if (Array.isArray(param.topic)) {
-            const loggerIds = await Logger.find({ 'topic': { '$in': param.topic } });
-            criteria.push({ logger: { '$in': loggerIds.map((l) => l._id) } });
+            const loggers = await db.find(Logger, { 'topic': { '$in': param.topic } });
+            criteria.push({ logger: { '$in': loggers.map(logger => logger._id) } });
         } else {
-            const logger = await Logger.findOne({ 'topic': param.topic });
+            const logger = await db.findOne(Logger, { 'topic': param.topic });
             criteria.push({ logger: logger._id });
         }
     }
@@ -164,51 +155,13 @@ async function query(param) {
         criteria = {};
     }
 
-    const operators = [
-        { $match: criteria },
-        { $limit: maxLimit(param.limit) },
-        { $lookup: { from: 'loggers', localField: 'logger', foreignField: '_id', as: 'loggerObj' } },
-        { $unwind: '$loggerObj' },
-        {
-            $project: {
-                _id: 0,
-                timestamp: 1,
-                value: 1,
-                status: 1,
-                topic: '$loggerObj.topic',
-                units: '$loggerObj.units',
-                presetValue: {
-                    /*
-                    Map value to preset if a matching preset exists:
-                    1. Convert preset object to array of objects, e.g. {'on':'1', 'off':'0'} -> [{k:'on', v:'1'}, {k:'off', v:'0'}]
-                    2. Filter object array where value equals preset value, e.g. if value is 1, result is [{k:'on', v:'1'}]
-                    3. Map the array to keys (k properties) only, e.g. result is ['on']
-                    4. Return the 0th element in the array, e.g. 'on'
-                    */
-                    $arrayElemAt: [
-                        {
-                            $map: {
-                                input: {
-                                    $filter: {
-                                        input: { $objectToArray: '$loggerObj.presets' },
-                                        cond: { $eq: [{ $toString: '$$this.v' }, { $toString: '$value' }] },
-                                    },
-                                },
-                                in: '$$this.k',
-                            },
-                        },
-                        0,
-                    ],
-                },
-            },
-        },
-    ];
-
+    let options = { 
+        limit: maxLimit(param.limit),
+    };
     if (param.sort) {
-        let sort = {};
-        sort[param.sort] = param.sortDir || -1;
-        operators.push({ $sort: sort });
+        options.sort = {};
+        options.sort[param.sort] = param.sortDir || -1;
     }
-
-    return await Datalog.aggregate(operators);
+    let projection = [ 'timestamp', 'value', 'status', 'Logger.topic', 'Logger.units', 'Logger.tags' ];
+    return db.join(Datalog, 'Logger', criteria, projection, options);
 }

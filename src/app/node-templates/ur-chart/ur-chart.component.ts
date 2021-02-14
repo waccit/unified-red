@@ -45,6 +45,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private labels = {};
     private showSeries = {};
     private lttb = new LargestTriangleThreeBuckets();
+    private nativeTimestamp = true;
 
     /*
      *      Table Members
@@ -258,8 +259,14 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
  
     private chartEntry(entry) {
+        let timestamp = this.nativeTimestamp ? new Date(entry.timestamp) : null;
+        if (!this.nativeTimestamp || !timestamp || isNaN(timestamp.getTime())) {
+            let t = entry.timestamp.split(/[- :]/);
+            timestamp = new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], t[4], t[5]));
+            this.nativeTimestamp = false;
+        }
         return {
-            name: new Date(entry.timestamp),
+            name: timestamp,
             value: entry.value,
         };
     }

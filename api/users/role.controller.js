@@ -16,6 +16,8 @@ router.put('/:level', jsonParser, authorize(Role.Level05), update);
 
 module.exports = router;
 
+// curl test:
+// curl -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/roles/
 function getAll(req, res, next) {
     roleService
         .getAll()
@@ -23,6 +25,8 @@ function getAll(req, res, next) {
         .catch((err) => next(err));
 }
 
+// curl test:
+// curl -X PUT -d '{ "name": "View123" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/roles/1
 function update(req, res, next) {
     roleService
         .update(req.params.level, req.body)

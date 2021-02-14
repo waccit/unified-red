@@ -7,7 +7,7 @@ module.exports = {
 };
 
 async function init() {
-    if (await Role.countDocuments() === 0) {
+    if (!(await db.findOne(Role))) {
         let defaultRoles = [
             { level: 1, name: 'Viewer' },
             { level: 2, name: 'Limited Operator' },
@@ -28,15 +28,15 @@ async function init() {
 init();
 
 async function getAll() {
-    return await Role.find();
+    return await db.find(Role);
 }
 
 async function update(level, roleParam) {
-    const role = await Role.findOne({ level: level });
+    const role = await db.findOne(Role, { level: level });
     if (!role) {
         throw 'Role not found';
     }
-    if (role.name !== roleParam.name && (await Role.findOne({ name: roleParam.name }))) {
+    if (role.name !== roleParam.name && (await db.findOne(Role, { name: roleParam.name }))) {
         throw 'Role "' + roleParam.name + '" is already taken';
     }
     role.name = roleParam.name;
