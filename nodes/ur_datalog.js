@@ -60,6 +60,9 @@ module.exports = function (RED) {
 
                 entry.value = RED.util.evaluateNodeProperty(node.format, 'msg', node, msg);
                 if (typeof entry.value !== 'undefined') {
+                    if (typeof entry.value === 'string' && !isNaN(entry.value)) {
+                        entry.value = parseFloat(entry.value);
+                    }
                     if (typeof msg.payload.health === 'string') {
                         entry.health = msg.payload.health;
                     }
