@@ -92,27 +92,27 @@ export class UrChartComponent extends BaseNode implements OnInit {
             (data: any) => { this.availableTopics = data; },
             (error) => { this.snackbar.error(error); }
         );
-        this.topicForm = this.formBuilder.group({ 
+        this.topicForm = this.formBuilder.group({
             label: ['', Validators.required],
             topic: ['', Validators.required]
         });
-        this.referenceLineForm = this.formBuilder.group({ 
+        this.referenceLineForm = this.formBuilder.group({
             name: ['', Validators.required],
             value: ['', Validators.required]
         });
-        this.colorForm = this.formBuilder.group({ 
-            color1: [ this.data.colors[0], Validators.required ],
-            color2: [ this.data.colors[1], Validators.required ],
-            color3: [ this.data.colors[2], Validators.required ],
-            color4: [ this.data.colors[3], Validators.required ],
-            color5: [ this.data.colors[4], Validators.required ],
-            color6: [ this.data.colors[5], Validators.required ],
-            color7: [ this.data.colors[6], Validators.required ],
-            color8: [ this.data.colors[7], Validators.required ],
-            color9: [ this.data.colors[8], Validators.required ],
-            color10: [ this.data.colors[9], Validators.required ],
-            color11: [ this.data.colors[10], Validators.required ],
-            color12: [ this.data.colors[11], Validators.required ],
+        this.colorForm = this.formBuilder.group({
+            color1: [this.data.colors[0], Validators.required],
+            color2: [this.data.colors[1], Validators.required],
+            color3: [this.data.colors[2], Validators.required],
+            color4: [this.data.colors[3], Validators.required],
+            color5: [this.data.colors[4], Validators.required],
+            color6: [this.data.colors[5], Validators.required],
+            color7: [this.data.colors[6], Validators.required],
+            color8: [this.data.colors[7], Validators.required],
+            color9: [this.data.colors[8], Validators.required],
+            color10: [this.data.colors[9], Validators.required],
+            color11: [this.data.colors[10], Validators.required],
+            color12: [this.data.colors[11], Validators.required],
         });
         this.live.subscribe(live => {
             if (live) {
@@ -130,7 +130,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.exporterOpt = {
             fileName: 'Unified Datalog' + (this.data.label.length ? ' ' + this.data.label : '')
         };
-    
+
 
         // Init table and graph
         this.queryParams = {
@@ -189,6 +189,15 @@ export class UrChartComponent extends BaseNode implements OnInit {
             .subscribe(
                 (data: any) => {
                     this.graphDataSource = data.reduce((out, entry) => {
+                        let timestamp = this.nativeTimestamp ? new Date(entry.timestamp) : null;
+                        //Timestamp conversion for SQL Database
+                        if (!this.nativeTimestamp || !timestamp || isNaN(timestamp.getTime())) {
+                            let t = entry.timestamp.split(/[- :]/);
+                            timestamp = new Date(Date.UTC(t[0], t[1] - 1, t[2], t[3], t[4], t[5]));
+                            this.nativeTimestamp = false;
+                        }
+                        entry.timestamp = timestamp;
+
                         let label = this.chartLabel(entry);
                         let newEntry = this.chartEntry(entry);
                         if (!out.hasOwnProperty(label)) {
@@ -245,7 +254,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
                 }
 
                 // refresh chart
-                this.updateGraphedResults([ ... this.graphedResults ]);
+                this.updateGraphedResults([... this.graphedResults]);
             }
         }
     }
@@ -257,16 +266,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
         }
         return label;
     }
- 
+
     private chartEntry(entry) {
-        let timestamp = this.nativeTimestamp ? new Date(entry.timestamp) : null;
-        if (!this.nativeTimestamp || !timestamp || isNaN(timestamp.getTime())) {
-            let t = entry.timestamp.split(/[- :]/);
-            timestamp = new Date(Date.UTC(t[0], t[1]-1, t[2], t[3], t[4], t[5]));
-            this.nativeTimestamp = false;
-        }
         return {
-            name: timestamp,
+            name: new Date(entry.timestamp),
             value: entry.value,
         };
     }
@@ -283,7 +286,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         if (typeof label !== 'string') { // legend clicks return strings. series clicks return objects.
             return;
         }
-        let legendLabel = $(".legend-label span[title='"+label+"']")
+        let legendLabel = $(".legend-label span[title='" + label + "']")
         let data = $.extend(true, [], this.graphedResults); // deep copy/clone data
         const isShown = this.showSeries[label];
         if (isShown) {
@@ -317,9 +320,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
      *      Settings Functions
      */
 
-     setDirty() {
+    setDirty() {
         this.dirty = true;
-     }
+    }
 
     setCurve(value: any) {
         this.chartOpt.curve = shape[value];
@@ -359,7 +362,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
             return;
         }
         if (!this.data.topics.find(t => t.topic === this.topicForm.value.topic)) {
-            this.data.topics = [ ... this.data.topics, this.topicForm.value ];
+            this.data.topics = [... this.data.topics, this.topicForm.value];
             this.setDirty();
         }
     }
@@ -376,7 +379,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
             return;
         }
         if (!this.data.referenceLines.find(r => r.value === this.referenceLineForm.value.value)) {
-            this.data.referenceLines = [ ... this.data.referenceLines, this.referenceLineForm.value ];
+            this.data.referenceLines = [... this.data.referenceLines, this.referenceLineForm.value];
             this.setDirty();
         }
     }
@@ -393,8 +396,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
             return;
         }
         let cf = this.colorForm.value;
-        this.data.colors = [ 
-            cf.color1, cf.color2, cf.color3, cf.color4, cf.color5, cf.color6, 
+        this.data.colors = [
+            cf.color1, cf.color2, cf.color3, cf.color4, cf.color5, cf.color6,
             cf.color7, cf.color8, cf.color9, cf.color10, cf.color11, cf.color12
         ];
         this.chartOpt.colorScheme.domain = this.data.colors;

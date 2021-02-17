@@ -74,7 +74,7 @@ function log(param) {
                 topic: logger.topic,
                 units: logger.units,
                 tags: logger.tags,
-                timestamp: datalog.timestamp,
+                timestamp: datalog.timestamp || new Date(),
                 value: datalog.value,
                 status: datalog.status,
             },
@@ -113,7 +113,7 @@ async function query(param) {
     if (param.topic) {
         if (Array.isArray(param.topic)) {
             const loggers = await db.find(Logger, { 'topic': { '$in': param.topic } });
-            criteria.push({ logger: { '$in': loggers.map(logger => logger._id) } });
+            criteria.push({ logger: { '$in': loggers.map((logger) => logger._id) } });
         } else {
             const logger = await db.findOne(Logger, { 'topic': param.topic });
             criteria.push({ logger: logger._id });
@@ -155,13 +155,13 @@ async function query(param) {
         criteria = {};
     }
 
-    let options = { 
+    let options = {
         limit: maxLimit(param.limit),
     };
     if (param.sort) {
         options.sort = {};
         options.sort[param.sort] = param.sortDir || -1;
     }
-    let projection = [ 'timestamp', 'value', 'status', 'Logger.topic', 'Logger.units', 'Logger.tags' ];
+    let projection = ['timestamp', 'value', 'status', 'Logger.topic', 'Logger.units', 'Logger.tags'];
     return db.join(Datalog, 'Logger', criteria, projection, options);
 }
