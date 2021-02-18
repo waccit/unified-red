@@ -57,7 +57,7 @@ export class ProfileComponent implements OnInit {
         );
         this.currentUserService.currentUser.subscribe((user: User) => {
             if (user) {
-                this.userId = user.id;
+                this.userId = user._id;
                 this.username = user.username;
                 this.settingsForm.setValue({
                     firstName: user.firstName,

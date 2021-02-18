@@ -1,5 +1,5 @@
 export interface RoleName {
-    id: string;
+    _id: string;
     level: string;
     name: string;
 }

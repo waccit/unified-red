@@ -66,10 +66,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
                     }
 				}
 				else if (msg.action === 'update') {
-                    this.recentAlarms = this.recentAlarms.map(a => a.id === msg.payload.id ? msg.payload : a);
+                    this.recentAlarms = this.recentAlarms.map(a => a._id === msg.payload.id ? msg.payload : a);
 				}
 				else if (msg.action === 'delete') {
-                    this.recentAlarms = this.recentAlarms.filter(a => a.id !== msg.payload.id);
+                    this.recentAlarms = this.recentAlarms.filter(a => a._id !== msg.payload.id);
 				}
 			}
         });
