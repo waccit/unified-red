@@ -405,11 +405,12 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     deploy() {
-        const nodesToReplace = [this.data.id];
+        const baseNodeId = this.getBaseNodeId(this.data.id);
+        const nodesToReplace = [baseNodeId];
         this.red
             .deployNodes(nodesToReplace, (existing) => {
                 switch (existing.id) {
-                    case this.data.id:
+                    case baseNodeId:
                         existing.chartType = this.data.chartType;
                         existing.topics = this.data.topics;
                         existing.xrange = this.data.xrange;

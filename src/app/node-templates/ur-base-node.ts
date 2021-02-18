@@ -60,6 +60,13 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         return this.data ? this.data.id : null;
     }
 
+    getBaseNodeId(nodeId = this.data.id): string {
+        if (nodeId) {
+            return nodeId.split('.').slice(0,2).join('.')
+        }
+        return null;
+    }
+
     get data() {
         return this._data;
     }
