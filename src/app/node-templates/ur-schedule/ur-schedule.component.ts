@@ -474,14 +474,16 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     }
 
     deploy() {
-        const nodesToReplace = [this.data.id, this.data.holidaysId];
+        const baseNodeId = this.getBaseNodeId(this.data.id);
+        const baseHolidayNodeId = this.getBaseNodeId(this.data.holidaysId);
+        const nodesToReplace = [baseNodeId, baseHolidayNodeId];
         this.red
             .deployNodes(nodesToReplace, (existing) => {
                 switch (existing.id) {
-                    case this.data.holidaysId:
+                    case baseHolidayNodeId:
                         existing.events = this.data.holidays;
                         break;
-                    case this.data.id:
+                    case baseNodeId:
                         existing.dates = this.data.dates;
                         existing.weekdays = this.data.weekdays;
                         break;
