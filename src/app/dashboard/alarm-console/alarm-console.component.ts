@@ -43,9 +43,9 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
                     if (msg.action === 'create') {
                         this.dataSource.add(msg.payload);
                     } else if (msg.action === 'update') {
-                        this.dataSource.update(msg.payload.id, msg.payload);
+                        this.dataSource.update(msg.payload._id, msg.payload);
                     } else if (msg.action === 'delete') {
-                        this.dataSource.delete(msg.payload.id);
+                        this.dataSource.delete(msg.payload._id);
                     }
                 } else if (this.view === 'summary') {
                     this.refreshData();
@@ -83,7 +83,7 @@ export class AlarmConsoleComponent implements OnInit, OnDestroy {
 
     clearAlarm(row) {
         if (this.canClear) {
-            this.alarmService.delete(row.id).subscribe((data) => {
+            this.alarmService.delete(row._id).subscribe((data) => {
                 this.snackbar.success(row.name + ' deleted');
             });
         }

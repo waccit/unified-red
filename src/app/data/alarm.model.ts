@@ -1,5 +1,5 @@
 export interface Alarm {
-    id: string;
+    _id: string;
     severity: string;
     name: string;
     topic: string;

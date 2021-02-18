@@ -40,12 +40,12 @@ export class AlarmDataSource extends GenericDataSource<Alarm> {
     }
 
     update(id: string, item: Alarm) {
-        this.alarms = this.alarms.map((a) => (a.id === id ? item : a));
+        this.alarms = this.alarms.map((a) => (a._id === id ? item : a));
         this.reload();
     }
 
     delete(id: string) {
-        this.alarms = this.alarms.filter((a) => a.id !== id);
+        this.alarms = this.alarms.filter((a) => a._id !== id);
         this.reload();
     }
 

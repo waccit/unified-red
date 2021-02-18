@@ -66,7 +66,7 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
-                    this.userService.update(row.id, result).subscribe((data) => {
+                    this.userService.update(row._id, result).subscribe((data) => {
                         this.snackbar.success('Edited user successfully!');
                         this.refreshTable();
                     });
@@ -80,7 +80,7 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result === 1) {
-                    this.userService.delete(row.id).subscribe((data) => {
+                    this.userService.delete(row._id).subscribe((data) => {
                         this.snackbar.success('Deleted user successfully!');
                         this.refreshTable();
                     });

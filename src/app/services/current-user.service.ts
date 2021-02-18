@@ -14,7 +14,7 @@ export class CurrentUserService {
             this.currentUserSubject.next(user);
             this.webSocketService.listen('ur-user-update').subscribe((data: any) => {
                 // filter on user id
-                if (this.currentUserSubject.value && data.id === this.currentUserSubject.value.id) {
+                if (this.currentUserSubject.value && data.id === this.currentUserSubject.value._id) {
                     this.currentUserSubject.next(data);
                 }
             });
