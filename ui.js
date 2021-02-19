@@ -962,7 +962,6 @@ function addControl(folders, page, group, tab, control) {
                 dynamicGroups[group.id] = true;
                 dynamicWidgets[control.id] = true;
             } else {
-                console.log('foundFolder: ', foundFolder);
                 foundFolder.items = foundFolder.items.filter(function (p) {
                     return !p.id.startsWith(page.id);
                 });
@@ -1309,33 +1308,39 @@ function addControl(folders, page, group, tab, control) {
 // dashboard was able to accomplish this because they just add directly to the menu @ root level
 // and rely on link.order & itemSorter.. we are required to add dummy folder(s) and have the control (add())
 // take care of recognizing dummy folders & correctly adding required data...
-function addLink(id, name, folders, link, icon, order, target) {
+function addLink(id, title, folders, link, icon, order, target) {
+    if (!link || !link.length) {
+        return () => {};
+    }
     let newLink = {
         id,
-        name,
+        title,
         // folders,
         link,
         icon,
         order: order || 1,
         target,
+        submenu: [],
     };
 
     // console.log('folders: ', folders);
 
     let foldersStack = [...folders];
     let parent = null;
-    let isRoot = true;
+    let isRoot;
     let foundFolder;
     let currFolder;
 
+    // console.log('foldersStack: ', foldersStack);
+
     while (foldersStack.length > 0) {
+        isRoot = foldersStack.length === folders.length;
         currFolder = foldersStack.pop();
 
         if (isRoot) {
             foundFolder = find(menu, function (f) {
                 return f.id === currFolder.id;
             });
-            isRoot = false;
         } else {
             parent = findFolderById(menu, currFolder.config.folder);
             foundFolder = find(parent.items, function (f) {
