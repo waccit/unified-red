@@ -4,7 +4,7 @@
         color: 'rgb( 63, 173, 181)',
         defaults: {
             name: { value: 'Google' },
-            folder: { type: 'ur_folder', required: false },
+            folder: { value: 'Root' },
             link: { value: 'https://www.google.com' },
             icon: { value: 'new-window' },
             target: {
@@ -28,17 +28,69 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
-            document.getElementById('node-config-input-target-opentab').checked = this.target === 'newtab';
-            document.getElementById('node-config-input-target-openthis').checked = this.target === 'thistab';
+            document.getElementById('node-config-input-target-newtab').checked = this.target === 'newtab';
+            document.getElementById('node-config-input-target-thistab').checked = this.target === 'thistab';
+
+            // let folderSelect = $(document.getElementsByClassName('node-input-config-folder')[0]);
+            let folderSelect = $('.node-input-config-folder');
+            // console.log('defaults.value.folder? ', this._def.defaults.folder.value);
+            // console.log('this.folder? ', this.folder);
+            // console.log('folderSelect? ', folderSelect);
+            let val = this.folder ? this.folder : this._def.defaults.folder.value;
+            getUrFolders(folderSelect, val);
         },
         oneditsave: function () {
             var t = 'newtab';
-            if (document.getElementById('node-config-input-target-openthis').checked) {
+            if (document.getElementById('node-config-input-target-thistab').checked) {
                 t = 'thistab';
             }
             this.target = t;
+
+            let f = $(document.getElementsByClassName('node-input-config-folder')[0]).val();
+            this.folder = f;
+            console.log('this.folder? ', this.folder);
         },
     });
+
+    function getUrFolders(select, value) {
+        var node_def = RED.nodes.getType('ur_folder');
+        select.children().remove();
+
+        $('<option value="root"' + (value ? ' selected' : '') + '>ROOT</option>').appendTo(select);
+
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
+
+        var configNodes = [];
+        RED.nodes.eachConfig(function (config) {
+            if (config.type == 'ur_folder' && (!config.z || config.z === activeWorkspace.id)) {
+                var label = RED.utils.getNodeLabel(config, config.id);
+                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
+                configNodes.push(config);
+            }
+        });
+        try {
+            configNodes.sort(function (A, B) {
+                if (A.__label__ < B.__label__) {
+                    return -1;
+                } else if (A.__label__ > B.__label__) {
+                    return 1;
+                }
+                return 0;
+            });
+        } catch (ignore) {}
+        configNodes.forEach(function (cn) {
+            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
+                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
+                .appendTo(select);
+            delete cn.__label__;
+        });
+        window.setTimeout(function () {
+            select.trigger('change');
+        }, 50);
+    }
 </script>
 
 <script type="text/html" data-template-name="ur_link">
@@ -50,10 +102,16 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-folder"
-            ><i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span
+            ><i class="fa fa-folder-o"></i> <span data-i18n="ur_link.label.folder"></span
+        ></label>
+        <select class="node-input-config-folder"></select>
+    </div>
+    <!-- <div class="form-row">
+        <label for="node-config-input-folder"
+            ><i class="fa fa-folder-o"></i> <span data-i18n="ur_folder.label.folder"></span
         ></label>
         <input type="text" id="node-config-input-folder" />
-    </div>
+    </div> -->
     <div class="form-row">
         <label for="node-config-input-link"
             ><i class="fa fa-link"></i> <span data-i18n="ur_link.label.link"></span
@@ -70,19 +128,19 @@
         <label><i class="fa fa-link"></i> <span data-i18n="ur_link.label.open-in"></span></label>
         <input
             type="radio"
-            id="node-config-input-target-opentab"
+            id="node-config-input-target-newtab"
             name="open-link-method"
             style="width:20px; margin-top:0px; margin-bottom:5px"
             checked
         />
-        <label for="node-config-input-target-opentab" data-i18n="ur_link.label.new-tab"></label><br />
+        <label for="node-config-input-target-newtab" data-i18n="ur_link.label.new-tab"></label><br />
         <input
             type="radio"
-            id="node-config-input-target-openthis"
+            id="node-config-input-target-thistab"
             name="open-link-method"
             style="width:20px; margin-left:104px; margin-top:0px; margin-bottom:5px"
         />
-        <label for="node-config-input-target-openthis" data-i18n="ur_link.label.this-tab"></label><br />
+        <label for="node-config-input-target-thistab" data-i18n="ur_link.label.this-tab"></label><br />
     </div>
     <!-- <div class="form-tips" data-i18n="[html]ur_link.tip"></div> -->
 </script>

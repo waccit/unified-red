@@ -81,7 +81,8 @@
         background: var(--nr-db-light-text);
     } */
 
-    .nr-db-sb-list-chevron {
+    .nr-db-sb-list-chevron,
+    .nr-db-sb-link-chevron {
         width: 15px;
         text-align: center;
         margin: 3px 5px 3px 5px;
@@ -1367,19 +1368,19 @@
                                         node.order = i + 1;
                                         changed = true;
                                     }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
                                     if (node.folder !== item.node.id) {
-                                        var oldFolderNode = RED.nodes.node(node.folder);
+                                        let oldFolderNode = RED.nodes.node(node.folder);
                                         if (oldFolderNode) {
-                                            var index = oldFolderNode.users.indexOf(node);
+                                            let index = oldFolderNode.users.indexOf(node);
                                             oldFolderNode.users.splice(index, 1);
                                         }
                                         node.folder = item.node.id;
                                         item.node.users.push(node);
                                         changed = true;
+                                    }
+                                    if (changed) {
+                                        node.dirty = true;
+                                        node.changed = true;
                                     }
                                 });
                                 RED.history.push({
@@ -1425,38 +1426,52 @@
                 };
 
                 var addLink = function (container, i, item) {
-                    console.log('container: ', container);
-                    console.log('i: ', i);
-                    console.log('item: ', item);
+                    let titleClass = 'nr-db-sb-list-header nr-db-sb-folder-list-header';
+                    let containerClass = 'nr-db-sb-folder-list-item';
+                    // console.log('container: ', container);
+                    // console.log('i: ', i);
+                    // console.log('item: ', item);
 
                     if (!item.node.folder && item.folder) {
                         item.node.folder = item.folder;
                     }
 
+                    if (item.folder) {
+                        // item.node.folder = item.folder;
+                        elementParents[item.node.id] = item.node.folder;
+                        titleClass = 'nr-db-sb-list-header nr-db-sb-folder-content-list-header';
+                        containerClass = 'nr-db-sb-folder-content-list-item';
+                    }
+
                     let linkNode = item.node;
                     elementParents[linkNode.id] = item.node.folder;
 
-                    container.addClass('nr-db-sb-link-list-item');
-
-                    // title row
+                    // title
                     let titleRow = $('<div>', {
-                        class: 'nr-db-sb-list-header nr-db-sb-folder-content-list-header',
+                        class: titleClass,
                     }).appendTo(container);
+
+                    container.addClass(containerClass);
 
                     // handle
                     $('<i class="nr-db-sb-list-handle nr-db-sb-link-list-handle fa fa-bars"></i>').appendTo(titleRow);
 
                     // chevron
-                    let chevron = $('<i class="fa fa-angle-down nr-db-sb-list-chevron">', {
+                    let chevron = $('<i class="fa fa-angle-right nr-db-sb-link-chevron">', {
                         style: 'width:10px;',
                     }).appendTo(titleRow);
+
+                    // chevron stand-in
+                    // let chevronStandIn = $('<i class="fa fa-minus fa-xs nr-db-sb-list-chevron"/>', {
+                    //     style: 'width:7px;',
+                    // }).appendTo(titleRow);
 
                     // icon
                     $('<i class="fa fa-external-link nr-db-sb-icon"></i>').appendTo(titleRow);
 
                     // title
                     $('<span class="nr-db-sb-title">')
-                        .text(item.node.name || 'untitled')
+                        .text(linkNode.name || 'untitled')
                         .appendTo(titleRow);
 
                     // buttons
@@ -1575,10 +1590,6 @@
                                         node.order = i + 1;
                                         changed = true;
                                     }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
                                     if (node.page !== item.node.id) {
                                         var oldPageNode = RED.nodes.node(node.page);
                                         if (oldPageNode) {
@@ -1588,6 +1599,10 @@
                                         node.page = item.node.id;
                                         item.node.users.push(node);
                                         changed = true;
+                                    }
+                                    if (changed) {
+                                        node.dirty = true;
+                                        node.changed = true;
                                     }
                                 });
                                 RED.history.push({
@@ -1710,10 +1725,6 @@
                                         node.order = i + 1;
                                         changed = true;
                                     }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
                                     if (node.group !== item.node.id) {
                                         var oldGroupNode = RED.nodes.node(node.group);
                                         if (oldGroupNode) {
@@ -1723,6 +1734,10 @@
                                         node.group = item.node.id;
                                         item.node.users.push(node);
                                         changed = true;
+                                    }
+                                    if (changed) {
+                                        node.dirty = true;
+                                        node.changed = true;
                                     }
                                 });
                                 RED.history.push({
@@ -1972,6 +1987,7 @@
                     .appendTo(divTabs)
                     .editableList({
                         sortable: '.nr-db-sb-folder-list-header',
+                        connectWith: '.nr-db-sb-folder-list',
                         addButton: false,
                         addItem: addMenuEntity,
                         sortItems: function (items) {
@@ -2244,10 +2260,7 @@
                     // Find all the folders, pages, groups, and tabs from flow.json
                     RED.nodes.eachConfig(function (node) {
                         switch (node.type) {
-                            case 'ur_link': {
-                                // TODO: ur_link stuffs
-                                break;
-                            }
+                            case 'ur_link':
                             case 'ur_folder': {
                                 if (!node.folder) {
                                     folders[node.id] = node;
@@ -2497,6 +2510,12 @@
                                                     : { id: child.id };
                                             p.groups = getNestedChildren(child, format);
                                             result.push(p);
+                                        } else if (child.type === 'ur_link') {
+                                            let l =
+                                                format === 'dashboard'
+                                                    ? { node: { ...child, folder: parent.id } }
+                                                    : { id: child.id };
+                                            result.push(l);
                                         }
                                     }
                                 }
@@ -2553,6 +2572,9 @@
                         folderForNewList.children = getNestedChildren(folders[folderId], 'new-list');
                         newList.push(folderForNewList);
                     });
+
+                    console.log('newList: ', newList);
+                    console.log('currentList: ', currentList);
 
                     if (JSON.stringify(newList) !== JSON.stringify(currentList)) {
                         listElements = {};
@@ -2770,6 +2792,7 @@
                 editSaveEventHandler = function (node) {
                     if (/^ur_/.test(node.type)) {
                         if (
+                            node.type === 'ur_link' ||
                             node.type === 'ur_folder' ||
                             node.type === 'ur_page' ||
                             node.type === 'ur_group' ||
@@ -2782,6 +2805,11 @@
                                     .find('.nr-db-sb-title')
                                     .text(node.name || node.id);
                                 if (node.type === 'ur_group' || node.type === 'ur_tab') {
+                                    refresh();
+                                } else if (node.type === 'ur_link') {
+                                    if (node.folder === 'root') {
+                                        node.folder = undefined;
+                                    }
                                     refresh();
                                 } else if (node.type === 'ur_page') {
                                     if (node.isDynamic) {
@@ -2830,15 +2858,29 @@
                                 }
                             } else if (node.type === 'ur_folder') {
                                 if (!node.folder) {
-                                    // Adding a root folder
+                                    // Adding a root folder or link
                                     folderContainer.editableList('addItem', { node: node, children: [] });
                                 } else if (folderLists[node.folder]) {
-                                    // Adding a child folder
+                                    // Adding a child folder or link
                                     folderLists[node.folder].editableList('addItem', {
                                         node: node,
                                         child: true,
                                         children: [],
                                     });
+                                }
+                            } else if (node.type === 'ur_link') {
+                                if (!node.folder) {
+                                    // Adding a root folder or link
+                                    folderContainer.editableList('addItem', { node: node });
+                                } else if (folderLists[node.folder]) {
+                                    // Adding a child folder or link
+                                    folderLists[node.folder].editableList('addItem', { node: node });
+                                }
+
+                                if (listElements[node.id]) {
+                                    var container = listElements[node.id];
+                                    container.find('.nr-db-sb-link-name').text(node.name || 'untitled');
+                                    container.find('.nr-db-sb-link-url').text(node.link);
                                 }
                             } else if (node.type === 'ur_page') {
                                 // Adding a page
@@ -2858,12 +2900,6 @@
                                         widgets: [],
                                     });
                                 }
-                            }
-                        } else if (node.type === 'ur_link') {
-                            if (listElements[node.id]) {
-                                var container = listElements[node.id];
-                                container.find('.nr-db-sb-link-name').text(node.name || 'untitled');
-                                container.find('.nr-db-sb-link-url').text(node.link);
                             }
                         } else {
                             // TODO: fix orphaned widgets
@@ -2952,6 +2988,7 @@
                 function handlePendingAdds() {
                     var hasFolders = false;
                     var hasChildFolders = false;
+                    var hasLinks = false;
                     var hasPages = false;
                     var hasGroups = false;
                     var hasTabs = false;
@@ -2965,12 +3002,13 @@
                             hasChildFolders ||
                             (A.type === 'ur_folder' && A.folder) ||
                             (B.type === 'ur_folder' && B.folder);
+                        hasLinks = hasLinks || A.type === 'ur_link' || B.type === 'ur_link';
                         hasPages = hasPages || A.type === 'ur_page' || B.type === 'ur_page';
                         hasGroups = hasGroups || A.type === 'ur_group' || B.type === 'ur_group';
                         hasTabs = hasTabs || A.type === 'ur_tab' || B.type === 'ur_tab';
 
                         if (A.type === B.type) {
-                            if (A.type === 'ur_folder') {
+                            if (A.type === 'ur_folder' || A.type === 'ur_link') {
                                 if (A.folder === undefined && B.folder !== undefined) {
                                     return -1;
                                 } else if (A.folder !== undefined && B.folder === undefined) {
@@ -2983,6 +3021,10 @@
                         if (A.type === 'ur_folder') {
                             return -1;
                         } else if (B.type === 'ur_folder') {
+                            return 1;
+                        } else if (A.type === 'ur_link') {
+                            return -1;
+                        } else if (B.type === 'ur_link') {
                             return 1;
                         } else if (A.type === 'ur_page') {
                             return -1;
@@ -3003,7 +3045,7 @@
 
                     for (var i = 0; i < pendingAdd.length; i++) {
                         var node = pendingAdd[i];
-                        if (node.type === 'ur_folder' && !node.folder) {
+                        if ((node.type === 'ur_folder' || node.type === 'ur_link') && !node.folder) {
                             folderContainer.editableList('addItem', { node: node, children: [] });
                         } else {
                             if (hasFolders) {
@@ -3012,17 +3054,18 @@
                                 pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                 return;
                             }
-                            if (node.type === 'ur_folder' && node.folder) {
+                            if ((node.type === 'ur_folder' || node.type === 'ur_link') && node.folder) {
                                 if (folderLists[node.folder]) {
                                     folderLists[node.folder].editableList('addItem', { node: node, children: [] });
                                 }
                             } else {
                                 // we've added some child folders, need to give jquery time to add the lists
-                                if (hasChildFolders) {
+                                if (hasChildFolders || hasLinks) {
                                     pendingAdd = pendingAdd.slice(i);
                                     pendingAddTimer = setTimeout(handlePendingAdds, 50);
                                     return;
                                 }
+
                                 if (node.type === 'ur_page') {
                                     if (folderLists[node.folder]) {
                                         folderLists[node.folder].editableList('addItem', {

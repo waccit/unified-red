@@ -6,9 +6,10 @@ module.exports = function (RED) {
         var node = this;
 
         var folders = [];
+        config.icon = 'ti-' + config.icon;
 
-        console.log('node: ', node);
-        console.log('config: ', config);
+        // console.log('node: ', node);
+        // console.log('config: ', config);
 
         var { folders, ...ignored } = ui.makeMenuTree(RED, config);
         // console.log('ignored: ', ignored);
