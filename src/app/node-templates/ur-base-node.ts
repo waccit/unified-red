@@ -187,7 +187,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             msg: { topic: topic }
         };
         const expression = /^\{\{([^\}]*)\}\}$/.exec(format);
-        if (expression.length >= 2 && value) {
+        if (expression.length >= 2 && typeof value !== 'undefined') {
             let walk = data;
             const parts = expression[1].split('.');
             for (let i = 0; i < parts.length; i++) {
