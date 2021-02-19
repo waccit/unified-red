@@ -1428,9 +1428,6 @@
                 var addLink = function (container, i, item) {
                     let titleClass = 'nr-db-sb-list-header nr-db-sb-folder-list-header';
                     let containerClass = 'nr-db-sb-folder-list-item';
-                    // console.log('container: ', container);
-                    // console.log('i: ', i);
-                    // console.log('item: ', item);
 
                     if (!item.node.folder && item.folder) {
                         item.node.folder = item.folder;
@@ -2572,9 +2569,6 @@
                         folderForNewList.children = getNestedChildren(folders[folderId], 'new-list');
                         newList.push(folderForNewList);
                     });
-
-                    console.log('newList: ', newList);
-                    console.log('currentList: ', currentList);
 
                     if (JSON.stringify(newList) !== JSON.stringify(currentList)) {
                         listElements = {};

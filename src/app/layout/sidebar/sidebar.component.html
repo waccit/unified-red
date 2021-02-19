@@ -21,7 +21,6 @@
                     <div class="header" *ngIf="sidebarItem.groupTitle === true">
                         {{ sidebarItem.title }}
                     </div>
-                    <!-- <div *ngIf="!sidebarItem.link"> -->
                     <a
                         [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
                         *ngIf="!sidebarItem.groupTitle && !sidebarItem.link"
@@ -31,7 +30,6 @@
                         <i [ngClass]="[sidebarItem.icon]"></i>
                         <span class="hide-menu">{{ sidebarItem.title }} </span>
                     </a>
-                    <!-- </div> -->
 
                     <div *ngIf="sidebarItem.link">
                         <a

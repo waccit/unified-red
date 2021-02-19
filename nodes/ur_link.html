@@ -31,11 +31,7 @@
             document.getElementById('node-config-input-target-newtab').checked = this.target === 'newtab';
             document.getElementById('node-config-input-target-thistab').checked = this.target === 'thistab';
 
-            // let folderSelect = $(document.getElementsByClassName('node-input-config-folder')[0]);
             let folderSelect = $('.node-input-config-folder');
-            // console.log('defaults.value.folder? ', this._def.defaults.folder.value);
-            // console.log('this.folder? ', this.folder);
-            // console.log('folderSelect? ', folderSelect);
             let val = this.folder ? this.folder : this._def.defaults.folder.value;
             getUrFolders(folderSelect, val);
         },
@@ -48,7 +44,6 @@
 
             let f = $(document.getElementsByClassName('node-input-config-folder')[0]).val();
             this.folder = f;
-            console.log('this.folder? ', this.folder);
         },
     });
 
