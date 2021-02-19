@@ -13,7 +13,7 @@
             "width": "Width",
             "default": "Default",
             "page": "Page",
-            "dynamic-page": "Dynamic Page",
+            "multi-page": "Multi Page",
             "expression": "Instance Name Expression",
             "instances": "Instances",
             "unassigned": "unassigned"
@@ -21,8 +21,8 @@
         "info": {
             "disabled": " Page is inactive in Dashboard.",
             "hidden": " Page is not shown in Navigation Menu.",
-            "isDynamic": " Page is now a Dynamic Page"
+            "isMulti": " Page is now a Multi Page"
         },
-        "tip": "<b>Dynamic</b> Page creates pseudo pages in Unified-RED to simplify creating pages with identical groups, tabs, & widgets. A Dynamic page requires:<br /><ul><li>Instance Name Expression: must include <em>{x}</em> (variable). In the generated pseudo pages, the <em>{x}</em> shall be replaced by each instance name of the matching instance parameter.</li><li>Instance Names: The list (comma separated and/or range) of user defined names that will replace <em>{x}</em> in the <strong>Instance Name Expression</strong> to form instance display names.</li><li>Instance Parameters: The list of variable-values pairs that are used as instance identifiers and as topic (e.g., MQTT) substitution variables.<br /><ul><li>Variable: User-defined keywords that are used to identify substitutable parts of the message topic. (e.g. 'glp/0/17qdcee/fb/dev/lon/siot-1/if/WebServer/{ws}/nvoStatus_{index}' where <strong><em>ws</em></strong> and <strong><em>index</em></strong> are variables). Please <strong>NOTE:</strong> variable names must match exactly between instances and the <em>topic pattern</em> of the individual widgets that are a part of the dynamic page.</li><li>Values: Expected values (alpha-numeric) that will appear in the message topics (in place of the variable). Please <strong>NOTE:</strong> the number of values must match the number of <strong>Instance Names</strong>.</li></ul></li></ul>"
+        "tip": "<b>Multi</b> Page creates pseudo pages in Unified-RED to simplify creating pages with identical groups, tabs, & widgets. A Multi page requires:<br /><ul><li>Instance Name Expression: must include <em>{x}</em> (variable). In the generated pseudo pages, the <em>{x}</em> shall be replaced by each instance name of the matching instance parameter.</li><li>Instance Names: The list (comma separated and/or range) of user defined names that will replace <em>{x}</em> in the <strong>Instance Name Expression</strong> to form instance display names.</li><li>Instance Parameters: The list of variable-values pairs that are used as instance identifiers and as topic (e.g., MQTT) substitution variables.<br /><ul><li>Variable: User-defined keywords that are used to identify substitutable parts of the message topic. (e.g. 'glp/0/17qdcee/fb/dev/lon/siot-1/if/WebServer/{ws}/nvoStatus_{index}' where <strong><em>ws</em></strong> and <strong><em>index</em></strong> are variables). Please <strong>NOTE:</strong> variable names must match exactly between instances and the <em>topic pattern</em> of the individual widgets that are a part of the multi page.</li><li>Values: Expected values (alpha-numeric) that will appear in the message topics (in place of the variable). Please <strong>NOTE:</strong> the number of values must match the number of <strong>Instance Names</strong>.</li></ul></li></ul>"
     }
 }
