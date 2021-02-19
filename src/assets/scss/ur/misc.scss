@@ -15,3 +15,9 @@ app-ur-form:not(:last-child) {
     background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px);
     border: 1px solid  #ffd000 !important;
 }
+
+app-ur-table {
+    a {
+        white-space: nowrap;
+    }
+}
