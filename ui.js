@@ -716,7 +716,8 @@ function addControl(folders, page, group, tab, control) {
         };
     } else {
         // group = group || settings.defaultGroupHeader;
-        control.order = parseFloat(control.order);
+        // control.order = parseFloat(control.order);
+        control.order = control.order;
         let pathNeedsUpdate = false;
         var foundFolder;
 
@@ -747,7 +748,8 @@ function addControl(folders, page, group, tab, control) {
                 foundFolder = {
                     id: currFolder.id,
                     isRoot: isRoot,
-                    order: parseFloat(currFolder.config.order),
+                    // order: parseFloat(currFolder.config.order),
+                    order: currFolder.config.order,
                     disabled: currFolder.config.disabled,
                     hidden: currFolder.config.hidden,
                     items: [],
@@ -775,7 +777,8 @@ function addControl(folders, page, group, tab, control) {
                 var updatedFolder = {
                     id: currFolder.id,
                     isRoot: currFolder.isRoot,
-                    order: parseFloat(currFolder.config.order),
+                    // order: parseFloat(currFolder.config.order),
+                    order: currFolder.config.order,
                     disabled: currFolder.config.disabled,
                     hidden: currFolder.config.hidden,
                     items: foundFolder.items,
@@ -1144,7 +1147,8 @@ function addControl(folders, page, group, tab, control) {
                     id: page.id,
                     isPage: true,
                     // order: updatedOrder,
-                    order: parseFloat(page.config.order),
+                    // order: parseFloat(page.config.order),
+                    order: page.config.order,
                     disabled: page.config.disabled,
                     hidden: page.config.hidden,
                     items: foundPage.items,
@@ -1167,7 +1171,8 @@ function addControl(folders, page, group, tab, control) {
                 foundPage = {
                     id: page.id,
                     isPage: true,
-                    order: parseFloat(page.config.order),
+                    // order: parseFloat(page.config.order),
+                    order: page.config.order,
                     disabled: page.config.disabled,
                     hidden: page.config.hidden,
                     items: [],
@@ -1348,7 +1353,8 @@ function addLink(id, title, folders, link, icon, order, target) {
             foundFolder = {
                 id: currFolder.id,
                 isRoot: isRoot,
-                order: parseFloat(currFolder.config.order),
+                // order: parseFloat(currFolder.config.order),
+                order: currFolder.config.order,
                 disabled: currFolder.config.disabled,
                 hidden: currFolder.config.hidden,
                 items: [],
