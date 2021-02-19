@@ -344,7 +344,7 @@ function add(opt) {
             }
 
             let newId = opt.node.id;
-            if (opt.page.config.isDynamic) {
+            if (opt.page.config.isMulti) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
                 let idVar = opt.control._idVar;
@@ -394,7 +394,7 @@ function add(opt) {
     var handler = function (msg) {
         let idParts = msg.id.split('.');
         // prettier-ignore
-        if (idParts.length === 3) { // is extended node id? (dynamic page)
+        if (idParts.length === 3) { // is extended node id? (multi page)
             msg.id = idParts[0] + '.' + idParts[1]; // set id to base node id
         }
         if (msg.id !== opt.node.id) {
@@ -681,19 +681,19 @@ function findFolderById(container, id) {
     return result;
 }
 
-// helper function to detect changes in dynamic page
+// helper function to detect changes in multi page
 // NB: limitations of using JSON.stringify:
 //      1. 'undefined' values will be replaced as 'null'
 //      2. JSON.stringify does not consider object types
-let dynamicPagesNeedUpdate = function (current, incoming) {
+let multiPagesNeedUpdate = function (current, incoming) {
     return JSON.stringify(current) !== JSON.stringify(incoming);
 };
 
 let removeFunc;
-var dynamicPages = {};
-var dynamicGroups = {};
-var dynamicTabs = {};
-var dynamicWidgets = {};
+var multiPages = {};
+var multiGroups = {};
+var multiTabs = {};
+var multiWidgets = {};
 
 function addControl(folders, page, group, tab, control) {
     if (typeof control.type !== 'string' || !folders.length || !page || !group || !tab) {
@@ -799,7 +799,7 @@ function addControl(folders, page, group, tab, control) {
             }
         }
 
-        if (page.config.isDynamic) {
+        if (page.config.isMulti) {
             // get expression from page
             let expression = page.config.expression;
 
@@ -813,7 +813,7 @@ function addControl(folders, page, group, tab, control) {
             // expressionArr[3]: third group (suffix)
 
             if (!expressionArr) {
-                throw new Error("Please check dynamic page's Instance Name Expression");
+                throw new Error("Please check multi page's Instance Name Expression");
             }
 
             // set prefix & suffix
@@ -849,8 +849,8 @@ function addControl(folders, page, group, tab, control) {
             };
 
             if (
-                dynamicPages.hasOwnProperty(page.id) &&
-                (dynamicPagesNeedUpdate(dynamicPages[page.id], incomingSettings) || pathNeedsUpdate)
+                multiPages.hasOwnProperty(page.id) &&
+                (multiPagesNeedUpdate(multiPages[page.id], incomingSettings) || pathNeedsUpdate)
             ) {
                 foundFolder.items = foundFolder.items.filter(function (p) {
                     return !p.id.startsWith(page.id);
@@ -860,19 +860,19 @@ function addControl(folders, page, group, tab, control) {
                     return !p.id.startsWith(page.id);
                 });
 
-                delete dynamicPages[page.id];
-                dynamicTabs = {};
-                dynamicGroups = {};
-                dynamicWidgets = {};
+                delete multiPages[page.id];
+                multiTabs = {};
+                multiGroups = {};
+                multiWidgets = {};
 
                 pathNeedsUpdate = false;
             }
 
-            // check to see if dynamic page has already been exploded && injected
-            if (dynamicPages.hasOwnProperty(page.id)) {
+            // check to see if multi page has already been exploded && injected
+            if (multiPages.hasOwnProperty(page.id)) {
                 foundFolder.items.forEach((p) => {
                     if (p.id.startsWith(page.id)) {
-                        if (dynamicGroups[group.id]) {
+                        if (multiGroups[group.id]) {
                             p.items.forEach((g) => {
                                 if (g.id.startsWith(group.id)) {
                                     g.header = group.config.name;
@@ -882,13 +882,13 @@ function addControl(folders, page, group, tab, control) {
                                     g.widthSm = group.config.widthSm;
                                     g.disp = group.config.disp;
 
-                                    if (dynamicTabs[tab.id]) {
+                                    if (multiTabs[tab.id]) {
                                         g.items.forEach((t) => {
                                             if (t.id.startsWith(tab.id)) {
                                                 t.header = tab.config.name;
                                                 t.order = tab.config.order;
 
-                                                if (dynamicWidgets[control.id]) {
+                                                if (multiWidgets[control.id]) {
                                                     t.items.forEach((w) => {
                                                         if (w.id.startsWith(control.id)) {
                                                             // control.instance = p.instance;
@@ -958,9 +958,9 @@ function addControl(folders, page, group, tab, control) {
                 foundFolder.items.sort(itemSorter);
                 foundFolder.submenu.sort(itemSorter);
 
-                dynamicTabs[tab.id] = true;
-                dynamicGroups[group.id] = true;
-                dynamicWidgets[control.id] = true;
+                multiTabs[tab.id] = true;
+                multiGroups[group.id] = true;
+                multiWidgets[control.id] = true;
             } else {
                 foundFolder.items = foundFolder.items.filter(function (p) {
                     return !p.id.startsWith(page.id);
@@ -1031,19 +1031,19 @@ function addControl(folders, page, group, tab, control) {
                 foundFolder.items.sort(itemSorter);
                 foundFolder.submenu.sort(itemSorter);
 
-                dynamicWidgets[control.id] = true;
-                dynamicTabs[tab.id] = true;
-                dynamicGroups[group.id] = true;
-                dynamicPages[page.id] = {
+                multiWidgets[control.id] = true;
+                multiTabs[tab.id] = true;
+                multiGroups[group.id] = true;
+                multiPages[page.id] = {
                     instanceNames: [...instanceNames],
                     instanceParams: [...instanceParams],
                     pageTitle: { pageTitlePrefix, pageTitleSuffix },
                 };
             }
 
-            function dynamicRemove() {
-                // if control is part of a dynamic page
-                if (dynamicWidgets[control.id]) {
+            function multiRemove() {
+                // if control is part of a multi page
+                if (multiWidgets[control.id]) {
                     // filter foundFolder.items
                     foundFolder.items = foundFolder.items.filter((p) => {
                         // if p is a pseudo-page of page
@@ -1059,26 +1059,26 @@ function addControl(folders, page, group, tab, control) {
                                             t.items = t.items.filter((w) => !w.id.startsWith(control.id));
                                         }
 
-                                        // cleanup dynamicTabs dictionary
+                                        // cleanup multiTabs dictionary
                                         if (t.items.length === 0) {
-                                            delete dynamicTabs[tab.id];
+                                            delete multiTabs[tab.id];
                                         }
 
                                         return t.items.length > 0;
                                     });
 
-                                    // cleanup dynamicGroups dictionary
+                                    // cleanup multiGroups dictionary
                                     if (g.items.length === 0) {
-                                        delete dynamicGroups[group.id];
+                                        delete multiGroups[group.id];
                                     }
                                 }
                                 // filter out childless groups from p.items
                                 return g.items.length > 0;
                             });
 
-                            //cleanup dynamicPages dict && filter foundFolder.submenu to match foundFolder.items
+                            //cleanup multiPages dict && filter foundFolder.submenu to match foundFolder.items
                             if (p.items.length === 0) {
-                                delete dynamicPages[page.id];
+                                delete multiPages[page.id];
                                 foundFolder.submenu = foundFolder.submenu.filter((s) => s.id !== p.id);
                             }
                         }
@@ -1111,17 +1111,17 @@ function addControl(folders, page, group, tab, control) {
                         //     }
                         // } while (curr);
                     }
-                    delete dynamicWidgets[control.id];
+                    delete multiWidgets[control.id];
                     updateUi();
                 }
             }
 
-            removeFunc = dynamicRemove;
+            removeFunc = multiRemove;
 
             // save a copy of the variable name used in instance IDs
             control['_idVar'] = firstParamVar;
         } else {
-            if (dynamicPages.hasOwnProperty(page.id)) {
+            if (multiPages.hasOwnProperty(page.id)) {
                 foundFolder.items = foundFolder.items.filter(function (p) {
                     return !p.id.startsWith(page.id);
                 });
@@ -1130,10 +1130,10 @@ function addControl(folders, page, group, tab, control) {
                     return !p.id.startsWith(page.id);
                 });
 
-                delete dynamicPages[page.id];
+                delete multiPages[page.id];
             }
-            delete dynamicGroups[group.id];
-            delete dynamicWidgets[control.id];
+            delete multiGroups[group.id];
+            delete multiWidgets[control.id];
 
             var foundPage = find(foundFolder.items, function (p) {
                 return p.id === page.id;

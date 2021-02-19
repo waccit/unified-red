@@ -13,7 +13,7 @@ module.exports = function (RED) {
             // icon: config.icon || 'ti-folder',
             disabled: config.disabled || false,
             hidden: config.hidden || false,
-            isDynamic: config.isDynamic || false,
+            isMulti: config.isMulti || false,
             expression: config.expression || '',
             instances: this.instances || config.instances || [],
         };

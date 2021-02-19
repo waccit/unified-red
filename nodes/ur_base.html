@@ -1513,20 +1513,20 @@
                     }).appendTo(titleRow);
 
                     // icon
-                    let staticIcon = $('<i>', { class: 'nr-db-sb-icon nr-db-sb-page-icon fa fa-file-o' }).appendTo(
-                        titleRow
-                    );
-
-                    let dynamicIcon = $('<i>', {
-                        class: 'nr-db-sb-icon nr-db-sb-dynamic-page-icon fa fa-files-o',
+                    let singlePageIcon = $('<i>', {
+                        class: 'nr-db-sb-icon nr-db-sb-single-page-icon fa fa-file-o',
                     }).appendTo(titleRow);
 
-                    if (pageNode.isDynamic) {
-                        staticIcon.hide();
-                        dynamicIcon.show();
+                    let multiPageIcon = $('<i>', {
+                        class: 'nr-db-sb-icon nr-db-sb-multi-page-icon fa fa-files-o',
+                    }).appendTo(titleRow);
+
+                    if (pageNode.isMulti) {
+                        singlePageIcon.hide();
+                        multiPageIcon.show();
                     } else {
-                        staticIcon.show();
-                        dynamicIcon.hide();
+                        singlePageIcon.show();
+                        multiPageIcon.hide();
                     }
 
                     // title
@@ -2806,23 +2806,23 @@
                                     }
                                     refresh();
                                 } else if (node.type === 'ur_page') {
-                                    if (node.isDynamic) {
+                                    if (node.isMulti) {
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-page-icon')
+                                            .find('.nr-db-sb-single-page-icon')
                                             .hide();
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-dynamic-page-icon')
+                                            .find('.nr-db-sb-multi-page-icon')
                                             .show();
                                     } else {
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-page-icon')
+                                            .find('.nr-db-sb-single-page-icon')
                                             .show();
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-dynamic-page-icon')
+                                            .find('.nr-db-sb-multi-page-icon')
                                             .hide();
                                     }
                                     refresh();
