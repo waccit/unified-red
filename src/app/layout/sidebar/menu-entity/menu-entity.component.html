@@ -10,9 +10,16 @@
             </a>
         </div>
 
+        <div *ngIf="sidebarSubItem.link">
+            <a [href]="sidebarSubItem.link" target="{{ sidebarSubItem.target === 'thistab' ? '_self' : '_blank' }}">
+                <i [ngClass]="[sidebarSubItem.icon]"></i>
+                <span class="hide-menu">{{ sidebarSubItem.title }} </span>
+            </a>
+        </div>
+
         <!-- <div *ngIf="sidebarSubItem.submenu.length > 0"> -->
-        <div *ngIf="!sidebarSubItem.isPage">
-            <a (click)="callSubMenuToggle(sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
+        <div *ngIf="!sidebarSubItem.isPage && !sidebarSubItem.link">
+            <a (click)="callSubMenuToggle($event, sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
                 {{ sidebarSubItem.title }}
             </a>
 

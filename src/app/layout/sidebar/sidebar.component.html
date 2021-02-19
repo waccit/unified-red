@@ -21,15 +21,27 @@
                     <div class="header" *ngIf="sidebarItem.groupTitle === true">
                         {{ sidebarItem.title }}
                     </div>
+                    <!-- <div *ngIf="!sidebarItem.link"> -->
                     <a
                         [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
-                        *ngIf="!sidebarItem.groupTitle"
+                        *ngIf="!sidebarItem.groupTitle && !sidebarItem.link"
                         [ngClass]="[sidebarItem.class]"
                         (click)="callMenuToggle($event, sidebarItem.title)"
                     >
                         <i [ngClass]="[sidebarItem.icon]"></i>
                         <span class="hide-menu">{{ sidebarItem.title }} </span>
                     </a>
+                    <!-- </div> -->
+
+                    <div *ngIf="sidebarItem.link">
+                        <a
+                            [href]="sidebarItem.link"
+                            target="{{ sidebarItem.target === 'thistab' ? '_self' : '_blank' }}"
+                        >
+                            <i [ngClass]="[sidebarItem.icon]"></i>
+                            <span class="hide-menu">{{ sidebarItem.title }} </span>
+                        </a>
+                    </div>
 
                     <app-menu-entity [sidebarItems]="sidebarItem.submenu"></app-menu-entity>
                 </li>
