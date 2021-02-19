@@ -181,6 +181,7 @@
         "mockery": "^2.1.0",
         "nodemailer-mock": "^1.5.1",
         "npm": "^6.14.11",
+        "prettier": "2.2.1",
         "protractor": "^5.4.3",
         "run-sequence": "^2.2.1",
         "should": "^13.2.3",
