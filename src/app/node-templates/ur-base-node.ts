@@ -104,7 +104,9 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     send(msg: any) {
         if (this.nodeId) {
-            msg.topic = this.evalInstanceParameters(msg.topic); // handle multi-page. substitute {variables}
+            if (msg && msg.topic) { // check if msg.topic exists, not all do, e.g. ur-button sends a null message
+                msg.topic = this.evalInstanceParameters(msg.topic); // handle multi-page. substitute {variables}
+            }
             this.webSocketService.emit({ id: this.nodeId, msg });
         }
     }
