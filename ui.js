@@ -972,7 +972,7 @@ function addControl(folders, page, group, tab, control) {
 
                 for (let i = 0; i < instanceIds.length; i++) {
                     let pageTitle = pageTitlePrefix + instanceNames[i] + pageTitleSuffix;
-                    
+
                     let instancePage = {
                         id: page.id + '.' + instanceIds[i],
                         isPage: true,
@@ -1323,15 +1323,11 @@ function addLink(id, title, folders, link, icon, order, target) {
         submenu: [],
     };
 
-    // console.log('folders: ', folders);
-
     let foldersStack = [...folders];
     let parent = null;
     let isRoot;
     let foundFolder;
     let currFolder;
-
-    // console.log('foldersStack: ', foldersStack);
 
     while (foldersStack.length > 0) {
         isRoot = foldersStack.length === folders.length;
@@ -1377,20 +1373,7 @@ function addLink(id, title, folders, link, icon, order, target) {
         }
     }
 
-    // console.log('foundFolder: ', foundFolder);
-
-    // foundFolder.items.push(newLink);
-    // foundFolder.submenu.push(newLink);
-
-    // foundFolder.items.sort(itemSorter);
-    // foundFolder.submenu.sort(itemSorter);
-    // let parentFolder = findFolderById(menu, folders);
-    // console.log('parentFolder: ', parentFolder);
-
     if (foundFolder) {
-        // console.log('menu: ', menu);
-        // console.log('folder: ', folder);
-        // console.log('foundFolder: ', foundFolder);
         foundFolder.items.push(newLink);
         foundFolder.submenu.push(newLink);
 
@@ -1398,7 +1381,6 @@ function addLink(id, title, folders, link, icon, order, target) {
         foundFolder.submenu.sort(itemSorter);
 
         updateUi();
-        // console.log('menu: ', JSON.stringify(menu, null, 2));
     } else {
         menu.push(newLink);
         menu.sort(itemSorter);
