@@ -62,7 +62,8 @@
             "ur_pagerduty_config": "nodes/ur_pagerduty_config.js",
             "ur_pagerduty": "nodes/ur_pagerduty.js",
             "ur_schedule": "nodes/ur_schedule.js",
-            "ur_schedule_holidays_config": "nodes/ur_schedule_holidays_config.js"
+            "ur_schedule_holidays_config": "nodes/ur_schedule_holidays_config.js",
+            "ur_link": "nodes/ur_link.js"
         }
     },
     "dependencies": {
@@ -180,6 +181,7 @@
         "mockery": "^2.1.0",
         "nodemailer-mock": "^1.5.1",
         "npm": "^6.14.11",
+        "prettier": "2.2.1",
         "protractor": "^5.4.3",
         "run-sequence": "^2.2.1",
         "should": "^13.2.3",

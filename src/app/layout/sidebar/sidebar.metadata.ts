@@ -7,4 +7,6 @@ export interface RouteInfo {
     groupTitle: boolean;
     submenu: RouteInfo[];
     isPage?: boolean;
+    link?: string;
+    target?: string;
 }

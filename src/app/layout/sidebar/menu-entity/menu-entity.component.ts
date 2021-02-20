@@ -9,7 +9,6 @@ import { RouteInfo } from '../sidebar.metadata';
 })
 export class MenuEntityComponent implements OnInit {
     @Input() sidebarItems: RouteInfo[];
-    showMenu = '';
     showSubMenu = '';
 
     constructor(
@@ -18,11 +17,17 @@ export class MenuEntityComponent implements OnInit {
         public elementRef: ElementRef
     ) {}
 
-    callSubMenuToggle(element: any) {
+    callSubMenuToggle(event: any, element: any) {
         if (element === this.showSubMenu) {
             this.showSubMenu = '0';
         } else {
             this.showSubMenu = element;
+        }
+        const hasClass = event.target.classList.contains('toggled');
+        if (hasClass) {
+            this.renderer.removeClass(event.target, 'toggled');
+        } else {
+            this.renderer.addClass(event.target, 'toggled');
         }
     }
 
