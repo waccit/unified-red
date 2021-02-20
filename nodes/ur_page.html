@@ -16,11 +16,11 @@
             collapse: { value: false },
             disabled: { value: false },
             hidden: { value: false },
-            isDynamic: { value: false },
+            isMulti: { value: false },
             expression: {
                 value: '',
                 validate: function (v) {
-                    if (!this.isDynamic) {
+                    if (!this.isMulti) {
                         return true;
                     } else {
                         let expression = v || '';
@@ -125,15 +125,15 @@
                 $('#node-config-input-hidden-label').text(c_ur_page('label.visible'));
             }
 
-            $('#node-config-input-isDynamic-btn').on('click', function (e) {
+            $('#node-config-input-isMulti-btn').on('click', function (e) {
                 var i = $(this).find('i');
                 var disabled = i.hasClass('fa-toggle-off');
                 var newCls = 'fa fa-toggle-' + (disabled ? 'on' : 'off');
                 i.attr('class', newCls);
-                $('#node-config-input-isDynamic').prop('checked', disabled);
+                $('#node-config-input-isMulti').prop('checked', disabled);
 
                 var newTxt = c_ur_page(disabled ? 'label.enabled' : 'label.disabled');
-                $('#node-config-input-isDynamic-label').text(newTxt);
+                $('#node-config-input-isMulti-label').text(newTxt);
 
                 // if disabled toggle "on"
                 if (disabled) {
@@ -144,13 +144,13 @@
                     $('#instances-map').hide();
                 }
 
-                var info = $('#node-config-input-isDynamic-info');
+                var info = $('#node-config-input-isMulti-info');
                 var done = disabled ? info.show() : info.hide();
             });
-            if (this.isDynamic) {
-                $('#node-config-input-isDynamic-btn').click();
+            if (this.isMulti) {
+                $('#node-config-input-isMulti-btn').click();
             } else {
-                $('#node-config-input-isDynamic-label').text(c_ur_page('label.disabled'));
+                $('#node-config-input-isMulti-label').text(c_ur_page('label.disabled'));
                 $('#instance-expression').hide();
                 $('#instances-map').hide();
             }
@@ -308,7 +308,7 @@
         oneditsave: function () {
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
-            this.isDynamic = $('#node-config-input-isDynamic').prop('checked');
+            this.isMulti = $('#node-config-input-isMulti').prop('checked');
 
             let instances = $('#node-config-input-instance-expressions-list').editableList('items');
             let node = this;
@@ -444,18 +444,14 @@
         <span id="node-config-input-hidden-info" data-i18n="[html]ur_page.info.hidden" style="display:none;"></span>
     </div>
     <div class="form-row">
-        <label for="node-config-input-isDynamic-btn" style="display: inline-flex; align-items: center"
-            ><i class="fa fa-clone" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.dynamic-page"></span
+        <label for="node-config-input-isMulti-btn" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-clone" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.multi-page"></span
         ></label>
-        <button id="node-config-input-isDynamic-btn" class="editor-button" style="width:100px; margin-right:6px;">
-            <i class="fa fa-toggle-off"></i> <span id="node-config-input-isDynamic-label"></span>
+        <button id="node-config-input-isMulti-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-off"></i> <span id="node-config-input-isMulti-label"></span>
         </button>
-        <input type="checkbox" id="node-config-input-isDynamic" style="display:none;" />
-        <span
-            id="node-config-input-isDynamic-info"
-            data-i18n="[html]ur_page.info.isDynamic"
-            style="display:none;"
-        ></span>
+        <input type="checkbox" id="node-config-input-isMulti" style="display:none;" />
+        <span id="node-config-input-isMulti-info" data-i18n="[html]ur_page.info.isMulti" style="display:none;"></span>
     </div>
     <div class="form-row" id="instance-expression">
         <label for="node-config-input-expression" style="display: inline-flex; align-items: center"
