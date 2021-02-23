@@ -662,6 +662,7 @@ function needsUpdate(current, incoming) {
 // helper function for searching the menu for folders
 function findFolderById(container, id) {
     var result = null;
+
     if (container instanceof Array) {
         for (var i = 0; i < container.length; i++) {
             result = findFolderById(container[i], id);
@@ -670,7 +671,10 @@ function findFolderById(container, id) {
             }
         }
     } else {
-        if (container.hasOwnProperty('isPage') && container.isPage) {
+        if (
+            (container.hasOwnProperty('isPage') && container.isPage) ||
+            (container.hasOwnProperty('link') && container.link.length)
+        ) {
             return result;
         } else if (container instanceof Object && container.hasOwnProperty('id') && container.id === id) {
             result = container;
@@ -1228,7 +1232,7 @@ function addControl(folders, page, group, tab, control) {
             foundFolder.items.sort(itemSorter);
             foundFolder.submenu.sort(itemSorter);
 
-            function staticRemove() {
+            function singleRemove() {
                 var index = foundTab.items.indexOf(control);
 
                 if (index >= 0) {
@@ -1296,7 +1300,7 @@ function addControl(folders, page, group, tab, control) {
                 }
             }
 
-            removeFunc = staticRemove;
+            removeFunc = singleRemove;
         }
 
         updateUi();
@@ -1314,13 +1318,14 @@ function addControl(folders, page, group, tab, control) {
 // and rely on link.order & itemSorter.. we are required to add dummy folder(s) and have the control (add())
 // take care of recognizing dummy folders & correctly adding required data...
 function addLink(id, title, folders, link, icon, order, target) {
+    // Do not add dead links
     if (!link || !link.length) {
         return () => {};
     }
+
     let newLink = {
         id,
         title,
-        // folders,
         link,
         icon,
         order: order || 1,
@@ -1406,7 +1411,6 @@ function addLink(id, title, folders, link, icon, order, target) {
               if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
                   cleanupChildlessFolders(foundFolder, folders);
               }
-
               updateUi();
           }
         : function () {
@@ -1423,23 +1427,22 @@ function addLink(id, title, folders, link, icon, order, target) {
 
 function cleanupChildlessFolders(found, foldersArr) {
     let stack = [...foldersArr];
-    let curr = stack.find((f) => f.id === found.id);
+    let curr = stack.shift();
 
     do {
         let parent = findFolderById(menu, curr.config.folder);
-        let currInMenu = findFolderById(menu, curr.id);
 
         if (parent) {
+            let currInMenu = findFolderById(parent.items, curr.id);
             if (currInMenu.items.length === 0 && currInMenu.submenu.length === 0) {
                 parent.items = parent.items.filter((i) => i.id !== currInMenu.id);
                 parent.submenu = parent.submenu.filter((i) => i.id !== currInMenu.id);
             }
-            curr = stack.find((f) => f.id === parent.id);
+            curr = stack.shift();
         } else {
             menu = menu.filter((i) => i.id !== curr.id);
-            curr = null;
         }
-    } while (curr);
+    } while (stack.length);
 }
 
 function addBaseConfig(config) {
