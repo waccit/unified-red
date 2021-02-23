@@ -1348,21 +1348,13 @@
                             connectWith: '.nr-db-sb-folder-content-list',
                             addItem: addMenuEntity,
                             sortItems: function (items) {
+                                console.log('folderContentContainer sortItems called.....');
                                 var historyEvents = [];
                                 items.each(function (i, el) {
                                     var pageData = el.data('data');
+                                    console.log('pageData: ', pageData);
+
                                     var node = pageData.node;
-                                    var hev = {
-                                        t: 'edit',
-                                        node: node,
-                                        changes: {
-                                            order: node.order,
-                                            folder: node.folder,
-                                        },
-                                        dirty: node.dirty,
-                                        changed: node.changed,
-                                    };
-                                    historyEvents.push(hev);
                                     var changed = false;
                                     if (node.order !== i + 1) {
                                         node.order = i + 1;
@@ -1382,7 +1374,19 @@
                                         node.dirty = true;
                                         node.changed = true;
                                     }
+                                    var hev = {
+                                        t: 'edit',
+                                        node: node,
+                                        changes: {
+                                            order: node.order,
+                                            folder: node.folder,
+                                        },
+                                        dirty: node.dirty,
+                                        changed: node.changed,
+                                    };
+                                    historyEvents.push(hev);
                                 });
+                                console.log('historyEvents: ', historyEvents);
                                 RED.history.push({
                                     t: 'multi',
                                     events: historyEvents,
@@ -1992,6 +1996,15 @@
                             items.each(function (i, el) {
                                 var itemData = el.data('data');
                                 var node = itemData.node;
+                                var changed = false;
+                                if (node.order !== i + 1) {
+                                    node.order = i + 1;
+                                    changed = true;
+                                }
+                                if (changed) {
+                                    node.dirty = true;
+                                    node.changed = true;
+                                }
                                 var hev = {
                                     t: 'edit',
                                     node: node,
@@ -2002,15 +2015,6 @@
                                     changed: node.changed,
                                 };
                                 historyEvents.push(hev);
-                                var changed = false;
-                                if (node.order !== i + 1) {
-                                    node.order = i + 1;
-                                    changed = true;
-                                }
-                                if (changed) {
-                                    node.dirty = true;
-                                    node.changed = true;
-                                }
                             });
                             RED.history.push({
                                 t: 'multi',
@@ -2784,6 +2788,7 @@
                 });
 
                 editSaveEventHandler = function (node) {
+                    console.log('editSaveEventHandler called...');
                     if (/^ur_/.test(node.type)) {
                         if (
                             node.type === 'ur_link' ||
