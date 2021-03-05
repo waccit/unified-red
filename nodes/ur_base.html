@@ -1477,6 +1477,11 @@
                         class: 'nr-db-sb-icon nr-db-sb-multi-page-icon fa fa-files-o',
                     }).appendTo(titleRow);
 
+                    let inheritedPageIcon = $('<i>', {
+                        class: 'nr-db-sb-icon nr-db-sb-inherited-page-icon fa fa-bookmark-o',
+                    }).appendTo(titleRow);
+
+                    // TODO: pageNode.type
                     if (pageNode.isMulti) {
                         singlePageIcon.hide();
                         multiPageIcon.show();
@@ -2680,6 +2685,7 @@
                                     }
                                     refresh();
                                 } else if (node.type === 'ur_page') {
+                                    // TODO: node.type
                                     if (node.isMulti) {
                                         listElements[node.id]
                                             .children('.nr-db-sb-list-header')
