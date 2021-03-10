@@ -1215,15 +1215,14 @@
                             dirty: RED.nodes.dirty(),
                         });
                         RED.nodes.dirty(true);
-
-                        if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                            RED.nodes.updateConfigNodeUsers(item.node);
-                        }
                     } else if (item.type === undefined) {
                         item.type = item.node.type;
                     }
 
                     listElements[item.node.id] = container;
+                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
+                        RED.nodes.updateConfigNodeUsers(item.node);
+                    }
 
                     return item;
                 };
@@ -1244,13 +1243,13 @@
                     }
 
                     if (item.child) {
-                        // item.node.folder = item.folder;
                         elementParents[item.node.id] = item.node.folder;
                         titleClass = 'nr-db-sb-list-header nr-db-sb-folder-content-list-header';
                         containerClass = 'nr-db-sb-folder-content-list-item';
                     }
 
                     item.children = item.children || [];
+
                     // title
                     let titleRow = $('<div>', {
                         class: titleClass,
@@ -1283,41 +1282,21 @@
                     var addFolderButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"/> <i class="fa fa-folder-o"/> </a>'
                     ).appendTo(buttonGroup);
-                    // var addFolderButton = $(
-                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                    //         c_('layout.folder') +
-                    //         '</a>'
-                    // ).appendTo(buttonGroup);
 
                     // page button
                     var addPageButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"/> <i class="fa fa-file-o"/> </a>'
                     ).appendTo(buttonGroup);
-                    // var addPageButton = $(
-                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                    //         c_('layout.page') +
-                    //         '</a>'
-                    // ).appendTo(buttonGroup);
 
                     // link button
                     var addLinkButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"/> <i class="fa fa-link"/></a>'
                     ).appendTo(buttonGroup);
-                    // var addLinkButton = $(
-                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                    //         c_('layout.link') +
-                    //         '</a>'
-                    // ).appendTo(buttonGroup);
 
                     // edit button
                     let editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"/></a>'
                     ).appendTo(buttonGroup);
-                    // let editButton = $(
-                    //     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
-                    //         c_('layout.edit') +
-                    //         '</a>'
-                    // ).appendTo(buttonGroup);
 
                     editButton.on('click', function (evt) {
                         RED.editor.editConfig('', item.type, item.node.id);
@@ -1348,51 +1327,7 @@
                             connectWith: '.nr-db-sb-folder-content-list',
                             addItem: addMenuEntity,
                             sortItems: function (items) {
-                                console.log('folderContentContainer sortItems called.....');
-                                var historyEvents = [];
-                                items.each(function (i, el) {
-                                    var pageData = el.data('data');
-                                    console.log('pageData: ', pageData);
-
-                                    var node = pageData.node;
-                                    var changed = false;
-                                    if (node.order !== i + 1) {
-                                        node.order = i + 1;
-                                        changed = true;
-                                    }
-                                    if (node.folder !== item.node.id) {
-                                        let oldFolderNode = RED.nodes.node(node.folder);
-                                        if (oldFolderNode) {
-                                            let index = oldFolderNode.users.indexOf(node);
-                                            oldFolderNode.users.splice(index, 1);
-                                        }
-                                        node.folder = item.node.id;
-                                        item.node.users.push(node);
-                                        changed = true;
-                                    }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
-                                    var hev = {
-                                        t: 'edit',
-                                        node: node,
-                                        changes: {
-                                            order: node.order,
-                                            folder: node.folder,
-                                        },
-                                        dirty: node.dirty,
-                                        changed: node.changed,
-                                    };
-                                    historyEvents.push(hev);
-                                });
-                                console.log('historyEvents: ', historyEvents);
-                                RED.history.push({
-                                    t: 'multi',
-                                    events: historyEvents,
-                                });
-                                RED.nodes.dirty(true);
-                                RED.view.redraw();
+                                handleSort(items, item);
                             },
                         });
 
@@ -1418,7 +1353,11 @@
                     });
 
                     addLinkButton.click(function (evt) {
-                        folderContentContainer.editableList('addItem', { type: 'ur_link', folder: item.node.id });
+                        folderContentContainer.editableList('addItem', {
+                            type: 'ur_link',
+                            child: true,
+                            folder: item.node.id,
+                        });
                         evt.stopPropagation();
                         evt.preventDefault();
                     });
@@ -1437,17 +1376,14 @@
                         item.node.folder = item.folder;
                     }
 
-                    if (item.folder) {
-                        // item.node.folder = item.folder;
-                        elementParents[item.node.id] = item.node.folder;
+                    let linkNode = item.node;
+
+                    if (item.child) {
+                        elementParents[linkNode.id] = item.node.folder;
                         titleClass = 'nr-db-sb-list-header nr-db-sb-folder-content-list-header';
                         containerClass = 'nr-db-sb-folder-content-list-item';
                     }
 
-                    let linkNode = item.node;
-                    elementParents[linkNode.id] = item.node.folder;
-
-                    // title
                     let titleRow = $('<div>', {
                         class: titleClass,
                     }).appendTo(container);
@@ -1461,11 +1397,6 @@
                     let chevron = $('<i class="fa fa-angle-right nr-db-sb-link-chevron">', {
                         style: 'width:10px;',
                     }).appendTo(titleRow);
-
-                    // chevron stand-in
-                    // let chevronStandIn = $('<i class="fa fa-minus fa-xs nr-db-sb-list-chevron"/>', {
-                    //     style: 'width:7px;',
-                    // }).appendTo(titleRow);
 
                     // icon
                     $('<i class="fa fa-external-link nr-db-sb-icon"></i>').appendTo(titleRow);
@@ -1540,11 +1471,13 @@
 
                     // button group
                     let buttonGroup = $('<div>', { class: 'nr-db-sb-list-header-button-group' }).appendTo(titleRow);
+
                     let addGroupButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
                             c_('layout.group') +
                             '</a>'
                     ).appendTo(buttonGroup);
+
                     var editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
                             c_('layout.edit') +
@@ -1571,47 +1504,7 @@
                             connectWith: '.nr-db-sb-group-list',
                             addItem: addMenuEntity,
                             sortItems: function (items) {
-                                var historyEvents = [];
-                                items.each(function (i, el) {
-                                    var groupData = el.data('data');
-                                    var node = groupData.node;
-                                    var hev = {
-                                        t: 'edit',
-                                        node: node,
-                                        changes: {
-                                            order: node.order,
-                                            page: node.page,
-                                        },
-                                        dirty: node.dirty,
-                                        changed: node.changed,
-                                    };
-                                    historyEvents.push(hev);
-                                    var changed = false;
-                                    if (node.order !== i + 1) {
-                                        node.order = i + 1;
-                                        changed = true;
-                                    }
-                                    if (node.page !== item.node.id) {
-                                        var oldPageNode = RED.nodes.node(node.page);
-                                        if (oldPageNode) {
-                                            var index = oldPageNode.users.indexOf(node);
-                                            oldPageNode.users.splice(index, 1);
-                                        }
-                                        node.page = item.node.id;
-                                        item.node.users.push(node);
-                                        changed = true;
-                                    }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
-                                });
-                                RED.history.push({
-                                    t: 'multi',
-                                    events: historyEvents,
-                                });
-                                RED.nodes.dirty(true);
-                                RED.view.redraw();
+                                handleSort(items, item);
                             },
                         });
 
@@ -1706,47 +1599,7 @@
                             connectWith: '.nr-db-sb-tab-list',
                             addItem: addMenuEntity,
                             sortItems: function (items) {
-                                var historyEvents = [];
-                                items.each(function (i, el) {
-                                    var tabData = el.data('data');
-                                    var node = tabData.node;
-                                    var hev = {
-                                        t: 'edit',
-                                        node: node,
-                                        changes: {
-                                            order: node.order,
-                                            group: node.group,
-                                        },
-                                        dirty: node.dirty,
-                                        changed: node.changed,
-                                    };
-                                    historyEvents.push(hev);
-                                    var changed = false;
-                                    if (node.order !== i + 1) {
-                                        node.order = i + 1;
-                                        changed = true;
-                                    }
-                                    if (node.group !== item.node.id) {
-                                        var oldGroupNode = RED.nodes.node(node.group);
-                                        if (oldGroupNode) {
-                                            var index = oldGroupNode.users.indexOf(node);
-                                            oldGroupNode.users.splice(index, 1);
-                                        }
-                                        node.group = item.node.id;
-                                        item.node.users.push(node);
-                                        changed = true;
-                                    }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
-                                });
-                                RED.history.push({
-                                    t: 'multi',
-                                    events: historyEvents,
-                                });
-                                RED.nodes.dirty(true);
-                                RED.view.redraw();
+                                handleSort(items, item);
                             },
                         });
 
@@ -1894,46 +1747,7 @@
                                 });
                             },
                             sortItems: function (items) {
-                                var historyEvents = [];
-                                items.each(function (i, el) {
-                                    var node = el.data('data');
-                                    var hev = {
-                                        t: 'edit',
-                                        node: node,
-                                        changes: {
-                                            order: node.order,
-                                            tab: node.tab,
-                                        },
-                                        dirty: node.dirty,
-                                        changed: node.changed,
-                                    };
-                                    historyEvents.push(hev);
-                                    var changed = false;
-                                    if (node.order !== i + 1) {
-                                        node.order = i + 1;
-                                        changed = true;
-                                    }
-                                    if (node.tab !== item.node.id) {
-                                        var oldTabNode = RED.nodes.node(node.tab);
-                                        if (oldTabNode) {
-                                            var index = oldTabNode.users.indexOf(node);
-                                            oldTabNode.users.splice(index, 1);
-                                        }
-                                        node.tab = item.node.id;
-                                        item.node.users.push(node);
-                                        changed = true;
-                                    }
-                                    if (changed) {
-                                        node.dirty = true;
-                                        node.changed = true;
-                                    }
-                                });
-                                RED.history.push({
-                                    t: 'multi',
-                                    events: historyEvents,
-                                });
-                                RED.nodes.dirty(true);
-                                RED.view.redraw();
+                                handleSort(items, item);
                             },
                         });
 
@@ -1984,6 +1798,63 @@
                     }
                 };
 
+                var handleSort = function (items, parent) {
+                    var historyEvents = [];
+                    items.each(function (i, el) {
+                        var domData = el.data('data');
+                        let domNode = domData.hasOwnProperty('node') ? domData.node : domData;
+
+                        // Note: This is a work-around as Node-RED's cache was not updating...
+                        let node = RED.nodes.node(domNode.id);
+                        let hev = {
+                            t: 'edit',
+                            node: node,
+                            changes: {
+                                order: node.order,
+                            },
+                            dirty: node.dirty,
+                            changed: node.changed,
+                        };
+
+                        var changed = false;
+                        if (node.order !== i + 1) {
+                            node.order = domNode.order = i + 1;
+                            changed = true;
+                        }
+
+                        let parentType = node.folder
+                            ? 'folder'
+                            : node.page
+                            ? 'page'
+                            : node.group
+                            ? 'group'
+                            : node.tab
+                            ? 'tab'
+                            : null;
+
+                        if (parent && parentType && node[parentType] !== parent.node.id) {
+                            let oldFolderNode = RED.nodes.node(node[parentType]);
+                            if (oldFolderNode) {
+                                let index = oldFolderNode.users.indexOf(node);
+                                oldFolderNode.users.splice(index, 1);
+                            }
+                            node[parentType] = domNode[parentType] = parent.node.id;
+                            hev.changes[parentType] = node[parentType];
+                            parent.node.users.push(node);
+                            changed = true;
+                        }
+                        if (changed) {
+                            node.dirty = true;
+                            node.changed = true;
+                        }
+
+                        historyEvents.push(hev);
+                    });
+
+                    RED.nodes.dirty(true);
+                    RED.view.redraw();
+                };
+
                 var folderContainer = $('<ol>', { class: 'nr-db-sb-folder-list' })
                     .appendTo(divTabs)
                     .editableList({
@@ -1992,36 +1863,7 @@
                         addButton: false,
                         addItem: addMenuEntity,
                         sortItems: function (items) {
-                            var historyEvents = [];
-                            items.each(function (i, el) {
-                                var itemData = el.data('data');
-                                var node = itemData.node;
-                                var changed = false;
-                                if (node.order !== i + 1) {
-                                    node.order = i + 1;
-                                    changed = true;
-                                }
-                                if (changed) {
-                                    node.dirty = true;
-                                    node.changed = true;
-                                }
-                                var hev = {
-                                    t: 'edit',
-                                    node: node,
-                                    changes: {
-                                        order: node.order,
-                                    },
-                                    dirty: node.dirty,
-                                    changed: node.changed,
-                                };
-                                historyEvents.push(hev);
-                            });
-                            RED.history.push({
-                                t: 'multi',
-                                events: historyEvents,
-                            });
-                            RED.nodes.dirty(true);
-                            RED.view.redraw();
+                            handleSort(items, null);
                         },
                     });
 
@@ -2788,7 +2630,6 @@
                 });
 
                 editSaveEventHandler = function (node) {
-                    console.log('editSaveEventHandler called...');
                     if (/^ur_/.test(node.type)) {
                         if (
                             node.type === 'ur_link' ||
