@@ -1047,6 +1047,7 @@
                             .find('.nr-db-sb-widget-list-container')
                             .slideUp()
                             .addClass('nr-db-sb-collapsed');
+                        folderContainer.find('.nr-db-sb-tab-list-container').slideUp().addClass('nr-db-sb-collapsed');
                         folderContainer.find('.nr-db-sb-group-list-container').slideUp().addClass('nr-db-sb-collapsed');
                         folderContainer
                             .find('.nr-db-sb-folder-content-container')
@@ -1062,6 +1063,13 @@
                         folderContainer
                             .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': 'rotate(-90deg)' });
+                        folderContainer
+                            .find('.nr-db-sb-tab-list-header>.nr-db-sb-list-chevron')
+                            .css({ 'transform': 'rotate(-90deg)' });
+
+                        for (id in listStates) {
+                            listStates[id] = false;
+                        }
 
                         evt.preventDefault();
                     })
@@ -1079,9 +1087,14 @@
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
                         folderContainer
+                            .find('.nr-db-sb-tab-list-container')
+                            .slideDown()
+                            .removeClass('nr-db-sb-collapsed');
+                        folderContainer
                             .find('.nr-db-sb-widget-list-container')
                             .slideDown()
                             .removeClass('nr-db-sb-collapsed');
+
                         folderContainer
                             .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
@@ -1091,6 +1104,14 @@
                         folderContainer
                             .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
                             .css({ 'transform': '' });
+                        folderContainer
+                            .find('.nr-db-sb-tab-list-header>.nr-db-sb-list-chevron')
+                            .css({ 'transform': '' });
+
+                        for (id in listStates) {
+                            listStates[id] = true;
+                        }
+
                         evt.preventDefault();
                     })
                     .appendTo(buttonGroup);
@@ -1773,6 +1794,13 @@
                 var addMenuEntity = function (container, i, item) {
                     // create node
                     item = makeNode(container, i, item);
+
+                    // nodes default to collapsed
+                    if (item.type !== 'ur_link') {
+                        listStates[item.node.id] = listStates.hasOwnProperty(item.node.id)
+                            ? listStates[item.node.id]
+                            : false;
+                    }
 
                     switch (item.type) {
                         case 'ur_folder':
