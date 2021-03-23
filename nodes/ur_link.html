@@ -31,7 +31,7 @@
             document.getElementById('node-config-input-target-newtab').checked = this.target === 'newtab';
             document.getElementById('node-config-input-target-thistab').checked = this.target === 'thistab';
 
-            let folderSelect = $('.node-input-config-folder');
+            let folderSelect = $('#node-input-config-folder');
             let val = this.folder ? this.folder : this._def.defaults.folder.value;
             getUrFolders(folderSelect, val);
         },
@@ -42,8 +42,7 @@
             }
             this.target = t;
 
-            let f = $(document.getElementsByClassName('node-input-config-folder')[0]).val();
-            this.folder = f;
+            this.folder = $('#node-input-config-folder').val();
         },
     });
 
@@ -99,7 +98,7 @@
         <label for="node-config-input-folder"
             ><i class="fa fa-folder-o"></i> <span data-i18n="ur_link.label.folder"></span
         ></label>
-        <select class="node-input-config-folder"></select>
+        <select id="node-input-config-folder"></select>
     </div>
     <!-- <div class="form-row">
         <label for="node-config-input-folder"
