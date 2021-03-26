@@ -16,7 +16,6 @@
     },
     "angularCompilerOptions": {
         "enableIvy": true,
-        "allowEmptyCodegenFiles": true,
-        "strictTemplates": true
+        "allowEmptyCodegenFiles": true
     }
 }
