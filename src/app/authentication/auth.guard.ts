@@ -14,10 +14,18 @@ export class AuthGuard implements CanActivate {
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
         if (this.authenticationService.tokenValue) {
             const userRole = this.authenticationService.getUserRole();
-            if (route.data.roles && userRole < route.data.roles) {
-                // role not authorized so redirect to forbidden
-                this.router.navigate(['/403-forbidden']);
-                return false;
+            if (route.data.roles) {
+                /*
+                if route.data.roles contains a single role, then the user's role must be greater than or equal to
+                route.data.roles to grant access. if route.data.roles contains an array of roles, then the user's
+                role must be explicitly included in the array of roles to grant access.
+                */
+                let rolesArray = Array.isArray(route.data.roles);
+                if ((!rolesArray && userRole < route.data.roles) || (rolesArray && !route.data.roles.includes(userRole))) {
+                    // role not authorized so redirect to forbidden
+                    this.router.navigate(['/403-forbidden']);
+                    return false;
+                }
             }
             return true; // authorized so return true
         }

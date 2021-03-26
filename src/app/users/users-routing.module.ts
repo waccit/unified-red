@@ -20,13 +20,13 @@ const routes: Routes = [
                 path: 'view',
                 component: UserTableComponent,
                 canActivate: [AuthGuard],
-                data: { roles: Role.Level10 },
+                data: { roles: [ Role.Level5, Role.Level10 ] },
             },
             {
                 path: 'roles',
                 component: RolesTableComponent,
                 canActivate: [AuthGuard],
-                data: { roles: Role.Level10 },
+                data: { roles: [ Role.Level5, Role.Level10 ] },
             }
         ],
     },
