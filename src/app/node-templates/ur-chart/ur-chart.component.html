@@ -6,30 +6,14 @@
                 <mat-icon>timeline</mat-icon>
             </ng-template>
             <div class="pt-4" [ngStyle]="{ 'height.px': 56 * data.height }">
-                <ngx-charts-line-chart 
-                    [view]="" 
-                    [scheme]="chartOpt.colorScheme" 
-                    [legend]="data.legend" 
-                    [legendPosition]="chartOpt.legendPosition" 
-                    [animations]="chartOpt.animation"
-                    [xAxis]="true" 
-                    [yAxis]="true"
-                    [timeline]="data.timeline"
-                    [showXAxisLabel]="chartOpt.showXAxisLabel"
-                    [showYAxisLabel]="chartOpt.showYAxisLabel" 
-                    [xAxisLabel]="chartOpt.xAxisLabel"
-                    [yAxisLabel]="chartOpt.yAxisLabel" 
-                    [xScaleMin]="chartOpt.xScaleMin" 
-                    [xScaleMax]="chartOpt.xScaleMax" 
-                    [yScaleMin]="chartOpt.yScaleMin"
-                    [yScaleMax]="chartOpt.yScaleMax"
-                    [autoScale]="chartOpt.autoScale"
-                    [curve]="chartOpt.curve"
-                    [showRefLines]="data.showRefLines"
-                    [referenceLines]="data.referenceLines"
-                    [results]="graphedResults"
-                    (select)="onSelect($event)"
-                    (activate)="onActivate($event)"
+                <ngx-charts-line-chart [view]="" [scheme]="chartOpt.colorScheme" [legend]="data.legend"
+                    [legendPosition]="chartOpt.legendPosition" [animations]="chartOpt.animation" [xAxis]="true"
+                    [yAxis]="true" [timeline]="data.timeline" [showXAxisLabel]="chartOpt.showXAxisLabel"
+                    [showYAxisLabel]="chartOpt.showYAxisLabel" [xAxisLabel]="chartOpt.xAxisLabel"
+                    [yAxisLabel]="chartOpt.yAxisLabel" [xScaleMin]="chartOpt.xScaleMin" [xScaleMax]="chartOpt.xScaleMax"
+                    [yScaleMin]="chartOpt.yScaleMin" [yScaleMax]="chartOpt.yScaleMax" [autoScale]="chartOpt.autoScale"
+                    [curve]="chartOpt.curve" [showRefLines]="data.showRefLines" [referenceLines]="data.referenceLines"
+                    [results]="graphedResults" (select)="onSelect($event)" (activate)="onActivate($event)"
                     (deactivate)="onDeactivate($event)">
                 </ngx-charts-line-chart>
             </div>
@@ -40,7 +24,8 @@
                 <mat-icon>grid_on</mat-icon>
             </ng-template>
             <div class="pt-3" [ngStyle]="{ 'height.px': 56 * data.height }">
-                <mat-table #table [dataSource]="tableDataSource" matTableExporter #exporter="matTableExporter" class="mat-cell">
+                <mat-table #table [dataSource]="tableDataSource" matTableExporter #exporter="matTableExporter"
+                    class="mat-cell">
                     <ng-container matColumnDef="timestamp">
                         <mat-header-cell *matHeaderCellDef>Timestamp</mat-header-cell>
                         <mat-cell *matCellDef="let row">{{row.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
@@ -60,10 +45,13 @@
                 </mat-table>
             </div>
             <div class="dropup ur-dropup-menu">
-                <button class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                <button class="btn btn-light dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                    aria-expanded="false"></button>
                 <ul class="dropdown-menu">
-                    <li><a href="javascript:void" (click)="exporter.exportTable('csv', exporterOpt)">Save as CSV</a></li>
-                    <li><a href="javascript:void" (click)="exporter.exportTable('xls', exporterOpt)">Save as Excel</a></li>
+                    <li><a href="javascript:void" (click)="exporter.exportTable('csv', exporterOpt)">Save as CSV</a>
+                    </li>
+                    <li><a href="javascript:void" (click)="exporter.exportTable('xls', exporterOpt)">Save as Excel</a>
+                    </li>
                 </ul>
             </div>
         </mat-tab>
@@ -76,7 +64,7 @@
                 <div class="col-3">
                     <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                         <mat-label>Type</mat-label>
-                        <select matNativeControl [(ngModel)]="data.chartType" (change)="setDirty()"> 
+                        <select matNativeControl [(ngModel)]="data.chartType" (change)="setDirty()">
                             <option value="line">Line Chart</option>
                             <option value="table">Table</option>
                         </select>
@@ -91,7 +79,8 @@
                 <div class="col-3">
                     <mat-form-field appearance="outline" style="width:100%">
                         <mat-label>Range Units</mat-label>
-                        <select matNativeControl [ngModel]="data.xrangeunits" (change)="setXRangeUnits($event.target.value)">
+                        <select matNativeControl [ngModel]="data.xrangeunits"
+                            (change)="setXRangeUnits($event.target.value)">
                             <option value="1">seconds</option>
                             <option value="60">minutes</option>
                             <option value="3600">hours</option>
@@ -102,7 +91,8 @@
                     </mat-form-field>
                 </div>
                 <div class="col-3 pt-4">
-                    <mat-checkbox [(ngModel)]="data.live" (change)="live.next($event.checked); setDirty()">Live</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="data.live" (change)="live.next($event.checked); setDirty()">Live
+                    </mat-checkbox>
                 </div>
             </div>
             <div class="row">
@@ -142,10 +132,13 @@
                             <div class="col-5 pr-0 pl-1">
                                 <mat-form-field appearance="outline" style="width:100%">
                                     <mat-label>Topic</mat-label>
-                                    <select matNativeControl formControlName="topic" required>
-                                        <option></option>
-                                        <option *ngFor="let topic of availableTopics" [value]="topic">{{ topic }}</option>
-                                    </select>
+                                    <input type="text" placeholder="topic" aria-label="Topic" matInput
+                                        [formControl]="control" [matAutocomplete]="auto" required>
+                                    <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                                        <mat-option *ngFor="let topic of filteredTopics | async" [value]="topic">
+                                            {{ topic }}
+                                        </mat-option>
+                                    </mat-autocomplete>
                                 </mat-form-field>
                             </div>
                             <div class="col-2 pl-2 p-t-10">
@@ -176,19 +169,22 @@
                         <div class="col-4">
                             <mat-form-field appearance="outline" style="width:100%">
                                 <mat-label>Y-Axis Min</mat-label>
-                                <input matInput type="number" (change)="setYAxisMin($event.target.value); setDirty()" [value]="data.ymin" />
+                                <input matInput type="number" (change)="setYAxisMin($event.target.value); setDirty()"
+                                    [value]="data.ymin" />
                             </mat-form-field>
                         </div>
                         <div class="col-4">
                             <mat-form-field appearance="outline" style="width:100%">
                                 <mat-label>Y-Axis Max</mat-label>
-                                <input matInput type="number" (change)="setYAxisMax($event.target.value); setDirty()" [value]="data.ymax" />
+                                <input matInput type="number" (change)="setYAxisMax($event.target.value); setDirty()"
+                                    [value]="data.ymax" />
                             </mat-form-field>
                         </div>
                         <div class="col-4">
                             <mat-form-field appearance="outline" style="width:100%">
                                 <mat-label>Curve</mat-label>
-                                <select matNativeControl [ngModel]="data.curve" (change)="setCurve($event.target.value); setDirty()">
+                                <select matNativeControl [ngModel]="data.curve"
+                                    (change)="setCurve($event.target.value); setDirty()">
                                     <option value="curveLinear">Linear</option>
                                     <option value="curveNatural">Natural</option>
                                     <option value="curveBasis">Basis</option>
@@ -214,7 +210,8 @@
                             <div class="p-l-10 font-17">Reference Lines</div>
                         </div>
                         <div class="col-6">
-                            <mat-checkbox class="pull-right pt-1" [(ngModel)]="data.showRefLines" (change)="setDirty()">Show</mat-checkbox>
+                            <mat-checkbox class="pull-right pt-1" [(ngModel)]="data.showRefLines" (change)="setDirty()">
+                                Show</mat-checkbox>
                         </div>
                     </div>
                     <mat-table [dataSource]="data.referenceLines" class="mat-cell">
