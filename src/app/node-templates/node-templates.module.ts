@@ -39,6 +39,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RouterModule } from '@angular/router';
+import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @NgModule({
     declarations: [
@@ -75,13 +76,14 @@ import { RouterModule } from '@angular/router';
         MatTableExporterModule,
         MatTooltipModule,
         MatTabsModule,
+        MatAutocompleteModule,
         FullCalendarModule,
         PerfectScrollbarModule,
         DragDropModule,
-        BrowserModule, 
+        BrowserModule,
         FormsModule,
         NgxChartsModule,
         BrowserAnimationsModule
     ],
 })
-export class NodeTemplatesModule {}
+export class NodeTemplatesModule { }

@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CurrentUserService, DataLogService, NodeRedApiService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { LargestTriangleThreeBuckets } from './LargestTriangleThreeBuckets';
 import * as shape from 'd3-shape';
-import { first } from 'rxjs/operators';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { first, map, startWith } from 'rxjs/operators';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
 
 declare const $: any;
@@ -66,6 +66,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
     dirty = false;
     sampled = true;
     live = new BehaviorSubject<boolean>(false);
+    control = new FormControl();
+    filteredTopics: Observable<string[]>;
 
     constructor(
         protected webSocketService: WebSocketService,
@@ -91,6 +93,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.dataLogService.listTopics().pipe(first()).subscribe(
             (data: any) => { this.availableTopics = data; },
             (error) => { this.snackbar.error(error); }
+        );
+        this.filteredTopics = this.control.valueChanges.pipe(
+            startWith(''),
+            map(value => this._filter(value))
         );
         this.topicForm = this.formBuilder.group({
             label: ['', Validators.required],
@@ -151,6 +157,12 @@ export class UrChartComponent extends BaseNode implements OnInit {
             this.initGraph();
         }
         this.live.next(this.data.live);
+    }
+
+
+    private _filter(value: string): string[] {
+        const filterValue = value.toLowerCase();
+        return this.availableTopics.filter(topic => topic.includes(filterValue));
     }
 
     ngAfterViewInit(): void {
