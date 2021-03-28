@@ -162,7 +162,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
     private _filter(value: string): string[] {
         const filterValue = value.toLowerCase();
-        return this.availableTopics.filter(topic => topic.includes(filterValue));
+        return this.availableTopics.filter(topic => topic.toLowerCase().includes(filterValue));
     }
 
     ngAfterViewInit(): void {
