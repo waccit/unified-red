@@ -66,7 +66,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
     dirty = false;
     sampled = true;
     live = new BehaviorSubject<boolean>(false);
-    control = new FormControl();
     filteredTopics: Observable<string[]>;
 
     constructor(
@@ -94,14 +93,14 @@ export class UrChartComponent extends BaseNode implements OnInit {
             (data: any) => { this.availableTopics = data; },
             (error) => { this.snackbar.error(error); }
         );
-        this.filteredTopics = this.control.valueChanges.pipe(
-            startWith(''),
-            map(value => this._filter(value))
-        );
         this.topicForm = this.formBuilder.group({
             label: ['', Validators.required],
             topic: ['', Validators.required]
         });
+        this.filteredTopics = this.topicForm.get('topic').valueChanges.pipe(
+            startWith(''),
+            map(value => this._filter(value))
+        );
         this.referenceLineForm = this.formBuilder.group({
             name: ['', Validators.required],
             value: ['', Validators.required]

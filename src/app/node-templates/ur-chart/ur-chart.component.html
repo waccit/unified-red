@@ -133,7 +133,7 @@
                                 <mat-form-field appearance="outline" style="width:100%">
                                     <mat-label>Topic</mat-label>
                                     <input type="text" placeholder="topic" aria-label="Topic" matInput
-                                        [formControl]="control" [matAutocomplete]="auto" required>
+                                        formControlName="topic" [matAutocomplete]="auto" required>
                                     <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
                                         <mat-option *ngFor="let topic of filteredTopics | async" [value]="topic">
                                             {{ topic }}
