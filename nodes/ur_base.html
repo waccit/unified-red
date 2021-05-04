@@ -1478,17 +1478,35 @@
                     }).appendTo(titleRow);
 
                     let inheritedPageIcon = $('<i>', {
-                        class: 'nr-db-sb-icon nr-db-sb-inherited-page-icon fa fa-bookmark-o',
+                        class: 'nr-db-sb-icon nr-db-sb-inherited-page-icon fa fa-clipboard',
                     }).appendTo(titleRow);
 
-                    // TODO: pageNode.type
-                    if (pageNode.isMulti) {
-                        singlePageIcon.hide();
-                        multiPageIcon.show();
-                    } else {
-                        singlePageIcon.show();
-                        multiPageIcon.hide();
+                    switch (pageNode.pageType) {
+                        case 'multi':
+                            singlePageIcon.hide();
+                            multiPageIcon.show();
+                            inheritedPageIcon.hide();
+                            break;
+                        case 'inherited':
+                            singlePageIcon.hide();
+                            multiPageIcon.hide();
+                            inheritedPageIcon.show();
+                            break;
+                        case 'single':
+                        default:
+                            singlePageIcon.show();
+                            multiPageIcon.hide();
+                            inheritedPageIcon.hide();
                     }
+                    // if (pageNode.isMulti) {
+                    //     singlePageIcon.hide();
+                    //     multiPageIcon.show();
+                    //     inheritedPageIcon.hide();
+                    // } else {
+                    //     singlePageIcon.show();
+                    //     multiPageIcon.hide();
+                    //     inheritedPageIcon.hide();
+                    // }
 
                     // title
                     let title = $('<span class="nr-db-sb-title">')
@@ -2685,26 +2703,70 @@
                                     }
                                     refresh();
                                 } else if (node.type === 'ur_page') {
-                                    // TODO: node.type
-                                    if (node.isMulti) {
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-single-page-icon')
-                                            .hide();
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-multi-page-icon')
-                                            .show();
-                                    } else {
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-single-page-icon')
-                                            .show();
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-multi-page-icon')
-                                            .hide();
+                                    switch (node.pageType) {
+                                        case 'multi':
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-single-page-icon')
+                                                .hide();
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-multi-page-icon')
+                                                .show();
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-inherited-page-icon')
+                                                .hide();
+                                            break;
+                                        case 'inherited':
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-single-page-icon')
+                                                .hide();
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-multi-page-icon')
+                                                .hide();
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-inherited-page-icon')
+                                                .show();
+                                            break;
+                                        case 'single':
+                                        default:
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-single-page-icon')
+                                                .show();
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-multi-page-icon')
+                                                .hide();
+                                            listElements[node.id]
+                                                .children('.nr-db-sb-list-header')
+                                                .find('.nr-db-sb-inherited-page-icon')
+                                                .hide();
                                     }
+
+                                    // if (node.isMulti) {
+                                    //     listElements[node.id]
+                                    //         .children('.nr-db-sb-list-header')
+                                    //         .find('.nr-db-sb-single-page-icon')
+                                    //         .hide();
+                                    //     listElements[node.id]
+                                    //         .children('.nr-db-sb-list-header')
+                                    //         .find('.nr-db-sb-multi-page-icon')
+                                    //         .show();
+                                    // } else {
+                                    //     listElements[node.id]
+                                    //         .children('.nr-db-sb-list-header')
+                                    //         .find('.nr-db-sb-single-page-icon')
+                                    //         .show();
+                                    //     listElements[node.id]
+                                    //         .children('.nr-db-sb-list-header')
+                                    //         .find('.nr-db-sb-multi-page-icon')
+                                    //         .hide();
+                                    // }
                                     refresh();
                                 } else {
                                     if (node.hidden === true) {

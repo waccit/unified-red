@@ -9,6 +9,7 @@ module.exports = function (RED) {
     return {
         add: add,
         addLink: addLink,
+        addInheritedPage: addInheritedPage, // ?
         addBaseConfig: addBaseConfig,
         emit: emit,
         emitSocket: emitSocket,
@@ -34,6 +35,7 @@ var urVersion = require('./package.json').version;
 var baseConfiguration = {};
 var io;
 var menu = [];
+var inheritedPages = {}; // schema: <key=refPage.id, value=[inhPage1, inhPage2, inhPage3, ...]>
 var globals = [];
 var settings = {};
 var updateValueEventName = 'update-value';
@@ -145,8 +147,10 @@ function setReplayMessage(id, topic, value) {
 options:
   node - the node that represents the control on a flow
   control - the control to be added
+  folders - a stack of folder IDs that represent the hierarchy of folders this control belongs to 
+  page - page config node that this control belongs to
+  group - group config node that this control belongs to
   tab - tab config node that this control belongs to
-  group - group name
   [emitOnlyNewValues] - boolean (default true).
       If true, it checks if the payload changed before sending it
       to the front-end. If the payload is the same no message is sent.
@@ -344,7 +348,7 @@ function add(opt) {
             }
 
             let newId = opt.node.id;
-            if (opt.page.config.isMulti) {
+            if (opt.page.config.pageType === 'multi' || opt.page.config.isMulti) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
                 let idVar = opt.control._idVar;
@@ -431,6 +435,14 @@ function add(opt) {
     };
 
     ev.on(updateValueEventName, handler);
+
+    // if (inheritedPages.hasOwnProperty(opt.page.id)) {
+    //     // let inheritedOpt = updateAndClone(opt, { node: { ...opt.node, id: opt.node.id + '.inh' } });
+    //     let inheritedOpt = updateAndClone(opt, {});
+    //     inheritedOpt.node.id = opt.node.id + '.inh';
+    //     // this.add();
+    //     console.log('inheritedOpt: ', inheritedOpt);
+    // }
 
     return function () {
         ev.removeListener(updateValueEventName, handler);
@@ -700,6 +712,19 @@ var multiTabs = {};
 var multiWidgets = {};
 
 function addControl(folders, page, group, tab, control) {
+    // let removeInheritedPages;
+
+    if (group.id.includes('inh')) {
+        console.log('INHERITED!!!!!!');
+    }
+    // if (control.label === 'button1') {
+    //     console.log('folders: ', folders);
+    //     console.log('page: ', page);
+    //     console.log('group: ', group);
+    //     console.log('tab: ', tab);
+    //     console.log('control: ', control);
+    // }
+
     if (typeof control.type !== 'string' || !folders.length || !page || !group || !tab) {
         return function () {};
     }
@@ -744,7 +769,7 @@ function addControl(folders, page, group, tab, control) {
             } else {
                 parent = findFolderById(menu, currFolder.config.folder);
                 foundFolder = find(parent.items, function (f) {
-                    return f.id == currFolder.id;
+                    return f.id === currFolder.id;
                 });
             }
 
@@ -806,7 +831,43 @@ function addControl(folders, page, group, tab, control) {
             }
         }
 
-        if (page.config.isMulti) {
+        // console.log('page: ', page);
+
+        if (page.config.pageType === 'inherited') {
+            console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        }
+
+        if (page.config.pageType === 'multi' || page.config.isMulti) {
+            if (inheritedPages.hasOwnProperty(page.id)) {
+                console.log('inheritedPages: ', inheritedPages);
+                console.log('control: ', control);
+                inheritedPages[page.id].forEach((inhPage, index) => {
+                    // let inhPage = inheritedPages[page.id]; // TODO: This should be an array!
+
+                    // inherit groups, tabs, & control
+                    let inhGroup = updateAndClone(group, {
+                        id: group.id + '.inh.' + index,
+                        config: { ...group.config, page: inhPage.id },
+                    });
+
+                    let inhTab = updateAndClone(tab, {
+                        id: tab.id + '.inh.' + index,
+                        config: { ...tab.config, group: inhGroup.id },
+                    });
+
+                    let inhCtrl = updateAndClone(control, { id: control.id + '.inh.' + index });
+
+                    if (!inhPage.removes) {
+                        inhPage.removes = {};
+                    }
+
+                    inhPage.removes[control.id] = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+                    // inhPage.remove = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+                    // removeInheritedPages = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+                });
+                console.log('inheritedPages: ', inheritedPages);
+            }
+
             // get expression from page
             let expression = page.config.expression;
 
@@ -1049,6 +1110,18 @@ function addControl(folders, page, group, tab, control) {
             }
 
             function multiRemove() {
+                // console.log('multiRemove called by....', page);
+                // console.log('inheritedPages: ', inheritedPages);
+                if (inheritedPages.hasOwnProperty(page.id)) {
+                    inheritedPages[page.id].forEach((inhPage) => {
+                        if (inhPage.config.refPage === page.id && inhPage.removes.hasOwnProperty(control.id)) {
+                            inhPage.removes[control.id]();
+                            delete inhPage.removes[control.id];
+                        }
+                    });
+                    // removeInheritedPages();
+                    // delete inheritedPages[page.id];
+                }
                 // if control is part of a multi page
                 if (multiWidgets[control.id]) {
                     // filter foundFolder.items
@@ -1083,10 +1156,30 @@ function addControl(folders, page, group, tab, control) {
                                 return g.items.length > 0;
                             });
 
-                            //cleanup multiPages dict && filter foundFolder.submenu to match foundFolder.items
+                            // filter foundFolder.submenu to match foundFolder.items
                             if (p.items.length === 0) {
+                                foundFolder.submenu = foundFolder.submenu.filter((item) => item.id !== p.id);
+
+                                // clean-up multiPages dict
                                 delete multiPages[page.id];
-                                foundFolder.submenu = foundFolder.submenu.filter((s) => s.id !== p.id);
+
+                                // if a inherited page clean-up inheritedPages dict
+                                if (
+                                    page.config.pageType === 'inherited' &&
+                                    inheritedPages.hasOwnProperty(page.config.refPage)
+                                ) {
+                                    // removeInheritedPages();
+                                    // console.log('inheritedPages: ', inheritedPages);
+                                    inheritedPages[page.config.refPage] = inheritedPages[page.config.refPage].filter(
+                                        (inhPage) => inhPage.id !== page.id
+                                    );
+                                    // console.log('inheritedPages: ', inheritedPages);
+
+                                    if (inheritedPages[page.config.refPage].length === 0) {
+                                        delete inheritedPages[page.config.refPage];
+                                    }
+                                    // console.log('inheritedPages: ', inheritedPages);
+                                }
                             }
                         }
 
@@ -1127,7 +1220,39 @@ function addControl(folders, page, group, tab, control) {
 
             // save a copy of the variable name used in instance IDs
             control['_idVar'] = firstParamVar;
-        } else {
+        } else if (page.config.pageType === 'single' || page.config.isSingle) {
+            if (inheritedPages.hasOwnProperty(page.id)) {
+                inheritedPages[page.id].forEach((inhPage, index) => {
+                    // let inhPage = inheritedPages[page.id]; // TODO: This should be an array!
+
+                    // inherit groups, tabs, & control
+                    let inhGroup = updateAndClone(group, {
+                        id: group.id + '.inh.' + index,
+                        config: { ...group.config, page: inhPage.id },
+                    });
+
+                    let inhTab = updateAndClone(tab, {
+                        id: tab.id + '.inh.' + index,
+                        config: { ...tab.config, group: inhGroup.id },
+                    });
+
+                    let inhCtrl = updateAndClone(control, { id: control.id + '.inh.' + index });
+
+                    // console.log('inhPage: ', inhPage);
+                    // console.log('inhGroup: ', inhGroup);
+                    // console.log('inhTab: ', inhTab);
+                    // console.log('inhCtrl: ', inhCtrl);
+
+                    if (!inhPage.removes) {
+                        inhPage.removes = {};
+                    }
+
+                    inhPage.removes[control.id] = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+                    // inhPage.remove = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+                    // removeInheritedPages = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+                });
+            }
+
             if (multiPages.hasOwnProperty(page.id)) {
                 foundFolder.items = foundFolder.items.filter(function (p) {
                     return !p.id.startsWith(page.id);
@@ -1233,7 +1358,29 @@ function addControl(folders, page, group, tab, control) {
             foundFolder.submenu.sort(itemSorter);
 
             function singleRemove() {
+                // if (control.id.includes('inh')) {
+                // console.log('singleRemove called by control.id: ', control.id, ' and page.id: ', page.id);
+                // }
+                if (inheritedPages.hasOwnProperty(page.id)) {
+                    // console.log('inheritedPages: ', inheritedPages);
+                    inheritedPages[page.id].forEach((inhPage) => {
+                        // console.log('inhPage: ', inhPage);
+                        if (inhPage.config.refPage === page.id && inhPage.removes.hasOwnProperty(control.id)) {
+                            // console.log('inhPage.remove being called by inhPage: ', inhPage);
+                            // inhPage.remove();
+                            inhPage.removes[control.id]();
+                            delete inhPage.removes[control.id];
+                        }
+                    });
+                    // removeInheritedPages();
+                    // delete inheritedPages[page.id];
+                }
+
                 var index = foundTab.items.indexOf(control);
+                // if (control.id.includes('inh')) {
+                //     console.log('foundTab: ', foundTab);
+                //     console.log('index: ', index);
+                // }
 
                 if (index >= 0) {
                     // Remove the item from the tab
@@ -1255,6 +1402,23 @@ function addControl(folders, page, group, tab, control) {
 
                                     // If the page is now empty, remove it from the folder
                                     if (foundPage.items.length === 0) {
+                                        // if a inherited page clean-up inheritedPages dict
+                                        if (
+                                            page.config.pageType === 'inherited' &&
+                                            inheritedPages.hasOwnProperty(page.config.refPage)
+                                        ) {
+                                            // removeInheritedPages();
+                                            // console.log('inheritedPages: ', inheritedPages);
+                                            inheritedPages[page.config.refPage] = inheritedPages[
+                                                page.config.refPage
+                                            ].filter((inhPage) => inhPage.id !== page.id);
+                                            // console.log('inheritedPages: ', inheritedPages);
+
+                                            if (inheritedPages[page.config.refPage].length === 0) {
+                                                delete inheritedPages[page.config.refPage];
+                                            }
+                                            // console.log('inheritedPages: ', inheritedPages);
+                                        }
                                         itemsIdx = foundFolder.items.indexOf(foundPage);
                                         submenuIdx = foundFolder.submenu.indexOf(foundPage);
 
@@ -1309,14 +1473,57 @@ function addControl(folders, page, group, tab, control) {
     }
 }
 
-// menu is NOT guaranteed to be complete.... or exist at all... because menu is built
-// by other widgets (control) && ur_link is alphabetically(?) higher than e.g. ur_text!
-// so.. we must find a way to add to the menu and have the control gracefully take care
-// or overwriting(?) the menu correctly...
+function addInheritedPage(RED, page) {
+    // let control/widgets handle remove
+    let remove = function () {};
 
-// dashboard was able to accomplish this because they just add directly to the menu @ root level
-// and rely on link.order & itemSorter.. we are required to add dummy folder(s) and have the control (add())
-// take care of recognizing dummy folders & correctly adding required data...
+    if (page.config.refPage === 'none' || page.config.pageType !== 'inherited') {
+        return remove;
+    }
+
+    let { _tab, _group, _page, folders } = makeMenuTree(RED, page.config);
+
+    // console.log('page: ', page);
+    let refPage = RED.nodes.getNode(page.config.refPage);
+    // console.log('refPage: ', refPage);
+
+    let inhConfig = {
+        id: page.id,
+        name: page.name,
+        folders,
+        config: {
+            // ...inhPage.config,
+            ...refPage.config,
+            id: page.id,
+            name: page.config.name,
+            pathName: page.config.pathName,
+            folder: page.config.folder,
+            pageType: page.config.pageType,
+            refPage: page.config.refPage,
+            order: page.config.order,
+            width: page.config.width,
+            disabled: page.config.disabled,
+            hidden: page.config.hidden,
+            expression: page.config.inheritInst ? refPage.config.expression : page.config.expression,
+            instances: page.config.inheritInst ? refPage.config.instances : page.config.instances,
+        },
+    };
+
+    let inhPage = updateAndClone(refPage, inhConfig);
+
+    // console.log('inheritedPages: ', inheritedPages);
+    if (inheritedPages.hasOwnProperty(refPage.id)) {
+        inheritedPages[refPage.id].push(inhPage);
+    } else {
+        inheritedPages[refPage.id] = [inhPage];
+    }
+    // console.log('inheritedPages: ', inheritedPages);
+
+    // inheritedPages[refPage.id] = inhPage;
+
+    return remove;
+}
+
 function addLink(id, title, folders, link, icon, order, target) {
     // Do not add dead links
     if (!link || !link.length) {
@@ -1423,6 +1630,17 @@ function addLink(id, title, folders, link, icon, order, target) {
           };
 
     return removeLink;
+}
+
+function updateAndClone(source, update) {
+    if (!source || !update) {
+        return {};
+    }
+
+    let clone = require('lodash.clone');
+    let updatedClone = clone(source);
+    Object.assign(updatedClone, update);
+    return updatedClone;
 }
 
 function cleanupChildlessFolders(found, foldersArr) {

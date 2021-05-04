@@ -1,4 +1,6 @@
 module.exports = function (RED) {
+    var ui = require('../ui')(RED);
+
     function PageNode(config) {
         RED.nodes.createNode(this, config);
         this.config = {
@@ -14,9 +16,16 @@ module.exports = function (RED) {
             disabled: config.disabled || false,
             hidden: config.hidden || false,
             isMulti: config.isMulti || false,
+            isSingle: typeof config.isSingle === 'boolean' ? config.isSingle : true,
+            pageType: config.pageType || 'single',
+            refPage: config.refPage || 'none',
+            inheritInst: typeof config.inheritInst === 'boolean' ? config.inheritInst : true,
             expression: config.expression || '',
             instances: this.instances || config.instances || [],
         };
+
+        this.on('close', ui.addInheritedPage(RED, this));
+
         if (!this.config.hasOwnProperty('disp')) {
             this.config.disp = true;
         }
