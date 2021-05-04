@@ -24,7 +24,7 @@
             expression: {
                 value: '',
                 validate: function (v) {
-                    if (!this.pageType !== 'multi') {
+                    if (!this.pageType !== 'multi' || !this.isMulti) {
                         return true;
                     } else {
                         let expression = v || '';
@@ -158,13 +158,6 @@
                 $('#instances-map').show();
                 $('#node-config-input-inherit-instances-info').hide();
             }
-            // if (this.isMulti) {
-            //     $('#node-config-input-isMulti-btn').click();
-            // } else {
-            //     $('#node-config-input-isMulti-label').text(c_ur_page('label.disabled'));
-            //     $('#instance-expression').hide();
-            //     $('#instances-map').hide();
-            // }
 
             $('#node-config-input-page-type').change(function () {
                 switch (this.value) {
@@ -257,11 +250,21 @@
                     break;
                 case 'single':
                 default:
-                    $('#inherit-instances').hide();
-                    $('#referenced-page').hide();
-                    $('#node-config-input-page-type').val('single');
-                    $('#instance-expression').hide();
-                    $('#instances-map').hide();
+                    // (!) this maintains compatibility with older ur_page config
+                    if (this.isMulti) {
+                        $('#inherit-instances').hide();
+                        $('#referenced-page').hide();
+                        $('#node-config-input-page-type').val('multi');
+                        $('#instance-expression').show();
+                        $('#instances-map').show();
+                    } else {
+                        $('#inherit-instances').hide();
+                        $('#referenced-page').hide();
+                        $('#node-config-input-page-type').val('single');
+                        $('#instance-expression').hide();
+                        $('#instances-map').hide();
+                    }
+
                     break;
             }
 
