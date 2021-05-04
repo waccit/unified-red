@@ -17,10 +17,14 @@
             disabled: { value: false },
             hidden: { value: false },
             isMulti: { value: false },
+            isSingle: { value: true },
+            pageType: { value: 'single' },
+            refPage: { value: 'none' },
+            inheritInst: { value: true },
             expression: {
                 value: '',
                 validate: function (v) {
-                    if (!this.isMulti) {
+                    if (!this.pageType !== 'multi') {
                         return true;
                     } else {
                         let expression = v || '';
@@ -125,35 +129,166 @@
                 $('#node-config-input-hidden-label').text(c_ur_page('label.visible'));
             }
 
-            $('#node-config-input-isMulti-btn').on('click', function (e) {
+            $('#node-config-input-inherit-instances-btn').on('click', function (e) {
                 var i = $(this).find('i');
-                var disabled = i.hasClass('fa-toggle-off');
-                var newCls = 'fa fa-toggle-' + (disabled ? 'on' : 'off');
+                var inherit = i.hasClass('fa-toggle-off');
+                var newCls = 'fa fa-toggle-' + (inherit ? 'on' : 'off');
                 i.attr('class', newCls);
-                $('#node-config-input-isMulti').prop('checked', disabled);
+                $('#node-config-input-inherit-instances').prop('checked', inherit);
 
-                var newTxt = c_ur_page(disabled ? 'label.enabled' : 'label.disabled');
-                $('#node-config-input-isMulti-label').text(newTxt);
+                var newTxt = c_ur_page(inherit ? 'label.yes' : 'label.no');
+                $('#node-config-input-inherit-instances-label').text(newTxt);
 
-                // if disabled toggle "on"
-                if (disabled) {
-                    $('#instance-expression').show();
-                    $('#instances-map').show();
-                } else {
+                if (inherit) {
                     $('#instance-expression').hide();
                     $('#instances-map').hide();
+                    $('#node-config-input-inherit-instances-info').show();
+                } else {
+                    $('#instance-expression').show();
+                    $('#instances-map').show();
+                    $('#node-config-input-inherit-instances-info').hide();
+                }
+            });
+
+            if (this.inheritInst) {
+                $('#node-config-input-inherit-instances-btn').click();
+            } else {
+                $('#node-config-input-inherit-instances-label').text(c_ur_page('label.no'));
+                $('#instance-expression').show();
+                $('#instances-map').show();
+                $('#node-config-input-inherit-instances-info').hide();
+            }
+            // if (this.isMulti) {
+            //     $('#node-config-input-isMulti-btn').click();
+            // } else {
+            //     $('#node-config-input-isMulti-label').text(c_ur_page('label.disabled'));
+            //     $('#instance-expression').hide();
+            //     $('#instances-map').hide();
+            // }
+
+            $('#node-config-input-page-type').change(function () {
+                switch (this.value) {
+                    case 'multi':
+                        // $('#node-config-input-page-type').val('multi');
+                        // $('#node-config-input-inherit-instances-btn').click();
+                        $('#inherit-instances').hide();
+                        $('#referenced-page').hide();
+                        $('#instance-expression').show();
+                        $('#instances-map').show();
+                        break;
+                    case 'inherited':
+                        // $('#node-config-input-page-type').val('inherited');
+                        // $('#node-config-input-inherit-instances-label').text(c_ur_page('label.disabled'));
+                        let refPageIsMulti = null;
+
+                        if (this.refPage && this.refPage !== 'none') {
+                            refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
+                        }
+
+                        if (refPageIsMulti) {
+                            $('#inherit-instances').show();
+                            // this.isMulti = true;
+                            // this.isSingle = false;
+                        } else {
+                            $('#inherit-instances').hide();
+                            // this.isMulti = false;
+                            // this.isSingle = true;
+                        }
+
+                        $('#referenced-page').show();
+                        if (this.inheritInst) {
+                            $('#node-config-input-inherit-instances-btn').click();
+                        } else {
+                            $('#node-config-input-inherit-instances-label').text(c_ur_page('label.no'));
+                            $('#instance-expression').show();
+                            $('#instances-map').show();
+                            $('#node-config-input-inherit-instances-info').hide();
+                        }
+                        break;
+                    case 'single':
+                    default:
+                        // $('#node-config-input-page-type').val('single');
+                        // $('#node-config-input-inherit-instances-label').text(c_ur_page('label.disabled'));
+                        $('#inherit-instances').hide();
+                        $('#referenced-page').hide();
+                        $('#instance-expression').hide();
+                        $('#instances-map').hide();
+                        break;
+                }
+            });
+
+            switch (this.pageType) {
+                case 'multi':
+                    $('#inherit-instances').hide();
+                    $('#referenced-page').hide();
+                    $('#node-config-input-page-type').val('multi');
+                    $('#instance-expression').show();
+                    $('#instances-map').show();
+
+                    break;
+                case 'inherited':
+                    let refPageIsMulti = null;
+
+                    if (this.refPage && this.refPage !== 'none') {
+                        refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
+                    }
+
+                    if (refPageIsMulti) {
+                        $('#inherit-instances').show();
+                        // this.isMulti = true;
+                        // this.isSingle = false;
+                    } else {
+                        $('#inherit-instances').hide();
+                        // this.isMulti = false;
+                        // this.isSingle = true;
+                    }
+
+                    $('#referenced-page').show();
+                    $('#node-config-input-page-type').val('inherited');
+
+                    if (this.inheritInst) {
+                        $('#node-config-input-inherit-instances-btn').click();
+                    } else {
+                        $('#node-config-input-inherit-instances-label').text(c_ur_page('label.no'));
+                        $('#instance-expression').show();
+                        $('#instances-map').show();
+                        $('#node-config-input-inherit-instances-info').hide();
+                    }
+                    break;
+                case 'single':
+                default:
+                    $('#inherit-instances').hide();
+                    $('#referenced-page').hide();
+                    $('#node-config-input-page-type').val('single');
+                    $('#instance-expression').hide();
+                    $('#instances-map').hide();
+                    break;
+            }
+
+            let refPageSelect = $('#node-config-input-refPage');
+            // let val = this.refPage ? this.refPage : this._def.defaults.refPage.value;
+            getRefPages(this.id, refPageSelect, this.refPage);
+
+            // if (this.pageType === 'inherited') {
+            refPageSelect.change(function () {
+                // this.refPage = this.value;
+                let refPageIsMulti = null;
+
+                if (this.value && this.value !== 'none') {
+                    refPageIsMulti = RED.nodes.node(this.value).isMulti;
                 }
 
-                var info = $('#node-config-input-isMulti-info');
-                var done = disabled ? info.show() : info.hide();
+                if (refPageIsMulti) {
+                    $('#inherit-instances').show();
+                    // this.isMulti = true;
+                    // this.isSingle = false;
+                } else {
+                    $('#inherit-instances').hide();
+                    // this.isMulti = false;
+                    // this.isSingle = true;
+                }
             });
-            if (this.isMulti) {
-                $('#node-config-input-isMulti-btn').click();
-            } else {
-                $('#node-config-input-isMulti-label').text(c_ur_page('label.disabled'));
-                $('#instance-expression').hide();
-                $('#instances-map').hide();
-            }
+            // }
 
             $('#node-config-input-instance-expressions-list')
                 .css('min-height', '150px')
@@ -308,73 +443,115 @@
         oneditsave: function () {
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
-            this.isMulti = $('#node-config-input-isMulti').prop('checked');
+            this.pageType = $('#node-config-input-page-type').val();
+            this.inheritInst = $('#node-config-input-inherit-instances').prop('checked');
+            console.log('this.inheritInst: ', this.inheritInst);
 
-            let instances = $('#node-config-input-instance-expressions-list').editableList('items');
-            let node = this;
+            // Single Housekeeping
+            if (this.pageType === 'single' || this.isSingle) {
+                // $('#node-config-input-refPage').val('none');
+                // this.refPage = 'none';
+                this.isSingle = true;
+                this.isMulti = false;
+                // this.inheritInst = true;
+            }
 
-            node.instances = [];
+            // Multi Housekeeping
+            if (this.pageType == 'multi' || this.isMulti) {
+                // $('#node-config-input-refPage').val('none');
+                // this.refPage = 'none';
+                this.isSingle = false;
+                this.isMulti = true;
+                // this.inheritInst = true;
 
-            instances.each(function (index, inst) {
-                let container = $(this);
+                let instances = $('#node-config-input-instance-expressions-list').editableList('items');
+                let node = this;
 
-                let parameters = $('#node-config-input-instance-parameters-list-' + index).editableList('items');
+                node.instances = [];
 
-                let rawNames = container.find('#instance-name-' + index).val();
-                let namesArr = rawToArr(rawNames);
+                instances.each(function (index, inst) {
+                    let container = $(this);
 
-                let rawParams = [];
-                let paramsArr = [];
+                    let parameters = $('#node-config-input-instance-parameters-list-' + index).editableList('items');
 
-                // build rawParams
-                parameters.each((i, p) => {
-                    let rawParamVar = $(this)
-                        .find('#instance-parameter-variable-' + index + '-' + i)
-                        .val();
-                    let rawParamVals = $(this)
-                        .find('#instance-parameter-values-' + index + '-' + i)
-                        .val();
+                    let rawNames = container.find('#instance-name-' + index).val();
+                    let namesArr = rawToArr(rawNames);
 
-                    rawParams.push({ variable: rawParamVar, values: rawParamVals });
-                });
+                    let rawParams = [];
+                    let paramsArr = [];
 
-                // build paramsArr
-                namesArr.forEach((n, i) => {
-                    let paramObj = {};
-
-                    parameters.each((ii, p) => {
+                    // build rawParams
+                    parameters.each((i, p) => {
                         let rawParamVar = $(this)
-                            .find('#instance-parameter-variable-' + index + '-' + ii)
+                            .find('#instance-parameter-variable-' + index + '-' + i)
                             .val();
-                        let rawParamVals = rawToArr(
-                            $(this)
-                                .find('#instance-parameter-values-' + index + '-' + ii)
-                                .val()
-                        );
+                        let rawParamVals = $(this)
+                            .find('#instance-parameter-values-' + index + '-' + i)
+                            .val();
 
-                        paramObj[rawParamVar] = rawParamVals[i];
+                        rawParams.push({ variable: rawParamVar, values: rawParamVals });
                     });
 
-                    paramsArr.push(paramObj);
+                    // build paramsArr
+                    namesArr.forEach((n, i) => {
+                        let paramObj = {};
+
+                        parameters.each((ii, p) => {
+                            let rawParamVar = $(this)
+                                .find('#instance-parameter-variable-' + index + '-' + ii)
+                                .val();
+                            let rawParamVals = rawToArr(
+                                $(this)
+                                    .find('#instance-parameter-values-' + index + '-' + ii)
+                                    .val()
+                            );
+
+                            paramObj[rawParamVar] = rawParamVals[i];
+                        });
+
+                        paramsArr.push(paramObj);
+                    });
+
+                    let i = {
+                        names: {
+                            input: container.find('#instance-name-' + index).val(),
+                            _arr: [...namesArr],
+                        },
+                        param: {
+                            input: [...rawParams],
+                            _arr: [...paramsArr],
+                        },
+                    };
+
+                    node.instances.push(i);
                 });
+            }
 
-                let i = {
-                    names: {
-                        input: container.find('#instance-name-' + index).val(),
-                        _arr: [...namesArr],
-                    },
-                    param: {
-                        input: [...rawParams],
-                        _arr: [...paramsArr],
-                    },
-                };
+            // Inherited Housekeeping
+            if (this.pageType == 'inherited') {
+                this.refPage = $('#node-config-input-refPage').val();
+                console.log('refPage: ', this.refPage);
+                let refPageIsMulti = null;
 
-                node.instances.push(i);
-            });
+                if (this.refPage && this.refPage !== 'none') {
+                    refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
+                }
+                console.log('refPageIsMulti-select: ', refPageIsMulti);
+
+                if (refPageIsMulti) {
+                    // $('#inherit-instances').show();
+                    this.isSingle = false;
+                    this.isMulti = true;
+                } else {
+                    // $('#inherit-instances').hide();
+                    this.isSingle = true;
+                    this.isMulti = false;
+                }
+            }
         },
     });
 
-    var explodeRange = function (exp) {
+    function explodeRange(exp) {
         if (exp.indexOf('-') === -1) {
             return exp;
         }
@@ -388,9 +565,9 @@
             range.push(start++);
         }
         return range.join(',');
-    };
+    }
 
-    var rawToArr = function (raw) {
+    function rawToArr(raw) {
         let result = [];
         let rawCopy = raw;
 
@@ -403,26 +580,71 @@
         }
 
         return result;
-    };
+    }
+
+    function getRefPages(self, select, value) {
+        var node_def = RED.nodes.getType('ur_page');
+        select.children().remove();
+
+        $('<option value="none"' + (value ? ' selected' : '') + '>NONE</option>').appendTo(select);
+
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
+
+        var configNodes = [];
+        RED.nodes.eachConfig(function (config) {
+            if (
+                config.id !== self &&
+                config.type == 'ur_page' &&
+                config.pageType !== 'inherited' &&
+                (!config.z || config.z === activeWorkspace.id)
+            ) {
+                var label = RED.utils.getNodeLabel(config, config.id);
+                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
+                configNodes.push(config);
+            }
+        });
+        try {
+            configNodes.sort(function (A, B) {
+                if (A.__label__ < B.__label__) {
+                    return -1;
+                } else if (A.__label__ > B.__label__) {
+                    return 1;
+                }
+                return 0;
+            });
+        } catch (ignore) {}
+        configNodes.forEach(function (cn) {
+            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
+                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
+                .appendTo(select);
+            delete cn.__label__;
+        });
+        window.setTimeout(function () {
+            select.trigger('change');
+        }, 50);
+    }
 </script>
 
 <script type="text/html" data-template-name="ur_page">
     <div class="form-row">
-        <label for="node-config-input-name"
-            ><i class="fa fa-tag"></i> <span data-i18n="ur_page.label.name"></span
-        ></label>
+        <label for="node-config-input-name">
+            <i class="fa fa-tag"></i> <span data-i18n="ur_page.label.name"></span>
+        </label>
         <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-folder"
-            ><i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span
-        ></label>
+        <label for="node-config-input-folder">
+            <i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span>
+        </label>
         <input type="text" id="node-config-input-folder" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-disabled-btn"
-            ><i class="fa fa-ban"></i> <span data-i18n="ur_page.label.state"></span
-        ></label>
+        <label for="node-config-input-disabled-btn">
+            <i class="fa fa-ban"></i> <span data-i18n="ur_page.label.state"></span>
+        </label>
         <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
             <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
         </button>
@@ -434,9 +656,9 @@
         ></span>
     </div>
     <div class="form-row">
-        <label for="node-config-input-hidden-btn"
-            ><i class="fa fa-eye-slash"></i> <span data-i18n="ur_page.label.navmenu"></span
-        ></label>
+        <label for="node-config-input-hidden-btn">
+            <i class="fa fa-eye-slash"></i> <span data-i18n="ur_page.label.navmenu"></span>
+        </label>
         <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
             <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
         </button>
@@ -444,14 +666,32 @@
         <span id="node-config-input-hidden-info" data-i18n="[html]ur_page.info.hidden" style="display:none;"></span>
     </div>
     <div class="form-row">
-        <label for="node-config-input-isMulti-btn" style="display: inline-flex; align-items: center"
-            ><i class="fa fa-clone" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.multi-page"></span
-        ></label>
-        <button id="node-config-input-isMulti-btn" class="editor-button" style="width:100px; margin-right:6px;">
-            <i class="fa fa-toggle-off"></i> <span id="node-config-input-isMulti-label"></span>
+        <label for="node-config-input-page-type"><i class="fa fa-list"></i> Page Type</label>
+        <select name="node-config-input-page-type" id="node-config-input-page-type" style="width:150px">
+            <option value="single">Single Page</option>
+            <option value="multi">Multi Page</option>
+            <option value="inherited">Inherited Page</option>
+        </select>
+    </div>
+    <div class="form-row" id="referenced-page">
+        <label for="node-config-input-refPage" style="display: inline-flex; align-items: center">
+            <i class="fa fa-file-text-o" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.refPage"></span>
+        </label>
+        <select id="node-config-input-refPage"></select>
+    </div>
+    <!-- <div class="form-row" id="inherited-is-multi">
+        <label for="node-config-input-inherited-multi"><i class="fa fa-files-o"></i> Is Multi?</label>
+        <input type="checkbox" id="node-config-input-inherited-multi" />
+    </div> -->
+    <div class="form-row" id="inherit-instances">
+        <label for="node-config-input-inherit-instances-btn" style="display: inline-flex; align-items: center">
+            <i class="fa fa-code-fork" style="margin-right: 5px"></i> Inherit Instances?</span>
+        </label>
+        <button id="node-config-input-inherit-instances-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-inherit-instances-label"></span>
         </button>
-        <input type="checkbox" id="node-config-input-isMulti" style="display:none;" />
-        <span id="node-config-input-isMulti-info" data-i18n="[html]ur_page.info.isMulti" style="display:none;"></span>
+        <input type="checkbox" id="node-config-input-inherit-instances" style="display:none;" />
+        <span id="node-config-input-inherit-instances-info" data-i18n="[html]ur_page.info.inheritInstances" style="display:none;"></span>
     </div>
     <div class="form-row" id="instance-expression">
         <label for="node-config-input-expression" style="display: inline-flex; align-items: center"

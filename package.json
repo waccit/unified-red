@@ -118,6 +118,7 @@
         "jquery": "^3.4.1",
         "jquery-sparkline": "^2.4.0",
         "jsonwebtoken": "^8.5.1",
+        "lodash.clone": "^4.5.0",
         "mat-progress-buttons": "^9.1.1",
         "mat-table-exporter": "^9.1.0",
         "material-design-iconic-font": "^2.2.0",
