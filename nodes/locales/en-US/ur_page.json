@@ -19,7 +19,9 @@
             "refPage": "Referenced Page",
             "expression": "Instance Name Expression",
             "instances": "Instances",
-            "unassigned": "unassigned"
+            "unassigned": "unassigned",
+            "inherit": "Inherit",
+            "define": "Define"
         },
         "info": {
             "disabled": " Page is inactive in Dashboard.",

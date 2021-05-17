@@ -19,7 +19,7 @@ module.exports = function (RED) {
             isSingle: typeof config.isSingle === 'boolean' ? config.isSingle : true,
             pageType: config.pageType || 'single',
             refPage: config.refPage || 'none',
-            inheritInst: typeof config.inheritInst === 'boolean' ? config.inheritInst : true,
+            inheritInst: config.inheritInst || false,
             expression: config.expression || '',
             instances: this.instances || config.instances || [],
         };
