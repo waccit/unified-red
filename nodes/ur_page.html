@@ -130,10 +130,8 @@
             }
 
             $('#node-config-input-inherit-instances-btn').on('click', function (e) {
-                console.log('clicked inherit-instances-btn!!!');
                 var i = $(this).find('i');
                 var inherit = i.hasClass('fa-toggle-off');
-                // console.log('inherit? ', inherit);
                 var newCls = 'fa fa-toggle-' + (inherit ? 'on' : 'off');
                 i.attr('class', newCls);
                 $('#node-config-input-inherit-instances').prop('checked', inherit);
@@ -152,73 +150,24 @@
                 }
             });
 
-            // if (this.inheritInst) {
-            //     $('#node-config-input-inherit-instances-btn').click();
-            // } else {
-            //     $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
-            //     $('#instance-expression').show();
-            //     $('#instances-map').show();
-            //     $('#node-config-input-inherit-instances-info').hide();
-            // }
-
             $('#node-config-input-page-type').change({ refPage: this.refPage }, function (e) {
                 let type = $(this).val();
-                console.log('type: ', type);
-                // switch (this.value) {
+
                 switch (type) {
                     case 'multi':
-                        console.log('MULTI');
                         $('#inherit-instances').hide();
                         $('#referenced-page').hide();
                         $('#instance-expression').show();
                         $('#instances-map').show();
-                        console.log('MULTI DONE');
                         break;
                     case 'inherited':
-                        console.log('pageType change to inherited');
-                        console.log('this: ', e.data.inheritInst);
-                        // $('#node-config-input-page-type').val('inherited');
-                        // $('#node-config-input-inherit-instances-label').text(c_ur_page('label.disabled'));
                         $('#referenced-page').show();
-                        // $('#inherit-instances').show();
                         $('#node-config-input-referenced-page')
                             .val(e.data.refPage || 'none')
                             .trigger('change', [type]);
-                        // let refPageIsMulti = false;
-
-                        // if (this.refPage && this.refPage !== 'none') {
-                        //     refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
-                        // }
-
-                        // console.log('refPageIsMulti: ', refPageIsMulti);
-
-                        // if (refPageIsMulti) {
-                        //     $('#inherit-instances').show();
-                        //     // this.isMulti = true;
-                        //     // this.isSingle = false;
-                        // } else {
-                        //     $('#inherit-instances').hide();
-                        //     // this.isMulti = false;
-                        //     // this.isSingle = true;
-                        // }
-
-                        // $('#referenced-page').show();
-                        // $('#inherit-instances').show();
-
-                        // if (this.inheritInst) {
-                        //     $('#node-config-input-inherit-instances-btn').click();
-                        // } else {
-                        //     $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
-                        //     $('#instance-expression').show();
-                        //     $('#instances-map').show();
-                        //     $('#node-config-input-inherit-instances-info').hide();
-                        // }
                         break;
                     case 'single':
                     default:
-                        console.log('DEFAULT');
-                        // $('#node-config-input-page-type').val('single');
-                        // $('#node-config-input-inherit-instances-label').text(c_ur_page('label.disabled'));
                         $('#inherit-instances').hide();
                         $('#referenced-page').hide();
                         $('#instance-expression').hide();
@@ -231,99 +180,26 @@
                 $('#node-config-input-page-type').val(this.pageType).trigger('change');
             } else {
                 if (this.isMulti) {
+                    // (!) this maintains compatibility with older ur_page config (pre inherited-page)
                     $('#node-config-input-page-type').val('multi').trigger('change');
-                    // $('#inherit-instances').hide();
-                    // $('#referenced-page').hide();
-                    // $('#node-config-input-page-type').val('multi');
-                    // $('#instance-expression').show();
-                    // $('#instances-map').show();
                 } else {
                     $('#node-config-input-page-type').val('single').trigger('change');
-                    $('#inherit-instances').hide();
-                    // $('#referenced-page').hide();
-                    // $('#node-config-input-page-type').val('single');
-                    // $('#instance-expression').hide();
-                    // $('#instances-map').hide();
                 }
             }
 
-            // switch (this.pageType) {
-            //     case 'multi':
-            //         $('#inherit-instances').hide();
-            //         $('#referenced-page').hide();
-            //         $('#node-config-input-page-type').val('multi');
-            //         $('#instance-expression').show();
-            //         $('#instances-map').show();
-
-            //         break;
-            //     case 'inherited':
-            //         console.log('INHERITED!!!');
-            //         let refPageIsMulti = false;
-
-            //         if (this.refPage && this.refPage !== 'none') {
-            //             refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
-            //         }
-
-            //         if (refPageIsMulti) {
-            //             $('#inherit-instances').show();
-            //             // this.isMulti = true;
-            //             // this.isSingle = false;
-            //         } else {
-            //             $('#inherit-instances').hide();
-            //             // this.isMulti = false;
-            //             // this.isSingle = true;
-            //         }
-
-            //         $('#referenced-page').show();
-            //         $('#inherit-instances').show();
-            //         $('#node-config-input-page-type').val('inherited');
-
-            //         if (this.inheritInst) {
-            //             $('#node-config-input-inherit-instances-btn').click();
-            //         } else {
-            //             $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
-            //             // $('#instance-expression').show();
-            //             // $('#instances-map').show();
-            //             // $('#node-config-input-inherit-instances-info').hide();
-            //         }
-            //         break;
-            //     case 'single':
-            //     default:
-            //         console.log('DEFAULT!!!');
-            //         // (!) this maintains compatibility with older ur_page config
-            //         if (this.isMulti) {
-            //             $('#inherit-instances').hide();
-            //             $('#referenced-page').hide();
-            //             $('#node-config-input-page-type').val('multi');
-            //             $('#instance-expression').show();
-            //             $('#instances-map').show();
-            //         } else {
-            //             $('#inherit-instances').hide();
-            //             $('#referenced-page').hide();
-            //             $('#node-config-input-page-type').val('single');
-            //             $('#instance-expression').hide();
-            //             $('#instances-map').hide();
-            //         }
-
-            //         break;
-            // }
-
             let refPageSelect = $('#node-config-input-referenced-page');
-            // let val = this.refPage ? this.refPage : this._def.defaults.refPage.value;
             getRefPages(this, refPageSelect, this.refPage);
 
-            // if (this.pageType === 'inherited') {
             refPageSelect
                 .change({ inheritInst: this.inheritInst }, function (e, pageType) {
-                    console.log('pageType: ', pageType);
-                    console.log('inheritInst: ', e.data.inheritInst);
-                    // this.refPage = this.value;
                     let refPageIsMulti = false;
 
                     if (this.value && this.value !== 'none') {
                         refPageIsMulti = RED.nodes.node(this.value).isMulti;
                     }
 
+                    // pageType is undefined => user selection
+                    // otherwise, pageType is invoked by initialization
                     if (pageType && pageType !== 'inherited') return;
 
                     if (refPageIsMulti) {
@@ -336,19 +212,14 @@
                             $('#instances-map').show();
                             $('#node-config-input-inherit-instances-info').hide();
                         }
-                        // this.isMulti = true;
-                        // this.isSingle = false;
                     } else {
                         $('#inherit-instances').hide();
                         $('#instance-expression').hide();
                         $('#instances-map').hide();
-                        // this.isMulti = false;
-                        // this.isSingle = true;
                     }
                 })
                 .val(this.refPage || 'none')
                 .trigger('change', [this.pageType]);
-            // }
 
             $('#node-config-input-instance-expressions-list')
                 .css('min-height', '150px')
@@ -441,7 +312,6 @@
                                         class: 'node-config-input-instance-parameter-variable',
                                         id: 'instance-parameter-variable-' + index + '-' + i,
                                         type: 'text',
-                                        // style: 'width: 43%; font-size: 10px',
                                         placeholder: 'variable',
                                     })
                                         .appendTo(paramRow)
@@ -451,7 +321,6 @@
                                         class: 'node-config-input-instance-parameter-value',
                                         id: 'instance-parameter-values-' + index + '-' + i,
                                         type: 'text',
-                                        // style: 'width: 43%; font-size: 10px',
                                         placeholder: 'values',
                                     })
                                         .appendTo(paramRow)
@@ -505,24 +374,17 @@
             this.hidden = $('#node-config-input-hidden').prop('checked');
             this.pageType = $('#node-config-input-page-type').val();
             this.inheritInst = $('#node-config-input-inherit-instances').prop('checked');
-            console.log('this.inheritInst: ', this.inheritInst);
 
             // Single Housekeeping
             if (this.pageType === 'single' || this.isSingle) {
-                // $('#node-config-input-referenced-page').val('none');
-                // this.refPage = 'none';
                 this.isSingle = true;
                 this.isMulti = false;
-                // this.inheritInst = true;
             }
 
             // Multi Housekeeping
             if (this.pageType == 'multi' || this.isMulti) {
-                // $('#node-config-input-referenced-page').val('none');
-                // this.refPage = 'none';
                 this.isSingle = false;
                 this.isMulti = true;
-                // this.inheritInst = true;
 
                 let instances = $('#node-config-input-instance-expressions-list').editableList('items');
                 let node = this;
@@ -590,20 +452,17 @@
             // Inherited Housekeeping
             if (this.pageType == 'inherited') {
                 this.refPage = $('#node-config-input-referenced-page').val();
-                console.log('refPage: ', this.refPage);
+
                 let refPageIsMulti = false;
 
                 if (this.refPage && this.refPage !== 'none') {
                     refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
                 }
-                console.log('refPageIsMulti-select: ', refPageIsMulti);
 
                 if (refPageIsMulti) {
-                    // $('#inherit-instances').show();
                     this.isSingle = false;
                     this.isMulti = true;
                 } else {
-                    // $('#inherit-instances').hide();
                     this.isSingle = true;
                     this.isMulti = false;
                 }
