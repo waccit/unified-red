@@ -1494,7 +1494,7 @@
                             break;
                         case 'single':
                         default:
-                            // (!) this maintains compatibility with older ur_page config
+                            // (!) this maintains compatibility with older ur_page config (pre inherited-page)
                             if (pageNode.isMulti) {
                                 singlePageIcon.hide();
                                 multiPageIcon.show();
@@ -2732,7 +2732,7 @@
                                             break;
                                         case 'single':
                                         default:
-                                            // (!) this maintains compatibility with older ur_page config
+                                            // (!) this maintains compatibility with older ur_page config (pre inherited-page)
                                             if (node.isMulti) {
                                                 listElements[node.id]
                                                     .children('.nr-db-sb-list-header')
