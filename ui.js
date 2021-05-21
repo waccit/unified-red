@@ -1362,19 +1362,21 @@ function addInheritedPage(RED, page) {
     return remove;
 }
 
-function addLink(id, title, folders, link, icon, order, target) {
+function addLink(folders, config) {
     // Do not add dead links
-    if (!link || !link.length) {
+    if (!config.link || !config.link.length) {
         return () => {};
     }
 
     let newLink = {
-        id,
-        title,
-        link,
-        icon,
-        order: order || 1,
-        target,
+        id: config.id,
+        title: config.name,
+        link: config.link,
+        icon: config.icon,
+        order: config.order || 1,
+        target: config.target,
+        disabled: config.disabled,
+        hidden: config.hidden,
         submenu: [],
     };
 
