@@ -18,31 +18,33 @@
                     *ngFor="let sidebarItem of sidebarItems"
                     [routerLinkActive]="sidebarItem.submenu.length != 0 ? '' : 'active'"
                 >
-                    <div class="header" *ngIf="sidebarItem.groupTitle === true">
-                        {{ sidebarItem.title }}
-                    </div>
-                    <a
-                        [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
-                        *ngIf="!sidebarItem.groupTitle && !sidebarItem.link"
-                        [ngClass]="[sidebarItem.class, sidebarItem.disabled ? 'disabled' : '']"
-                        (click)="sidebarItem.disabled ? '' : callMenuToggle($event, sidebarItem.title)"
-                    >
-                        <i [ngClass]="[sidebarItem.icon]"></i>
-                        <span class="hide-menu">{{ sidebarItem.title }} </span>
-                    </a>
-
-                    <div *ngIf="sidebarItem.link">
+                    <ng-container *ngIf="!sidebarItem.hidden">
+                        <div class="header" *ngIf="sidebarItem.groupTitle === true">
+                            {{ sidebarItem.title }}
+                        </div>
                         <a
-                            [href]="sidebarItem.link"
-                            target="{{ sidebarItem.target === 'thistab' ? '_self' : '_blank' }}"
-                            [ngClass]="sidebarItem.disabled ? 'disabled' : ''"
+                            [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
+                            *ngIf="!sidebarItem.groupTitle && !sidebarItem.link"
+                            [ngClass]="[sidebarItem.class, sidebarItem.disabled ? 'disabled' : '']"
+                            (click)="sidebarItem.disabled ? '' : callMenuToggle($event, sidebarItem.title)"
                         >
                             <i [ngClass]="[sidebarItem.icon]"></i>
                             <span class="hide-menu">{{ sidebarItem.title }} </span>
                         </a>
-                    </div>
 
-                    <app-menu-entity [sidebarItems]="sidebarItem.submenu"></app-menu-entity>
+                        <div *ngIf="sidebarItem.link">
+                            <a
+                                [href]="sidebarItem.link"
+                                target="{{ sidebarItem.target === 'thistab' ? '_self' : '_blank' }}"
+                                [ngClass]="sidebarItem.disabled ? 'disabled' : ''"
+                            >
+                                <i [ngClass]="[sidebarItem.icon]"></i>
+                                <span class="hide-menu">{{ sidebarItem.title }} </span>
+                            </a>
+                        </div>
+
+                        <app-menu-entity [sidebarItems]="sidebarItem.submenu"></app-menu-entity>
+                    </ng-container>
                 </li>
             </ul>
         </div>
