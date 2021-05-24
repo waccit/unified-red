@@ -1423,7 +1423,10 @@
                     $('<i class="fa fa-external-link nr-db-sb-icon"></i>').appendTo(titleRow);
 
                     // title
-                    $('<span class="nr-db-sb-title">')
+                    // add hide & disable
+                    let hide = item.node.hidden ? ' nr-db-sb-title-hidden' : '';
+                    let able = item.node.disabled ? ' nr-db-sb-title-disabled' : '';
+                    $('<span>', { class: 'nr-db-sb-title' + hide + able })
                         .text(linkNode.name || 'untitled')
                         .appendTo(titleRow);
 
@@ -1507,7 +1510,10 @@
                     }
 
                     // title
-                    let title = $('<span class="nr-db-sb-title">')
+                    // add hide & disable
+                    let hide = item.node.hidden ? ' nr-db-sb-title-hidden' : '';
+                    let able = item.node.disabled ? ' nr-db-sb-title-disabled' : '';
+                    let title = $('<span>', { class: 'nr-db-sb-title' + hide + able })
                         .text(pageNode.name || pageNode.id || '')
                         .appendTo(titleRow);
 
@@ -1600,7 +1606,10 @@
                     $('<i class="nr-db-sb-icon nr-db-sb-group-icon fa fa-window-maximize"></i>').appendTo(titleRow);
 
                     //title
-                    let title = $('<span class="nr-db-sb-title">')
+                    // add hide & disable
+                    let hide = item.node.hidden ? ' nr-db-sb-title-hidden' : '';
+                    let able = item.node.disabled ? ' nr-db-sb-title-disabled' : '';
+                    let title = $('<span>', { class: 'nr-db-sb-title' + hide + able })
                         .text(groupNode.name || groupNode.id || '')
                         .appendTo(titleRow);
 
@@ -1695,7 +1704,10 @@
                     $('<i class="nr-db-sb-icon nr-db-sb-tab-icon fa fa-columns"></i>').appendTo(titleRow);
 
                     // title
-                    $('<span class="nr-db-sb-title">')
+                    // add hide & disable
+                    let hide = item.node.hidden ? ' nr-db-sb-title-hidden' : '';
+                    let able = item.node.disabled ? ' nr-db-sb-title-disabled' : '';
+                    $('<span>', { class: 'nr-db-sb-title' + hide + able })
                         .text(tabNode.name || tabNode.id || '')
                         .appendTo(titleRow);
 
