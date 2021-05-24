@@ -4,39 +4,41 @@
         [class.activeSub]="showSubMenu === sidebarSubItem.title"
         [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'"
     >
-        <div *ngIf="sidebarSubItem.isPage">
-            <a [routerLink]="[sidebarSubItem.path]" [ngClass]="[sidebarSubItem.disabled ? 'disabled' : '']">
-                {{ sidebarSubItem.title }}
-            </a>
-        </div>
+        <ng-container *ngIf="!sidebarSubItem.hidden">
+            <div *ngIf="sidebarSubItem.isPage">
+                <a [routerLink]="[sidebarSubItem.path]" [ngClass]="[sidebarSubItem.disabled ? 'disabled' : '']">
+                    {{ sidebarSubItem.title }}
+                </a>
+            </div>
 
-        <div *ngIf="sidebarSubItem.link">
-            <a
-                [href]="sidebarSubItem.link"
-                [ngClass]="[sidebarSubItem.disabled ? 'disabled' : '']"
-                target="{{ sidebarSubItem.target === 'thistab' ? '_self' : '_blank' }}"
-            >
-                <i [ngClass]="[sidebarSubItem.icon]"></i>
-                <span class="hide-menu">{{ sidebarSubItem.title }} </span>
-            </a>
-        </div>
+            <div *ngIf="sidebarSubItem.link">
+                <a
+                    [href]="sidebarSubItem.link"
+                    [ngClass]="[sidebarSubItem.disabled ? 'disabled' : '']"
+                    target="{{ sidebarSubItem.target === 'thistab' ? '_self' : '_blank' }}"
+                >
+                    <i [ngClass]="[sidebarSubItem.icon]"></i>
+                    <span class="hide-menu">{{ sidebarSubItem.title }} </span>
+                </a>
+            </div>
 
-        <div *ngIf="!sidebarSubItem.isPage && !sidebarSubItem.link">
-            <a
-                (click)="sidebarSubItem.disabled ? '' : callSubMenuToggle($event, sidebarSubItem.title)"
-                [ngClass]="[sidebarSubItem.class, sidebarSubItem.disabled ? 'disabled' : '']"
-            >
-                {{ sidebarSubItem.title }}
-            </a>
+            <div *ngIf="!sidebarSubItem.isPage && !sidebarSubItem.link">
+                <a
+                    (click)="sidebarSubItem.disabled ? '' : callSubMenuToggle($event, sidebarSubItem.title)"
+                    [ngClass]="[sidebarSubItem.class, sidebarSubItem.disabled ? 'disabled' : '']"
+                >
+                    {{ sidebarSubItem.title }}
+                </a>
 
-            <app-menu-entity
-                [ngClass]="
-                    !sidebarSubItem.isPage
-                        ? { 'collapse': true, 'in': showSubMenu === sidebarSubItem.title }
-                        : 'collapse'
-                "
-                [sidebarItems]="sidebarSubItem.submenu"
-            ></app-menu-entity>
-        </div>
+                <app-menu-entity
+                    [ngClass]="
+                        !sidebarSubItem.isPage
+                            ? { 'collapse': true, 'in': showSubMenu === sidebarSubItem.title }
+                            : 'collapse'
+                    "
+                    [sidebarItems]="sidebarSubItem.submenu"
+                ></app-menu-entity>
+            </div>
+        </ng-container>
     </li>
 </ul>
