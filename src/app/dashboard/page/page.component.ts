@@ -80,6 +80,13 @@ export class PageComponent implements OnInit {
 
         const foundFolder = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.folder);
 
+        // do not render disabled folders
+        if (foundFolder && foundFolder.disabled) {
+            // this.router.navigate(['/d/disabled']);
+            this.breadcrumbs.push('DISABLED');
+            return;
+        }
+
         let foundPage: any;
         if (foundFolder) {
             this.breadcrumbs.push(foundFolder.title);
@@ -87,6 +94,11 @@ export class PageComponent implements OnInit {
         }
 
         if (foundPage) {
+            // do not render disabled pages
+            if (foundPage.disabled) {
+                this.breadcrumbs.push('DISABLED');
+                return;
+            }
             this.breadcrumbs.push(foundPage.title);
             foundPage.items.forEach((g) => {
                 this.groups.push({
@@ -99,7 +111,7 @@ export class PageComponent implements OnInit {
                             widgets: this.widgetService.getWidgets(t.items),
                         };
                     }),
-                    displayHeader: !!g.disp
+                    displayHeader: !!g.disp,
                 });
             });
         }

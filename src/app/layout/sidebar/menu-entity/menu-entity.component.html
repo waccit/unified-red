@@ -5,20 +5,27 @@
         [routerLinkActive]="sidebarSubItem.submenu.length > 0 ? '' : 'active'"
     >
         <div *ngIf="sidebarSubItem.isPage">
-            <a [routerLink]="[sidebarSubItem.path]">
+            <a [routerLink]="[sidebarSubItem.path]" [ngClass]="[sidebarSubItem.disabled ? 'disabled' : '']">
                 {{ sidebarSubItem.title }}
             </a>
         </div>
 
         <div *ngIf="sidebarSubItem.link">
-            <a [href]="sidebarSubItem.link" target="{{ sidebarSubItem.target === 'thistab' ? '_self' : '_blank' }}">
+            <a
+                [href]="sidebarSubItem.link"
+                [ngClass]="[sidebarSubItem.disabled ? 'disabled' : '']"
+                target="{{ sidebarSubItem.target === 'thistab' ? '_self' : '_blank' }}"
+            >
                 <i [ngClass]="[sidebarSubItem.icon]"></i>
                 <span class="hide-menu">{{ sidebarSubItem.title }} </span>
             </a>
         </div>
 
         <div *ngIf="!sidebarSubItem.isPage && !sidebarSubItem.link">
-            <a (click)="callSubMenuToggle($event, sidebarSubItem.title)" [ngClass]="[sidebarSubItem.class]">
+            <a
+                (click)="sidebarSubItem.disabled ? '' : callSubMenuToggle($event, sidebarSubItem.title)"
+                [ngClass]="[sidebarSubItem.class, sidebarSubItem.disabled ? 'disabled' : '']"
+            >
                 {{ sidebarSubItem.title }}
             </a>
 
