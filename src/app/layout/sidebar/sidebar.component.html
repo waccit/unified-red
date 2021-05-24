@@ -24,8 +24,8 @@
                     <a
                         [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
                         *ngIf="!sidebarItem.groupTitle && !sidebarItem.link"
-                        [ngClass]="[sidebarItem.class]"
-                        (click)="callMenuToggle($event, sidebarItem.title)"
+                        [ngClass]="[sidebarItem.class, sidebarItem.disabled ? 'disabled' : '']"
+                        (click)="sidebarItem.disabled ? '' : callMenuToggle($event, sidebarItem.title)"
                     >
                         <i [ngClass]="[sidebarItem.icon]"></i>
                         <span class="hide-menu">{{ sidebarItem.title }} </span>
@@ -35,6 +35,7 @@
                         <a
                             [href]="sidebarItem.link"
                             target="{{ sidebarItem.target === 'thistab' ? '_self' : '_blank' }}"
+                            [ngClass]="sidebarItem.disabled ? 'disabled' : ''"
                         >
                             <i [ngClass]="[sidebarItem.icon]"></i>
                             <span class="hide-menu">{{ sidebarItem.title }} </span>
