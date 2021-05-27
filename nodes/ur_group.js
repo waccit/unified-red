@@ -11,6 +11,8 @@ module.exports = function (RED) {
             order: config.order || 0,
             page: config.page,
             collapse: config.collapse || false,
+            disabled: config.disabled || false,
+            hidden: config.hidden || false,
             access: config.access || '',
         };
         if (!this.config.hasOwnProperty('disp')) {

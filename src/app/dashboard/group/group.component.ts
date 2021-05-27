@@ -21,6 +21,7 @@ export class GroupComponent implements OnInit, OnDestroy {
     cols: string;
     tabs: Tab[];
     displayHeader: boolean;
+    disabled: boolean;
     @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
 
     constructor(
@@ -31,7 +32,11 @@ export class GroupComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.viewContainerRef = this.groupHost.viewContainerRef;
-        // this.loadTabs();
+
+        // do not render hidden tabs
+        this.tabs = this.tabs.filter((tab) => !tab.hidden);
+
+        // this.loadTabs(); => this is being handled in html
         if (this.tabs && this.tabs.length < 2) {
             this.loadTab();
         }

@@ -927,12 +927,17 @@ function addControl(folders, page, group, tab, control) {
                                     g.widthMd = group.config.widthMd;
                                     g.widthSm = group.config.widthSm;
                                     g.disp = group.config.disp;
+                                    g.disabled = group.config.disabled;
+                                    g.hidden = group.config.hidden;
+                                    g.access = group.config.access;
 
                                     if (multiTabs[tab.id]) {
                                         g.items.forEach((t) => {
                                             if (t.id.startsWith(tab.id)) {
                                                 t.header = tab.config.name;
                                                 t.order = tab.config.order;
+                                                t.disabled = tab.config.disabled;
+                                                t.hidden = tab.config.hidden;
 
                                                 // if tab's items already have the widget => update widget
                                                 if (t.items.findIndex((w) => w.id.startsWith(control.id)) !== -1) {
@@ -959,6 +964,8 @@ function addControl(folders, page, group, tab, control) {
                                             id: tab.id + '.' + p.instance._id,
                                             header: tab.config.name,
                                             order: tab.config.order,
+                                            disabled: tab.config.disabled,
+                                            hidden: tab.config.hidden,
                                             items: [],
                                         };
 
@@ -980,12 +987,17 @@ function addControl(folders, page, group, tab, control) {
                                 widthSm: group.config.widthSm,
                                 items: [],
                                 disp: group.config.disp,
+                                access: group.config.access,
+                                disabled: group.config.disabled,
+                                hidden: group.config.hidden,
                             };
 
                             let instanceTab = {
                                 id: tab.id + '.' + p.instance._id,
                                 header: tab.config.name,
                                 order: tab.config.order,
+                                disabled: tab.config.disabled,
+                                hidden: tab.config.hidden,
                                 items: [],
                             };
 
@@ -1046,6 +1058,9 @@ function addControl(folders, page, group, tab, control) {
                         widthSm: group.config.widthSm,
                         items: [],
                         disp: group.config.disp,
+                        disabled: group.config.disabled,
+                        hidden: group.config.hidden,
+                        access: group.config.access,
                     };
 
                     let instanceTab = {
@@ -1228,6 +1243,9 @@ function addControl(folders, page, group, tab, control) {
                     widthSm: group.config.widthSm,
                     items: [],
                     disp: group.config.disp,
+                    access: group.config.access,
+                    disabled: group.config.disabled,
+                    hidden: group.config.hidden,
                 };
                 foundPage.items.push(foundGroup);
             }
@@ -1240,6 +1258,8 @@ function addControl(folders, page, group, tab, control) {
                     id: tab.id,
                     header: tab.config.name,
                     order: tab.config.order,
+                    disabled: tab.config.disabled,
+                    hidden: tab.config.hidden,
                     items: [],
                 };
                 foundGroup.items.push(foundTab);

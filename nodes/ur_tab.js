@@ -5,6 +5,8 @@ module.exports = function (RED) {
             name: config.name,
             order: config.order || 0,
             group: config.group,
+            disabled: config.disabled || false,
+            hidden: config.hidden || false,
         };
     }
 

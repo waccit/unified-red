@@ -68,18 +68,43 @@
                 auto: false,
             });
 
-            // $('#node-config-input-widthLg').val(this.widthLg);
-            // $('#node-config-input-widthMd').val(this.widthMd);
-            // $('#node-config-input-widthSm').val(this.widthSm);
+            $('#node-config-input-disabled-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-disabled').prop('checked', active);
 
-            // $("#node-input-size").elementSizer({
-            //     width: {
-            //         lg: '#node-config-input-width-lg',
-            //         md: '#node-config-input-width-md',
-            //         sm: '#node-config-input-width-sm',
-            //     },
-            //     auto: false
-            // });
+                var newTxt = c_ur_group(active ? 'label.disabled' : 'label.enabled');
+                $('#node-config-input-disabled-label').text(newTxt);
+
+                var info = $('#node-config-input-disabled-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.disabled) {
+                $('#node-config-input-disabled-btn').click();
+            } else {
+                $('#node-config-input-disabled-label').text(c_ur_group('label.enabled'));
+            }
+
+            $('#node-config-input-hidden-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-hidden').prop('checked', active);
+
+                var newTxt = c_ur_group(active ? 'label.hidden' : 'label.visible');
+                $('#node-config-input-hidden-label').text(newTxt);
+
+                var info = $('#node-config-input-hidden-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.hidden) {
+                $('#node-config-input-hidden-btn').click();
+            } else {
+                $('#node-config-input-hidden-label').text(c_ur_group('label.visible'));
+            }
 
             $('#node-config-input-disp').on('change', function () {
                 if ($('#node-config-input-disp').is(':checked')) {
@@ -89,6 +114,10 @@
                     $('#node-config-input-collapse').prop('checked', false);
                 }
             });
+        },
+        oneditsave: function () {
+            this.disabled = $('#node-config-input-disabled').prop('checked');
+            this.hidden = $('#node-config-input-hidden').prop('checked');
         },
     });
 </script>
@@ -132,6 +161,30 @@
     <div class="form-row">
         <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp" />
         <label style="width:auto" for="node-config-input-disp"><span data-i18n="ur_group.display-name"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-disabled-btn">
+            <i class="fa fa-ban"></i> <span data-i18n="ur_group.label.state"></span>
+        </label>
+        <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-disabled" style="display: none;" />
+        <span
+            id="node-config-input-disabled-info"
+            data-i18n="[html]ur_group.info.disabled"
+            style="display: none;"
+        ></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-hidden-btn">
+            <i class="fa fa-eye-slash"></i> <span data-i18n="ur_group.label.navmenu"></span>
+        </label>
+        <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-hidden" style="display:none;" />
+        <span id="node-config-input-hidden-info" data-i18n="[html]ur_group.info.hidden" style="display:none;"></span>
     </div>
     <!-- <div class="form-row" id="group-collapse-flag">
         <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse" />

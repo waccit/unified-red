@@ -1,5 +1,5 @@
 import { Widget } from './widget.model';
 
 export class Tab {
-    constructor(public header: string, public widgets: Widget[]) {}
+    constructor(public header: string, public disabled: boolean, public hidden: boolean, public widgets: Widget[]) {}
 }
