@@ -6,6 +6,7 @@ export class Group {
         public access: string,
         public cols: any,
         public tabs: Tab[],
-        public displayHeader: boolean
+        public displayHeader: boolean,
+        public disabled: boolean
     ) {}
 }

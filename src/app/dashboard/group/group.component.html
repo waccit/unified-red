@@ -1,5 +1,6 @@
 <div class="card">
-    <div class="header" style="padding-bottom:0" *ngIf="displayHeader">
+    <div class="overlay overlay-card" *ngIf="this.disabled"></div>
+    <div class="header" style="padding-bottom: 0" *ngIf="displayHeader">
         <h2>{{ header }}</h2>
         <!-- <ul class="header-dropdown m-r--5">
             <li class="dropdown">
@@ -29,11 +30,17 @@
     </div>
     <div class="body">
         <div [class.row]="tabs.length === 1">
-            <ng-template group-host></ng-template>
+            <ng-container>
+                <div class="overlay overlay-card" *ngIf="!this.disabled && tabs.length === 1 && tabs[0].disabled"></div>
+                <ng-template group-host></ng-template>
+            </ng-container>
             <mat-tab-group *ngIf="tabs.length > 1">
                 <mat-tab *ngFor="let tab of tabs" label="{{ tab.header }}">
                     <ng-template matTabContent>
-                        <app-tab [widgets]="tab.widgets"></app-tab>
+                        <div class="overlay" *ngIf="tab.disabled && !this.disabled"></div>
+                        <ng-container *ngIf="!tab.hidden">
+                            <app-tab [widgets]="tab.widgets"></app-tab>
+                        </ng-container>
                     </ng-template>
                 </mat-tab>
                 <!-- <ng-template group-host></ng-template> -->

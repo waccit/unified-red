@@ -101,18 +101,23 @@ export class PageComponent implements OnInit {
             }
             this.breadcrumbs.push(foundPage.title);
             foundPage.items.forEach((g) => {
-                this.groups.push({
-                    header: g.header,
-                    access: g.access || '',
-                    cols: { lg: g.widthLg, md: g.widthMd, sm: g.widthSm },
-                    tabs: g.items.map((t) => {
-                        return {
-                            header: t.header,
-                            widgets: this.widgetService.getWidgets(t.items),
-                        };
-                    }),
-                    displayHeader: !!g.disp,
-                });
+                if (!g.hidden) {
+                    this.groups.push({
+                        header: g.header,
+                        access: g.access || '',
+                        cols: { lg: g.widthLg, md: g.widthMd, sm: g.widthSm },
+                        tabs: g.items.map((t) => {
+                            return {
+                                header: t.header,
+                                disabled: t.disabled,
+                                hidden: t.hidden,
+                                widgets: this.widgetService.getWidgets(t.items),
+                            };
+                        }),
+                        displayHeader: !!g.disp,
+                        disabled: !!g.disabled,
+                    });
+                }
             });
         }
     }
@@ -167,6 +172,7 @@ export class PageComponent implements OnInit {
 
             componentRef.instance.header = group.header;
             componentRef.instance.displayHeader = group.displayHeader;
+            componentRef.instance.disabled = group.disabled;
 
             for (const size in group.cols) {
                 if (size) {
