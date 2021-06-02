@@ -349,28 +349,43 @@ function add(opt) {
 
             let newId = opt.node.id;
             if (opt.page.config.pageType === 'multi' || opt.page.config.isMulti) {
+                if (!opt.control.topicPattern.length) throw new Error('Topic Pattern is Required');
+
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
-                let idVar = opt.control._idVar;
+                let sortedVars = opt.control.sortedVars;
+
+                let varMap = {};
 
                 // find and escape hyphen, brackets, parentheses, plus, punctuation, backslash,
                 // caret, dollar, vertical bar, and pound symbols
                 let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
                 // find and replace wildcard (*)
                 topicRegex = topicRegex.replace(/\*/g, '.*');
-                // find and replace capture group (idVar)
-                topicRegex = topicRegex.replace(new RegExp('{' + idVar + '}', 'gi'), '([\\w\\. ]+)');
-                // find and replace ignored {variables}
-                topicRegex = topicRegex.replace(/\{.*}/g, '[\\w\\. ]+');
 
-                // make new regex
+                // make a copy of topicRegex for pattern (includes {}) to capture variable names in topicPattern
+                let patternRegex = topicRegex.replace(/\{[^/}]*}/g, '{([\\w\\. ]+)}');
+
+                // find variables and replace with capture groups
+                topicRegex = topicRegex.replace(/\{[^/}]*}/g, '([\\w\\. ]+)');
+
+                // make regexs
                 topicRegex = new RegExp('^' + topicRegex + '$');
+                patternRegex = new RegExp('^' + patternRegex + '$');
 
-                let topicArr = topicRegex.exec(topic);
+                // find matches in topic
+                let topicMatches = topicRegex.exec(topic);
+                // find matches in topicPattern
+                let patternMatches = patternRegex.exec(topicPattern);
 
-                if (topicArr) {
-                    let destinationInstNum = topicArr[1];
-                    newId += '.' + idVar + destinationInstNum;
+                // make variable dict from topic & topicPattern
+                for (let i = 1; i < topicMatches.length; i++) {
+                    varMap[patternMatches[i]] = topicMatches[i];
+                }
+
+                // add newId suffixes
+                for (v of sortedVars) {
+                    newId += '.' + v + varMap[v];
                 }
             }
 
@@ -873,15 +888,25 @@ function addControl(folders, page, group, tab, control) {
             let instanceNames = [];
             let instanceParams = [];
             let instanceIds = [];
-            let firstParamVar = '';
+            let sortedVars = [];
 
             instances.forEach((instance) => {
                 if (instance.names && instance.param) {
                     instanceNames = instanceNames.concat(instance.names._arr);
                     instanceParams = instanceParams.concat(instance.param._arr);
-                    firstParamVar = instance.param.input[0].variable; // grab first variable to be used in the IDs
+
+                    instance.param.input.forEach((p) => {
+                        if (!sortedVars.includes(p.variable)) sortedVars.push(p.variable);
+                    });
+
+                    sortedVars.sort();
+
                     instance.param._arr.forEach((p) => {
-                        instanceIds.push(firstParamVar + p[firstParamVar]);
+                        let id = '';
+
+                        sortedVars.forEach((variable) => (id += '.' + variable + p[variable]));
+
+                        instanceIds.push(id);
                     });
                 }
             });
@@ -943,13 +968,13 @@ function addControl(folders, page, group, tab, control) {
                                                 if (t.items.findIndex((w) => w.id.startsWith(control.id)) !== -1) {
                                                     t.items.forEach((w) => {
                                                         if (w.id.startsWith(control.id)) {
-                                                            let newCtrlId = control.id + '.' + p.instance._id;
+                                                            let newCtrlId = control.id + p.instance._id;
                                                             w = { ...control, 'id': newCtrlId, 'instance': p.instance };
                                                         }
                                                     });
                                                 } else {
                                                     // else add new widget
-                                                    let newCtrlId = control.id + '.' + p.instance._id;
+                                                    let newCtrlId = control.id + p.instance._id;
                                                     t.items.push({
                                                         ...control,
                                                         'id': newCtrlId,
@@ -961,7 +986,7 @@ function addControl(folders, page, group, tab, control) {
                                         });
                                     } else {
                                         let instanceTab = {
-                                            id: tab.id + '.' + p.instance._id,
+                                            id: tab.id + p.instance._id,
                                             header: tab.config.name,
                                             order: tab.config.order,
                                             disabled: tab.config.disabled,
@@ -969,7 +994,7 @@ function addControl(folders, page, group, tab, control) {
                                             items: [],
                                         };
 
-                                        let newCtrlId = control.id + '.' + p.instance._id;
+                                        let newCtrlId = control.id + p.instance._id;
                                         instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': p.instance });
 
                                         g.items.push(instanceTab);
@@ -979,7 +1004,7 @@ function addControl(folders, page, group, tab, control) {
                             });
                         } else {
                             let instanceGroup = {
-                                id: group.id + '.' + p.instance._id,
+                                id: group.id + p.instance._id,
                                 header: group.config.name,
                                 order: group.config.order,
                                 widthLg: group.config.widthLg,
@@ -993,7 +1018,7 @@ function addControl(folders, page, group, tab, control) {
                             };
 
                             let instanceTab = {
-                                id: tab.id + '.' + p.instance._id,
+                                id: tab.id + p.instance._id,
                                 header: tab.config.name,
                                 order: tab.config.order,
                                 disabled: tab.config.disabled,
@@ -1001,7 +1026,7 @@ function addControl(folders, page, group, tab, control) {
                                 items: [],
                             };
 
-                            let newCtrlId = control.id + '.' + p.instance._id;
+                            let newCtrlId = control.id + p.instance._id;
                             instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': p.instance });
 
                             instanceGroup.items.push(instanceTab);
@@ -1029,7 +1054,7 @@ function addControl(folders, page, group, tab, control) {
                     let pageTitle = pageTitlePrefix + instanceNames[i] + pageTitleSuffix;
 
                     let instancePage = {
-                        id: page.id + '.' + instanceIds[i],
+                        id: page.id + instanceIds[i],
                         isPage: true,
                         order: page.config.order + '.' + i,
                         disabled: page.config.disabled,
@@ -1050,7 +1075,7 @@ function addControl(folders, page, group, tab, control) {
                     };
 
                     let instanceGroup = {
-                        id: group.id + '.' + instanceIds[i],
+                        id: group.id + instanceIds[i],
                         header: group.config.name,
                         order: group.config.order,
                         widthLg: group.config.widthLg,
@@ -1064,13 +1089,13 @@ function addControl(folders, page, group, tab, control) {
                     };
 
                     let instanceTab = {
-                        id: tab.id + '.' + instanceIds[i],
+                        id: tab.id + instanceIds[i],
                         header: tab.config.name,
                         order: tab.config.order,
                         items: [],
                     };
 
-                    let newCtrlId = control.id + '.' + instanceIds[i];
+                    let newCtrlId = control.id + instanceIds[i];
 
                     instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': instancePage.instance });
                     instanceTab.items.sort(itemSorter);
@@ -1163,8 +1188,8 @@ function addControl(folders, page, group, tab, control) {
 
             removeFunc = multiRemove;
 
-            // save a copy of the variable name used in instance IDs
-            control['_idVar'] = firstParamVar;
+            // save a copy of the sorted variable names for filtering topics
+            control['sortedVars'] = sortedVars;
         }
         // Single Page
         else if (page.config.pageType === 'single' || page.config.isSingle) {
