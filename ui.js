@@ -378,9 +378,11 @@ function add(opt) {
                 // find matches in topicPattern
                 let patternMatches = patternRegex.exec(topicPattern);
 
-                // make variable dict from topic & topicPattern
-                for (let i = 1; i < topicMatches.length; i++) {
-                    varMap[patternMatches[i]] = topicMatches[i];
+                // if a match, make variable dict from topic & topicPattern
+                if (topicMatches) {
+                    for (let i = 1; i < topicMatches.length; i++) {
+                        varMap[patternMatches[i]] = topicMatches[i];
+                    }
                 }
 
                 // add newId suffixes
