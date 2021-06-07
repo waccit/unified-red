@@ -415,7 +415,7 @@ function add(opt) {
     var handler = function (msg) {
         let idParts = msg.id.split('.');
         // prettier-ignore
-        if (idParts.length === 3) { // is extended node id? (multi page)
+        if (idParts.length > 2) { // is extended node id? (multi page)
             msg.id = idParts[0] + '.' + idParts[1]; // set id to base node id
         }
         if (msg.id !== opt.node.id) {
@@ -737,7 +737,7 @@ function addControl(folders, page, group, tab, control) {
         };
     } else {
         // group = group || settings.defaultGroupHeader;
-        control.order = control.order;
+        // control.order = control.order;
         let pathNeedsUpdate = false;
         var foundFolder;
 
