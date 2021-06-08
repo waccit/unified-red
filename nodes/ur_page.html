@@ -19,8 +19,8 @@
             isMulti: { value: false },
             isSingle: { value: true },
             pageType: { value: 'single' },
-            refPage: { value: 'none' },
-            inheritInst: { value: true },
+            refPage: { type: 'ur_page', value: 'none', required: false },
+            inheritInst: { value: false },
             expression: {
                 value: '',
                 validate: function (v) {
@@ -149,6 +149,14 @@
                     $('#node-config-input-inherit-instances-info').hide();
                 }
             });
+            if (this.inheritInst) {
+                $('#node-config-input-inherit-instances-btn').click();
+            } else {
+                $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
+                $('#instance-expression').show();
+                $('#instances-map').show();
+                $('#node-config-input-inherit-instances-info').hide();
+            }
 
             $('#node-config-input-page-type').change({ refPage: this.refPage }, function (e) {
                 let type = $(this).val();
@@ -375,6 +383,29 @@
             this.pageType = $('#node-config-input-page-type').val();
             this.inheritInst = $('#node-config-input-inherit-instances').prop('checked');
 
+            // Inherited Housekeeping
+            if (this.pageType == 'inherited') {
+                this.refPage = $('#node-config-input-referenced-page').val();
+
+                let refPageIsMulti = false;
+
+                if (this.refPage && this.refPage !== 'none') {
+                    refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
+                }
+
+                if (refPageIsMulti) {
+                    this.isSingle = false;
+                    this.isMulti = true;
+                    // console.log('inheritInst: ', this.inheritInst);
+                    // if (!this.inheritInst) {
+                    //     saveInstances(this, $(this));
+                    // }
+                } else {
+                    this.isSingle = true;
+                    this.isMulti = false;
+                }
+            }
+
             // Single Housekeeping
             if (this.pageType === 'single' || this.isSingle) {
                 this.isSingle = true;
@@ -447,25 +478,6 @@
 
                     node.instances.push(i);
                 });
-            }
-
-            // Inherited Housekeeping
-            if (this.pageType == 'inherited') {
-                this.refPage = $('#node-config-input-referenced-page').val();
-
-                let refPageIsMulti = false;
-
-                if (this.refPage && this.refPage !== 'none') {
-                    refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
-                }
-
-                if (refPageIsMulti) {
-                    this.isSingle = false;
-                    this.isMulti = true;
-                } else {
-                    this.isSingle = true;
-                    this.isMulti = false;
-                }
             }
         },
     });
@@ -545,8 +557,6 @@
             select.trigger('change', [self.pageType]);
         }, 50);
     }
-
-    function saveInstances() {}
 </script>
 
 <script type="text/html" data-template-name="ur_page">
