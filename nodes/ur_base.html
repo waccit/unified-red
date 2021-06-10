@@ -1241,9 +1241,11 @@
                     }
 
                     listElements[item.node.id] = container;
-                    if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
-                        RED.nodes.updateConfigNodeUsers(item.node);
-                    }
+                    // NB: updateConfigNodeUsers may be misbehaving; it adds 2 additional copies of users in configNode.users (3 total)
+                    // if (RED.nodes.hasOwnProperty('updateConfigNodeUsers')) {
+                    //     console.log('users: ', item.node.users);
+                    //     RED.nodes.updateConfigNodeUsers(item.node);
+                    // }
 
                     return item;
                 };
@@ -1901,7 +1903,9 @@
                             }
                             node[parentType] = domNode[parentType] = parent.node.id;
                             hev.changes[parentType] = node[parentType];
-                            parent.node.users.push(node);
+                            if (!parent.node.users.includes(node)) {
+                                parent.node.users.push(node);
+                            }
                             changed = true;
                         }
                         if (changed) {
