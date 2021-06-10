@@ -2709,13 +2709,11 @@
                                     .children('.nr-db-sb-list-header')
                                     .find('.nr-db-sb-title')
                                     .text(node.name || node.id);
-                                if (node.type === 'ur_group' || node.type === 'ur_tab') {
-                                    refresh();
-                                } else if (node.type === 'ur_link') {
+
+                                if (node.type === 'ur_link') {
                                     if (node.folder === 'root') {
                                         node.folder = undefined;
                                     }
-                                    refresh();
                                 } else if (node.type === 'ur_page') {
                                     switch (node.pageType) {
                                         case 'multi':
@@ -2777,38 +2775,39 @@
                                                     .hide();
                                             }
                                     }
-
-                                    refresh();
-                                } else {
-                                    if (node.hidden === true) {
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-title')
-                                            .addClass('nr-db-sb-title-hidden');
-                                    } else {
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-title')
-                                            .removeClass('nr-db-sb-title-hidden');
-                                    }
-                                    if (node.disabled === true) {
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-title')
-                                            .addClass('nr-db-sb-title-disabled');
-                                    } else {
-                                        listElements[node.id]
-                                            .children('.nr-db-sb-list-header')
-                                            .find('.nr-db-sb-title')
-                                            .removeClass('nr-db-sb-title-disabled');
-                                    }
                                 }
+
+                                if (node.hidden === true) {
+                                    listElements[node.id]
+                                        .children('.nr-db-sb-list-header')
+                                        .find('.nr-db-sb-title')
+                                        .addClass('nr-db-sb-title-hidden');
+                                } else {
+                                    listElements[node.id]
+                                        .children('.nr-db-sb-list-header')
+                                        .find('.nr-db-sb-title')
+                                        .removeClass('nr-db-sb-title-hidden');
+                                }
+
+                                if (node.disabled === true) {
+                                    listElements[node.id]
+                                        .children('.nr-db-sb-list-header')
+                                        .find('.nr-db-sb-title')
+                                        .addClass('nr-db-sb-title-disabled');
+                                } else {
+                                    listElements[node.id]
+                                        .children('.nr-db-sb-list-header')
+                                        .find('.nr-db-sb-title')
+                                        .removeClass('nr-db-sb-title-disabled');
+                                }
+
+                                refresh();
                             } else if (node.type === 'ur_folder') {
                                 if (!node.folder) {
-                                    // Adding a root folder or link
+                                    // Adding a root folder
                                     folderContainer.editableList('addItem', { node: node, children: [] });
                                 } else if (folderLists[node.folder]) {
-                                    // Adding a child folder or link
+                                    // Adding a child folder
                                     folderLists[node.folder].editableList('addItem', {
                                         node: node,
                                         child: true,
@@ -2817,10 +2816,10 @@
                                 }
                             } else if (node.type === 'ur_link') {
                                 if (!node.folder) {
-                                    // Adding a root folder or link
+                                    // Adding a root link
                                     folderContainer.editableList('addItem', { node: node });
                                 } else if (folderLists[node.folder]) {
-                                    // Adding a child folder or link
+                                    // Adding a child link
                                     folderLists[node.folder].editableList('addItem', { node: node });
                                 }
 
@@ -2849,6 +2848,8 @@
                                 }
                             }
                         } else {
+                            // saving non-config ur_ node
+
                             // TODO: fix orphaned widgets
                             // refreshOrphanedWidgets();
                             if (listElements[node.id]) {
