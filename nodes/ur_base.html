@@ -2680,17 +2680,23 @@
                     awaitingFolders = {};
                 }
 
+                let firstLoad = true;
+
                 RED.sidebar.addTab({
                     id: 'dashboard',
-                    label: c_('label.dashboard'),
-                    name: 'Dashboard',
+                    label: c_('label.unified-red'),
+                    name: 'Unified-RED',
                     content: content,
                     closeable: true,
                     pinned: true,
-                    iconClass: 'fa fa-bar-chart',
+                    iconClass: 'fa fa-desktop',
                     disableOnEdit: true,
                     onchange: function () {
-                        refresh();
+                        if (!firstLoad) {
+                            refresh();
+                        }
+
+                        firstLoad = false;
                     },
                 });
 
