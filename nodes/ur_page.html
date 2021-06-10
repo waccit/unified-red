@@ -91,6 +91,8 @@
         },
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
+            let node = this;
+
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
                 var active = i.hasClass('fa-toggle-on');
@@ -104,7 +106,7 @@
                 var info = $('#node-config-input-disabled-info');
                 var done = active ? info.show() : info.hide();
             });
-            if (this.disabled) {
+            if (node.disabled) {
                 $('#node-config-input-disabled-btn').click();
             } else {
                 $('#node-config-input-disabled-label').text(c_ur_page('label.enabled'));
@@ -123,7 +125,7 @@
                 var info = $('#node-config-input-hidden-info');
                 var done = active ? info.show() : info.hide();
             });
-            if (this.hidden) {
+            if (node.hidden) {
                 $('#node-config-input-hidden-btn').click();
             } else {
                 $('#node-config-input-hidden-label').text(c_ur_page('label.visible'));
@@ -149,7 +151,7 @@
                     $('#node-config-input-inherit-instances-info').hide();
                 }
             });
-            if (this.inheritInst) {
+            if (node.inheritInst) {
                 $('#node-config-input-inherit-instances-btn').click();
             } else {
                 $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
@@ -158,7 +160,7 @@
                 $('#node-config-input-inherit-instances-info').hide();
             }
 
-            $('#node-config-input-page-type').change({ refPage: this.refPage }, function (e) {
+            $('#node-config-input-page-type').change({ refPage: node.refPage }, function (e) {
                 let type = $(this).val();
 
                 switch (type) {
@@ -184,10 +186,10 @@
                 }
             });
 
-            if (this.pageType) {
-                $('#node-config-input-page-type').val(this.pageType).trigger('change');
+            if (node.pageType) {
+                $('#node-config-input-page-type').val(node.pageType).trigger('change');
             } else {
-                if (this.isMulti) {
+                if (node.isMulti) {
                     // (!) this maintains compatibility with older ur_page config (pre inherited-page)
                     $('#node-config-input-page-type').val('multi').trigger('change');
                 } else {
@@ -196,14 +198,23 @@
             }
 
             let refPageSelect = $('#node-config-input-referenced-page');
-            getRefPages(this, refPageSelect, this.refPage);
+            getRefPages(node, refPageSelect, node.refPage);
 
             refPageSelect
-                .change({ inheritInst: this.inheritInst }, function (e, pageType) {
+                .change({ inheritInst: node.inheritInst }, function (e, pageType) {
+                    let refPageNode;
                     let refPageIsMulti = false;
 
                     if (this.value && this.value !== 'none') {
-                        refPageIsMulti = RED.nodes.node(this.value).isMulti;
+                        refPageNode = RED.nodes.node(this.value);
+                        refPageIsMulti = refPageNode.isMulti;
+                        if (!node.users.includes(refPageNode)) {
+                            node.users.push(refPageNode);
+                        }
+                        
+                        if (!refPageNode.users.includes(node)) {
+                            refPageNode.users.push(node)
+                        }
                     }
 
                     // pageType is undefined => user selection
@@ -226,8 +237,8 @@
                         $('#instances-map').hide();
                     }
                 })
-                .val(this.refPage || 'none')
-                .trigger('change', [this.pageType]);
+                .val(node.refPage || 'none')
+                .trigger('change', [node.pageType]);
 
             $('#node-config-input-instance-expressions-list')
                 .css('min-height', '150px')
@@ -369,10 +380,10 @@
                     },
                 });
 
-            if (this.instances) {
-                for (let i = 0; i < this.instances.length; i++) {
+            if (node.instances) {
+                for (let i = 0; i < node.instances.length; i++) {
                     $('#node-config-input-instance-expressions-list').editableList('addItem', {
-                        instance: this.instances[i],
+                        instance: node.instances[i],
                     });
                 }
             }
