@@ -31,10 +31,7 @@
                             "src/assets/scss/theme/all-themes.scss",
                             "src/styles.scss"
                         ],
-                        "scripts": [
-                            "src/assets/js/app.min.js"
-                        ],
-                        "es5BrowserSupport": true
+                        "scripts": ["src/assets/js/app.min.js"]
                     },
                     "configurations": {
                         "production": {
@@ -88,10 +85,7 @@
                 "lint": {
                     "builder": "@angular-devkit/build-angular:tslint",
                     "options": {
-                        "tsConfig": [
-                            "src/tsconfig.app.json",
-                            "src/tsconfig.spec.json"
-                        ],
+                        "tsConfig": ["src/tsconfig.app.json", "src/tsconfig.spec.json"],
                         "exclude": ["**/node_modules/**"]
                     }
                 }
