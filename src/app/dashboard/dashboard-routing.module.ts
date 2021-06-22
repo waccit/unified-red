@@ -5,6 +5,7 @@ import { AuthGuard } from '../authentication/auth.guard';
 import { HomePageComponent } from './home-page/home-page.component';
 import { Role } from '../data';
 import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
+import { AuditLogComponent } from './audit-log/audit-log.component';
 
 const routes: Routes = [
     {
@@ -27,6 +28,12 @@ const routes: Routes = [
         component: AlarmConsoleComponent,
         canActivate: [AuthGuard],
         data: { roles: Role.Level1 },
+    },
+    {
+        path: 'audit-log',
+        component: AuditLogComponent,
+        canActivate: [AuthGuard],
+        data: { roles: Role.Level5 },
     },
 ];
 

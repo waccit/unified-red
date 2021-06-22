@@ -55,6 +55,8 @@ export class WebSocketService {
             event = this.updateValueEventName;
         }
 
+        msg.timestamp = new Date();
+
         msg.socketId = this.socket.id;
         this.socket.emit(event, msg);
     }

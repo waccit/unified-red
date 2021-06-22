@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { CurrentUserService, DataLogService, NodeRedApiService, RoleService, SnackbarService, WebSocketService } from '../../services';
+import {
+    CurrentUserService,
+    DataLogService,
+    NodeRedApiService,
+    RoleService,
+    SnackbarService,
+    WebSocketService,
+} from '../../services';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { LargestTriangleThreeBuckets } from './LargestTriangleThreeBuckets';
@@ -89,21 +96,28 @@ export class UrChartComponent extends BaseNode implements OnInit {
         }
 
         // Init settings
-        this.dataLogService.listTopics().pipe(first()).subscribe(
-            (data: any) => { this.availableTopics = data; },
-            (error) => { this.snackbar.error(error); }
-        );
+        this.dataLogService
+            .listTopics()
+            .pipe(first())
+            .subscribe(
+                (data: any) => {
+                    this.availableTopics = data;
+                },
+                (error) => {
+                    this.snackbar.error(error);
+                }
+            );
         this.topicForm = this.formBuilder.group({
             label: ['', Validators.required],
-            topic: ['', Validators.required]
+            topic: ['', Validators.required],
         });
         this.filteredTopics = this.topicForm.get('topic').valueChanges.pipe(
             startWith(''),
-            map(value => this._filter(value))
+            map((value) => this._filter(value))
         );
         this.referenceLineForm = this.formBuilder.group({
             name: ['', Validators.required],
-            value: ['', Validators.required]
+            value: ['', Validators.required],
         });
         this.colorForm = this.formBuilder.group({
             color1: [this.data.colors[0], Validators.required],
@@ -119,10 +133,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
             color11: [this.data.colors[10], Validators.required],
             color12: [this.data.colors[11], Validators.required],
         });
-        this.live.subscribe(live => {
+        this.live.subscribe((live) => {
             if (live) {
                 if (!this.liveSubscription) {
-                    this.liveSubscription = this.webSocketService.listen('ur-datalog-update').subscribe(data => {
+                    this.liveSubscription = this.webSocketService.listen('ur-datalog-update').subscribe((data) => {
                         this.liveData(data);
                     });
                 }
@@ -133,9 +147,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
             }
         });
         this.exporterOpt = {
-            fileName: 'Unified Datalog' + (this.data.label.length ? ' ' + this.data.label : '')
+            fileName: 'Unified Datalog' + (this.data.label.length ? ' ' + this.data.label : ''),
         };
-
 
         // Init table and graph
         this.queryParams = {
@@ -149,19 +162,19 @@ export class UrChartComponent extends BaseNode implements OnInit {
             // status: string,
             // tags: string[]
         };
-        if (this.data.chartType === 'table') { // init table
+        if (this.data.chartType === 'table') {
+            // init table
             this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
-        }
-        else { // init graph
+        } else {
+            // init graph
             this.initGraph();
         }
         this.live.next(this.data.live);
     }
 
-
     private _filter(value: string): string[] {
         const filterValue = value.toLowerCase();
-        return this.availableTopics.filter(topic => topic.toLowerCase().includes(filterValue));
+        return this.availableTopics.filter((topic) => topic.toLowerCase().includes(filterValue));
     }
 
     ngAfterViewInit(): void {
@@ -195,7 +208,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     private queryGraphData() {
-        this.dataLogService.query(this.queryParams)
+        this.dataLogService
+            .query(this.queryParams)
             .pipe()
             .subscribe(
                 (data: any) => {
@@ -240,8 +254,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         if (data.payload && this.topics.includes(data.payload.topic)) {
             if (this.data.chartType === 'table' && this.tableDataSource) {
                 this.tableDataSource.add(data.payload);
-            }
-            else if (typeof this.graphDataSource !== 'undefined') {
+            } else if (typeof this.graphDataSource !== 'undefined') {
                 this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
                 this.chartOpt.xScaleMin = new Date(
                     this.chartOpt.xScaleMax.getTime() - this.data.xrange * this.data.xrangeunits * 1000
@@ -265,7 +278,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
                 }
 
                 // refresh chart
-                this.updateGraphedResults([... this.graphedResults]);
+                this.updateGraphedResults([...this.graphedResults]);
             }
         }
     }
@@ -273,7 +286,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private chartLabel(entry) {
         let label = this.labels[entry.topic] || entry.topic;
         if (entry.units) {
-            label += " (" + entry.units + ")";
+            label += ' (' + entry.units + ')';
         }
         return label;
     }
@@ -294,10 +307,11 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     onSelect(label) {
-        if (typeof label !== 'string') { // legend clicks return strings. series clicks return objects.
+        if (typeof label !== 'string') {
+            // legend clicks return strings. series clicks return objects.
             return;
         }
-        let legendLabel = $(".legend-label span[title='" + label + "']")
+        let legendLabel = $(".legend-label span[title='" + label + "']");
         let data = $.extend(true, [], this.graphedResults); // deep copy/clone data
         const isShown = this.showSeries[label];
         if (isShown) {
@@ -309,7 +323,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
                     break;
                 }
             }
-            legendLabel.addClass("dim");
+            legendLabel.addClass('dim');
         } else {
             // topic hidden, so show
             this.showSeries[label] = true;
@@ -322,7 +336,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
                     entry.series = [];
                 }
             }
-            legendLabel.removeClass("dim");
+            legendLabel.removeClass('dim');
         }
         this.updateGraphedResults(data);
     }
@@ -372,14 +386,14 @@ export class UrChartComponent extends BaseNode implements OnInit {
         if (this.topicForm.invalid) {
             return;
         }
-        if (!this.data.topics.find(t => t.topic === this.topicForm.value.topic)) {
-            this.data.topics = [... this.data.topics, this.topicForm.value];
+        if (!this.data.topics.find((t) => t.topic === this.topicForm.value.topic)) {
+            this.data.topics = [...this.data.topics, this.topicForm.value];
             this.setDirty();
         }
     }
 
     removeTopic(topic) {
-        this.data.topics = this.data.topics.filter(t => {
+        this.data.topics = this.data.topics.filter((t) => {
             return t.label !== topic.label && t.topic !== topic.topic;
         });
         this.setDirty();
@@ -389,14 +403,14 @@ export class UrChartComponent extends BaseNode implements OnInit {
         if (this.referenceLineForm.invalid) {
             return;
         }
-        if (!this.data.referenceLines.find(r => r.value === this.referenceLineForm.value.value)) {
-            this.data.referenceLines = [... this.data.referenceLines, this.referenceLineForm.value];
+        if (!this.data.referenceLines.find((r) => r.value === this.referenceLineForm.value.value)) {
+            this.data.referenceLines = [...this.data.referenceLines, this.referenceLineForm.value];
             this.setDirty();
         }
     }
 
     removeRefLine(line) {
-        this.data.referenceLines = this.data.referenceLines.filter(r => {
+        this.data.referenceLines = this.data.referenceLines.filter((r) => {
             return r.name !== line.name && r.value !== line.value;
         });
         this.setDirty();
@@ -408,8 +422,18 @@ export class UrChartComponent extends BaseNode implements OnInit {
         }
         let cf = this.colorForm.value;
         this.data.colors = [
-            cf.color1, cf.color2, cf.color3, cf.color4, cf.color5, cf.color6,
-            cf.color7, cf.color8, cf.color9, cf.color10, cf.color11, cf.color12
+            cf.color1,
+            cf.color2,
+            cf.color3,
+            cf.color4,
+            cf.color5,
+            cf.color6,
+            cf.color7,
+            cf.color8,
+            cf.color9,
+            cf.color10,
+            cf.color11,
+            cf.color12,
         ];
         this.chartOpt.colorScheme.domain = this.data.colors;
         this.setDirty();
@@ -444,5 +468,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
                     this.snackbar.success('Deployed successfully!');
                 }
             });
+        this.send({
+            payload: {},
+            point: 'Chart',
+        });
     }
 }

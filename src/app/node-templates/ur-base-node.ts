@@ -1,10 +1,11 @@
-import { ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
 import { User } from '../data';
 
 declare var $: any;
 
+@Directive()
 export class BaseNode implements AfterViewInit, OnDestroy {
     protected expressionGlobals = `
         function interpolate(value, minIn, maxIn, minOut, maxOut) {
@@ -24,7 +25,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService
-    ) { }
+    ) {}
 
     ngAfterViewInit(): void {
         this.webSocketService.join(this.nodeId);
@@ -34,7 +35,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             }
         });
         this.webSocketService.emit('ui-replay-state', {
-            id: this.nodeId
+            id: this.nodeId,
         });
 
         // Add send event to jQuery element
@@ -62,7 +63,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     getBaseNodeId(nodeId = this.data.id): string {
         if (nodeId) {
-            return nodeId.split('.').slice(0,2).join('.')
+            return nodeId.split('.').slice(0, 2).join('.');
         }
         return null;
     }
@@ -79,8 +80,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         if (this.container && this.container.length) {
             this.container.trigger([data]);
             // when health is available, insert hook into all point values, except for Animation and Template
-            if (this.processHealthIndicator &&
-                data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
+            if (this.processHealthIndicator && data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
                 data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
                 let health = data.msg.payload.health.toString().toLowerCase();
                 $(document).ready(() => {
@@ -104,9 +104,18 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     send(msg: any) {
         if (this.nodeId) {
-            if (msg && msg.topic) { // check if msg.topic exists, not all do, e.g. ur-button sends a null message
+            if (msg && msg.topic) {
+                // check if msg.topic exists, not all do, e.g. ur-button sends a null message
                 msg.topic = this.evalInstanceParameters(msg.topic); // handle multi-page. substitute {variables}
             }
+
+            if (msg.payload) {
+                this.currentUserService.currentUser.subscribe((user) => {
+                    msg.payload.user = user;
+                    msg.payload.pageTitle = this._data.instance ? this.data.instance.pageTitle : this.data.pageTitle;
+                });
+            }
+
             this.webSocketService.emit({ id: this.nodeId, msg });
         }
     }
@@ -121,7 +130,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                     variable = variable.slice(1, -1); // remove braces
                     let param = instance.parameters[variable];
                     if (typeof param !== 'undefined') {
-                        str = str.replace(new RegExp('\{' + variable + '\}', 'ig'), param);
+                        str = str.replace(new RegExp('{' + variable + '}', 'ig'), param);
                     }
                 }
             }
@@ -151,24 +160,21 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
                 if (enums && enums.length) {
                     try {
-                        let enumMap = enums.split(/\s*,\s*/g)
-                            .reduce((a, b) => {
-                                var v = b.split(/\s*[:=]\s*/);
-                                a[v[0]] = v[1];
-                                return a;
-                            }, {});
+                        let enumMap = enums.split(/\s*,\s*/g).reduce((a, b) => {
+                            var v = b.split(/\s*[:=]\s*/);
+                            a[v[0]] = v[1];
+                            return a;
+                        }, {});
                         value = enumMap[value];
-                    } catch (ignore) { }
+                    } catch (ignore) {}
                 }
 
                 if (typeof value !== 'undefined') {
                     if (typeof value === 'object') {
                         value = '(' + JSON.stringify(value) + ')';
-                    }
-                    else if (!isNaN(value)) {
+                    } else if (!isNaN(value)) {
                         value = parseFloat(value);
-                    }
-                    else if (typeof value === 'string') {
+                    } else if (typeof value === 'string') {
                         value = '"' + value + '"';
                     }
                 }
@@ -179,14 +185,14 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         }
         try {
             return eval('(' + ret + '); ' + this.expressionGlobals);
-        } catch (ignore) { }
+        } catch (ignore) {}
         return ret;
     }
 
-    formatAndSend(topic, value, format = this.data.format) {
+    formatAndSend(topic, point, value, format = this.data.format) {
         value = this.stripHTML(value);
         let data = {
-            msg: { topic: topic }
+            msg: { topic: topic, point: point },
         };
         const expression = /^\{\{([^\}]*)\}\}$/.exec(format);
         if (expression.length >= 2 && typeof value !== 'undefined') {
@@ -195,8 +201,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             for (let i = 0; i < parts.length; i++) {
                 if (i === parts.length - 1) {
                     walk[parts[i]] = value;
-                }
-                else {
+                } else {
                     if (!walk[parts[i]]) {
                         walk[parts[i]] = {};
                     }
@@ -212,8 +217,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             if (user) {
                 if (!this.data.access || this.data.access === '0') {
                     this.access = this.roleService.getRoleAccess(aclkey, user.role);
-                }
-                else {
+                } else {
                     this.access = this.roleService.overrideRoleAccess(aclkey, user.role, this.data.access);
                 }
             }

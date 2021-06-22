@@ -1,17 +1,16 @@
 import { DOCUMENT } from '@angular/common';
-import {
-    Component,
-    Inject,
-    ElementRef,
-    OnInit,
-    Renderer2,
-    OnDestroy,
-} from '@angular/core';
+import { Component, Inject, ElementRef, OnInit, Renderer2, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { RightSidebarService } from '../../services/rightsidebar.service';
-import { AuthenticationService, CurrentUserService, SnackbarService, AlarmService, WebSocketService } from '../../services/';
+import {
+    AuthenticationService,
+    CurrentUserService,
+    SnackbarService,
+    AlarmService,
+    WebSocketService,
+} from '../../services/';
 import { Idle, DEFAULT_INTERRUPTSOURCES } from '@ng-idle/core';
-import { Alarm } from '../../data';
+import { Alarm, Role } from '../../data';
 import { Subscription } from 'rxjs';
 import { Title } from '@angular/platform-browser';
 
@@ -24,8 +23,9 @@ const document: any = window.document;
 })
 export class HeaderComponent implements OnInit, OnDestroy {
     newalarm = false;
-    recentAlarms : Alarm[] = [];
-    site = { name:'', address: '', contactName:'', contactEmail:'', monitorServer:'' };
+    recentAlarms: Alarm[] = [];
+    site = { name: '', address: '', contactName: '', contactEmail: '', monitorServer: '' };
+    showAuditLog = false;
     private _wsSubscription: Subscription;
     private _wsAlarmUpdate: Subscription;
 
@@ -43,35 +43,35 @@ export class HeaderComponent implements OnInit, OnDestroy {
         private webSocketService: WebSocketService,
         private titleService: Title
     ) {
-        this.currentUserService.currentUser.subscribe(user => {
+        this.currentUserService.currentUser.subscribe((user) => {
             if (user) {
                 this.setupInactivityMonitor(user.sessionInactivity);
             }
         });
-        this.alarmService.getRecentActive().subscribe(alarms => {
+        this.alarmService.getRecentActive().subscribe((alarms) => {
             this.recentAlarms = alarms;
         });
+        this.showAuditLog = this.authenticationService.getUserRole() >= Role.Level5; //show/hide audit log link
     }
 
     ngOnInit(): void {
         this.setStartupStyles();
-        this._wsAlarmUpdate = this.webSocketService.listen('ur-alarm-update').subscribe((msg:any) => {
-			if (msg && msg.payload) {
-				if (msg.action === 'create') {
-                    if (msg.payload.state) { // active alarms only
+        this._wsAlarmUpdate = this.webSocketService.listen('ur-alarm-update').subscribe((msg: any) => {
+            if (msg && msg.payload) {
+                if (msg.action === 'create') {
+                    if (msg.payload.state) {
+                        // active alarms only
                         this.recentAlarms.unshift(msg.payload);
                         this.recentAlarms.pop();
                         this.snackbar.error(msg.payload.name + ' alarm', null, 5000);
                         this.newalarm = true;
                     }
-				}
-				else if (msg.action === 'update') {
-                    this.recentAlarms = this.recentAlarms.map(a => a._id === msg.payload.id ? msg.payload : a);
-				}
-				else if (msg.action === 'delete') {
-                    this.recentAlarms = this.recentAlarms.filter(a => a._id !== msg.payload.id);
-				}
-			}
+                } else if (msg.action === 'update') {
+                    this.recentAlarms = this.recentAlarms.map((a) => (a._id === msg.payload.id ? msg.payload : a));
+                } else if (msg.action === 'delete') {
+                    this.recentAlarms = this.recentAlarms.filter((a) => a._id !== msg.payload.id);
+                }
+            }
         });
         this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
             this.site = data.site;
@@ -95,30 +95,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (localStorage.getItem('theme')) {
             this.renderer.removeClass(this.doc.body, 'dark');
             this.renderer.removeClass(this.doc.body, 'light');
-            this.renderer.addClass(
-                this.doc.body,
-                localStorage.getItem('theme')
-            );
+            this.renderer.addClass(this.doc.body, localStorage.getItem('theme'));
         } else {
             this.renderer.addClass(this.doc.body, 'light');
         }
 
         // set light sidebar menu on startup
         if (localStorage.getItem('menu_option')) {
-            this.renderer.addClass(
-                this.doc.body,
-                localStorage.getItem('menu_option')
-            );
+            this.renderer.addClass(this.doc.body, localStorage.getItem('menu_option'));
         } else {
             this.renderer.addClass(this.doc.body, 'menu_light');
         }
 
         // set logo color on startup
         if (localStorage.getItem('choose_logoheader')) {
-            this.renderer.addClass(
-                this.doc.body,
-                localStorage.getItem('choose_logoheader')
-            );
+            this.renderer.addClass(this.doc.body, localStorage.getItem('choose_logoheader'));
         } else {
             this.renderer.addClass(this.doc.body, 'logo-white');
         }
@@ -171,8 +162,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
     public toggleRightSidebar(): void {
         this.dataService.changeMsg(
-            (this.dataService.currentStatus._isScalar = !this.dataService
-                .currentStatus._isScalar)
+            (this.dataService.currentStatus._isScalar = !this.dataService.currentStatus._isScalar)
         );
     }
 
@@ -189,16 +179,16 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.idle.setTimeout(120); // warn for 2 mins before logging out
         this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
         this.idle.onTimeout.subscribe(() => {
-            this.logout()
+            this.logout();
         });
         // this.idle.onIdleEnd.subscribe(() => {
         //     console.log('No longer idle');
         // });
         this.idle.onIdleStart.subscribe(() => {
-            this.snackbar.default('You\'ve been idle for sometime...', 'Stay logged in');
+            this.snackbar.default("You've been idle for sometime...", 'Stay logged in');
         });
         // this.idle.onTimeoutWarning.subscribe((countdown) => {
-            // console.log('You will time out in ' + countdown + ' seconds!');
+        // console.log('You will time out in ' + countdown + ' seconds!');
         // });
         this.idle.watch();
     }
