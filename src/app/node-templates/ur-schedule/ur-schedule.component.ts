@@ -495,6 +495,10 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     this.snackbar.success('Deployed successfully!');
                 }
             });
+        this.send({
+            payload: {},
+            point: 'Schedule',
+        });
     }
 
     private renderDateRange() {

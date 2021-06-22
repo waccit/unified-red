@@ -95,6 +95,11 @@
                                         <mat-icon aria-hidden="false" class="mr-2">person</mat-icon>Profile
                                     </a>
                                 </li>
+                                <li *ngIf="showAuditLog">
+                                    <a routerLink="/audit-log">
+                                        <mat-icon aria-hidden="false" class="mr-2">info</mat-icon>Audit Log
+                                    </a>
+                                </li>
                                 <!-- <li>
                                     <a href="#" onClick="return false;">
                                         <mat-icon aria-hidden="false" class="mr-2">feedback</mat-icon>Feedback
