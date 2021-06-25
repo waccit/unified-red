@@ -24,6 +24,7 @@ import { TabComponent } from './tab/tab.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TabDirective } from '../directives/tab.directive';
 import { AuditLogComponent } from './audit-log/audit-log.component';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
     declarations: [
@@ -53,6 +54,7 @@ import { AuditLogComponent } from './audit-log/audit-log.component';
         MatTableModule,
         MatSortModule,
         MatTabsModule,
+        MatSelectModule,
     ],
     entryComponents: [GroupComponent],
 })

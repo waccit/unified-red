@@ -29,7 +29,17 @@
                                     </div>
                                     <div class="col-4">
                                         <ul class="header-buttons">
-                                            <!-- placeholder for future buttons -->
+                                            <li>
+                                                <mat-form-field>
+                                                    <mat-label>Logs List</mat-label>
+                                                    <mat-select (selectionChange)="loadLog($event)" [(value)]="log">
+                                                        <mat-option *ngIf="logs.length == 0">No Logs Found</mat-option>
+                                                        <mat-option *ngFor="let l of logs" [value]="l">
+                                                            {{ prettyLogName(l) }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
