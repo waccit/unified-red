@@ -2,19 +2,32 @@ const app = require('express');
 const authorize = require('../authorize');
 const router = app.Router();
 const jsonParser = require('body-parser').json();
-
+const auditService = require('./audit.service.js');
 const Role = require('../users/role.model');
-const fs = require('fs');
 
-router.get('/', jsonParser, authorize(Role.Level05), getAll);
+router.get('/log/:name', jsonParser, authorize(Role.Level05), getLog);
+router.get('/logs', jsonParser, authorize(Role.Level05), getLogsList);
 
 module.exports = router;
 
-function getAll(req, res, next) {
-    // TODO: this needs to be updated to include db queries
-    // this solution is temporary
-    fs.readFile(__dirname + '/audit_log.json', (err, log) => {
-        res.set('Content-Type', 'application/json');
-        res.send(log);
-    });
+function getLogsList(req, res, next) {
+    auditService
+        .getLogsList()
+        .then((list) => {
+            list = list
+                .filter((file) => !file.startsWith('.')) // do not include hidden files (e.g., .gitignore)
+                .sort()
+                .reverse(); // list is in desc order (i.e., latest log first)
+            res.json(list);
+        })
+        .catch((err) => next(err));
+}
+
+function getLog(req, res, next) {
+    auditService
+        .getLog(req.params.name)
+        .then((log) => {
+            res.json(JSON.parse(log));
+        })
+        .catch((err) => next(err));
 }

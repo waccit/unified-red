@@ -451,16 +451,7 @@ function add(opt) {
         // msg must include a payload with user, pageTitle, topic, point, and value
         if (msg.msg.payload && msg.msg.payload.user) {
             const timestamp = new Date(msg.timestamp);
-            let value = msg.msg.payload.value;
-
-            // if combinedPayload
-            if (typeof value == Object) {
-                let temp = '';
-                for (v of Object.values(value)) {
-                    temp += v + ', ';
-                }
-                value = temp.slice(0, -2);
-            }
+            let value = JSON.stringify(msg.msg.payload.value);
 
             let entry = {
                 timestamp: timestamp.toLocaleString(),
@@ -470,15 +461,25 @@ function add(opt) {
                 value: value,
             };
 
-            let logURL = __dirname + '/api/audit/audit_log.json';
-            let log = JSON.parse(fs.readFileSync(logURL));
+            let now = new Date();
+            let filename =
+                now.getFullYear() +
+                '.' +
+                (now.getMonth() < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1) +
+                '.json';
+            let logURL = __dirname + '/audit/' + filename;
+            let log = [];
+
+            try {
+                log = JSON.parse(fs.readFileSync(logURL));
+            } catch (error) {
+                console.log('[Unified-RED] audit log not found. creating a new log file: ' + filename);
+            }
 
             log.push(entry);
 
             fs.writeFileSync(logURL, JSON.stringify(log), function (err) {
                 if (err) console.log(err);
-
-                console.log('audit log entry recorded...');
             });
         }
 
