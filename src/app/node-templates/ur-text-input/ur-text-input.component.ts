@@ -1,4 +1,4 @@
-import { Component,AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -25,7 +25,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                 .asObservable()
                 .pipe(debounceTime(this.delay), distinctUntilChanged())
                 .subscribe(() => {
-                    this.formatAndSend(this.data.topic, this.valueSubject.value);
+                    this.formatAndSend(this.data.topic, this.label, this.valueSubject.value);
                 });
         }
     }
@@ -43,6 +43,6 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     }
 
     change(value: string) {
-        this.formatAndSend(this.data.topic, value);
+        this.formatAndSend(this.data.topic, this.label, value);
     }
 }

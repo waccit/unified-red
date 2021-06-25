@@ -1,0 +1,95 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row clearfix">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="card">
+                    <div class="body">
+                        <div class="responsive_table">
+                            <div class="materialTableHeader">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <ul class="header-buttons-left ml-0">
+                                            <li class="dropdown">
+                                                <h2><strong>Audit Log</strong></h2>
+                                            </li>
+                                            <li class="dropdown m-l-20">
+                                                <label for="search-input">
+                                                    <i class="material-icons search-icon">search</i>
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search"
+                                                    aria-label="Search box"
+                                                    #filter
+                                                    class="browser-default search-field"
+                                                    (keyup)="applyFilter($event)"
+                                                />
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-4">
+                                        <ul class="header-buttons">
+                                            <li>
+                                                <mat-form-field>
+                                                    <mat-label>Logs List</mat-label>
+                                                    <mat-select (selectionChange)="loadLog($event)" [(value)]="log">
+                                                        <mat-option *ngIf="logs.length == 0">No Logs Found</mat-option>
+                                                        <mat-option *ngFor="let l of logs" [value]="l">
+                                                            {{ prettyLogName(l) }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <mat-table
+                                #table
+                                [dataSource]="dataSource"
+                                matSort
+                                matSortActive="timestamp"
+                                matSortDirection="desc"
+                                class="mat-cell"
+                            >
+                                <ng-container matColumnDef="timestamp">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Time</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{ row.timestamp }}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="username">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>User</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{ row.username }}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="page">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Page (Device)</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{ row.page }}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="point">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Point</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{ row.point }}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="value">
+                                    <mat-header-cell *matHeaderCellDef mat-sort-header>Value</mat-header-cell>
+                                    <mat-cell *matCellDef="let row">{{ row.value }}</mat-cell>
+                                </ng-container>
+                                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                                <mat-row *matRowDef="let row; columns: displayedColumns" matRipple></mat-row>
+                            </mat-table>
+
+                            <div class="no-results" *ngIf="dataSource.data.length == 0" style="text-align: center">
+                                <br /><br />
+                                <em>empty</em>
+                            </div>
+                            <mat-paginator
+                                [pageSize]="10"
+                                [pageSizeOptions]="[5, 10, 25, 100]"
+                                showFirstLastButtons
+                            ></mat-paginator>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -23,6 +23,8 @@ import { MatInputModule } from '@angular/material/input';
 import { TabComponent } from './tab/tab.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TabDirective } from '../directives/tab.directive';
+import { AuditLogComponent } from './audit-log/audit-log.component';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
     declarations: [
@@ -35,6 +37,7 @@ import { TabDirective } from '../directives/tab.directive';
         HomePageComponent,
         AlarmConsoleComponent,
         AlarmDialogComponent,
+        AuditLogComponent,
     ],
     imports: [
         CommonModule,
@@ -51,6 +54,7 @@ import { TabDirective } from '../directives/tab.directive';
         MatTableModule,
         MatSortModule,
         MatTabsModule,
+        MatSelectModule,
     ],
     entryComponents: [GroupComponent],
 })

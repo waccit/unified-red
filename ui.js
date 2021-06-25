@@ -1,4 +1,5 @@
 var inited = false;
+var fs = require('fs');
 
 module.exports = function (RED) {
     if (!inited) {
@@ -445,6 +446,43 @@ function add(opt) {
                 opt.node.send(toSend); // send to following nodes
             }
         }
+
+        // Audit Log: make & record an entry for each incoming messages
+        // msg must include a payload with user, pageTitle, topic, point, and value
+        if (msg.msg.payload && msg.msg.payload.user) {
+            const timestamp = new Date(msg.timestamp);
+            let value = JSON.stringify(msg.msg.payload.value);
+
+            let entry = {
+                timestamp: timestamp.toLocaleString(),
+                username: msg.msg.payload.user.username,
+                page: msg.msg.payload.pageTitle,
+                point: msg.msg.point,
+                value: value,
+            };
+
+            let now = new Date();
+            let filename =
+                now.getFullYear() +
+                '.' +
+                (now.getMonth() < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1) +
+                '.json';
+            let logURL = __dirname + '/audit/' + filename;
+            let log = [];
+
+            try {
+                log = JSON.parse(fs.readFileSync(logURL));
+            } catch (error) {
+                console.log('[Unified-RED] audit log not found. creating a new log file: ' + filename);
+            }
+
+            log.push(entry);
+
+            fs.writeFileSync(logURL, JSON.stringify(log), function (err) {
+                if (err) console.log(err);
+            });
+        }
+
         if (opt.storeFrontEndInputAsState === true) {
             //fwd to all UI clients
             io.emit(updateValueEventName, msg);
@@ -1062,6 +1100,7 @@ function addControl(folders, page, group, tab, control) {
                         disabled: page.config.disabled,
                         hidden: page.config.hidden,
                         instance: {
+                            'pageTitle': pageTitle,
                             'name': instanceNames[i],
                             'parameters': instanceParams[i],
                             '_id': instanceIds[i],
@@ -1292,7 +1331,7 @@ function addControl(folders, page, group, tab, control) {
                 foundGroup.items.push(foundTab);
             }
 
-            foundTab.items.push(control);
+            foundTab.items.push({ ...control, 'pageTitle': foundPage.title });
             foundTab.items.sort(itemSorter);
 
             foundTab.order = tab.config.order;
