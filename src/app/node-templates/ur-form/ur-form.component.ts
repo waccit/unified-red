@@ -69,7 +69,13 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 if (payload !== '') {
                     // send only if form element has a value
                     let topic = field.outtopic || field.intopic || field.topic;
-                    this.formatAndSend(topic, this.formLabels[topic], payload);
+                    let label: any = '';
+                    for (let [t, l] of Object.entries(this.formLabels)) {
+                        if (topic.includes(t)) {
+                            label = l;
+                        }
+                    }
+                    this.formatAndSend(topic, label, payload);
                 }
             }
             this.snackbar.success('Saved!');
@@ -85,7 +91,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             if (value && !isNaN(value) && precision && !isNaN(precision)) {
                 return parseFloat(value).toFixed(parseInt(precision, 10));
             }
-        } catch (e) {}
+        } catch (e) { }
         return value;
     }
 }
