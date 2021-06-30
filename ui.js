@@ -1346,7 +1346,7 @@ function addControl(folders, page, group, tab, control) {
                 // Clean up any inherited pages that reference me
                 removeInhControls(page.id, control.id);
 
-                var index = foundTab.items.indexOf(control);
+                let index = foundTab.items.findIndex((item) => item.id == control.id);
 
                 if (index >= 0) {
                     // Remove the item from the tab
@@ -1354,14 +1354,14 @@ function addControl(folders, page, group, tab, control) {
 
                     // If the tab is now empty, remove it from the group
                     if (foundTab.items.length === 0) {
-                        index = foundGroup.items.indexOf(foundTab);
+                        index = foundGroup.items.findIndex((i) => i.id == foundTab.id);
 
                         if (index >= 0) {
                             foundGroup.items.splice(index, 1);
 
                             // If the group is now empty, remove it from the page
                             if (foundGroup.items.length === 0) {
-                                index = foundPage.items.indexOf(foundGroup);
+                                index = foundPage.items.findIndex((i) => i.id == foundGroup.id);
 
                                 if (index >= 0) {
                                     foundPage.items.splice(index, 1);
@@ -1375,8 +1375,8 @@ function addControl(folders, page, group, tab, control) {
                                         ) {
                                             cleanupInhPageDict(page.config.refPage, page.id);
                                         }
-                                        itemsIdx = foundFolder.items.indexOf(foundPage);
-                                        submenuIdx = foundFolder.submenu.indexOf(foundPage);
+                                        itemsIdx = foundFolder.items.findIndex((i) => i.id == foundPage.id);
+                                        submenuIdx = foundFolder.submenu.findIndex((i) => i.id == foundPage.id);
 
                                         if (itemsIdx >= 0 && submenuIdx >= 0) {
                                             foundFolder.items.splice(itemsIdx, 1);
