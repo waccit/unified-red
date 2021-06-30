@@ -452,39 +452,42 @@ function add(opt) {
         if (msg.msg.payload && msg.msg.payload.user) {
             const timestamp = new Date(msg.timestamp);
             let value = JSON.stringify(msg.msg.payload.value);
+            let currentValue = getCurrentValue(msg.id, msg.msg.topic);
+            // log if first value or change of value
+            if (typeof currentValue === 'undefined' || JSON.stringify(currentValue.value) !== value) {
+                let entry = {
+                    timestamp: timestamp.toLocaleString(),
+                    username: msg.msg.payload.user.username,
+                    page: msg.msg.payload.pageTitle,
+                    point: msg.msg.point,
+                    value: value,
+                };
 
-            let entry = {
-                timestamp: timestamp.toLocaleString(),
-                username: msg.msg.payload.user.username,
-                page: msg.msg.payload.pageTitle,
-                point: msg.msg.point,
-                value: value,
-            };
+                let filename =
+                    timestamp.getFullYear() +
+                    '.' +
+                    (timestamp.getMonth() < 10 ? '0' + (timestamp.getMonth() + 1) : timestamp.getMonth() + 1) +
+                    '.json';
+                let logURL = __dirname + '/audit/' + filename;
+                let log = [];
 
-            let filename =
-                timestamp.getFullYear() +
-                '.' +
-                (timestamp.getMonth() < 10 ? '0' + (timestamp.getMonth() + 1) : timestamp.getMonth() + 1) +
-                '.json';
-            let logURL = __dirname + '/audit/' + filename;
-            let log = [];
+                try {
+                    log = JSON.parse(fs.readFileSync(logURL));
+                } catch (error) {
+                    console.log('[Unified-RED] audit log not found. creating a new log file: ' + filename);
+                }
 
-            try {
-                log = JSON.parse(fs.readFileSync(logURL));
-            } catch (error) {
-                console.log('[Unified-RED] audit log not found. creating a new log file: ' + filename);
+                log.push(entry);
+
+                fs.writeFileSync(logURL, JSON.stringify(log), function (err) {
+                    if (err) console.log(err);
+                });
             }
 
-            log.push(entry);
-
-            fs.writeFileSync(logURL, JSON.stringify(log), function (err) {
-                if (err) console.log(err);
-            });
-        }
-
-        if (opt.storeFrontEndInputAsState === true) {
-            //fwd to all UI clients
-            io.emit(updateValueEventName, msg);
+            if (opt.storeFrontEndInputAsState === true) {
+                //fwd to all UI clients
+                io.emit(updateValueEventName, msg);
+            }
         }
     };
 
