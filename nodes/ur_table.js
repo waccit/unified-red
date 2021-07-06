@@ -7,6 +7,20 @@ module.exports = function (RED) {
 
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
+        this.config = {
+            ...config,
+            id: config.id,
+            type: 'table',
+            width: config.width || 12,
+            label: config.label,
+            order: config.order,
+            fields: config.fields,
+            pivot: config.cts,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         try {
             var done = ui.add({
                 emitOnlyNewValues: false,
@@ -15,18 +29,19 @@ module.exports = function (RED) {
                 page: page,
                 group: group,
                 tab: tab,
-                control: {
-                    id: config.id,
-                    type: 'table',
-                    width: config.width || 12,
-                    label: config.label,
-                    order: config.order,
-                    fields: config.fields,
-                    pivot: config.cts,
-                    topicPattern: config.topicPattern || '',
-                    access: config.access || '',
-                    accessBehavior: config.accessBehavior || 'disable',
-                },
+                control: this.config,
+                // control: {
+                //     id: config.id,
+                //     type: 'table',
+                //     width: config.width || 12,
+                //     label: config.label,
+                //     order: config.order,
+                //     fields: config.fields,
+                //     pivot: config.cts,
+                //     topicPattern: config.topicPattern || '',
+                //     access: config.access || '',
+                //     accessBehavior: config.accessBehavior || 'disable',
+                // },
             });
         } catch (e) {
             console.log(e);

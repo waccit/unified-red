@@ -863,12 +863,13 @@ function addControl(folders, page, group, tab, control) {
         // Inherited Pages
         if (inheritedPages.hasOwnProperty(page.id)) {
             inheritedPages[page.id].forEach((inhPage, index) => {
-                // inherit groups, tabs, & control
+                // inherit group
                 let inhGroup = updateAndClone(group, {
                     id: group.id + '.inh.' + index,
                     config: { ...group.config, page: inhPage.id, order: '0.' + group.config.order },
                 });
 
+                // inherit tab
                 let inhTab = updateAndClone(tab, {
                     id: tab.id + '.inh.' + index,
                     config: { ...tab.config, group: inhGroup.id },
@@ -1441,11 +1442,27 @@ function addInheritedPage(RED, page) {
 
     let inhPage = updateAndClone(refPage, inhConfig);
 
-    if (inheritedPages.hasOwnProperty(refPage.id)) {
-        inheritedPages[refPage.id].push(inhPage);
+    removeFromInheritedPages(page.id);
+
+    // update inheritedPages dict
+    let idx = 0;
+    inhPage._idx = idx;
+    if (inheritedPages && inheritedPages.hasOwnProperty(refPage.id)) {
+        let indices = [];
+        inheritedPages[refPage.id].forEach((inhPage) => {
+            indices[inhPage._idx] = inhPage._idx;
+        });
+        idx = indices.findIndex((i) => typeof i === 'undefined');
+        if (idx < 0) {
+            idx = inheritedPages[refPage.id].length;
+        }
+        inhPage._idx = idx;
+        inheritedPages[refPage.id].splice(idx, 0, inhPage);
     } else {
         inheritedPages[refPage.id] = [inhPage];
     }
+
+    inhPage.removes = updateInhPageInMenu(RED, inhPage, idx);
 
     return remove;
 }
@@ -1655,4 +1672,74 @@ function makeMenuTree(RED, config) {
     }
 
     return { tab, group, page, folders };
+}
+
+function removeFromInheritedPages(pageId) {
+    for (let pagesList of Object.values(inheritedPages)) {
+        let oldInhPage = pagesList.find((ip) => ip.id == pageId);
+
+        if (oldInhPage && oldInhPage.removes) {
+            for (let remove of Object.values(oldInhPage.removes)) {
+                remove();
+            }
+        }
+    }
+}
+
+/**
+ * Manually updates Inherited Pages in the menu
+ *
+ * @param {Object} RED - node-red api
+ * @param {Object} inhPage - reference to updated configuration for inherited-page
+ * @param {Number} idx - index of the inherited-page's position in the inheritedPages dict (required for id)
+ */
+function updateInhPageInMenu(RED, inhPage, idx) {
+    if (!menu.length) return;
+    console.log('menu is not empty...');
+    inhPage._idx = idx;
+
+    let ur_nodes = [];
+    let removes = {};
+
+    // reduce node search space to UR nodes
+    RED.nodes.eachNode((node) => {
+        if (/^ur_/.test(node.type)) {
+            let n = RED.nodes.getNode(node.id);
+            if (n) {
+                ur_nodes.push(n);
+            }
+        }
+    });
+
+    ur_nodes.forEach((group) => {
+        if (group.type === 'ur_group' && group.config.page && group.config.page == inhPage.config.refPage) {
+            ur_nodes.forEach((tab) => {
+                if (tab.type === 'ur_tab' && tab.config.group && tab.config.group == group.id) {
+                    ur_nodes.forEach((control) => {
+                        if (control.hasOwnProperty('config') && control.config.tab && control.config.tab == tab.id) {
+                            let inhGroup = updateAndClone(group, {
+                                id: group.id + '.inh.' + idx,
+                                config: { ...group.config, page: inhPage.id, order: '0.' + group.config.order },
+                            });
+
+                            let inhTab = updateAndClone(tab, {
+                                id: tab.id + '.inh.' + idx,
+                                config: { ...tab.config, group: group.id },
+                            });
+
+                            removes[control.id] = addControl(
+                                inhPage.folders,
+                                inhPage,
+                                inhGroup,
+                                inhTab,
+                                control.config
+                            );
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    return removes;
 }

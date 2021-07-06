@@ -25,6 +25,24 @@ module.exports = function (RED) {
             payload = payload || node.id;
         }
 
+        this.config = {
+            ...config,
+            type: 'button',
+            label: config.label,
+            tooltip: config.tooltip,
+            color: config.color,
+            bgcolor: config.bgcolor,
+            icon: config.icon,
+            order: config.order,
+            value: payload,
+            format: config.bgcolor,
+            width: config.width || 3,
+            // height: config.height || 1,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             node: node,
             folders: folders,
@@ -34,22 +52,23 @@ module.exports = function (RED) {
             emitOnlyNewValues: false,
             forwardInputMessages: config.passthru || false,
             storeFrontEndInputAsState: false,
-            control: {
-                type: 'button',
-                label: config.label,
-                tooltip: config.tooltip,
-                color: config.color,
-                bgcolor: config.bgcolor,
-                icon: config.icon,
-                order: config.order,
-                value: payload,
-                format: config.bgcolor,
-                width: config.width || 3,
-                // height: config.height || 1,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     type: 'button',
+            //     label: config.label,
+            //     tooltip: config.tooltip,
+            //     color: config.color,
+            //     bgcolor: config.bgcolor,
+            //     icon: config.icon,
+            //     order: config.order,
+            //     value: payload,
+            //     format: config.bgcolor,
+            //     width: config.width || 3,
+            //     // height: config.height || 1,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
             beforeSend: function (msg) {
                 msg.topic = config.topic || msg.topic;
             },

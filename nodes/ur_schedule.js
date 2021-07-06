@@ -375,6 +375,23 @@ module.exports = function (RED) {
             buildJob = cron.schedule('0 0 0 * * *', buildSchedules);
         }
 
+        this.config = {
+            ...config,
+            id: config.id,
+            type: 'schedule',
+            label: config.label,
+            order: config.order,
+            width: config.width || group.config.width || 12,
+            values: config.values,
+            weekdays: config.weekdays,
+            dates: config.dates,
+            holidays: this.holidays,
+            holidaysId: config.holidays,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
@@ -382,21 +399,22 @@ module.exports = function (RED) {
             page: page,
             group: group,
             tab: tab,
-            control: {
-                id: config.id,
-                type: 'schedule',
-                label: config.label,
-                order: config.order,
-                width: config.width || group.config.width || 12,
-                values: config.values,
-                weekdays: config.weekdays,
-                dates: config.dates,
-                holidays: this.holidays,
-                holidaysId: config.holidays,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     id: config.id,
+            //     type: 'schedule',
+            //     label: config.label,
+            //     order: config.order,
+            //     width: config.width || group.config.width || 12,
+            //     values: config.values,
+            //     weekdays: config.weekdays,
+            //     dates: config.dates,
+            //     holidays: this.holidays,
+            //     holidaysId: config.holidays,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
         });
 
         /*

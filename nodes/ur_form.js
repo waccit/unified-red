@@ -7,6 +7,26 @@ module.exports = function (RED) {
 
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
+        this.config = {
+            ...config,
+            type: 'form',
+            label: config.label,
+            order: config.order,
+            format: config.format,
+            value: config.payload || node.id,
+            width: config.width || 12,
+            // height: config.height || config.options.length,
+            options: config.options,
+            formValue: config.formValue,
+            singleMsg: config.singleMsg,
+            singleMsgTopic: config.singleMsgTopic,
+            submit: config.submit,
+            cancel: config.cancel,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             node: node,
             folders: folders,
@@ -14,24 +34,25 @@ module.exports = function (RED) {
             group: group,
             tab: tab,
             forwardInputMessages: false,
-            control: {
-                type: 'form',
-                label: config.label,
-                order: config.order,
-                format: config.format,
-                value: config.payload || node.id,
-                width: config.width || 12,
-                // height: config.height || config.options.length,
-                options: config.options,
-                formValue: config.formValue,
-                singleMsg: config.singleMsg,
-                singleMsgTopic: config.singleMsgTopic,
-                submit: config.submit,
-                cancel: config.cancel,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     type: 'form',
+            //     label: config.label,
+            //     order: config.order,
+            //     format: config.format,
+            //     value: config.payload || node.id,
+            //     width: config.width || 12,
+            //     // height: config.height || config.options.length,
+            //     options: config.options,
+            //     formValue: config.formValue,
+            //     singleMsg: config.singleMsg,
+            //     singleMsgTopic: config.singleMsgTopic,
+            //     submit: config.submit,
+            //     cancel: config.cancel,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
             beforeSend: function (msg, fromUI) {
                 if (fromUI && fromUI.msg) {
                     var om = fromUI.msg;

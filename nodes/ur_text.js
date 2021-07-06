@@ -26,6 +26,23 @@ module.exports = function (RED) {
             angLayout = 'column';
             angLayoutAlign = 'center center';
         }
+
+        this.config = {
+            ...config,
+            id: config.id,
+            type: 'text',
+            label: config.label,
+            order: config.order,
+            format: config.format,
+            width: config.width || 12,
+            // height: config.height || 1,
+            layout: angLayout,
+            layoutAlign: angLayoutAlign,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
@@ -33,20 +50,21 @@ module.exports = function (RED) {
             page: page,
             group: group,
             tab: tab,
-            control: {
-                id: config.id,
-                type: 'text',
-                label: config.label,
-                order: config.order,
-                format: config.format,
-                width: config.width || 12,
-                // height: config.height || 1,
-                layout: angLayout,
-                layoutAlign: angLayoutAlign,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     id: config.id,
+            //     type: 'text',
+            //     label: config.label,
+            //     order: config.order,
+            //     format: config.format,
+            //     width: config.width || 12,
+            //     // height: config.height || 1,
+            //     layout: angLayout,
+            //     layoutAlign: angLayoutAlign,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
             convert: function (value) {
                 if (value !== undefined) {
                     if (Buffer.isBuffer(value)) {

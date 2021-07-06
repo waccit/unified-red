@@ -14,6 +14,19 @@ module.exports = function (RED) {
         }
         var hei = Number(config.height || 0);
 
+        this.config = {
+            ...config,
+            type: 'template',
+            order: config.order,
+            width: config.width || 12,
+            height: hei,
+            format: config.format,
+            templateScope: config.templateScope,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             forwardInputMessages: config.fwdInMessages,
             storeFrontEndInputAsState: config.storeOutMessages,
@@ -24,17 +37,18 @@ module.exports = function (RED) {
             page: page,
             group: group,
             tab: tab,
-            control: {
-                type: 'template',
-                order: config.order,
-                width: config.width || 12,
-                height: hei,
-                format: config.format,
-                templateScope: config.templateScope,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     type: 'template',
+            //     order: config.order,
+            //     width: config.width || 12,
+            //     height: hei,
+            //     format: config.format,
+            //     templateScope: config.templateScope,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
             beforeSend: function (msg, fromUI) {
                 if (fromUI && fromUI.msg) {
                     var om = fromUI.msg;

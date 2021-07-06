@@ -7,6 +7,24 @@ module.exports = function (RED) {
 
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
+        this.config = {
+            ...config,
+            type: 'text-input',
+            label: config.label,
+            format: config.format,
+            tooltip: config.tooltip,
+            mode: config.mode,
+            delay: config.delay,
+            order: config.order,
+            value: '',
+            width: config.width || 12,
+            // height: config.height || 1,
+            topic: config.topic,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             node: node,
             folders: folders,
@@ -14,22 +32,23 @@ module.exports = function (RED) {
             group: group,
             tab: tab,
             forwardInputMessages: config.passthru || false,
-            control: {
-                type: 'text-input',
-                label: config.label,
-                format: config.format,
-                tooltip: config.tooltip,
-                mode: config.mode,
-                delay: config.delay,
-                order: config.order,
-                value: '',
-                width: config.width || 12,
-                // height: config.height || 1,
-                topic: config.topic,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     type: 'text-input',
+            //     label: config.label,
+            //     format: config.format,
+            //     tooltip: config.tooltip,
+            //     mode: config.mode,
+            //     delay: config.delay,
+            //     order: config.order,
+            //     value: '',
+            //     width: config.width || 12,
+            //     // height: config.height || 1,
+            //     topic: config.topic,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
             beforeSend: function (msg, fromUI) {
                 if (fromUI && fromUI.msg) {
                     var om = fromUI.msg;

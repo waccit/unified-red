@@ -12,6 +12,19 @@ module.exports = function (RED) {
         }
         var hei = Number(config.height || 0);
 
+        this.config = {
+            ...config,
+            type: 'animation',
+            order: config.order,
+            width: config.width || 12,
+            height: hei,
+            format: config.format,
+            rules: config.rules,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
         var done = ui.add({
             emitOnlyNewValues: false,
             node: node,
@@ -19,17 +32,18 @@ module.exports = function (RED) {
             page: page,
             group: group,
             tab: tab,
-            control: {
-                type: 'animation',
-                order: config.order,
-                width: config.width || 12,
-                height: hei,
-                format: config.format,
-                rules: config.rules,
-                topicPattern: config.topicPattern || '',
-                access: config.access || '',
-                accessBehavior: config.accessBehavior || 'disable',
-            },
+            control: this.config,
+            // control: {
+            //     type: 'animation',
+            //     order: config.order,
+            //     width: config.width || 12,
+            //     height: hei,
+            //     format: config.format,
+            //     rules: config.rules,
+            //     topicPattern: config.topicPattern || '',
+            //     access: config.access || '',
+            //     accessBehavior: config.accessBehavior || 'disable',
+            // },
         });
         node.on('close', done);
     }

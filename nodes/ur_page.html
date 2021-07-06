@@ -19,7 +19,8 @@
             isMulti: { value: false },
             isSingle: { value: true },
             pageType: { value: 'single' },
-            refPage: { type: 'ur_page', value: 'none', required: false },
+            refPage: { value: 'none', required: false },
+            // childPage: { type: 'ur_page', value: 'none', required: false },
             inheritInst: { value: false },
             expression: {
                 value: '',
@@ -208,13 +209,13 @@
                     if (this.value && this.value !== 'none') {
                         refPageNode = RED.nodes.node(this.value);
                         refPageIsMulti = refPageNode.isMulti;
-                        if (!node.users.includes(refPageNode)) {
-                            node.users.push(refPageNode);
-                        }
-                        
-                        if (!refPageNode.users.includes(node)) {
-                            refPageNode.users.push(node)
-                        }
+                        // if (!node.users.includes(refPageNode)) {
+                        //     node.users.push(refPageNode);
+                        // }
+
+                        // if (!refPageNode.users.includes(node)) {
+                        //     refPageNode.users.push(node);
+                        // }
                     }
 
                     // pageType is undefined => user selection
@@ -389,6 +390,8 @@
             }
         },
         oneditsave: function () {
+            let node = this;
+
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
             this.pageType = $('#node-config-input-page-type').val();
@@ -401,16 +404,43 @@
                 let refPageIsMulti = false;
 
                 if (this.refPage && this.refPage !== 'none') {
-                    refPageIsMulti = RED.nodes.node(this.refPage).isMulti;
+                    let refPageNode = RED.nodes.node(this.refPage);
+                    if (refPageNode) {
+                        refPageIsMulti = refPageNode.isMulti;
+                        // console.log('refPageNode b4 change..... ', refPageNode);
+                        // console.log('this: ', this);
+                        // refPageNode.changed = true;
+
+                        // refPageNode._def.oneditsave();
+
+                        // let pageDef = RED.nodes.getType('ur_page');
+
+                        // if (pageDef.oneditsave) {
+                        //     try {
+                        //         console.log('invoking oneditsave: ', this.id);
+                        //         pageDef.oneditsave.call(refPageNode);
+                        //     } catch (err) {
+                        //         console.log('[inherited-page]: ERROR: ', this.id, err.toString());
+                        //     }
+                        // }
+                        // let users = refPageNode.users;
+                        // users.splice(users.indexOf(this), 1);
+                        // refPageNode.childPage = 'TESTING';
+                        // RED.events.emit('nodes:change', refPageNode);
+
+                        // this is where we need to "flag" a change in the refPageNode (e.g., hidden childPage??)
+                        // refPageNode._config.childPage = node;
+                        // refPageNode.changed = true;
+
+                        // console.log('refPageNode changed!!!!! ', refPageNode);
+                        // console.log('RED: ', RED);
+                        // RED.editor.editConfig('', 'ur_page', refPageNode.id, undefined);
+                    }
                 }
 
                 if (refPageIsMulti) {
                     this.isSingle = false;
                     this.isMulti = true;
-                    // console.log('inheritInst: ', this.inheritInst);
-                    // if (!this.inheritInst) {
-                    //     saveInstances(this, $(this));
-                    // }
                 } else {
                     this.isSingle = true;
                     this.isMulti = false;
