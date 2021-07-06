@@ -325,7 +325,31 @@
         #node-input-viewport [animated] {
             cursor: move;
         }
+
+        .badge {
+            padding: 5px 8px;
+            line-height: 12px;
+            border: 1px solid;
+            font-weight: 400;
+            font-size: 13px;
+            border-radius: 0.25rem;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            display: inline-block;
+        }
+
+        .badge-dark {
+            color: #fff;
+            background-color: #343a40;
+        }
+
+        .badge-light {
+            color: #212529;
+            background-color: #f8f9fa;
+        }
     </style>
+
     <div class="form-row" id="template-row-tab">
         <label for="node-input-tab"
             ><i class="fa fa-columns"></i> <span data-i18n="ur_animation.label.tab"></span
@@ -419,142 +443,141 @@
 </script>
 
 <script type="text/html" data-help-name="ur_animation">
-    <p>Creates an animated image element via user-defined HTML.</p>
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>payload<span class="property-type">string</span></dt>
-        <dd>updates the user interface based on provided <b>Rules</b> and feedback element values in the template</dd>
-    </dl>
-    <dl class="message-properties">
-        <dt>template<span class="property-type">string</span></dt>
-        <dd>updates the template content so you can use external files for example. Template will be reloaded 
-            on input if it has changed. Code written in the Template field will be ignored when 
-            <code>msg.template</code> is present.
-        </dd>
-    </dl>
-    <h3>Details</h3>
-    <p>
-        This node can be used to create a custom user interface element that changes its appearance
-        based on the input message.
-    </p>
-    <p>
-        <b>For example:</b><br>
-        <pre style="font-size:smaller;">&lt;img <b>static</b>
-    src=&quot;/img/VAV/<b>background</b>.jpg&quot;
-    style=&quot;max-width: 358px;&quot;&gt;
-&lt;img <b>animated</b> name=&quot;<b>damper</b>&quot;
-    src=&quot;/img/VAV/damper1.jpg&quot;
-    style=&quot;position: absolute;
-        top: 0px; left: 0px;&quot;&gt;
-&lt;img <b>animated</b> name=&quot;<b>coil</b>&quot;
-    src=&quot;/img/VAV/coil10.jpg&quot;
-    style=&quot;position: absolute;
-        top: 34px; left: 210px;&quot;&gt;</pre>
-        Will display three images: a background image that is statically position, an <code>animated</code> 
-        <i>damper</i> image, and an <code>animated</code> <i>coil</i> image.
-    </p>
-    <p>
-        Note: The <code>animated</code> attribute is used to indicate that rules will be processed on the image.
-    </p>
+        <p>Creates an animated image element via user-defined HTML.</p>
+        <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload<span class="property-type">string</span></dt>
+            <dd>updates the user interface based on provided <b>Rules</b> and feedback element values in the template</dd>
+        </dl>
+        <dl class="message-properties">
+            <dt>template<span class="property-type">string</span></dt>
+            <dd>updates the template content so you can use external files for example. Template will be reloaded
+                on input if it has changed. Code written in the Template field will be ignored when
+                <code>msg.template</code> is present.
+            </dd>
+        </dl>
+        <h3>Details</h3>
+        <p>
+            This node can be used to create a custom user interface element that changes its appearance
+            based on the input message.
+        </p>
+        <p>
+            <b>For example:</b><br>
+            <pre style="font-size:smaller;">&lt;img <b>static</b>
+        src=&quot;/img/VAV/<b>background</b>.jpg&quot;
+        style=&quot;max-width: 358px;&quot;&gt;
+    &lt;img <b>animated</b> name=&quot;<b>damper</b>&quot;
+        src=&quot;/img/VAV/damper1.jpg&quot;
+        style=&quot;position: absolute;
+            top: 0px; left: 0px;&quot;&gt;
+    &lt;img <b>animated</b> name=&quot;<b>coil</b>&quot;
+        src=&quot;/img/VAV/coil10.jpg&quot;
+        style=&quot;position: absolute;
+            top: 34px; left: 210px;&quot;&gt;</pre>
+            Will display three images: a background image that is statically position, an <code>animated</code>
+            <i>damper</i> image, and an <code>animated</code> <i>coil</i> image.
+        </p>
+        <p>
+            Note: The <code>animated</code> attribute is used to indicate that rules will be processed on the image.
+        </p>
 
-    <!-- TAB / SIZE 2020-12-30 - START -->
-    <p>
-        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
-        interface layout.
-    </p>
-    <p>
-        <b>Size</b> controls the widget width using
-        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
-    </p>
-    <!-- TAB / SIZE 2020-12-30 - END -->
+        <!-- TAB / SIZE 2020-12-30 - START -->
+        <p>
+            <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+            interface layout.
+        </p>
+        <p>
+            <b>Size</b> controls the widget width using
+            <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+        </p>
+        <!-- TAB / SIZE 2020-12-30 - END -->
 
-    <p><b>Name</b> is the name of a node in the workspace.</p>
-    <p><b>Template</b> contains HTML code to create the animation.</p>
-    <p>
-        The following icon fonts are available: 
-        <!-- <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a> <i>(e.g. 'check', 'close')</i>, or a  -->
-        <a href="https://fontawesome.com/icons" target="_blank">Font Awesome Free 5.3.1 icon</a> <i>(e.g. 'fas fa-fire')</i>
-        <!-- , or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
-        You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'. -->
-    </p>
-    <p><b>View</b> displays a preview of the template code and allows you to drag animated images to reposition them.</p>
-    <p>
-        <b>Rules</b> defines the behavior the animation should display, where each rule consists of an image name, topic, 
-        property, and expression.
-        <ol>
-            <li>
-                <b>Image name</b> is the <code>&lt;img&gt;</code> element's <i>name</i> attribute defined in the template 
-                code that the rule should apply to.
-            </li>
-            <li><b>Topic</b> is the incoming message topic to be evaluated and associated with this image.</li>
-            <li>
-                <b>Property</b> is the <code>&lt;img&gt;</code> property to be modified.<br>
-                <i>visible</i> : Shows or hides the image<br>
-                <i>src</i> : Specifies the path of a new image to display<br>
-                <i>src sub</i> : Substitutes the sequence number in the src property, e.g. image01.png<br>
-                <i>css class</i> : Adds or removes a CSS class on the image<br>
-                <i>css style</i> : Applies CSS style to the image<br>
-            </li>
-            <li><b>Expression</b> calculates a new value that is assigned to the <code>&lt;img&gt;</code> property.</li>
-        </ol>
-    </p>
-    <p>
-        <b>For example:</b><br>
+        <p><b>Name</b> is the name of a node in the workspace.</p>
+        <p><b>Template</b> contains HTML code to create the animation.</p>
+        <p>
+            The following icon fonts are available:
+            <!-- <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a> <i>(e.g. 'check', 'close')</i>, or a  -->
+            <a href="https://fontawesome.com/icons" target="_blank">Font Awesome Free 5.3.1 icon</a> <i>(e.g. 'fas fa-fire')</i>
+            <!-- , or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
+            You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'. -->
+        </p>
+        <p><b>View</b> displays a preview of the template code and allows you to drag animated images to reposition them.</p>
+        <p>
+            <b>Rules</b> defines the behavior the animation should display, where each rule consists of an image name, topic,
+            property, and expression.
+            <ol>
+                <li>
+                    <b>Image name</b> is the <code>&lt;img&gt;</code> element's <i>name</i> attribute defined in the template
+                    code that the rule should apply to.
+                </li>
+                <li><b>Topic</b> is the incoming message topic to be evaluated and associated with this image.</li>
+                <li>
+                    <b>Property</b> is the <code>&lt;img&gt;</code> property to be modified.<br>
+                    <i>visible</i> : Shows or hides the image<br>
+                    <i>src</i> : Specifies the path of a new image to display<br>
+                    <i>src sub</i> : Substitutes the sequence number in the src property, e.g. image01.png<br>
+                    <i>css class</i> : Adds or removes a CSS class on the image<br>
+                    <i>css style</i> : Applies CSS style to the image<br>
+                </li>
+                <li><b>Expression</b> calculates a new value that is assigned to the <code>&lt;img&gt;</code> property.</li>
+            </ol>
+        </p>
+        <p>
+            <b>For example:</b><br>
+            <ul>
+                <li><b>Image Name</b>: damper</li>
+                <li><b>Topic</b>: fb/vav/damper</li>
+                <li><b>Property</b>: src sub</li>
+                <li><b>Expression</b>: <code style="font-size:smaller;">parseInt(interpolate({{msg.payload.value}},0,100,1,10))</code></li>
+            </ul>
+            Will animate the damper image by substituting the sequence number in the <code>&lt;img&gt;</code> src property.
+        </p>
+        <p>
+            The incoming <code>msg.payload.value</code> for topic <i>fb/vav/damper</i> will be rescaled from a 0-to-100 value to a
+            1-to-10 using the <code>interpolate()</code> function and then converted into an integer using the <code>parseInt()</code>
+            function. The sequence number will then be detected and substituted in the <code>&lt;img&gt;</code> src, such that
+            <code>damper1.jpg</code> will be evaluated to <code>damper1.jpg</code>, ... <code>damper10.jpg</code>.
+        </p>
+        <p>
+            or for example:<br>
+            <ul>
+                <li>Image Name: <code>coil</code></li>
+                <li>Topic: <code>fb/vav/reheat</code></li>
+                <li>Property: <code>css style</code></li>
+                <li>Expression: <code>{ opacity: {{msg.payload.value}}/100 }</code></li>
+            </ul>
+            Will animate the coil image by varying its opacity.
+        </p>
+        <p>
+            The incoming <code>msg.payload.value</code> for topic <i>fb/vav/reheat</i> will be divided by 100 then applied to the
+            image's opacity style.
+        </p>
+        <p>Note: The CSS opacity style expects a value between 0.0 (completely transparent) and 1.0 (completely opaque).</p>
+
+        <!-- TOPIC PATTERN 2021-02-07 - START -->
+        <p>
+            <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+            member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+            The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern
+            may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+        </p>
+        <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+        <!-- ACCESS 2021-01-17 - START -->
+        <p>
+            <b>Access</b> controls the user's read/write access to this widget based on
+            <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+            When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+            other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+        </p>
+        <p>
+            When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+            <code>enable/disable</code> the text field.
+        </p>
+        <!-- ACCESS 2021-01-17 - END -->
+
+        <!-- <h3>References</h3>
         <ul>
-            <li><b>Image Name</b>: damper</li>
-            <li><b>Topic</b>: fb/vav/damper</li>
-            <li><b>Property</b>: src sub</li>
-            <li><b>Expression</b>: <code style="font-size:smaller;">parseInt(interpolate({{msg.payload.value}},0,100,1,10))</code></li>
-        </ul>
-        Will animate the damper image by substituting the sequence number in the <code>&lt;img&gt;</code> src property.
-    </p>
-    <p>
-        The incoming <code>msg.payload.value</code> for topic <i>fb/vav/damper</i> will be rescaled from a 0-to-100 value to a
-        1-to-10 using the <code>interpolate()</code> function and then converted into an integer using the <code>parseInt()</code>
-        function. The sequence number will then be detected and substituted in the <code>&lt;img&gt;</code> src, such that 
-        <code>damper1.jpg</code> will be evaluated to <code>damper1.jpg</code>, ... <code>damper10.jpg</code>.
-    </p>
-    <p>
-        or for example:<br>
-        <ul>
-            <li>Image Name: <code>coil</code></li>
-            <li>Topic: <code>fb/vav/reheat</code></li>
-            <li>Property: <code>css style</code></li>
-            <li>Expression: <code>{ opacity: {{msg.payload.value}}/100 }</code></li>
-        </ul>
-        Will animate the coil image by varying its opacity.
-    </p>
-    <p>
-        The incoming <code>msg.payload.value</code> for topic <i>fb/vav/reheat</i> will be divided by 100 then applied to the 
-        image's opacity style.
-    </p>
-    <p>Note: The CSS opacity style expects a value between 0.0 (completely transparent) and 1.0 (completely opaque).</p>
-
-    <!-- TOPIC PATTERN 2021-02-07 - START -->
-    <p>
-        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
-        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
-        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
-    </p>
-    <!-- TOPIC PATTERN 2021-02-07 - END -->
-
-    <!-- ACCESS 2021-01-17 - START -->
-    <p>
-        <b>Access</b> controls the user's read/write access to this widget based on 
-        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
-        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
-        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
-    </p>
-    <p>
-        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
-        <code>enable/disable</code> the text field.
-    </p>
-    <!-- ACCESS 2021-01-17 - END -->
-
-    <!-- <h3>References</h3>
-    <ul>
-        <li></li>
-    </ul> -->
-
+            <li></li>
+        </ul> -->
 </script>
