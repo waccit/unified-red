@@ -98,16 +98,16 @@ export class PageComponent implements OnInit {
 
         if (foundPage) {
             // do not render disabled pages
-            if (foundPage.disabled || (foundPage.accessBehavior === 'disable' && !this.hasAccess(foundPage.access))) {
+            if (foundPage.disabled) {
                 this.breadcrumbs.push('DISABLED');
                 return;
             }
             this.breadcrumbs.push(foundPage.title);
             foundPage.items.forEach((g) => {
-                if (!g.hidden) {
+                // do not render hidden groups
+                if (g.accessBehavior === 'hide' ? this.hasAccess(g.access) && !g.hidden : !g.hidden) {
                     this.groups.push({
                         header: g.header,
-                        access: g.access || '',
                         cols: { lg: g.widthLg, md: g.widthMd, sm: g.widthSm },
                         tabs: g.items.map((t) => {
                             return {
@@ -119,6 +119,8 @@ export class PageComponent implements OnInit {
                         }),
                         displayHeader: !!g.disp,
                         disabled: !!g.disabled,
+                        access: g.access,
+                        accessBehavior: g.accessBehavior,
                     });
                 }
             });
@@ -166,22 +168,23 @@ export class PageComponent implements OnInit {
         this.viewContainerRef.clear();
 
         this.groups.forEach((group) => {
-            let access: any;
-            if (!group.access || group.access === '0') {
-                access = this.roleService.getRoleAccess('datapoint', this.userRole);
-            } else {
-                access = this.roleService.overrideRoleAccess('datapoint', this.userRole, group.access);
-            }
-            if (!access.read) {
-                return;
-            }
+            // let access: any;
+            // if (!group.access || group.access === '0') {
+            //     access = this.roleService.getRoleAccess('datapoint', this.userRole);
+            // } else {
+            //     access = this.roleService.overrideRoleAccess('datapoint', this.userRole, group.access);
+            // }
+            // if (!access.read) {
+            //     return;
+            // }
 
             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(GroupComponent);
             const componentRef = this.viewContainerRef.createComponent(componentFactory);
 
             componentRef.instance.header = group.header;
             componentRef.instance.displayHeader = group.displayHeader;
-            componentRef.instance.disabled = group.disabled;
+            componentRef.instance.disabled =
+                group.disabled || (group.accessBehavior === 'disable' && !this.hasAccess(group.access)) ? true : false;
 
             for (const size in group.cols) {
                 if (size) {

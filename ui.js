@@ -1002,6 +1002,7 @@ function addControl(folders, page, group, tab, control) {
                                     g.disabled = group.config.disabled;
                                     g.hidden = group.config.hidden;
                                     g.access = group.config.access;
+                                    g.accessBehavior = group.config.accessBehavior;
 
                                     if (multiTabs[tab.id]) {
                                         g.items.forEach((t) => {
@@ -1059,9 +1060,10 @@ function addControl(folders, page, group, tab, control) {
                                 widthSm: group.config.widthSm,
                                 items: [],
                                 disp: group.config.disp,
-                                access: group.config.access,
                                 disabled: group.config.disabled,
                                 hidden: group.config.hidden,
+                                access: group.config.access,
+                                accessBehavior: group.config.accessBehavior,
                             };
 
                             let instanceTab = {
@@ -1131,6 +1133,8 @@ function addControl(folders, page, group, tab, control) {
                         widthLg: group.config.widthLg,
                         widthMd: group.config.widthMd,
                         widthSm: group.config.widthSm,
+                        access: group.config.access,
+                        accessBehavior: group.config.accessBehavior,
                         items: [],
                         disp: group.config.disp,
                         disabled: group.config.disabled,
@@ -1322,9 +1326,10 @@ function addControl(folders, page, group, tab, control) {
                     widthSm: group.config.widthSm,
                     items: [],
                     disp: group.config.disp,
-                    access: group.config.access,
                     disabled: group.config.disabled,
                     hidden: group.config.hidden,
+                    access: group.config.access,
+                    accessBehavior: group.config.accessBehavior,
                 };
                 foundPage.items.push(foundGroup);
             }

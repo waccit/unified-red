@@ -14,6 +14,7 @@ module.exports = function (RED) {
             disabled: config.disabled || false,
             hidden: config.hidden || false,
             access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
         };
         if (!this.config.hasOwnProperty('disp')) {
             this.config.disp = true;
