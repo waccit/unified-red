@@ -1694,11 +1694,14 @@ function removeFromInheritedPages(pageId) {
  * @param {Number} idx - index of the inherited-page's position in the inheritedPages dict (required for id)
  */
 function updateInhPageInMenu(RED, inhPage, idx) {
-    if (!menu.length) return;
-    console.log('menu is not empty...');
+    if (!menu.length) return; // if initial load skip
+
     inhPage._idx = idx;
 
     let ur_nodes = [];
+    let inhGroups = {}; // groups dict
+    let inhTabs = {}; // tabs dict
+    let controls = {}; // controls dict
     let removes = {};
 
     // reduce node search space to UR nodes
@@ -1711,35 +1714,50 @@ function updateInhPageInMenu(RED, inhPage, idx) {
         }
     });
 
+    // find groups that refer inhPage.refPage
     ur_nodes.forEach((group) => {
-        if (group.type === 'ur_group' && group.config.page && group.config.page == inhPage.config.refPage) {
-            ur_nodes.forEach((tab) => {
-                if (tab.type === 'ur_tab' && tab.config.group && tab.config.group == group.id) {
-                    ur_nodes.forEach((control) => {
-                        if (control.hasOwnProperty('config') && control.config.tab && control.config.tab == tab.id) {
-                            let inhGroup = updateAndClone(group, {
-                                id: group.id + '.inh.' + idx,
-                                config: { ...group.config, page: inhPage.id, order: '0.' + group.config.order },
-                            });
-
-                            let inhTab = updateAndClone(tab, {
-                                id: tab.id + '.inh.' + idx,
-                                config: { ...tab.config, group: group.id },
-                            });
-
-                            removes[control.id] = addControl(
-                                inhPage.folders,
-                                inhPage,
-                                inhGroup,
-                                inhTab,
-                                control.config
-                            );
-                        }
-                    });
-                }
-            });
+        if (group.type === 'ur_group' && group.config.page && group.config.page === inhPage.config.refPage) {
+            inhGroups[group.id] = group;
         }
     });
+
+    // find tabs that refer to each inhGroup
+    for (const groupId in inhGroups) {
+        ur_nodes.forEach((tab) => {
+            if (tab.type === 'ur_tab' && tab.config.group && tab.config.group === groupId) {
+                inhTabs[tab.id] = tab;
+            }
+        });
+    }
+
+    // find controls that refer to each inhTab
+    for (const tabId in inhTabs) {
+        ur_nodes.forEach((control) => {
+            if (control.config && control.config.tab && control.config.tab === tabId) {
+                controls[control.id] = control.config;
+            }
+        });
+    }
+
+    for (const controlId in controls) {
+        let inhTab = inhTabs[controls[controlId].tab];
+        let inhGroup = inhGroups[inhTab.config.group];
+        let control = controls[controlId];
+
+        // inherit group
+        inhGroup = updateAndClone(inhGroup, {
+            id: inhGroup.id + '.inh.' + idx,
+            config: { ...inhGroup.config, page: inhPage.id, order: '0.' + inhGroup.config.order },
+        });
+
+        // inherit tab
+        inhTab = updateAndClone(inhTab, {
+            id: inhTab.id + '.inh.' + idx,
+            config: { ...inhTab.config, group: inhGroup.id },
+        });
+
+        removes[controlId] = addControl(inhPage.folders, inhPage, inhGroup, inhTab, control);
+    }
 
     return removes;
 }
