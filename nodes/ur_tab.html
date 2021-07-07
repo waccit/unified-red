@@ -12,6 +12,8 @@
             group: { type: 'ur_group', required: true },
             disabled: { value: false },
             hidden: { value: false },
+            access: { value: '' },
+            accessBehavior: { value: '' },
         },
         sort: function (A, B) {
             if (A.group !== B.group) {
@@ -130,11 +132,23 @@
         <span id="node-config-input-hidden-info" data-i18n="[html]ur_tab.info.hidden" style="display:none;"></span>
     </div>
     <div class="form-row">
-        <label for="node-config-input-page-type"><i class="fa fa-list"></i> Page Type</label>
-        <select name="node-config-input-page-type" id="node-config-input-page-type" style="width:150px">
-            <option value="single">Single Page</option>
-            <option value="multi">Multi Page</option>
-            <option value="inherited">Inherited Page</option>
+        <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-config-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-config-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
         </select>
     </div>
 </script>

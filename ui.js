@@ -1011,6 +1011,8 @@ function addControl(folders, page, group, tab, control) {
                                                 t.order = tab.config.order;
                                                 t.disabled = tab.config.disabled;
                                                 t.hidden = tab.config.hidden;
+                                                t.access = tab.config.access;
+                                                t.accessBehavior = tab.config.accessBehavior;
 
                                                 // if tab's items already have the widget => update widget
                                                 if (t.items.findIndex((w) => w.id.startsWith(control.id)) !== -1) {
@@ -1040,6 +1042,8 @@ function addControl(folders, page, group, tab, control) {
                                             disabled: tab.config.disabled,
                                             hidden: tab.config.hidden,
                                             items: [],
+                                            access: tab.config.access,
+                                            accessBehavior: tab.config.accessBehavior,
                                         };
 
                                         let newCtrlId = control.id + p.instance._id;
@@ -1073,6 +1077,8 @@ function addControl(folders, page, group, tab, control) {
                                 disabled: tab.config.disabled,
                                 hidden: tab.config.hidden,
                                 items: [],
+                                access: tab.config.access,
+                                accessBehavior: tab.config.accessBehavior,
                             };
 
                             let newCtrlId = control.id + p.instance._id;
@@ -1147,6 +1153,8 @@ function addControl(folders, page, group, tab, control) {
                         header: tab.config.name,
                         order: tab.config.order,
                         items: [],
+                        access: tab.config.access,
+                        accessBehavior: tab.config.accessBehavior,
                     };
 
                     let newCtrlId = control.id + instanceIds[i];
@@ -1345,6 +1353,8 @@ function addControl(folders, page, group, tab, control) {
                     disabled: tab.config.disabled,
                     hidden: tab.config.hidden,
                     items: [],
+                    access: tab.config.access,
+                    accessBehavior: tab.config.accessBehavior,
                 };
                 foundGroup.items.push(foundTab);
             }

@@ -115,6 +115,8 @@ export class PageComponent implements OnInit {
                                 disabled: t.disabled,
                                 hidden: t.hidden,
                                 widgets: this.widgetService.getWidgets(t.items),
+                                access: t.access,
+                                accessBehavior: t.accessBehavior,
                             };
                         }),
                         displayHeader: !!g.disp,

@@ -7,8 +7,10 @@ import {
     ViewContainerRef,
     Renderer2,
 } from '@angular/core';
+import { User } from '../../data';
 import { Tab } from '../../data/tab.model';
 import { GroupDirective } from '../../directives/group.directive';
+import { CurrentUserService } from '../../services';
 import { TabComponent } from '../tab/tab.component';
 
 @Component({
@@ -23,18 +25,34 @@ export class GroupComponent implements OnInit, OnDestroy {
     displayHeader: boolean;
     disabled: boolean;
     @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
+    private userRole;
 
     constructor(
         private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
-        private renderer2: Renderer2
+        private renderer2: Renderer2,
+        private currentUserService: CurrentUserService
     ) {}
 
     ngOnInit() {
         this.viewContainerRef = this.groupHost.viewContainerRef;
 
+        this.currentUserService.currentUser.subscribe((user: User) => {
+            if (user) {
+                this.userRole = user.role;
+            }
+        });
+
         // do not render hidden tabs
-        this.tabs = this.tabs.filter((tab) => !tab.hidden);
+        this.tabs = this.tabs.filter((tab) =>
+            tab.accessBehavior === 'hide' ? this.hasAccess(tab.access) && !tab.hidden : !tab.hidden
+        );
+
+        // update disabled access
+        this.tabs.forEach((tab) => {
+            tab.disabled =
+                tab.disabled || (tab.accessBehavior === 'disable' && !this.hasAccess(tab.access)) ? true : false;
+        });
 
         // this.loadTabs(); => this is being handled in html
         if (this.tabs && this.tabs.length < 2) {
@@ -44,6 +62,12 @@ export class GroupComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.viewContainerRef.clear();
+    }
+
+    hasAccess(access): boolean {
+        if (!access) access = 0;
+
+        return this.userRole >= access;
     }
 
     loadTab() {
@@ -61,34 +85,4 @@ export class GroupComponent implements OnInit, OnDestroy {
             });
         }
     }
-
-    // loadTabs() {
-    //     this.viewContainerRef.clear();
-
-    //     if (this.tabs) {
-    //         this.tabs.forEach((tab) => {
-    //             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(TabComponent);
-
-    //             const componentRef = this.viewContainerRef.createComponent(componentFactory);
-    //             componentRef.instance.header = tab.header;
-    //             componentRef.instance.widgets = tab.widgets;
-    //         });
-    //     }
-    // }
-
-    // loadWidgets() {
-    //     this.viewContainerRef.clear();
-
-    //     if (this.widgets) {
-    //         this.widgets.forEach((widget) => {
-    //             const componentFactory = this.componentFactoryResolver.resolveComponentFactory(widget.component);
-
-    //             const componentRef = this.viewContainerRef.createComponent(componentFactory);
-    //             componentRef.instance.data = widget.data;
-    //             const colWidth = widget.data.width !== 0 ? widget.data.width : 12;
-    //             const colClass = 'col-' + colWidth;
-    //             this.renderer2.addClass(componentRef.location.nativeElement, colClass);
-    //         });
-    //     }
-    // }
 }

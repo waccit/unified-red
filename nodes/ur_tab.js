@@ -7,6 +7,8 @@ module.exports = function (RED) {
             group: config.group,
             disabled: config.disabled || false,
             hidden: config.hidden || false,
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
         };
     }
 
