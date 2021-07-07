@@ -81,7 +81,10 @@ export class PageComponent implements OnInit {
         const foundFolder = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.folder);
 
         // do not render disabled folders
-        if (foundFolder && foundFolder.disabled) {
+        if (
+            foundFolder &&
+            (foundFolder.disabled || (foundFolder.accessBehavior === 'disable' && !this.hasAccess(foundFolder.access)))
+        ) {
             // this.router.navigate(['/d/disabled']);
             this.breadcrumbs.push('DISABLED');
             return;
@@ -120,6 +123,12 @@ export class PageComponent implements OnInit {
                 }
             });
         }
+    }
+
+    hasAccess(access) {
+        if (!access) access = 0;
+
+        return this.userRole >= access;
     }
 
     // credit: https://stackoverflow.com/questions/15523514/find-by-key-deep-in-a-nested-array

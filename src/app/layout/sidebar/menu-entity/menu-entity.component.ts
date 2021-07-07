@@ -1,5 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, OnInit, Input, Renderer2, HostListener, ElementRef, Inject } from '@angular/core';
+import { User } from '../../../data';
+import { CurrentUserService } from '../../../services';
 import { RouteInfo } from '../sidebar.metadata';
 
 @Component({
@@ -10,11 +12,13 @@ import { RouteInfo } from '../sidebar.metadata';
 export class MenuEntityComponent implements OnInit {
     @Input() sidebarItems: RouteInfo[];
     showSubMenu = '';
+    private userRole: string;
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
-        public elementRef: ElementRef
+        public elementRef: ElementRef,
+        private currentUserService: CurrentUserService
     ) {}
 
     callSubMenuToggle(event: any, element: any) {
@@ -31,5 +35,17 @@ export class MenuEntityComponent implements OnInit {
         }
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.currentUserService.currentUser.subscribe((user: User) => {
+            if (user) {
+                this.userRole = user.role;
+            }
+        });
+    }
+
+    hasAccess(access) {
+        if (!access) access = 0;
+
+        return this.userRole >= access;
+    }
 }

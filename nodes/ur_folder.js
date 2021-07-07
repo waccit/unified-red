@@ -10,6 +10,8 @@ module.exports = function (RED) {
             icon: 'menu-icon ti-' + (config.icon || 'dashboard'),
             disabled: config.disabled || false,
             hidden: config.hidden || false,
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
         };
     }
 

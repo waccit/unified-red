@@ -18,15 +18,32 @@
                     *ngFor="let sidebarItem of sidebarItems"
                     [routerLinkActive]="sidebarItem.submenu.length != 0 ? '' : 'active'"
                 >
-                    <ng-container *ngIf="!sidebarItem.hidden">
+                    <ng-container
+                        *ngIf="
+                            sidebarItem.accessBehavior === 'hide'
+                                ? hasAccess(sidebarItem.access) && !sidebarItem.hidden
+                                : !sidebarItem.hidden
+                        "
+                    >
                         <div class="header" *ngIf="sidebarItem.groupTitle === true">
                             {{ sidebarItem.title }}
                         </div>
                         <a
                             [routerLink]="sidebarItem.class === '' ? [sidebarItem.path] : null"
                             *ngIf="!sidebarItem.groupTitle && !sidebarItem.link"
-                            [ngClass]="[sidebarItem.class, sidebarItem.disabled ? 'disabled' : '']"
-                            (click)="sidebarItem.disabled ? '' : callMenuToggle($event, sidebarItem.title)"
+                            [ngClass]="[
+                                sidebarItem.class,
+                                sidebarItem.disabled ||
+                                (sidebarItem.accessBehavior === 'disable' && !hasAccess(sidebarItem.access))
+                                    ? 'disabled'
+                                    : ''
+                            ]"
+                            (click)="
+                                sidebarItem.disabled ||
+                                (sidebarItem.accessBehavior === 'disable' && !hasAccess(sidebarItem.access))
+                                    ? ''
+                                    : callMenuToggle($event, sidebarItem.title)
+                            "
                         >
                             <i [ngClass]="[sidebarItem.icon]"></i>
                             <span class="hide-menu">{{ sidebarItem.title }} </span>
@@ -36,7 +53,12 @@
                             <a
                                 [href]="sidebarItem.link"
                                 target="{{ sidebarItem.target === 'thistab' ? '_self' : '_blank' }}"
-                                [ngClass]="sidebarItem.disabled ? 'disabled' : ''"
+                                [ngClass]="
+                                    sidebarItem.disabled ||
+                                    (sidebarItem.accessBehavior === 'disable' && !hasAccess(sidebarItem.access))
+                                        ? 'disabled'
+                                        : ''
+                                "
                             >
                                 <i [ngClass]="[sidebarItem.icon]"></i>
                                 <span class="hide-menu">{{ sidebarItem.title }} </span>

@@ -1,5 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, Inject, ElementRef, OnInit, Renderer2, HostListener, Input } from '@angular/core';
+import { User } from '../../data';
+import { CurrentUserService } from '../../services';
 import { MenuService } from '../../services/menu.service';
 import { RouteInfo } from './sidebar.metadata';
 // import { ROUTES } from './sidebar-items';
@@ -19,12 +21,14 @@ export class SidebarComponent implements OnInit {
     listMaxHeight: string;
     listMaxWidth: string;
     headerHeight = 60;
+    private userRole: string;
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
         private renderer: Renderer2,
         public elementRef: ElementRef,
-        private menuService: MenuService
+        private menuService: MenuService,
+        private currentUserService: CurrentUserService
     ) {}
 
     @HostListener('window:resize', ['$event'])
@@ -58,8 +62,20 @@ export class SidebarComponent implements OnInit {
         this.menuService.menu.subscribe((menu: RouteInfo[]) => {
             this.sidebarItems = menu;
         });
+
+        this.currentUserService.currentUser.subscribe((user: User) => {
+            if (user) {
+                this.userRole = user.role;
+            }
+        });
         this.initLeftSidebar();
         this.bodyTag = this.document.body;
+    }
+
+    hasAccess(access) {
+        if (!access) access = 0;
+
+        return this.userRole >= access;
     }
 
     initLeftSidebar() {

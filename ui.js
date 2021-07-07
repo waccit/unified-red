@@ -812,6 +812,8 @@ function addControl(folders, page, group, tab, control) {
                     disabled: currFolder.config.disabled,
                     hidden: currFolder.config.hidden,
                     items: [],
+                    access: currFolder.config.access,
+                    accessBehavior: currFolder.config.accessBehavior,
                     // Atrio sidebarItems properties:
                     path: '',
                     title: currFolder.config.name,
@@ -840,6 +842,8 @@ function addControl(folders, page, group, tab, control) {
                     disabled: currFolder.config.disabled,
                     hidden: currFolder.config.hidden,
                     items: foundFolder.items,
+                    access: currFolder.config.access,
+                    accessBehavior: currFolder.config.accessBehavior,
                     // Atrio sidebarItems properties:
                     path: '',
                     title: currFolder.config.name,
