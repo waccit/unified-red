@@ -98,7 +98,7 @@ export class PageComponent implements OnInit {
 
         if (foundPage) {
             // do not render disabled pages
-            if (foundPage.disabled) {
+            if (foundPage.disabled || (foundPage.accessBehavior === 'disable' && !this.hasAccess(foundPage.access))) {
                 this.breadcrumbs.push('DISABLED');
                 return;
             }

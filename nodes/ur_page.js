@@ -22,6 +22,8 @@ module.exports = function (RED) {
             inheritInst: config.inheritInst || false,
             expression: config.expression || '',
             instances: this.instances || config.instances || [],
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
         };
 
         this.on('close', ui.addInheritedPage(RED, this));

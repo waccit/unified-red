@@ -1113,6 +1113,8 @@ function addControl(folders, page, group, tab, control) {
                             '_id': instanceIds[i],
                         },
                         items: [],
+                        access: page.config.access,
+                        accessBehavior: page.config.accessBehavior,
                         // Atrio sidebarItems properties:
                         path: '/d/' + foldersPath + pageTitle.replace(/ /g, '').toLowerCase(),
                         title: pageTitle,
@@ -1267,6 +1269,8 @@ function addControl(folders, page, group, tab, control) {
                     disabled: page.config.disabled,
                     hidden: page.config.hidden,
                     items: foundPage.items,
+                    access: foundPage.access,
+                    accessBehavior: foundPage.accessBehavior,
                     // Atrio sidebarItems properties:
                     path: '/d/' + foldersPath + page.config.pathName,
                     title: page.config.name,
@@ -1290,6 +1294,8 @@ function addControl(folders, page, group, tab, control) {
                     disabled: page.config.disabled,
                     hidden: page.config.hidden,
                     items: [],
+                    access: page.config.access,
+                    accessBehavior: page.config.accessBehavior,
                     // Atrio sidebarItems properties:
                     path: '/d/' + foldersPath + page.config.pathName,
                     title: page.config.name,
@@ -1441,6 +1447,8 @@ function addInheritedPage(RED, page) {
             hidden: page.config.hidden,
             expression: page.config.inheritInst ? refPage.config.expression : page.config.expression,
             instances: page.config.inheritInst ? refPage.config.instances : page.config.instances,
+            access: page.config.access,
+            accessBehavior: page.config.accessBehavior,
         },
     };
 

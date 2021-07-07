@@ -16,11 +16,12 @@
             collapse: { value: false },
             disabled: { value: false },
             hidden: { value: false },
+            access: { value: '' },
+            accessBehavior: { value: '' },
             isMulti: { value: false },
             isSingle: { value: true },
             pageType: { value: 'single' },
             refPage: { value: 'none', required: false },
-            // childPage: { type: 'ur_page', value: 'none', required: false },
             inheritInst: { value: false },
             expression: {
                 value: '',
@@ -209,13 +210,6 @@
                     if (this.value && this.value !== 'none') {
                         refPageNode = RED.nodes.node(this.value);
                         refPageIsMulti = refPageNode.isMulti;
-                        // if (!node.users.includes(refPageNode)) {
-                        //     node.users.push(refPageNode);
-                        // }
-
-                        // if (!refPageNode.users.includes(node)) {
-                        //     refPageNode.users.push(node);
-                        // }
                     }
 
                     // pageType is undefined => user selection
@@ -407,34 +401,6 @@
                     let refPageNode = RED.nodes.node(this.refPage);
                     if (refPageNode) {
                         refPageIsMulti = refPageNode.isMulti;
-                        // console.log('refPageNode b4 change..... ', refPageNode);
-                        // console.log('this: ', this);
-                        // refPageNode.changed = true;
-
-                        // refPageNode._def.oneditsave();
-
-                        // let pageDef = RED.nodes.getType('ur_page');
-
-                        // if (pageDef.oneditsave) {
-                        //     try {
-                        //         console.log('invoking oneditsave: ', this.id);
-                        //         pageDef.oneditsave.call(refPageNode);
-                        //     } catch (err) {
-                        //         console.log('[inherited-page]: ERROR: ', this.id, err.toString());
-                        //     }
-                        // }
-                        // let users = refPageNode.users;
-                        // users.splice(users.indexOf(this), 1);
-                        // refPageNode.childPage = 'TESTING';
-                        // RED.events.emit('nodes:change', refPageNode);
-
-                        // this is where we need to "flag" a change in the refPageNode (e.g., hidden childPage??)
-                        // refPageNode._config.childPage = node;
-                        // refPageNode.changed = true;
-
-                        // console.log('refPageNode changed!!!!! ', refPageNode);
-                        // console.log('RED: ', RED);
-                        // RED.editor.editConfig('', 'ur_page', refPageNode.id, undefined);
                     }
                 }
 
@@ -688,6 +654,26 @@
             ><i class="fa fa-tags"></i> <span data-i18n="ur_page.label.instances"></span
         ></label>
         <ol id="node-config-input-instance-expressions-list"></ol>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-config-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-config-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
     </div>
     <div class="form-tips" data-i18n="[html]ur_page.tip"></div>
 </script>
