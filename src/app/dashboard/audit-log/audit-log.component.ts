@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -42,7 +42,16 @@ export class AuditLogComponent implements OnInit {
             this.loadLog();
         });
 
+        this.dataSource.sortingDataAccessor = (entry, property) => {
+            switch (property) {
+                case 'timestamp':
+                    return new Date(entry.timestamp);
+                default:
+                    return entry[property];
+            }
+        };
         this.dataSource.sort = this.sort;
+        this.sort.disableClear = true;
         this.dataSource.paginator = this.paginator;
     }
 
