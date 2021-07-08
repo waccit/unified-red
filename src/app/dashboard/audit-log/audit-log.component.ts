@@ -51,7 +51,7 @@ export class AuditLogComponent implements OnInit {
             }
         };
         this.dataSource.sort = this.sort;
-        this.sort.disableClear = true;
+        // this.sort.disableClear = true; // this will disable "unsort"
         this.dataSource.paginator = this.paginator;
     }
 
