@@ -9,7 +9,6 @@
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
-  "private": true,
   "dependencies": {
     "@agm/core": "^1.1.0",
     "@angular/animations": "^9.1.0",
