@@ -1,5 +1,4 @@
 # prettier-ignore
-
 name: Release
 on:
   push:
