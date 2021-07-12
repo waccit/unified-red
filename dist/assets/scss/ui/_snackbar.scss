@@ -1,0 +1,27 @@
+.snackbar-success {
+    background-color: #00c853;
+    * {
+        color: #ffffff;
+    }
+}
+
+.snackbar-info {
+    background-color: #2ca8ff;
+    * {
+        color: #ffffff;
+    }
+}
+
+.snackbar-warning {
+    background-color: #ffc107;
+    * {
+        color: #333333;
+    }
+}
+
+.snackbar-danger {
+    background-color: #f44336;
+    * {
+        color: #ffffff;
+    }
+}

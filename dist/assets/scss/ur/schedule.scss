@@ -1,0 +1,90 @@
+$weekdayEventColor: var(--fc-event-bg-color,#3788d8);
+$weekdayInactiveEventColor: #9bc4ec;
+$dateEventColor: seagreen;
+$dateInactiveEventColor: #97c5ab;
+$holidateEventColor: tomato;
+
+.ur-schedule-weekday-event.fc-daygrid-dot-event .fc-daygrid-event-dot {
+    border-color: $weekdayEventColor;
+}
+
+.ur-schedule-date-event.fc-daygrid-dot-event .fc-daygrid-event-dot {
+    border-color: $dateEventColor;
+}
+
+.ur-schedule-holiday-event.fc-daygrid-dot-event .fc-daygrid-event-dot {
+    border-color: $holidateEventColor;
+}
+
+.ur-schedule-weekday-event.fc-timegrid-event {
+    background-color: $weekdayEventColor;
+}
+
+.ur-schedule-date-event.fc-timegrid-event {
+    background-color: $dateEventColor;
+}
+
+.ur-schedule-holiday-event.fc-timegrid-event {
+    background-color: $holidateEventColor;
+}
+
+.ur-schedule-event-module {
+    .mat-drawer.mat-drawer-end {
+        width: 220px;
+        min-width: 220px;
+    }
+    .task-container .header .header-close {
+        top: 5px;
+    }
+}
+
+.fc-timegrid-col .ur-schedule-weekday-event.inactive {
+    background-color: $weekdayInactiveEventColor;
+    background-image: repeating-linear-gradient(45deg, #0000, #0000 10px, #7777 10px, #7777 20px);
+}
+
+.fc-timegrid-col .ur-schedule-date-event.inactive {
+    background-color: $dateInactiveEventColor;
+    background-image: repeating-linear-gradient(45deg, #0000, #0000 10px, #7777 10px, #7777 20px);
+}
+
+.fc-daygrid-day .ur-schedule-weekday-event.inactive,
+.fc-daygrid-day .ur-schedule-date-event.inactive {
+    background-image: repeating-linear-gradient(45deg, #EEEF, #EEEF 4px, #0003 4px, #0003 6px);
+}
+
+.ur-schedule-weekday-picker {
+    flex-wrap: wrap;
+    max-width: 562px;
+    margin-bottom: 1.34375em;
+    .mat-button-toggle {
+        width: 61px;
+    }
+    .mat-button-toggle-checked {
+        @extend .bg-indigo;
+    }
+}
+
+.ur-schedule-month-date-picker {
+    flex-wrap: wrap;
+    max-width: 562px;
+    margin-bottom: 1.34375em;
+    .mat-button-toggle {
+        width: 40px;
+    }
+    .mat-button-toggle-checked {
+        @extend .bg-indigo;
+    }
+}
+
+.ur-schedule-year-month-picker {
+    flex-wrap: wrap;
+    max-width: 562px;
+    margin-bottom: 1.34375em;
+    .mat-button-toggle {
+        width: 46.6px;
+    }
+    .mat-button-toggle-checked {
+        @extend .bg-indigo;
+    }
+}
