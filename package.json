@@ -1,6 +1,7 @@
 {
     "name": "unified-red",
     "version": "0.0.0",
+    "keywords": ["node-red"],
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
