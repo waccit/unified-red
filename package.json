@@ -1,5 +1,5 @@
 {
-    "name": "@westernalliedcorp/unified-red",
+    "name": "unified-red",
     "version": "0.0.0",
     "scripts": {
         "ng": "ng",
