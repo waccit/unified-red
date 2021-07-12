@@ -1,0 +1,11 @@
+{
+    "ur_ui_control": {
+        "label": {
+            "category": "unified-red",
+            "name": "Name"
+        },
+        "placeholder": {
+            "name": "Name"
+        }
+    }
+}

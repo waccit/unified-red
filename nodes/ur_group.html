@@ -1,0 +1,231 @@
+<script type="text/javascript">
+    // convert to i18 text
+    function c_ur_group(x) {
+        return RED._('unified-red/ur_group:ur_group.' + x);
+    }
+
+    RED.nodes.registerType('ur_group', {
+        category: 'config',
+        defaults: {
+            name: { value: c_ur_group('label.default') },
+            page: { type: 'ur_page', required: true },
+            order: { value: 0 },
+            disp: { value: true },
+            // width: { value: 30 },
+            // width: { value: { lg: 6, md: 6, sm: 12 } },
+            widthLg: { value: 6 },
+            widthMd: { value: 6 },
+            widthSm: { value: 12 },
+            collapse: { value: false },
+            disabled: { value: false },
+            hidden: { value: false },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        sort: function (A, B) {
+            if (A.page !== B.page) {
+                var pageA = RED.nodes.node(A.page);
+                var pageB = RED.nodes.node(B.page);
+                if (!pageA && pageB) {
+                    return -1;
+                } else if (pageA && !pageB) {
+                    return 1;
+                } else {
+                    return pageA.order - pageB.order;
+                }
+            }
+            return A.order - B.order;
+        },
+        paletteLabel: 'dashboard group',
+        label: function () {
+            var pageNode = RED.nodes.node(this.page);
+            var folderNode = pageNode !== null ? RED.nodes.node(pageNode.folder) : null;
+            var pageName = pageNode ? pageNode.name : 'label.unassigned';
+            var folderName = folderNode ? folderNode.name : 'label.unassigned';
+
+            return (
+                '[' +
+                (folderName || c_ur_group('label.folder')) +
+                '] [' +
+                (pageName || c_ur_group('label.page')) +
+                '] ' +
+                (this.name || c_ur_group('label.group'))
+            );
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            $('#node-input-size-lg').elementSizer({
+                width: '#node-config-input-widthLg',
+                auto: false,
+            });
+            $('#node-input-size-md').elementSizer({
+                width: '#node-config-input-widthMd',
+                auto: false,
+            });
+            $('#node-input-size-sm').elementSizer({
+                width: '#node-config-input-widthSm',
+                auto: false,
+            });
+
+            $('#node-config-input-disabled-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-disabled').prop('checked', active);
+
+                var newTxt = c_ur_group(active ? 'label.disabled' : 'label.enabled');
+                $('#node-config-input-disabled-label').text(newTxt);
+
+                var info = $('#node-config-input-disabled-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.disabled) {
+                $('#node-config-input-disabled-btn').click();
+            } else {
+                $('#node-config-input-disabled-label').text(c_ur_group('label.enabled'));
+            }
+
+            $('#node-config-input-hidden-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-hidden').prop('checked', active);
+
+                var newTxt = c_ur_group(active ? 'label.hidden' : 'label.visible');
+                $('#node-config-input-hidden-label').text(newTxt);
+
+                var info = $('#node-config-input-hidden-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.hidden) {
+                $('#node-config-input-hidden-btn').click();
+            } else {
+                $('#node-config-input-hidden-label').text(c_ur_group('label.visible'));
+            }
+
+            $('#node-config-input-disp').on('change', function () {
+                if ($('#node-config-input-disp').is(':checked')) {
+                    $('#group-collapse-flag').show();
+                } else {
+                    $('#group-collapse-flag').hide();
+                    $('#node-config-input-collapse').prop('checked', false);
+                }
+            });
+        },
+        oneditsave: function () {
+            this.disabled = $('#node-config-input-disabled').prop('checked');
+            this.hidden = $('#node-config-input-hidden').prop('checked');
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_group">
+    <div class="form-row">
+        <label for="node-config-input-name"
+            ><i class="fa fa-tag"></i> <span data-i18n="ur_group.label.name"></span
+        ></label>
+        <input type="text" id="node-config-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-page"
+            ><i class="fa fa-file-o"></i> <span data-i18n="ur_group.label.page"></span
+        ></label>
+        <input type="text" id="node-config-input-page" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-width-row"
+            ><i class="fa fa-arrows-h"></i> <span data-i18n="ur_group.label.width"></span
+        ></label>
+
+        <label for="node-config-input-widthLg" style="width: auto;">
+            <span data-i18n="ur_group.label.widthLg"></span
+        ></label>
+        <input type="hidden" id="node-config-input-widthLg" />
+        <button class="editor-button" id="node-input-size-lg" style="margin-right: 7px;"></button>
+
+        <label for="node-config-input-widthMd" style="width: auto;">
+            <span data-i18n="ur_group.label.widthMd"></span
+        ></label>
+        <input type="hidden" id="node-config-input-widthMd" />
+        <button class="editor-button" id="node-input-size-md" style="margin-right: 7px;"></button>
+
+        <label for="node-config-input-widthSm" style="width: auto;">
+            <span data-i18n="ur_group.label.widthSm"></span
+        ></label>
+        <input type="hidden" id="node-config-input-widthSm" />
+        <button class="editor-button" id="node-input-size-sm" style="margin-right: 7px;"></button>
+    </div>
+    <div class="form-row">
+        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" checked id="node-config-input-disp" />
+        <label style="width:auto" for="node-config-input-disp"><span data-i18n="ur_group.display-name"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-disabled-btn">
+            <i class="fa fa-ban"></i> <span data-i18n="ur_group.label.state"></span>
+        </label>
+        <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-disabled" style="display: none;" />
+        <span
+            id="node-config-input-disabled-info"
+            data-i18n="[html]ur_group.info.disabled"
+            style="display: none;"
+        ></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-hidden-btn">
+            <i class="fa fa-eye-slash"></i> <span data-i18n="ur_group.label.navmenu"></span>
+        </label>
+        <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-hidden" style="display:none;" />
+        <span id="node-config-input-hidden-info" data-i18n="[html]ur_group.info.hidden" style="display:none;"></span>
+    </div>
+    <!-- <div class="form-row" id="group-collapse-flag">
+        <input style="margin:8px 0 10px 102px; width:20px;" type="checkbox" id="node-config-input-collapse" />
+        <label style="width:auto" for="node-config-input-collapse"
+            ><span data-i18n="ur_group.collapse-name"></span
+        ></label>
+    </div> -->
+    <div class="form-row">
+        <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-config-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-config-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_group">
+    <p>Group configuration for Unified-RED</p>
+    <p>
+        Configures a group in the menu that serves to <em>group</em> widgets together.
+        <em>A page may have multiple groups of widgets.</em> May contain tabs.
+    </p>
+    <p>
+        <b>Disabled</b> groups are not included in the app, and are therefore not functional. The group name still
+        appears in the Navigation Menu (unless it is also hidden).
+    </p>
+    <p>
+        <b>Hidden</b> groups are not listed in the Left-hand Navigation Menu. However, they are still active in the app.
+    </p>
+</script>

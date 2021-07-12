@@ -1,0 +1,12 @@
+<h2 mat-dialog-title>Ready to Install?</h2>
+<div mat-dialog-content>
+    <p>
+        Node-RED will be shutdown and must be manually restarted.<br>
+        <br>
+        Once restarted, click <a [href]="urURL">here for Unified-RED</a> or <a [href]="nrURL">here for Node-RED</a>.<br>
+    </p>
+</div>
+<mat-dialog-actions align="end">
+    <button mat-button [mat-dialog-close]="false">Cancel</button>
+    <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Continue</button>
+</mat-dialog-actions>

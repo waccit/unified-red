@@ -6,11 +6,11 @@
 .collapse,
 .collapse.in,
 .collapsing {
-  .well {
-    @include border-radius(0);
-    margin-bottom: 0;
-  }
-  &.show {
-    display: block;
-  }
+    .well {
+        @include border-radius(0);
+        margin-bottom: 0;
+    }
+    &.show {
+        display: block;
+    }
 }

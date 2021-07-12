@@ -1,0 +1,355 @@
+<style>
+    input.gauge-color {
+        width: 87px !important;
+        text-align: center;
+    }
+    input.gauge-color::-webkit-color-swatch {
+        border: none;
+    }
+    #gauge-options input[type=checkbox] {
+        width: auto;
+        vertical-align: baseline;
+        margin-left: 10px;
+    }
+</style>
+<script type="text/javascript">
+    RED.nodes.registerType('ur_gauge', {
+        category: 'unified-red',
+        color: '#81c784',
+        defaults: {
+            name: { value: '' },
+            tab: { type: 'ur_tab', required: true },
+            order: { value: 0 },
+            width: { value: 0 },
+            height: { value: 0 },
+            gtype: { value: 'gauge' },
+            label: { value: '' },
+            topics: { value: [ { label: '', topic: '' } ] },
+            legend: { value: true },
+            showAxis: { value: true },
+            format: { value: '{{msg.payload.value}}' },
+            units: { value: '' },
+            min: { value: 0, required: true, validate: RED.validators.number() },
+            max: { value: 100, required: true, validate: RED.validators.number() },
+            bigseg: { value: 10 },
+            smallseg: { value: 5 },
+            colors: { value: [
+                '#5899DA', '#E8743B', '#19A979', '#ED4A7B', '#945ECF', '#13A4B4', 
+                '#525DF4', '#BF399E', '#6C8893', '#EE6868', '#2F6497', '#5AA454'
+            ] },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        inputs: 1,
+        outputs: 0,
+        inputLabels: function () { return this.min + " - " + this.max; },
+        align: "right",
+        icon: "ur_gauge.png",
+        paletteLabel: 'gauge',
+        label: function () {
+            return this.name || this.label || this.gtype || 'gauge';
+        },
+        labelStyle: function () { return this.name ? "node_label_italic" : ""; },
+        oneditprepare: function () {
+            $('#node-input-topic-container')
+                .css('min-height', '100px')
+                .editableList({
+                    addItem: function (container, index, opt) {
+                        if (!opt.hasOwnProperty('topic')) {
+                            opt.topic = {};
+                        }
+                        var topic = opt.topic;
+                        if (!topic.hasOwnProperty('prop')) {
+                            topic.prop = 'vis';
+                        }
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                        });
+                        var row = $('<div/>').appendTo(container);
+                        //label input
+                        $('<input/>', { class: 'node-input-topic-label', type: 'text', placeholder: 'label' })
+                            .appendTo(row)
+                            .val(topic.label);
+                        //topic input
+                        $('<input/>', { class: 'node-input-topic-topic', type: 'text', placeholder: 'topic' })
+                            .appendTo(row)
+                            .val(topic.topic);
+                    },
+                    sortable: true,
+                    removable: true,
+                    addButton: true,
+                });
+            for (let i = 0; i < this.topics.length; i++) {
+                $('#node-input-topic-container').editableList('addItem', { topic: this.topics[i] });
+            }
+            
+            function hexToRgb(hex) {
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            }
+            var setColour = function (id, value) {
+                $(id).val(value);
+                $(id).css("background-color", value);
+                var rgb = hexToRgb(value);
+                var level = ((rgb.r * 299) + (rgb.g * 587) + (rgb.b * 114)) / 1000;
+                var textColor = (level >= 128) ? '#111111' : '#eeeeee';
+                $(id).css("color", textColor);
+            }
+            $(".gauge-color").on("change", function () {
+                setColour("#" + $(this).attr("id"), $(this).val());
+            });
+            if (!this.colors) {
+                this.colors = [
+                    '#5899DA', '#E8743B', '#19A979', '#ED4A7B', '#945ECF', '#13A4B4',
+                    '#525DF4', '#BF399E', '#6C8893', '#EE6868', '#2F6497', '#5AA454'
+                ];
+            }
+            for (let i = 0; i < this.colors.length; i++) {
+                setColour("#node-input-color" + (i+1), this.colors[i]);
+            }
+
+            if (this.gtype === undefined) {
+                this.gtype = "gauge";
+                $("#node-input-gtype").val("gauge");
+            }
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+                height: '#node-input-height',
+                group: '#node-input-tab'
+            });
+            $("#node-input-min").on("change", function () {
+                $("#seg-min").text($(this).val());
+            });
+            $("#node-input-max").on("change", function () {
+                $("#seg-max").text($(this).val());
+            });
+            $("#node-input-gtype").on("change", function() {
+                let val = $(this).val();
+                if (val === "level-horz" || val === "level-vert" || val === "liquid") {
+                    $("#regular-gauge-options").hide();
+                } else {
+                    $("#regular-gauge-options").show();
+                }
+            });
+        },
+        oneditsave: function () {
+            let node = this;
+
+            node.topics = [];
+            $('#node-input-topic-container').editableList('items').each(function (i) {
+                node.topics.push({
+                    label: $(this).find('.node-input-topic-label').val(),
+                    topic: $(this).find('.node-input-topic-topic').val(),
+                });
+            });
+
+            this.colors = [ $("#node-input-color1").val(), $("#node-input-color2").val(), $("#node-input-color3").val(),
+                $("#node-input-color4").val(), $("#node-input-color5").val(), $("#node-input-color6").val(),
+                $("#node-input-color7").val(), $("#node-input-color8").val(), $("#node-input-color9").val(),
+                $("#node-input-color10").val(), $("#node-input-color11").val(), $("#node-input-color12").val() ];
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_gauge">
+    <div class="form-row">
+        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
+        <input type="text" id="node-input-tab" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width" />
+        <input type="hidden" id="node-input-height" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label">
+    </div>
+    <div class="form-row node-input-topic-container-row">
+        <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Topics</label>
+        <div class="form-row node-input-topic-container-row">
+            <ol id="node-input-topic-container"></ol>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-gtype"><i class="fa fa-list"></i> Type</label>
+        <select id="node-input-gtype" style="width:150px">
+            <optgroup label="Dial">
+                <option value="gauge">Regular</option>
+                <option value="circle">Circle</option>
+                <option value="over">Over</option>
+                <option value="under">Under</option>
+            </optgroup>
+            <optgroup label="Level">
+                <option value="level-horz">Horizontal</option>
+                <option value="level-vert">Vertical</option>
+                <option value="liquid">Liquid</option>
+            </optgroup>
+        </select>
+    </div>
+    <div class="form-row" id="ui-gauge-format">
+        <label for="node-input-format"><i class="fa fa-i-cursor"></i> Value format</label>
+        <input type="text" id="node-input-format" placeholder="{{msg.payload.value}}">
+    </div>
+    <div class="form-row">
+        <label for="node-input-units"><i class="fa fa-i-cursor"></i> Units</label>
+        <input type="text" id="node-input-units">
+    </div>
+    <div class="form-row">
+        <label for="node-input-min">Range</label>
+        <span for="node-input-min">min</span>
+        <input type="text" id="node-input-min" style="width:80px">
+        <span for="node-input-max" style="margin-left:20px;">max</span>
+        <input type="text" id="node-input-max" style="width:80px">
+    </div>
+    <div id="regular-gauge-options">
+        <div class="form-row">
+            <label for="node-input-bigseg">Segments</label>
+            <span for="node-input-bigseg">big</span>
+            <input type="text" id="node-input-bigseg" style="width:80px">
+            <span for="node-input-smallseg" style="margin-left:20px;">small</span>
+            <input type="text" id="node-input-smallseg" style="width:80px">
+        </div>
+        <div class="form-row">
+            <label for="node-input-legend">Options</label>
+            <span>
+                <input type="checkbox" id="node-input-legend" style="width: auto">
+                <label for="node-input-legend">Legend</label>
+                <input type="checkbox" id="node-input-showAxis" style="width: auto">
+                <label for="node-input-showAxis">Axis</label>
+            </span>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-color1">Colors</label>
+        <input type="color" id="node-input-color1" class="gauge-color"/>
+        <input type="color" id="node-input-color2" class="gauge-color"/>
+        <input type="color" id="node-input-color3" class="gauge-color"/>
+        <input type="color" id="node-input-color4" class="gauge-color"/>
+        <div style="margin-top:5px; margin-left:104px;">
+            <input type="color" id="node-input-color5" class="gauge-color"/>
+            <input type="color" id="node-input-color6" class="gauge-color"/>
+            <input type="color" id="node-input-color7" class="gauge-color"/>
+            <input type="color" id="node-input-color8" class="gauge-color"/>
+        </div>
+        <div style="margin-top:5px; margin-left:104px;">
+            <input type="color" id="node-input-color9" class="gauge-color"/>
+            <input type="color" id="node-input-color10" class="gauge-color"/>
+            <input type="color" id="node-input-color11" class="gauge-color"/>
+            <input type="color" id="node-input-color12" class="gauge-color"/>
+        </div>
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center">
+            <i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label>
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_gauge">
+    <p>Displays numeric values on a gauge.</p>
+    <h3>Details</h3>
+    <p>
+        The payload of each received message will be displayed on a gauge. Each unique topic received will be 
+        displayed on a separate line, therefore multiple values can be shown on the same dail gauge. Level 
+        gauges can only display single values therefore each unique topic will be shown on a separate gauge.
+    </p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Label</b> is the gauge title text.</p>
+    <p>
+        <b>Topics</b> are message topics expected to be received and includes a <b>Label</b> field for each topic 
+        used as the data series name. Topics can include instance parameter variables when used with Multi Pages.
+    </p>
+    <p>
+        <b>Type</b> defines the style of gauge display - <i>regular</i>, <i>circle</i>, <i>over</i>, or 
+        <i>under</i> dial gauges and <i>horizontal</i>, <i>vertical</i>, or <i>liquid</i> level gauges.
+    </p>
+    <p>
+        <b>Value Format</b> is a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the value displayed.
+    </p>
+    <p>
+        <b>Units</b> is a text label shown below the value text label. Value and units labels are only shown when a 
+        single topic is used.
+    </p>
+    <p><b>Range</b> defines the minimum and maximum limits of the gauge.</p>
+    <p>
+        <b>Segments</b> defines the number of <b>big</b> divisions along the gauge axis and the number of <b>small</b>
+        divisions between each big division.
+    </p>
+    <p><b>Legend</b> shows the gauge legend.</p>
+    <p><b>Axis</b> shows the gauge axis.</p>
+    <p><b>Colors</b> sets the line colors.</p>
+
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+
+</script>

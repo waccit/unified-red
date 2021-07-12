@@ -1,0 +1,516 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_form', {
+        category: 'unified-red',
+        color: 'rgb(176, 223, 227)',
+        defaults: {
+            name: { value: '' },
+            label: { value: '' },
+            tab: { type: 'ur_tab', required: true },
+            order: { value: 0 },
+            width: { value: 12 },
+            height: { value: 0 },
+            format: { value: '{{msg.payload.value}}' },
+            options: {
+                value: [{ topic: '', label: '', type: '', outtopic: '' }],
+                validate: function (value) {
+                    if (value.length) {
+                        for (var i = 0; i < value.length; i++) {
+                            if (!value[i].topic) {
+                                return false;
+                            }
+                        }
+                    } else {
+                        return false;
+                    }
+                    return true;
+                },
+                required: true,
+            },
+            formValue: { value: {} },
+            payload: { value: '' },
+            singleMsg: { value: 'false' },
+            singleMsgTopic: { value: '' },
+            submit: { value: 'submit' },
+            cancel: { value: 'cancel' },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'ur_form.png',
+        paletteLabel: 'form',
+        label: function () {
+            return this.name || this.label || 'form';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            if ($('#node-input-submit').val() === null) {
+                $('#node-input-submit').val('submit');
+            }
+            if ($('#node-input-cancel').val() === null) {
+                $('#node-input-cancel').val('cancel');
+            }
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+            });
+
+            function generateOption(i, option) {
+                var container = $('<li/>', { style: 'margin:0; padding:5px 0px; border-bottom:1px solid #ccc;' });
+                var row = $('<div/>').appendTo(container);
+                var rowOptions = $('<div/>', { style: 'padding-top:5px; padding-left:22px;' }).appendTo(container);
+                var rowOutTopic = $('<div/>', { style: 'padding-top:5px; padding-left:22px; display: none;' }).appendTo(
+                    container
+                );
+
+                $('<i style="cursor:move; margin-left:3px;" class="node-input-option-handle fa fa-bars"></i>').appendTo(
+                    row
+                );
+
+                var labelField = $('<input/>', {
+                    class: 'node-input-option-label',
+                    type: 'text',
+                    style: 'margin-left:7px; width:20%;',
+                    placeholder: 'label',
+                    value: option.label,
+                }).appendTo(row);
+                var topicClass = 'node-input-option-topic';
+                if (!option.topic) {
+                    topicClass = 'node-input-option-topic input-error';
+                }
+                var topicField = $('<input/>', {
+                    class: topicClass,
+                    type: 'text',
+                    style: 'margin-left:7px; width:38%;',
+                    placeholder: 'topic filter',
+                    value: option.topic,
+                }).appendTo(row);
+                topicField.keyup(function () {
+                    if ($(this).val() && $(this).hasClass('input-error')) {
+                        $(this).removeClass('input-error');
+                    } else {
+                        if (!$(this).val()) {
+                            $(this).addClass('input-error');
+                        }
+                    }
+                });
+
+                var typeField = $('<select/>', {
+                    class: 'node-input-option-type',
+                    type: 'text',
+                    style: 'margin-left:7px; width:16%',
+                }).appendTo(row);
+
+                var arr = [
+                    { val: 'text', text: 'Text' },
+                    { val: 'multiline', text: 'Multiline' },
+                    { val: 'number', text: 'Number' },
+                    { val: 'email', text: 'E-mail' },
+                    { val: 'password', text: 'Password' },
+                    { val: 'checkbox', text: 'Checkbox' },
+                    { val: 'switch', text: 'Switch' },
+                    { val: 'select', text: 'Select' },
+                    { val: 'date', text: 'Date' },
+                ];
+
+                //var sel = $('<select>').appendTo('body');
+                $(arr).each(function () {
+                    var isSelected = false;
+                    if (option.type == this.val) {
+                        isSelected = true;
+                    }
+                    typeField.append(
+                        $('<option>').attr('value', this.val).text(this.text).prop('selected', isSelected)
+                    );
+                });
+
+                let setOptions = function (optionType, labelElem, inputElem, row) {
+                    let value = '';
+                    let text = 'Options';
+                    let placeholder = '';
+                    switch (optionType) {
+                        case 'multiline':
+                            value = Object.entries(option.options)
+                                .map((o) => o[0] + ':' + o[1])
+                                .join(', ');
+                            text = 'Rows';
+                            placeholder = 'Options e.g. rows:3';
+                            row.show();
+                            break;
+                        case 'text':
+                        case 'number':
+                            value = Object.entries(option.options)
+                                .map((o) => o[0] + ':' + o[1])
+                                .join(', ');
+                            placeholder = 'Options e.g. units:%, precision:1';
+                            row.show();
+                            break;
+                        case 'select':
+                            value = Object.entries(option.options)
+                                .map((o) => o[0] + (o[1] ? ':' + o[1] : ''))
+                                .join(', ');
+                            text = 'Options';
+                            placeholder = 'Options e.g. value1, value2 ... or label1:value1, label2:value2';
+                            row.show();
+                            break;
+                        default:
+                            row.hide();
+                            break;
+                    }
+                    labelElem.text(text);
+                    inputElem.attr('placeholder', placeholder);
+                    inputElem.val(value);
+                };
+
+                var optionsLabel = $('<label>', { style: 'width:60px;' }).appendTo(rowOptions);
+                var optionsField = $('<input/>', {
+                    class: 'node-input-option-options',
+                    type: 'text',
+                    style: 'width:87%;',
+                }).appendTo(rowOptions);
+                setOptions(option.type, optionsLabel, optionsField, rowOptions);
+
+                var deletespan = $('<div/>', { style: 'display:inline-block; width:8%;' }).appendTo(row);
+                var deleteButton = $('<a/>', {
+                    href: '#',
+                    class: 'editor-button',
+                    style: 'font-size:1.3em; left:45%; position:relative;',
+                }).appendTo(deletespan);
+                $('<i/>', { class: 'fa fa-trash-o' }).appendTo(deleteButton);
+
+                var morespan = $('<div/>', { style: 'display:inline-block; width:8%;' }).appendTo(row);
+                var moreButton = $('<a/>', {
+                    href: '#',
+                    class: 'editor-button',
+                    style: 'font-size:1.3em; left:45%; position:relative;',
+                }).appendTo(morespan);
+                $('<i/>', { class: 'fa fa-caret-down' }).appendTo(moreButton);
+
+                option.outtopic ? rowOutTopic.show() : rowOutTopic.hide();
+                $('<label>', { style: 'width:60px;' }).text('Output').appendTo(rowOutTopic);
+                var outtopicField = $('<input/>', {
+                    class: 'node-input-option-outtopic',
+                    type: 'text',
+                    style: 'width:87%;',
+                    placeholder: 'Output topic/property',
+                    value: option.outtopic,
+                }).appendTo(rowOutTopic);
+
+                typeField.change(function (e) {
+                    option.options = '';
+                    setOptions(e.target.value, optionsLabel, optionsField, rowOptions);
+                });
+
+                deleteButton.click(function () {
+                    container.find('.node-input-option-topic').removeAttr('required');
+                    container.css({ 'background': '#fee' });
+                    container.fadeOut(300, function () {
+                        $(this).remove();
+                    });
+                });
+
+                moreButton.click(function () {
+                    rowOutTopic.show();
+                });
+
+                $('#node-input-option-container').append(container);
+            }
+
+            $('#node-input-add-option').click(function () {
+                generateOption($('#node-input-option-container').children().length + 1, {});
+                $('#node-input-option-container-div').scrollTop(
+                    $('#node-input-option-container-div').get(0).scrollHeight
+                );
+            });
+
+            for (var i = 0; i < this.options.length; i++) {
+                var option = this.options[i];
+                generateOption(i + 1, option);
+            }
+
+            $('#node-input-option-container').sortable({
+                axis: 'y',
+                handle: '.node-input-option-handle',
+                cursor: 'move',
+            });
+
+            $('#node-input-singleMsg').change(function() {
+                let value = $(this).val() === "true";
+                if (value) {
+                    $('#node-input-singleMsgTopic').show();
+                }
+                else {
+                    $('#node-input-singleMsgTopic').hide();
+                }
+            });
+            $('#node-input-singleMsg').trigger('change');
+        },
+        oneditsave: function () {
+            var options = $('#node-input-option-container').children();
+            var node = this;
+            node.options = [];
+            node.formValue = {};
+            options.each(function (i) {
+                var option = $(this);
+                var o = {
+                    label: option.find('.node-input-option-label').val(),
+                    topic: option.find('.node-input-option-topic').val(),
+                    type: option.find('.node-input-option-type').val(),
+                    options: option.find('.node-input-option-options').val(),
+                    outtopic: option.find('.node-input-option-outtopic').val(),
+                };
+                if (o.type === 'text' || o.type === 'number' || o.type === 'multiline' || o.type === 'select') {
+                    o.options = o.options.trim();
+                    o.options = o.options.length ? o.options.split(/\s*,\s*/g)
+                        .reduce((a, b) => {
+                            var v = b.split(/\s*[:=]\s*/);
+                            a[v[0]] = v[1] || '';
+                            return a;
+                        }, {}) : {};
+                }
+                node.formValue[o.topic] = o.type == 'checkbox' || o.type == 'switch' ? false : '';
+                node.options.push(o);
+            });
+        },
+    });
+</script>
+<script type="text/html" data-template-name="ur_form">
+    <style>
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 18px;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: 0.4s;
+            transition: 0.4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: '';
+            height: 15px;
+            width: 15px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            -webkit-transition: 0.4s;
+            transition: 0.4s;
+        }
+
+        input:checked + .slider {
+            background-color: #910000;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196f3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(11px);
+            -ms-transform: translateX(11px);
+            transform: translateX(11px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+    </style>
+
+    <div class="form-row">
+        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
+        <input type="text" id="node-input-tab" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional label" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-i-cursor"></i> Value format</label>
+        <input type="text" id="node-input-format" placeholder="{{msg.payload.value}}" />
+    </div>
+    <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:520px">
+        <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Form elements</label>
+        <div style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
+            <div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:7px; padding-bottom:3px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
+                <div style="width:94%; display:inline-block; margin-left:27px">
+                    <div style="width:20%; text-align:center; float:left;">Label</div>
+                    <div style="width:38%; text-align:center; float:left; margin-left:9px">Topic Filter</div>
+                    <div style="width:16%; text-align:center; float:left; margin-left:9px">Type</div>
+                </div>
+            </div>
+            <div id="node-input-option-container-div" style=" height: 257px; padding: 5px; overflow-y:scroll;">
+                <ol id="node-input-option-container" style=" list-style-type:none; margin: 0;"></ol>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <a
+            href="#"
+            class="editor-button editor-button-small"
+            id="node-input-add-option"
+            style="margin-top: 4px; margin-left: 103px;"
+            ><i class="fa fa-plus"></i> <span>element</span></a
+        >
+    </div>
+    <div class="form-row">
+        <label for="node-input-singleMsg"><i class="fa fa-asterisk"></i> Send as</label>
+        <select id="node-input-singleMsg" style="width: 27%">
+            <option value="false">individual messages</option>
+            <option value="true">single message</option>
+        </select>
+        <input type="text" id="node-input-singleMsgTopic" placeholder="single message topic"  style="width: 50%" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-submit"><i class="fa fa-square"></i> Buttons</label>
+        <i class="fa fa-thumbs-o-up"></i>
+        <input type="text" id="node-input-submit" placeholder="submit button text" style="width:35%;" />
+        <span style="margin-left:16px"><i class="fa fa-thumbs-o-down"></i></span>
+        <input type="text" id="node-input-cancel" placeholder="cancel button text" style="width:35%;" />
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_form">
+    <p>Adds a submission form to the user interface.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>updates the input field value of a matching topic</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic associated with input field</dd>
+        <dt class="optional">enable <span class="property-type">boolean</span></dt>
+        <dd>disables the input when set to false</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object</span></dt>
+        <dd>new value provided from input field</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic associated with the new value</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>Helps to collect multiple values from the user on submit button click</p>
+    <p>Multiple input elements can be added using add elements button</p>
+    <p>Each element contains following components:</p>
+    <ul>
+        <li><b>Label</b> : Value that will be the label of the element in the user interface</li>
+        <li><b>Topic Filter</b> : Represents the topic or substring of the topic associated with <code>msg.payload</code></li>
+        <li><b>Type</b> : Drop drown option to select the type of input element</li>
+        <li>
+            <b>Options</b> : For text and number inputs, <code>units</code> of measurement and <code>precision</code> can be 
+            set. For multiline inputs, the number of <code>rows</code>. For select inputs, list of options as comma-separated
+            values or label:value pairs.
+        </li>
+        <li>
+            <b>Output</b> : Overrides the <code>msg.topic</code> property when sending individual messages or used as a 
+            <code>msg.payload</code> property when sending as a single message.
+        </li>
+    </ul>
+    <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the button.</p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Label</b> is the form title text.</p>
+    <p>
+        <b>Value Format</b> is a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the value displayed in the text field.
+    </p>
+    <p>
+        <b>Send as</b> configures the node to send each field as an individual message or combined into a single message.
+        <b>Single Message Topic</b> used as the <code>msg.topic</code> property when sending as a single message.
+    </p>
+    <p><b>Submit/Cancel Buttons</b> are form button text. The Cancel button can be hidden by setting it's value to be blank "".</p>
+
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>

@@ -1,0 +1,368 @@
+<script type="text/javascript">
+    // convert to i18 text
+    function c_(x) {
+        return RED._('unified-red/ur_template:ur_template.' + x);
+    }
+
+    RED.nodes.registerType('ur_template', {
+        category: 'unified-red',
+        color: 'rgb( 63, 173, 181)',
+        defaults: {
+            tab: { type: 'ur_tab', required: true },
+            name: { value: '' },
+            order: { value: 0 },
+            width: { value: 12 },
+            height: { value: 0 },
+            format: {
+                value: `<div feedback="some\/fb\/point" format="{{msg.payload.value}}"><\/div>
+<input feedback="some\/fb\/point" request="some\/rq\/point" format="{{msg.payload.value}}">
+<div class="js-point"><\/div>
+
+<button class="mat-raised-button mat-primary">Send<\/button>
+<script>
+$node.on("update-value", function(evt, data) {
+    $node.find(".js-point").html(data.msg.payload);
+});
+$node.find("button").click(function() {
+    $node.trigger('send', 'some value');
+});
+<\/script>`,
+            },
+            storeOutMessages: { value: true },
+            fwdInMessages: { value: true },
+            resendOnRefresh: { value: true },
+            templateScope: { value: 'local' },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: 'ur_template.png',
+        paletteLabel: 'template',
+        label: function () {
+            return this.name || 'template';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            if (RED.editor.hasOwnProperty('editText') && typeof RED.editor.editText === 'function') {
+                $('#node-template-expand-editor').show();
+            } else {
+                $('#node-template-expand-editor').hide();
+            }
+            var that = this;
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+            });
+
+            if (typeof this.storeOutMessages === 'undefined') {
+                this.storeOutMessages = true;
+                $('#node-input-storeOutMessages').prop('checked', true);
+            }
+
+            if (typeof this.fwdInMessages === 'undefined') {
+                this.fwdInMessages = true;
+                $('#node-input-fwdInMessages').prop('checked', true);
+            }
+
+            if (typeof this.templateScope === 'undefined') {
+                this.templateScope = 'local';
+                $('#node-input-templateScope').val(this.templateScope);
+            }
+
+            $('#node-input-templateScope').on('change', function () {
+                if ($('#node-input-templateScope').val() === 'global') {
+                    $('#template-row-tab, #template-row-size, #template-pass-store').hide();
+                    that._def.defaults.tab.required = false;
+                } else {
+                    $('#template-row-tab, #template-row-size, #template-pass-store').show();
+                    that._def.defaults.tab.required = true;
+                }
+
+                var rows = $('#dialog-form>div:not(.node-text-editor-row)');
+                var height = $('#dialog-form').height();
+                for (var i = 0; i < rows.size(); i++) {
+                    height = height - $(rows[i]).outerHeight(true);
+                }
+                if ($('#node-input-templateScope').val() === 'global') {
+                    height += 240;
+                }
+                var editorRow = $('#dialog-form>div.node-text-editor-row');
+                height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
+                $('.node-text-editor').css('height', height + 'px');
+                if (this.editor) {
+                    this.editor.resize();
+                }
+            });
+
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-format-editor',
+                mode: 'ace/mode/html',
+                value: $('#node-input-format').val(),
+            });
+
+            RED.library.create({
+                url: 'uitemplates', // where to get the data from
+                type: 'ur_template', // the type of object the library is for
+                editor: this.editor, // the field name the main text body goes to
+                mode: 'ace/mode/html',
+                fields: ['name'],
+            });
+
+            this.editor.focus();
+
+            RED.popover.tooltip($('#node-template-expand-editor'), c_('label.expand'));
+
+            $('#node-template-expand-editor').on('click', function (e) {
+                e.preventDefault();
+                var value = that.editor.getValue();
+                RED.editor.editText({
+                    mode: 'html',
+                    value: value,
+                    width: 'Infinity',
+                    cursor: that.editor.getCursorPosition(),
+                    complete: function (v, cursor) {
+                        that.editor.setValue(v, -1);
+                        that.editor.gotoLine(cursor.row + 1, cursor.column, false);
+                        setTimeout(function () {
+                            that.editor.focus();
+                        }, 300);
+                    },
+                });
+            });
+        },
+        oneditsave: function () {
+            var annot = this.editor.getSession().getAnnotations();
+            this.noerr = 0;
+            $('#node-input-noerr').val(0);
+            for (var k = 0; k < annot.length; k++) {
+                if (annot[k].type === 'error') {
+                    $('#node-input-noerr').val(annot.length);
+                    this.noerr = annot.length;
+                }
+            }
+            $('#node-input-format').val(this.editor.getValue());
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function () {
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditresize: function (size) {
+            var rows = $('#dialog-form>div:not(.node-text-editor-row)');
+            var height = $('#dialog-form').height();
+            for (var i = 0; i < rows.size(); i++) {
+                height = height - $(rows[i]).outerHeight(true);
+            }
+            if ($('#node-input-templateScope').val() === 'global') {
+                height += 232;
+            }
+            var editorRow = $('#dialog-form>div.node-text-editor-row');
+            height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
+            $('.node-text-editor').css('height', height + 'px');
+            this.editor.resize();
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_template">
+    <div class="form-row">
+        <label for="node-input-format"><span data-i18n="ur_template.label.type"></span></label>
+        <select style="width:76%" id="node-input-templateScope">
+            <option value="local" data-i18n="ur_template.label.local"></option>
+            <option value="global" data-i18n="ur_template.label.global"></option>
+        </select>
+    </div>
+    <div class="form-row" id="template-row-tab">
+        <label for="node-input-tab"
+            ><i class="fa fa-columns"></i> <span data-i18n="ur_template.label.tab"></span
+        ></label>
+        <input type="text" id="node-input-tab" />
+    </div>
+    <div class="form-row" id="template-row-size">
+        <label><i class="fa fa-object-group"></i> <span data-i18n="ur_template.label.size"></span></label>
+        <input type="hidden" id="node-input-width" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_template.label.name"></span></label>
+        <div style="display:inline-block; width:calc(100% - 105px)">
+            <input type="text" id="node-input-name" />
+        </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-input-format"
+            ><i class="fa fa-copy"></i> <span data-i18n="ur_template.label.template"></span
+        ></label>
+        <input type="hidden" id="node-input-format" />
+        <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small" style="float:right">
+            <i class="fa fa-expand"></i>
+        </button>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height:250px; min-height:100px" class="node-text-editor" id="node-input-format-editor"></div>
+    </div>
+    <div id="template-pass-store">
+        <div class="form-row" style="margin-bottom:0px;">
+            <input
+                type="checkbox"
+                id="node-input-fwdInMessages"
+                style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;"
+            />
+            <label for="node-input-fwdInMessages" style="width:70%;">
+                <span data-i18n="ur_template.label.pass-through"></span
+            ></label>
+        </div>
+        <div class="form-row" style="margin-bottom:0px;">
+            <input
+                type="checkbox"
+                id="node-input-storeOutMessages"
+                style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;"
+            />
+            <label for="node-input-storeOutMessages" style="width:70%;">
+                <span data-i18n="ur_template.label.store-state"></span
+            ></label>
+        </div>
+        <div class="form-row" style="margin-bottom:0px;">
+            <input
+                type="checkbox"
+                id="node-input-resendOnRefresh"
+                style="display:inline-block; margin-left:8px; width:auto; vertical-align:top;"
+            />
+            <label for="node-input-resendOnRefresh" style="width:70%;">
+                <span data-i18n="ur_template.label.resend"></span
+            ></label>
+        </div>
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_template">
+    <p>Creates a user interface element via user-defined HTML and jQuery.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>updates feedback element values in the template</dd>
+    </dl>
+    <dl class="message-properties">
+        <dt>template<span class="property-type">string</span></dt>
+        <dd>updates the template content so you can use external files for example. Template will be reloaded 
+            on input if it has changed. Code written in the Template field will be ignored when 
+            <code>msg.template</code> is present.
+        </dd>
+    </dl>
+    <h3>Details</h3>
+    <p>
+        This node can be used to create a custom user interface element that changes its appearance
+        based on the input message and can send back messages to Node-RED.
+    </p>
+    <p>
+        <b>For example:</b><br>
+        <pre style="font-size:smaller;">&lt;div feedback=&quot;some/fb/point&quot; format=&quot;{{msg.payload.value}}&quot;&gt;&lt;/div&gt;</pre>
+        Will display the <code>msg.payload.value</code> for the topic "some/fb/point". If the format attribute is not specified,
+        <code>{{msg.payload.value}}</code> will be used as the default format.
+    </p>
+    <p>
+        To watch incoming messages and update HTML elements using jQuery:
+        <pre style="font-size:smaller;">&lt;div class=&quot;js-point&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+$node.on(&quot;update-value&quot;, function(evt, data) {
+    $node.find(&quot;.js-point&quot;).html(data.msg.payload);
+});
+&lt;/script&gt;</pre>
+    </p>
+    <p>Templates made in this way can be copied and remain independent of each other.</p>
+    <p>
+        <b>Sending a message:</b><br>
+        <pre style="font-size:smaller;">&lt;input feedback=&quot;some/fb/point&quot; request=&quot;some/rq/point&quot; format=&quot;{{msg.payload.value}}&quot;&gt;
+&lt;button class=&quot;mat-raised-button mat-primary&quot;&gt;Send&lt;/button&gt;
+&lt;script&gt;
+$node.find(&quot;button&quot;).click(function() {
+    $node.trigger(&quot;send&quot;, &quot;Hello world&quot;);
+});
+&lt;/script&gt;</pre>
+        Will display a text input and a button. Changing the value in the text input will send the new value to Node-RED.
+        Clicking the button will send a message <code>'Hello world'</code>.
+    </p>
+    <p>
+        <b>Template Type</b> allows the template code to be inserted into the widget or into the site's HTML head 
+        section. The head section is a container typically used to include styles, scripts, and other meta information 
+        that is not displayed on the page.
+    </p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Template</b> contains HTML and jQuery code to create the user interface.</p>
+    <p>
+        The following icon fonts are available: 
+        <!-- <a href="https://klarsys.github.io/angular-material-icons/" target="_blank">Material Design icon</a> <i>(e.g. 'check', 'close')</i>, or a  -->
+        <a href="https://fontawesome.com/icons" target="_blank">Font Awesome Free 5.3.1 icon</a> <i>(e.g. 'fas fa-fire')</i>
+        <!-- , or a <a href="https://github.com/Paul-Reed/weather-icons-lite/blob/master/css_mappings.md">Weather icon</a>.
+        You can use the full set of google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'. -->
+    </p>
+
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>

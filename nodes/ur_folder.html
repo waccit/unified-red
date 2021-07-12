@@ -1,0 +1,161 @@
+<script type="text/javascript">
+    // convert to i18 text
+    function c_ur_folder(x) {
+        return RED._('unified-red/ur_folder:ur_folder.' + x);
+    }
+
+    RED.nodes.registerType('ur_folder', {
+        category: 'config',
+        defaults: {
+            name: { value: c_ur_folder('label.home') },
+            folder: { type: 'ur_folder', required: false },
+            icon: { value: 'dashboard' },
+            order: { value: 0 },
+            disabled: { value: false },
+            hidden: { value: false },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        paletteLabel: 'dashboard folder',
+        label: function () {
+            if (this.folder) {
+                let parentNode = RED.nodes.node(this.folder);
+                if (parentNode) {
+                    return (
+                        '[' +
+                        (parentNode.name || c_ur_folder('label.folder')) +
+                        '] ' +
+                        (this.name || c_ur_folder('label.folder'))
+                    );
+                }
+            }
+            return this.name || c_ur_folder('label.folder');
+        },
+        sort: function (A, B) {
+            return A.order - B.order;
+        },
+        oneditprepare: function () {
+            $('#node-config-input-disabled-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-disabled').prop('checked', active);
+
+                var newTxt = c_ur_folder(active ? 'label.disabled' : 'label.enabled');
+                $('#node-config-input-disabled-label').text(newTxt);
+
+                var info = $('#node-config-input-disabled-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.disabled) {
+                $('#node-config-input-disabled-btn').click();
+            } else {
+                $('#node-config-input-disabled-label').text(c_ur_folder('label.enabled'));
+            }
+
+            $('#node-config-input-hidden-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-hidden').prop('checked', active);
+
+                var newTxt = c_ur_folder(active ? 'label.hidden' : 'label.visible');
+                $('#node-config-input-hidden-label').text(newTxt);
+
+                var info = $('#node-config-input-hidden-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (this.hidden) {
+                $('#node-config-input-hidden-btn').click();
+            } else {
+                $('#node-config-input-hidden-label').text(c_ur_folder('label.visible'));
+            }
+        },
+        oneditsave: function () {
+            this.disabled = $('#node-config-input-disabled').prop('checked');
+            this.hidden = $('#node-config-input-hidden').prop('checked');
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_folder">
+    <div class="form-row">
+        <label for="node-config-input-name"
+            ><i class="fa fa-tag"></i> <span data-i18n="ur_folder.label.name"></span
+        ></label>
+        <input type="text" id="node-config-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-icon"
+            ><i class="fa fa-file-image-o"></i> <span data-i18n="ur_folder.label.icon"></span
+        ></label>
+        <input type="text" id="node-config-input-icon" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-disabled-btn"
+            ><i class="fa fa-ban"></i> <span data-i18n="ur_folder.label.state"></span
+        ></label>
+        <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-disabled" style="display:none;" />
+        <span
+            id="node-config-input-disabled-info"
+            data-i18n="[html]ur_folder.info.disabled"
+            style="display:none;"
+        ></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-hidden-btn"
+            ><i class="fa fa-eye-slash"></i> <span data-i18n="ur_folder.label.navmenu"></span
+        ></label>
+        <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-hidden" style="display:none;" />
+        <span id="node-config-input-hidden-info" data-i18n="[html]ur_folder.info.hidden" style="display:none;"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-config-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-config-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+    <div class="form-tips" data-i18n="[html]ur_folder.tip"></div>
+</script>
+
+<script type="text/html" data-help-name="ur_folder">
+    <p>Folder configuration for Unified-RED</p>
+    <p>
+        Configures a folder in the menu to serve as <em>directory</em> level node in the menu tree. May contain other
+        folders or pages.
+    </p>
+    <p>
+        <b>Disabled</b> folders are not included in the Unified-RED app, and are therefore not functional. The folder
+        name still appears in the Navigation Menu (unless it is also hidden).
+    </p>
+    <p>
+        <b>Hidden</b> folders are not listed in the Left-hand Navigation Menu. However, they are still active in
+        Unified-RED.
+    </p>
+    <p>
+        The <b>Icon</b> field accpets <a href="https://themify.me/themify-icons" target="_blank">Themify icons</a>.
+        (e.g. 'check', 'close') <em>without</em> the "ti-" prefix.
+    </p>
+</script>

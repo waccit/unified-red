@@ -4,16 +4,16 @@
         <li role="presentation">
             <a href="#skins" data-toggle="tab" class="active">SKINS</a>
         </li>
-        <li role="presentation">
+        <li role="presentation" *ngIf="showSettings">
             <a href="#settings" data-toggle="tab">SETTINGS</a>
         </li>
     </ul>
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane in active in active stretchLeft" id="skins">
+        <div role="tabpanel" class="tab-pane in active in active" id="skins">
             <div class="demo-skin"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
-                <div class="rightSetting">
+                <!-- <div class="rightSetting">
                     <p>GENERAL SETTINGS</p>
                     <ul class="setting-list list-unstyled m-t-20">
                         <li>
@@ -69,19 +69,19 @@
                             </div>
                         </li>
                     </ul>
-                </div>
+                </div> -->
                 <div class="rightSetting">
                     <p>SIDEBAR MENU COLORS</p>
-                    <mat-button-toggle-group class="mt-2" value="light">
-                        <mat-button-toggle (click)="lightSidebarBtnClick()" value="light">Light</mat-button-toggle>
-                        <mat-button-toggle (click)="darkSidebarBtnClick()" value="dark">Dark</mat-button-toggle>
+                    <mat-button-toggle-group class="mt-2" [value]="menuOption">
+                        <mat-button-toggle (click)="lightSidebar()" value="menu_light">Light</mat-button-toggle>
+                        <mat-button-toggle (click)="darkSidebar()" value="menu_dark">Dark</mat-button-toggle>
                     </mat-button-toggle-group>
                 </div>
                 <div class="rightSetting">
                     <p>THEME COLORS</p>
-                    <mat-button-toggle-group class="mt-2" value="light">
-                        <mat-button-toggle (click)="lightThemeBtnClick()" value="light">Light</mat-button-toggle>
-                        <mat-button-toggle (click)="darkThemeBtnClick()" value="dark">Dark</mat-button-toggle>
+                    <mat-button-toggle-group class="mt-2" [value]="theme">
+                        <mat-button-toggle (click)="lightTheme()" value="light">Light</mat-button-toggle>
+                        <mat-button-toggle (click)="darkTheme()" value="dark">Dark</mat-button-toggle>
                     </mat-button-toggle-group>
                 </div>
                 <div class="rightSetting">
@@ -117,7 +117,7 @@
                         </li>
                     </ul>
                 </div>
-                <div class="rightSetting">
+                <!-- <div class="rightSetting">
                     <p>Disk Space</p>
                     <div class="sidebar-progress">
                         <div class="progress m-t-20">
@@ -140,41 +140,27 @@
                             <small>Highly Loaded</small>
                         </span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane stretchRight" id="settings">
+        <div role="tabpanel" class="tab-pane" id="settings"  *ngIf="showSettings">
             <div class="demo-settings"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
-                <p>GENERAL SETTINGS</p>
-
-                <ul class="setting-list">
-                    <li>
-                        <mat-slide-toggle checked>Report Panel Usage</mat-slide-toggle>
-                    </li>
-                    <li>
-                        <mat-slide-toggle>Email Redirect</mat-slide-toggle>
-                    </li>
-                </ul>
-                <p>SYSTEM SETTINGS</p>
-                <ul class="setting-list">
-                    <li>
-                        <mat-slide-toggle>Notifications</mat-slide-toggle>
-                    </li>
-                    <li>
-                        <mat-slide-toggle checked>Auto Updates</mat-slide-toggle>
-                    </li>
-                </ul>
                 <p>ACCOUNT SETTINGS</p>
-                <ul class="setting-list">
-                    <li>
-                        <mat-slide-toggle>Offline</mat-slide-toggle>
-                    </li>
-                    <li>
-                        <mat-slide-toggle checked>Location Permission</mat-slide-toggle>
-                    </li>
-                </ul>
+                <div class="body">
+                    <div class="list-group m-t-20">
+                        <!-- <a href="#" onClick="return false;" class="list-group-item active">
+                            Cras justo odio
+                        </a> -->
+                        <a class="list-group-item" routerLink="/users/view" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Management</a>
+                        <a class="list-group-item" routerLink="/users/roles" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Roles</a>
+                        <!-- <a href="#" onClick="return false;" class="list-group-item">Dapibus ac facilisis in</a>
+                        <a href="#" onClick="return false;" class="list-group-item">Morbi leo risus</a>
+                        <a href="#" onClick="return false;" class="list-group-item">Porta ac consectetur ac</a>
+                        <a href="#" onClick="return false;" class="list-group-item">Vestibulum at eros</a> -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>

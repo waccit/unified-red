@@ -1,0 +1,65 @@
+<div #container>
+    <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
+        <div class="example-container">
+            <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
+            <div *ngFor="let field of data.options">
+                <mat-form-field class="example-full-width healthIndicator" appearance="outline"
+                    *ngIf="field.type !== 'multiline' && field.type !== 'checkbox' && field.type !== 'select' && field.type !== 'switch'">
+                    <span [title]="field.intopic" hidden></span> <!-- health -->
+                    <mat-label>{{ field.label }}</mat-label>
+                    <span matPrefix *ngIf="field.type === 'email'">
+                        <mat-icon class="mr-2">email</mat-icon>
+                    </span>
+                    <input matInput [type]="field.type"
+                        [value]="access.read ? precision(stripHTML(data.formValue[field.topic]), field.options.precision) : ''"
+                        [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                        (change)="valueChange(field.topic, $event.target.value, field.type)" />
+                    <span matSuffix *ngIf="field.options.units">{{ field.options.units }}</span>
+                </mat-form-field>
+
+                <mat-form-field class="example-full-width healthIndicator" appearance="outline" *ngIf="field.type === 'multiline'">
+                    <span [title]="field.intopic" hidden></span> <!-- health -->
+                    <mat-label>{{ field.label }}</mat-label>
+                    <textarea matInput [rows]="field.options.rows"
+                        [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
+                        [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                        (change)="valueChange(field.topic, $event.target.value, field.type)"></textarea>
+                </mat-form-field>
+
+                <mat-form-field class="example-full-width healthIndicator" appearance="outline" *ngIf="field.type === 'select'">
+                    <span [title]="field.intopic" hidden></span> <!-- health -->
+                    <mat-label>{{ field.label }}</mat-label>
+                    <select matNativeControl
+                        [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                        (change)="valueChange(field.topic, $event.target.value, field.type)">
+                        <option *ngFor="let opt of field.options | keyvalue" [value]="opt.value || opt.key" 
+                            [selected]="access.read && (opt.value || opt.key) === stripHTML(data.formValue[field.topic])">
+                            {{ opt.key }}</option>
+                    </select>
+                </mat-form-field>
+
+                <mat-checkbox *ngIf="field.type === 'checkbox'"
+                    [checked]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
+                    [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                    (change)="valueChange(field.topic, $event.checked)" class="example-margin mb-3"
+                    color="primary">{{ field.label }}</mat-checkbox>
+
+                <mat-slide-toggle *ngIf="field.type === 'switch'"
+                    [checked]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
+                    [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                    (change)="valueChange(field.topic, $event.checked)" class="example-margin mb-3"
+                    color="primary">{{ field.label }}</mat-slide-toggle>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="example-button-row">
+                    <button mat-raised-button color="primary" (click)="submit()"
+                        [disabled]="!access.write && data.accessBehavior === 'disable'">{{ data.submit }}</button>
+                    <button mat-raised-button color="warn" (click)="reset()" *ngIf="data.cancel"
+                        [disabled]="!access.write && data.accessBehavior === 'disable'">{{ data.cancel }}</button>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+</div>

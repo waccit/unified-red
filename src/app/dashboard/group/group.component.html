@@ -1,0 +1,50 @@
+<div class="card">
+    <div class="overlay overlay-card" *ngIf="this.disabled"></div>
+    <div class="header" style="padding-bottom: 0" *ngIf="displayHeader">
+        <h2>{{ header }}</h2>
+        <!-- <ul class="header-dropdown m-r--5">
+            <li class="dropdown">
+                <a
+                    href="#"
+                    onClick="return false;"
+                    data-toggle="dropdown"
+                    role="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                >
+                    <i class="material-icons">more_vert</i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li>
+                        <a href="#" onClick="return false;">Action</a>
+                    </li>
+                    <li>
+                        <a href="#" onClick="return false;">Another action</a>
+                    </li>
+                    <li>
+                        <a href="#" onClick="return false;">Something else here</a>
+                    </li>
+                </ul>
+            </li>
+        </ul> -->
+    </div>
+    <div class="body">
+        <div [class.row]="tabs.length === 1">
+            <ng-container>
+                <div class="overlay overlay-card" *ngIf="!this.disabled && tabs.length === 1 && tabs[0].disabled"></div>
+                <ng-template group-host></ng-template>
+            </ng-container>
+            <mat-tab-group *ngIf="tabs.length > 1">
+                <mat-tab *ngFor="let tab of tabs" label="{{ tab.header }}">
+                    <ng-template matTabContent>
+                        <div class="overlay" *ngIf="tab.disabled && !this.disabled"></div>
+                        <ng-container *ngIf="!tab.hidden">
+                            <app-tab [widgets]="tab.widgets"></app-tab>
+                        </ng-container>
+                    </ng-template>
+                </mat-tab>
+                <!-- <ng-template group-host></ng-template> -->
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

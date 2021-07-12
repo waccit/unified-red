@@ -1,0 +1,464 @@
+<script type="text/javascript">
+    (function () {
+        // convert to i18 text
+        function c_(x) {
+            return RED._('unified-red/ur_schedule:ur_schedule.' + x);
+        }
+
+        RED.nodes.registerType('ur_schedule', {
+            category: 'unified-red',
+            color: '#b39ddb',
+            defaults: {
+                tab: { type: 'ur_tab', required: true },
+                order: { value: 0 },
+                width: { value: 12 },
+                holidays: { type: 'ur_schedule_holidays_config', required: true },
+                name: { value: '' },
+                topic: { value: '', required: true },
+                values: [],
+                weekdays: [],
+                dates: [],
+                topicPattern: { value: '' },
+                access: { value: '' },
+                accessBehavior: { value: '' },
+            },
+            inputs: 0,
+            outputs: 1,
+            align: 'left',
+            icon: 'font-awesome/fa-calendar',
+            paletteLabel: 'schedule',
+            label: function () {
+                return this.name || 'schedule';
+            },
+            labelStyle: function () {
+                return this.name ? 'node_label_italic' : '';
+            },
+            oneditprepare: function () {
+                let node = this;
+                if (this.values == null) {
+                    this.values = [
+                        { name: 'On', value: 1 },
+                        { name: 'Off', value: 0 },
+                    ];
+                }
+                if (this.weekdays == null) {
+                    this.weekdays = [
+                        /* { weekday:0, value: "On", hour: 12, minute: 0 }, { weekday:0, value: "Off", hour: 14, minute: 0 } */
+                    ];
+                }
+                if (this.dates == null) {
+                    this.dates = [
+                        /* { date:"06/29", value: "On", hour: 12, minute: 0 }, { date:"06/29", value: "Off", hour: 14, minute: 0 } */
+                    ];
+                }
+                $('#node-input-size').elementSizer({
+                    width: '#node-input-width',
+                });
+
+                $('#node-input-value-container')
+                    .css('min-height', '160px')
+                    .css('min-width', '450px')
+                    .editableList({
+                        addItem: function (container, i, opt) {
+                            if (!opt.hasOwnProperty('value')) {
+                                opt.value = {};
+                            }
+                            var value = opt.value;
+                            container.css({
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                            });
+                            var row = $('<div/>').appendTo(container);
+                            // name field
+                            $('<input/>', {
+                                class: 'node-input-value-name',
+                                type: 'text',
+                                placeholder: 'name',
+                                style: 'margin-left: 5px; width: 48%;',
+                            })
+                                .appendTo(row)
+                                .val(value.name);
+                            // value field
+                            $('<input/>', {
+                                class: 'node-input-value-value',
+                                type: 'text',
+                                placeholder: 'value',
+                                style: 'margin-left: 5px; width: 48%;',
+                            })
+                                .appendTo(row)
+                                .val(value.value);
+                        },
+                        sortable: true,
+                        removable: true,
+                    });
+
+                $('#node-input-weekday-container')
+                    .css('min-height', '260px')
+                    .css('min-width', '450px')
+                    .editableList({
+                        addItem: function (container, i, opt) {
+                            if (!opt.hasOwnProperty('event')) {
+                                opt.event = {};
+                            }
+                            var event = opt.event;
+                            container.css({
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                            });
+                            var row = $('<div/>').appendTo(container);
+                            // weekday field
+                            var weekdays = [
+                                'Sunday',
+                                'Monday',
+                                'Tuesday',
+                                'Wednesday',
+                                'Thursday',
+                                'Friday',
+                                'Saturday',
+                            ];
+                            var weekdayField = $('<select/>', {
+                                class: 'node-input-weekday-weekday',
+                                style: 'margin-left: 5px; width: 32%;',
+                            }).appendTo(row);
+                            for (let i in weekdays) {
+                                $('<option>').val(i).text(weekdays[i]).appendTo(weekdayField);
+                            }
+                            weekdayField.val(event.weekday);
+                            // value field
+                            var valueField = $('<select/>', {
+                                class: 'node-input-weekday-value',
+                                style: 'margin-left: 5px; width: 33%;',
+                            }).appendTo(row);
+                            for (let v of node.values) {
+                                $('<option>')
+                                    .val(v.value)
+                                    .text(v.name)
+                                    .prop('selected', v.name == event.value)
+                                    .appendTo(valueField);
+                            }
+                            // hour field
+                            var hourField = $('<select/>', {
+                                class: 'node-input-weekday-hour',
+                                style: 'margin-left: 5px; width: 15%;',
+                            }).appendTo(row);
+                            for (let i = 0; i < 24; i++) {
+                                $('<option>').val(i).text(i).appendTo(hourField);
+                            }
+                            hourField.val(event.hour);
+                            // minute field
+                            var minuteField = $('<select/>', {
+                                class: 'node-input-weekday-minute',
+                                style: 'margin-left: 5px; width: 15%;',
+                            }).appendTo(row);
+                            for (let i = 0; i < 60; i++) {
+                                $('<option>')
+                                    .val(i)
+                                    .text(i < 10 ? '0' + i : i)
+                                    .appendTo(minuteField);
+                            }
+                            minuteField.val(event.minute);
+                        },
+                        sortable: true,
+                        removable: true,
+                    });
+
+                $('#node-input-date-container')
+                    .css('min-height', '260px')
+                    .css('min-width', '450px')
+                    .editableList({
+                        addItem: function (container, i, opt) {
+                            if (!opt.hasOwnProperty('event')) {
+                                opt.event = {};
+                            }
+                            var event = opt.event;
+                            container.css({
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                            });
+                            var row = $('<div/>').appendTo(container);
+                            // date field
+                            $('<input/>', {
+                                class: 'node-input-date-date',
+                                type: 'text',
+                                placeholder: 'Date (mm/dd)',
+                                style: 'margin-left: 5px; width: 32%;',
+                            })
+                                .appendTo(row)
+                                .val(event.date);
+                            // value field
+                            var valueField = $('<select/>', {
+                                class: 'node-input-date-value',
+                                style: 'margin-left: 5px; width: 33%;',
+                            }).appendTo(row);
+                            for (let v of node.values) {
+                                $('<option>')
+                                    .val(v.value)
+                                    .text(v.name)
+                                    .prop('selected', v.name == event.value)
+                                    .appendTo(valueField);
+                            }
+                            // hour field
+                            var hourField = $('<select/>', {
+                                class: 'node-input-date-hour',
+                                style: 'margin-left: 5px; width: 15%;',
+                            }).appendTo(row);
+                            for (let i = 0; i < 24; i++) {
+                                $('<option>').val(i).text(i).appendTo(hourField);
+                            }
+                            hourField.val(event.hour);
+                            // minute field
+                            var minuteField = $('<select/>', {
+                                class: 'node-input-date-minute',
+                                style: 'margin-left: 5px; width: 15%;',
+                            }).appendTo(row);
+                            for (let i = 0; i < 60; i++) {
+                                $('<option>')
+                                    .val(i)
+                                    .text(i < 10 ? '0' + i : i)
+                                    .appendTo(minuteField);
+                            }
+                            minuteField.val(event.minute);
+                        },
+                        sortable: true,
+                        removable: true,
+                    });
+
+                if (this.values && this.values.length) {
+                    for (let value of this.values) {
+                        $('#node-input-value-container').editableList('addItem', { value: value });
+                    }
+                }
+                if (this.weekdays && this.weekdays.length) {
+                    for (let weekday of this.weekdays) {
+                        $('#node-input-weekday-container').editableList('addItem', { event: weekday });
+                    }
+                }
+                if (this.dates && this.dates.length) {
+                    for (let date of this.dates) {
+                        $('#node-input-date-container').editableList('addItem', { event: date });
+                    }
+                }
+            },
+            oneditsave: function () {
+                let node = this;
+                // store values from editable list
+                let values = $('#node-input-value-container').editableList('items');
+                node.values = [];
+                values.each(function (i) {
+                    let container = $(this);
+                    let value = {
+                        name: container.find('.node-input-value-name').val(),
+                        value: container.find('.node-input-value-value').val(),
+                    };
+                    node.values.push(value);
+                });
+
+                // store weekdays from editable list
+                let weekdays = $('#node-input-weekday-container').editableList('items');
+                node.weekdays = [];
+                weekdays.each(function (i) {
+                    let container = $(this);
+                    let event = {
+                        weekday: container.find('.node-input-weekday-weekday').val(),
+                        value: container.find('.node-input-weekday-value option:selected').text(),
+                        hour: container.find('.node-input-weekday-hour').val(),
+                        minute: container.find('.node-input-weekday-minute').val(),
+                    };
+                    node.weekdays.push(event);
+                });
+
+                // store dates from editable list
+                let dates = $('#node-input-date-container').editableList('items');
+                node.dates = [];
+                dates.each(function (i) {
+                    let container = $(this);
+                    let event = {
+                        date: container.find('.node-input-date-date').val(),
+                        value: container.find('.node-input-date-value option:selected').text(),
+                        hour: container.find('.node-input-date-hour').val(),
+                        minute: container.find('.node-input-date-minute').val(),
+                    };
+                    node.dates.push(event);
+                });
+            },
+        });
+    })();
+</script>
+
+<script type="text/html" data-template-name="ur_schedule">
+    <div class="form-row">
+        <label for="node-input-tab"
+            ><i class="fa fa-columns"></i> <span data-i18n="ur_schedule.label.tab"></span
+        ></label>
+        <input type="text" id="node-input-tab" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> <span data-i18n="ur_schedule.label.size"></span></label>
+        <input type="hidden" id="node-input-width" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_schedule.label.name"></span></label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"
+            ><i class="fa fa-tasks"></i> <span data-i18n="ur_schedule.label.topic"></span
+        ></label>
+        <input type="text" id="node-input-topic" />
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-input-value-container"
+            ><i class="fa fa-list"></i> <span data-i18n="ur_schedule.label.values"></span
+        ></label>
+    </div>
+    <div class="form-row node-input-value-container-row">
+        <ol id="node-input-value-container"></ol>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-input-weekday-container"
+            ><i class="fa fa-clock-o"></i> <span data-i18n="ur_schedule.label.weekdays"></span
+        ></label>
+    </div>
+    <div class="form-row node-input-weekday-container-row">
+        <ol id="node-input-weekday-container"></ol>
+    </div>
+    <div class="form-row" style="margin-bottom:0px;">
+        <label for="node-input-date-container"
+            ><i class="fa fa-clock-o"></i> <span data-i18n="ur_schedule.label.dates"></span
+        ></label>
+    </div>
+    <div class="form-row node-input-date-container-row">
+        <ol id="node-input-date-container"></ol>
+    </div>
+    <div class="form-row">
+        <label for="node-input-holidays"
+            ><i class="fa fa-sun-o"></i> <span data-i18n="ur_schedule.label.holidays"></span
+        ></label>
+        <input type="text" id="node-input-holidays" />
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_schedule">
+    <p>Time-of-day event schedule</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object</span></dt>
+        <dd>event value</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>Fires messages based on the provided calendar events and provides a calendar user interface in Unified-RED.</p>
+    <p>
+        Three types of schedules are support:
+        <ul>
+            <li><b>Weekday</b> schedules provide a 7-day weekly schedule.</li>
+            <li>
+                <b>Date</b> schedules allow you to schedule an event for a fixed date and will override any weekday
+                schedules that occur on the same day.
+            </li>
+            <li>
+                <b>Holiday</b> schedules allow you schedule recurring events and will override any weekday or date
+                schedules that occur on the same day. These events can repeat, weekly, monthly, or annually depending
+                on their configuration.
+            </li>
+        </ul>
+    </p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Topic</b> is added to the message as <code>msg.topic</code>.</p>
+    <p>
+        <b>Values</b> is a list of possible commands that can be sent when a scheduled event is fired.
+        Each consisting of: 
+        <ol>
+            <li><b>Name</b>: Description of the value, e.g. <i>Off</i> or <i>On</i></li>
+            <li><b>Value</b>: Text or numeric value to be sent, e.g. <i>0</i> or <i>1</i></li>
+        </ol>
+    </p>
+    <p>
+        <b>Weekdays</b> is a list of weekly events and the time and value to be fired. Each consisting of: 
+        <ol>
+            <li><b>Weekday</b>: Sunday through Saturday</li>
+            <li><b>Value</b>: Value to be sent, e.g. <i>Off</i></li>
+            <li><b>Hour</b>: Hour event should fire, e.g. <i>0</i> (midnight)</li>
+            <li><b>Minute</b>: Minute event should fire, e.g. <i>0</i></li>
+        </ol>
+    </p>
+    <p>
+        <b>Dates</b> is a list of date events and the time and value to be fired overriding any weekday
+        schedules that occur on the same day. Each consisting of: 
+        <ol>
+            <li><b>Date</b>: Day and month using mm/dd format, e.g. <i>06/01</i> for June 1st</li>
+            <li><b>Value</b>: Value to be sent, e.g. <i>Off</i></li>
+            <li><b>Hour</b>: Hour event should fire, e.g. <i>0</i> (midnight)</li>
+            <li><b>Minute</b>: Minute event should fire, e.g. <i>0</i></li>
+        </ol>
+    </p>
+    <p><b>Holidays</b> references a holiday configuration for holiday schedules to observe.</p>
+ 
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+    
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>
+    

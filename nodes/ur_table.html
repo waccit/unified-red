@@ -1,0 +1,402 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_table', {
+        category: 'unified-red',
+        color: 'rgb(63, 173, 181)',
+        defaults: {
+            tab: { type: 'ur_tab', required: true },
+            name: { value: '' },
+            order: { value: 0 },
+            width: {
+                value: 0,
+            },
+            height: { value: 0 },
+            label: { value: '' },
+            fields: {
+                value: [
+                    {
+                        label: '',
+                        format: '',
+                        formatType: '',
+                        device: '',
+                        deviceType: '',
+                        param: '',
+                        unit: '',
+                        unitType: '',
+                    },
+                ],
+            },
+            cts: { value: false },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: 'font-awesome/fa-table',
+        paletteLabel: 'table',
+        label: function () {
+            return this.name || 'table';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            if (RED.nodes.getType('ur_tab')) {
+                $('.form-tips').hide();
+            } else {
+                $('.form-row').hide();
+            }
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+            });
+            $('#node-input-field-container')
+                .css('min-height', '200px')
+                .css('min-width', '860px')
+                .editableList({
+                    header: $(`<div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:7px; padding-bottom:3px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
+                            <div style="width:94%; display:inline-block; margin-left:27px">
+                                <div style="width:20%; text-align:center; float:left;">Label</div>
+                                <div style="width:65px; text-align:center; float:left; margin-left:5px">Type</div>
+                                <div style="width:36.5%; text-align:center; float:left;">Text Format / Link</div>
+                                <div style="width:16%; text-align:center; float:left; margin-left:5px">Device Filter</div>
+                                <div style="width:17%; text-align:center; float:left; margin-left:5px">Parameter Filter</div>
+                            </div>
+                        </div>`),
+                    addItem: function (container, index, opt) {
+                        if (!opt.hasOwnProperty('field')) {
+                            opt.field = {};
+                        }
+                        var field = opt.field;
+                        if (!field.hasOwnProperty('prop')) {
+                            field.prop = 'vis';
+                        }
+                        container.css({
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                        });
+                        var row = $('<div/>').appendTo(container);
+                        //label input
+                        $('<input/>', {
+                            class: 'node-input-field-label',
+                            type: 'text',
+                            placeholder: 'label',
+                            style: 'margin-left: 5px; width: 20%;',
+                        })
+                            .appendTo(row)
+                            .val(field.label);
+
+                        //format type
+                        let formatTypeSelect = $('<select/>', {
+                            class: 'node-input-field-formatType',
+                            style: 'margin-left: 5px; width: 65px;'
+                        })
+                            .append(
+                                $('<option>', { value: 'text' }).text('Text'),
+                                $('<option>', { value: 'link' }).text('Link') )
+                            .appendTo(row);
+
+                        let textFormatSection = $('<div>', { 
+                            style: 'width: 36.5%; display: inline-flex',
+                        }).appendTo(row);
+
+                        //format text
+                        let formatTextInput = $('<input/>', {
+                            class: 'node-input-field-format-text',
+                            type: 'text',
+                            style: 'margin-left: 5px; width: 63%;',
+                            placeholder: '{{msg.payload.value}}'
+                        })
+                            .appendTo(textFormatSection)
+                            .val(field.format)
+                            .change();
+
+                        // Units select
+                        var optionAuto = { value: 'nothing', label: 'payload.units', hasValue: false };
+                        var optionManual = { value: 'unit', label: 'Manual', hasValue: true };
+                        $('<input/>', {
+                            class: 'node-input-field-unit',
+                            type: 'text',
+                            style: 'margin-left: 5px; width: 36%;',
+                        })
+                            .appendTo(textFormatSection)
+                            .val(field.unit)
+                            .change()
+                            .typedInput({
+                                default: field.unitType,
+                                typeField: $('<input/>', { class: '.node-input-field-unitType', type: 'hidden' }),
+                                types: [optionAuto, optionManual],
+                            });
+
+                        //format link
+                        let formatLinkSelect = $('<select/>', {
+                            class: 'node-input-field-format-link',
+                            style: 'margin-left: 5px; width: 36%; display: none',
+                        }).appendTo(row);
+                        getUrPages(formatLinkSelect, field.format);
+
+                        formatTypeSelect.on('change', () => {
+                            if (formatTypeSelect.val() === 'link') {
+                                textFormatSection.hide();
+                                formatLinkSelect.show();
+                            }
+                            else {
+                                formatLinkSelect.hide();
+                                textFormatSection.show();
+                            }
+                        })
+                            .val(field.formatType || 'text').change();
+
+                        //Regex Select
+                        var optionSSIoT = { value: 'webApp', label: 'SmartServer IoT', hasValue: false };
+                        var optionCustom = { value: 'custom', label: 'Custom', hasValue: true };
+                        $('<input/>', {
+                            class: 'node-input-field-device',
+                            type: 'text',
+                            style: 'margin-left: 5px; width: 16%;',
+                        })
+                            .appendTo(row)
+                            .val(field.device)
+                            .change()
+                            .typedInput({
+                                default: field.deviceType,
+                                typeField: $('<input/>', { class: '.node-input-field-deviceType', type: 'hidden' }),
+                                types: [optionSSIoT, optionCustom],
+                            });
+                        //param input
+                        $('<input/>', {
+                            class: 'node-input-field-param',
+                            type: 'text',
+                            placeholder: 'param filter',
+                            style: 'margin-left: 5px; width: 17%;',
+                        })
+                            .appendTo(row)
+                            .val(field.param);
+                    },
+                    sortable: true,
+                    removable: true,
+                    addButton: true,
+                });
+            for (let i = 0; i < this.fields.length; i++) {
+                $('#node-input-field-container').editableList('addItem', { field: this.fields[i] });
+            }
+        },
+        oneditsave: function () {
+            let fields = $('#node-input-field-container').editableList('items');
+            let node = this;
+            node.fields = [];
+            fields.each(function (i) {
+                let container = $(this);
+                let formatType = container.find('.node-input-field-formatType').val();
+                let c = {
+                    label: container.find('.node-input-field-label').val(),
+                    format: container.find('.node-input-field-format-' + formatType).val(),
+                    formatType: formatType,
+                    deviceType: container.find('.node-input-field-device').typedInput('type'),
+                    device: container.find('.node-input-field-device').val(),
+                    param: container.find('.node-input-field-param').val(),
+                    unitType: container.find('.node-input-field-unit').typedInput('type'),
+                    unit: container.find('.node-input-field-unit').val(),
+                };
+                node.fields.push(c);
+            });
+            //check for pivot
+            $('#node-input-cts').is(':checked') ? (this.pivot = 1) : (this.pivot = 0);
+        },
+        oneditresize: function (size) {
+            var rows = $('#dialog-form>div:not(.node-input-field-container-row)');
+            var height = size.height;
+            for (var i = 0; i < rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $('#dialog-form>div.node-input-field-container-row');
+            height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
+
+            $('#node-input-field-container').editableList('height', height);
+        },
+    });
+
+    function getUrPages(select, value) {
+        var node_def = RED.nodes.getType('ur_page');
+        select.children().remove();
+
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
+
+        var configNodes = [];
+        RED.nodes.eachConfig(function(config) {
+            if (config.type == 'ur_page' && (!config.z || config.z === activeWorkspace.id)) {
+                var label = RED.utils.getNodeLabel(config,config.id);
+                config.__label__ = label+(config.d?" ["+RED._("workspace.disabled")+"]":"");
+                configNodes.push(config);
+            }
+        });
+        try {
+            configNodes.sort(function(A,B) {
+                if (A.__label__ < B.__label__) {
+                    return -1;
+                } else if (A.__label__ > B.__label__) {
+                    return 1;
+                }
+                return 0;
+            });
+        } catch(ignore) {}
+        configNodes.forEach(function(cn) {
+            $('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'></option>').text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__)).appendTo(select);
+            delete cn.__label__;
+        });
+        window.setTimeout(function() { select.trigger("change");},50);
+    }
+</script>
+
+<script type="text/html" data-template-name="ur_table">
+    <div class='form-row' id='table-row-tab'>
+        <label for='node-input-tab'>
+            <i class='fa fa-columns'></i> Tab</span>
+        </label>
+        <input type='text' id='node-input-tab'>
+    </div>
+    <div class="form-row" id="table-row-size">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class='form-row'>
+        <label for='node-input-name'><i class='fa fa-tag'></i> <span data-i18n='node-red:common.label.name'></span></label>
+        <input type='text' id='node-input-name' data-i18n='[placeholder]node-red:common.label.name'>
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional table title" />
+    </div>
+    <div class="form-row node-input-field-container-row">
+        <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Fields</label>
+        <span style="float:right">
+            <span data-i18n='table.label.send'>Pivot Table </span><input type="checkbox" id="node-input-cts" style="display:inline-block; width:auto; vertical-align:top;">
+        </span>
+
+        <div class="form-row node-input-field-container-row">
+            <ol id="node-input-field-container"></ol>
+        </div>
+        <!-- <ol id="node-input-field-container"></ol> -->
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+         </select>
+         <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+         </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_table">
+    <p>Adds a table to the user interface.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">any</span></dt>
+        <dd>updates a table cell value</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic associated with a table cell</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>Display the payloads of multiple messages with different topics in a table format.</p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p><b>Label</b> is the table title text.</p>
+    <p><b>Fields</b> define the data columns to display. Selecting <b>Pivot Table</b> allows fields to be displayed as rows.</p>
+    <p>Each field contains following components:</p>
+    <ul>
+        <li><b>Label</b> : Field header label.</li>
+        <li><b>Value Type</b> : The type of value to be displayed - <b>Text</b> or <b>Link</b></li>
+        <li>
+            <b>Text Format</b> : Formats the text value to be displayed. Units of measurement can be automatically appended to the value 
+            if they are included in <code>msg.payload.units</code> or can be manually set.</li>
+        </li>
+        <li><b>Link</b> : Navigates the user to the selected page when the hyperlink is clicked.</li>
+        <li>
+            <b>Device Filter</b> : Used to generate rows (or columns when pivoted) based on the messages received. Setting to 
+            <code>SmartServer IoT</code> will detect devices using the SmartServer IoT IAP topic schema. <code>Custom</code> allows you 
+            to provide a regular expresison that will be applied to incoming messages. When providing a custom regular expression, two 
+            <i>capture groups</i> should be provided. Group 1 should be a unique segment of the message topic that represents the device
+            name or instance. Similarly, group 2 should indicate the data point segment within the topic.
+            Group 2 is used by <b>Parameter Filter</b>.
+        </li>
+        <li><b>Parameter Filter</b> : The data point name (or a portion of it) used to map the data point to a cell.</li>
+    </ul>
+
+    <p>
+        <b>Text Format</b> is a 
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a> used to evaluate the value displayed.
+        Additionally, JavaScript can be used to perform operations on the value, for example using 
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#binary_logical_operators" target="_blank">boolean</a>
+        (||, &&) and
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#arithmetic_operators" target="_blank">arithmetic</a>
+        operators (+, -, *, /) as well as standard built-in objects
+        (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math" target="_blank">Math</a> functions,
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a> functions,
+        etc):
+        <pre style="font-size:smaller;">1 + {{msg.payload.value}} / 100
+Math.floor({{msg.payload.value}} * 100)
+interpolate({{msg.payload.value}},0,100,1,10)</pre>
+        Values can also be mapped to text enumerations by providing a JSON object, for example:
+        <pre style="font-size:smaller;">{{msg.payload.value | enum: '0:Off, 1:Cooling, 2:Fan Only, 3:Heating'}}</pre>
+    </p>
+
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>

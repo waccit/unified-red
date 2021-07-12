@@ -1,0 +1,24 @@
+{
+    "ur_group": {
+        "label": {
+            "name": "Name",
+            "folder": "Folder",
+            "page": "Page",
+            "width": "Width",
+            "widthLg": "lg",
+            "widthMd": "md",
+            "widthSm": "sm",
+            "default": "Default",
+            "group": "Group",
+            "unassigned": "unassigned",
+            "state": "State",
+            "navmenu": "Nav. Menu",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "visible": "Visible",
+            "hidden": "Hidden"
+        },
+        "display-name": "Display group name",
+        "collapse-name": "Allow group to be collapsed"
+    }
+}

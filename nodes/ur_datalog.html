@@ -1,0 +1,93 @@
+<script type="text/javascript">
+    (function () {
+        RED.nodes.registerType('ur_datalog', {
+            category: 'unified-red',
+            color: '#81c784',
+            defaults: {
+                name: { value: "" },
+                format: { value: 'msg.payload.value' },
+                maxDays: { value: 1 },
+            },
+            inputs: 1,
+            outputs: 0,
+            align: 'right',
+            icon: "font-awesome/fa-database",
+            paletteLabel: 'datalog',
+            label: function () {
+                return this.name || "Data Log";
+            },
+            labelStyle: function () {
+                return this.name ? "node_label_italic" : "";
+            }
+        });
+    })();
+</script>
+
+<script type="text/html" data-template-name="ur_datalog">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_datalog.label.name"></span></label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-i-cursor"></i> <span data-i18n="ur_datalog.label.format"></span></label>
+        <input type="text" id="node-input-format" placeholder="msg.payload.value" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-maxDays"><i class="fa fa-tag"></i> <span data-i18n="ur_datalog.label.maxDays"></span></label>
+        <input type="text" id="node-input-maxDays">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_datalog">
+    <p>Records an incoming message to a database</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>message topic</dd>
+        <dt>payload<span class="property-type">object</span></dt>
+        <dd>
+            records the value based on the provided <b>Value Format</b>. 
+            Optional configuration properties can also be defined. See below.
+        </dd>
+        <dt class="optional">payload.units <span class="property-type">string</span></dt>
+        <dd>changes units of measurement for the data</dd>
+        <dt class="optional">payload.newTopic <span class="property-type">string</span></dt>
+        <dd>changes the topic of existing records where <code>msg.topic</code> is the existing topic value</dd>
+        <dt class="optional">payload.maxDays <span class="property-type">number</span></dt>
+        <dd>changes the data retention setting</dd>
+        <dt class="optional">payload.tags <span class="property-type">array</span></dt>
+        <dd>changes metatags associated with the data</dd>
+        <dt class="optional">inhibit <span class="property-type">boolean | number</span></dt>
+        <dd>causes messages received to be ignored</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>Records an incoming message to a datalog database. Use the <b>ur_chart</b> wdiget to access the datalog database.</p>
+    <p>
+        <b>Retention</b>: Sets the data retention on all received messages. By default, data automatically expires and is 
+        purged from the database after 1 day. Optionally, you can change the data retention for a particular topic by 
+        setting <code>msg.payload.maxDays</code> to the number of days data should be stored.
+    </p>
+    <p><b>Units</b>: When <code>msg.payload.units</code> is provided, units of measurement will be recorded with the value.</p>
+    <p>
+        <b>Health</b>: When <code>msg.payload.health</code> is provided, the health status will be recorded with the value. 
+        For example: <i>normal</i> or <i>down</i></p>
+    <p>
+        <b>Tags</b>: To associate metadata with a topic, set <code>msg.payload.tags</code> to an array of text tag names. 
+        Applying metadata makes data more easily searchable and creates real-world relationships to the data.<br>
+        For example: <code>['outside', 'temp']</code> for a topic that represents outside air temperature.
+    </p>
+    <p>
+        See <a href="https://project-haystack.org/tag" target="_blank">Project Haystack</a> for more information and
+        a standard list of tags.
+    </p>
+    <p>
+        Setting <code>msg.inhibit</code> to <code>true</code> will cause messages received to be ignored.
+        Setting it to a <code>number</code> will cause messages received to be ignored for the number of seconds set. 
+        Setting it to <code>false</code> or <code>0</code> will cause  messages to be processed.
+    </p>
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>

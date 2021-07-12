@@ -1,12 +1,23 @@
 <nav #navbar class="navbar">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a href="#" onClick="return false;" class="navbar-toggle collapsed" data-toggle="collapse"
-                data-target="#navbar-collapse" aria-expanded="false"></a>
-            <a href="#" onClick="return false;" class="bars" (click)="mobileMenuSidebarOpen($event,'overlay-open')"></a>
-            <a class="navbar-brand" routerLink="dashboard/main">
+            <a
+                href="#"
+                onClick="return false;"
+                class="navbar-toggle collapsed"
+                data-toggle="collapse"
+                data-target="#navbar-collapse"
+                aria-expanded="false"
+            ></a>
+            <a
+                href="#"
+                onClick="return false;"
+                class="bars"
+                (click)="mobileMenuSidebarOpen($event, 'overlay-open')"
+            ></a>
+            <a class="navbar-brand" routerLink="/">
                 <img src="assets/images/logo.png" alt="" />
-                <span class="logo-name">Atrio</span>
+                <span class="logo-name">{{ site.name || 'Unified-RED' }}</span>
             </a>
         </div>
         <div class="collapse navbar-collapse" id="navbar-collapse">
@@ -20,70 +31,87 @@
             <ul class="nav navbar-nav navbar-right">
                 <!-- Full Screen Button -->
                 <li class="fullscreen">
-                    <button mat-icon-button (click)="callFullscreen()" class=" nav-notification-icons">
+                    <button mat-icon-button (click)="callFullscreen()" class="nav-notification-icons">
                         <i class="nav-hdr-btn ti-fullscreen"></i>
                     </button>
                 </li>
                 <!-- #END# Full Screen Button -->
                 <!-- #START# Notifications-->
                 <li class="dropdown">
-                    <button mat-icon-button data-toggle="dropdown" class=" nav-notification-icons">
+                    <button
+                        mat-icon-button
+                        data-toggle="dropdown"
+                        class="nav-notification-icons"
+                        (click)="newalarm = false"
+                    >
                         <i class="nav-hdr-btn ti-bell"></i>
-                        <span class="notify"></span>
-                        <span class="heartbeat"></span>
+                        <span class="notify" *ngIf="newalarm"></span>
+                        <span class="heartbeat" *ngIf="newalarm"></span>
                     </button>
-                    <ul class="dropdown-menu pullDown">
-                        <li class="header">NOTIFICATIONS</li>
+                    <ul class="dropdown-menu">
+                        <li class="header">Recent Alarms</li>
                         <li class="body">
-                            <ul class="menu" style="position: relative; max-width: 600px; max-height: 200px;"
-                                [perfectScrollbar]>
+                            <ul
+                                class="menu ur-menu-recent-alarm"
+                                style="position: relative; max-width: 600px; max-height: 200px"
+                                [perfectScrollbar]
+                            >
                                 <li>
-                                    <a href="#" *ngFor="let notification of notifications" onClick="return false;">
+                                    <a href="#" *ngFor="let alarm of recentAlarms" onClick="return false;">
                                         <span class="table-img msg-user">
-                                            <img src="{{notification.userImg}}" alt="">
+                                            <i
+                                                class="fas fa-exclamation-triangle"
+                                                *ngIf="alarm.severity === 'warning'"
+                                            ></i>
+                                            <i class="fas fa-exclamation-circle" *ngIf="alarm.severity === 'alert'"></i>
+                                            <i class="fas fa-fire" *ngIf="alarm.severity === 'critical'"></i>
                                         </span>
                                         <span class="menu-info">
-                                            <span class="menu-title">{{notification.userName}}</span>
+                                            <span class="menu-title">{{ alarm.name }}</span>
                                             <span class="menu-desc">
-                                                <i class="material-icons">access_time</i> {{notification.time}}
+                                                <i class="material-icons">access_time</i>
+                                                {{ alarm.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
                                             </span>
-                                            <span class="menu-desc">{{notification.message}}</span>
                                         </span>
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li class="footer">
-                            <a href="#" onClick="return false;">View All Notifications</a>
+                            <a routerLink="/alarm-console">Alarm Console</a>
                         </li>
                     </ul>
                 </li>
                 <!-- #END# Notifications-->
                 <li class="dropdown user_profile">
-                    <a href="#" onClick="return false;" data-toggle="dropdown" role="button"
-                        class="nav-notification-icons">
-                        <img src="assets/images/user.jpg" class="rounded-circle" width="32" height="32" alt="User">
-                    </a>
-                    <ul class="dropdown-menu pullDown">
+                    <button mat-icon-button data-toggle="dropdown" class="nav-notification-icons">
+                        <i class="nav-hdr-btn ti-user"></i>
+                    </button>
+                    <ul class="dropdown-menu">
                         <li class="body">
                             <ul class="user_dw_menu">
                                 <li>
-                                    <a href="#" onClick="return false;">
+                                    <a routerLink="/users/profile">
                                         <mat-icon aria-hidden="false" class="mr-2">person</mat-icon>Profile
                                     </a>
                                 </li>
-                                <li>
+                                <li *ngIf="showAuditLog">
+                                    <a routerLink="/audit-log">
+                                        <mat-icon aria-hidden="false" class="mr-2">info</mat-icon>Audit Log
+                                    </a>
+                                </li>
+                                <!-- <li>
                                     <a href="#" onClick="return false;">
                                         <mat-icon aria-hidden="false" class="mr-2">feedback</mat-icon>Feedback
                                     </a>
-                                </li>
-                                <li>
+                                </li> -->
+                                <!-- <li>
                                     <a href="#" onClick="return false;">
                                         <mat-icon aria-hidden="false" class="mr-2">help</mat-icon>Help
                                     </a>
-                                </li>
+                                </li> -->
                                 <li>
-                                    <a routerLink="/authentication/signin" onClick="return false;">
+                                    <a href="#" (click)="logout()">
                                         <mat-icon aria-hidden="false" class="mr-2">power_settings_new</mat-icon>Logout
                                     </a>
                                 </li>
@@ -100,4 +128,4 @@
             </ul>
         </div>
     </div>
-</nav>>
+</nav>

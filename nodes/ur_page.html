@@ -1,0 +1,693 @@
+<script type="text/javascript">
+    // convert to i18 text
+    function c_ur_page(x) {
+        return RED._('unified-red/ur_page:ur_page.' + x);
+    }
+
+    RED.nodes.registerType('ur_page', {
+        category: 'config',
+        defaults: {
+            name: { value: c_ur_page('label.default') },
+            // icon: { value: 'folder' },
+            folder: { type: 'ur_folder', required: true },
+            order: { value: 0 },
+            disp: { value: true },
+            width: { value: 6 },
+            collapse: { value: false },
+            disabled: { value: false },
+            hidden: { value: false },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+            isMulti: { value: false },
+            isSingle: { value: true },
+            pageType: { value: 'single' },
+            refPage: { value: 'none', required: false },
+            inheritInst: { value: false },
+            expression: {
+                value: '',
+                validate: function (v) {
+                    if (!this.pageType !== 'multi' || !this.isMulti) {
+                        return true;
+                    } else {
+                        let expression = v || '';
+                        let validLen = v.length > 0;
+                        let validExp = v.toLowerCase().includes('{x}');
+                        let valid = validLen && validExp;
+
+                        if (!validLen) {
+                            $('#length-invalid').css({ display: 'block' });
+                        } else {
+                            $('#length-invalid').css({ display: 'none' });
+                        }
+
+                        if (!validExp) {
+                            $('#expression-invalid').css({ display: 'block' });
+                        } else {
+                            $('#expression-invalid').css({ display: 'none' });
+                        }
+
+                        $('#node-config-input-expression').toggleClass('input-error', !valid);
+
+                        return valid;
+                    }
+                },
+            },
+            instances: {
+                value: [
+                    {
+                        names: {
+                            input: '',
+                            _arr: [],
+                        },
+                        param: {
+                            input: [{ variable: '', values: '' }],
+                            _arr: [],
+                        },
+                    },
+                ],
+            },
+        },
+        sort: function (A, B) {
+            if (A.folder !== B.folder) {
+                var folderA = RED.nodes.node(A.folder);
+                var folderB = RED.nodes.node(B.folder);
+                if (!folderA && folderB) {
+                    return -1;
+                } else if (folderA && !folderB) {
+                    return 1;
+                } else {
+                    return folderA.order - folderB.order;
+                }
+            }
+            return A.order - B.order;
+        },
+        paletteLabel: 'dashboard page',
+        label: function () {
+            var folderNode = RED.nodes.node(this.folder);
+            if (folderNode) {
+                return (
+                    '[' + (folderNode.name || c_ur_page('label.folder')) + '] ' + (this.name || c_ur_page('label.page'))
+                );
+            }
+            return '[' + c_ur_page('label.unassigned') + '] ' + (this.name || c_ur_page('label.page'));
+        },
+        // labelStyle: function() { return this.name?"node_label_italic":""; },
+        oneditprepare: function () {
+            let node = this;
+
+            $('#node-config-input-disabled-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-disabled').prop('checked', active);
+
+                var newTxt = c_ur_page(active ? 'label.disabled' : 'label.enabled');
+                $('#node-config-input-disabled-label').text(newTxt);
+
+                var info = $('#node-config-input-disabled-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (node.disabled) {
+                $('#node-config-input-disabled-btn').click();
+            } else {
+                $('#node-config-input-disabled-label').text(c_ur_page('label.enabled'));
+            }
+
+            $('#node-config-input-hidden-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var active = i.hasClass('fa-toggle-on');
+                var newCls = 'fa fa-toggle-' + (active ? 'off' : 'on');
+                i.attr('class', newCls);
+                $('#node-config-input-hidden').prop('checked', active);
+
+                var newTxt = c_ur_page(active ? 'label.hidden' : 'label.visible');
+                $('#node-config-input-hidden-label').text(newTxt);
+
+                var info = $('#node-config-input-hidden-info');
+                var done = active ? info.show() : info.hide();
+            });
+            if (node.hidden) {
+                $('#node-config-input-hidden-btn').click();
+            } else {
+                $('#node-config-input-hidden-label').text(c_ur_page('label.visible'));
+            }
+
+            $('#node-config-input-inherit-instances-btn').on('click', function (e) {
+                var i = $(this).find('i');
+                var inherit = i.hasClass('fa-toggle-off');
+                var newCls = 'fa fa-toggle-' + (inherit ? 'on' : 'off');
+                i.attr('class', newCls);
+                $('#node-config-input-inherit-instances').prop('checked', inherit);
+
+                var newTxt = c_ur_page(inherit ? 'label.inherit' : 'label.define');
+                $('#node-config-input-inherit-instances-label').text(newTxt);
+
+                if (inherit) {
+                    $('#instance-expression').hide();
+                    $('#instances-map').hide();
+                    $('#node-config-input-inherit-instances-info').show();
+                } else {
+                    $('#instance-expression').show();
+                    $('#instances-map').show();
+                    $('#node-config-input-inherit-instances-info').hide();
+                }
+            });
+            if (node.inheritInst) {
+                $('#node-config-input-inherit-instances-btn').click();
+            } else {
+                $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
+                $('#instance-expression').show();
+                $('#instances-map').show();
+                $('#node-config-input-inherit-instances-info').hide();
+            }
+
+            $('#node-config-input-page-type').change({ refPage: node.refPage }, function (e) {
+                let type = $(this).val();
+
+                switch (type) {
+                    case 'multi':
+                        $('#inherit-instances').hide();
+                        $('#referenced-page').hide();
+                        $('#instance-expression').show();
+                        $('#instances-map').show();
+                        break;
+                    case 'inherited':
+                        $('#referenced-page').show();
+                        $('#node-config-input-referenced-page')
+                            .val(e.data.refPage || 'none')
+                            .trigger('change', [type]);
+                        break;
+                    case 'single':
+                    default:
+                        $('#inherit-instances').hide();
+                        $('#referenced-page').hide();
+                        $('#instance-expression').hide();
+                        $('#instances-map').hide();
+                        break;
+                }
+            });
+
+            if (node.pageType) {
+                $('#node-config-input-page-type').val(node.pageType).trigger('change');
+            } else {
+                if (node.isMulti) {
+                    // (!) this maintains compatibility with older ur_page config (pre inherited-page)
+                    $('#node-config-input-page-type').val('multi').trigger('change');
+                } else {
+                    $('#node-config-input-page-type').val('single').trigger('change');
+                }
+            }
+
+            let refPageSelect = $('#node-config-input-referenced-page');
+            getRefPages(node, refPageSelect, node.refPage);
+
+            refPageSelect
+                .change({ inheritInst: node.inheritInst }, function (e, pageType) {
+                    let refPageNode;
+                    let refPageIsMulti = false;
+
+                    if (this.value && this.value !== 'none') {
+                        refPageNode = RED.nodes.node(this.value);
+                        refPageIsMulti = refPageNode.isMulti;
+                    }
+
+                    // pageType is undefined => user selection
+                    // otherwise, pageType is invoked by initialization
+                    if (pageType && pageType !== 'inherited') return;
+
+                    if (refPageIsMulti) {
+                        $('#inherit-instances').show();
+                        if (e.data.inheritInst) {
+                            $('#node-config-input-inherit-instances-btn').click();
+                        } else {
+                            $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
+                            $('#instance-expression').show();
+                            $('#instances-map').show();
+                            $('#node-config-input-inherit-instances-info').hide();
+                        }
+                    } else {
+                        $('#inherit-instances').hide();
+                        $('#instance-expression').hide();
+                        $('#instances-map').hide();
+                    }
+                })
+                .val(node.refPage || 'none')
+                .trigger('change', [node.pageType]);
+
+            $('#node-config-input-instance-expressions-list')
+                .css('min-height', '150px')
+                .editableList({
+                    sortable: true,
+                    removable: true,
+                    addButton: true,
+                    addItem: function (container, index, opt) {
+                        if (!opt.hasOwnProperty('instance')) {
+                            opt.instance = {
+                                names: { input: '', _arr: [] },
+                                param: { input: [], _arr: [] },
+                            };
+                        }
+
+                        let instance = opt.instance;
+
+                        let rawInstanceNames = instance.names.input || '';
+                        let arrInstanceNames = [...rawToArr(rawInstanceNames)];
+
+                        container.css({
+                            overflow: 'hidden',
+                            whitespace: 'nowrap',
+                        });
+
+                        var row = $('<div/>')
+                            .css({ display: 'flex', 'justify-content': 'space-evenly' })
+                            .appendTo(container);
+
+                        var instNamesInputField = $('<input/>', {
+                            class: 'node-config-input-instance-name',
+                            id: 'instance-name-' + index,
+                            type: 'text',
+                            style: 'width: 40%',
+                            placeholder: 'instance name',
+                        })
+                            .appendTo(row)
+                            .val(rawInstanceNames);
+
+                        var addInstanceParamBtn = $(
+                            '<a href="#" class="editor-button-small" style="align-self: flex-end"> <i class="fa fa-plus"></i></a>'
+                        ).css({ 'text-align': 'center', padding: '0' });
+
+                        addInstanceParamBtn.on('click', function (evt) {
+                            instanceParamField.editableList('addItem', {});
+                            evt.stopPropagation();
+                            evt.preventDefault();
+                        });
+
+                        var instanceParamField = $('<ol>', {
+                            class: 'node-config-input-instance-parameters-list',
+                            id: 'node-config-input-instance-parameters-list-' + index,
+                        })
+                            .appendTo(row)
+                            .editableList({
+                                header: $('<div>')
+                                    .append(
+                                        $.parseHTML(
+                                            '<div id="instance-param-field-header" style="color: #5d5d5d; font-size: 14px;">instance parameters</div>'
+                                        )
+                                    )
+                                    .append(addInstanceParamBtn)
+                                    .css({ display: 'flex', padding: '6px 8px', 'justify-content': 'space-between' }),
+                                addButton: false,
+                                removable: true,
+                                height: 'auto',
+                                connectWith: '.node-config-input-instance-parameter',
+                                addItem: function (container, i, parameter) {
+                                    container.css({ padding: '0' });
+
+                                    let idx = i;
+
+                                    if (!parameter.hasOwnProperty('input')) {
+                                        parameter.input = [{ variable: '', values: '' }];
+                                        idx = 0;
+                                    }
+
+                                    let param = parameter;
+
+                                    let rawValues = param.input[idx].values;
+                                    let arrValues = rawToArr(rawValues);
+
+                                    var paramRow = $('<div>', {
+                                        class: 'node-input-instance-parameter-' + index + '-' + i,
+                                    })
+                                        .css({ display: 'flex', 'justify-content': 'space-evenly', padding: 0 })
+                                        .appendTo(container);
+
+                                    var instParamVarInputField = $('<input/>', {
+                                        class: 'node-config-input-instance-parameter-variable',
+                                        id: 'instance-parameter-variable-' + index + '-' + i,
+                                        type: 'text',
+                                        placeholder: 'variable',
+                                    })
+                                        .appendTo(paramRow)
+                                        .val(param.input[idx].variable);
+
+                                    var instParamValInputField = $('<input/>', {
+                                        class: 'node-config-input-instance-parameter-value',
+                                        id: 'instance-parameter-values-' + index + '-' + i,
+                                        type: 'text',
+                                        placeholder: 'values',
+                                    })
+                                        .appendTo(paramRow)
+                                        .val(param.input[idx].values);
+
+                                    instNamesInputField
+                                        .add(instParamValInputField)
+                                        .on('change keyup paste', function () {
+                                            rawInstanceNames = instNamesInputField.val();
+                                            rawValues = instParamValInputField.val();
+
+                                            arrInstanceNames = rawToArr(rawInstanceNames);
+                                            arrValues = rawToArr(rawValues);
+
+                                            let valid =
+                                                arrInstanceNames.length !== 0 &&
+                                                arrValues.length !== 0 &&
+                                                arrInstanceNames.length === arrValues.length;
+
+                                            instNamesInputField.toggleClass('input-error', !valid);
+                                            instParamValInputField.toggleClass('input-error', !valid);
+                                            $(
+                                                '#node-config-input-instance-expressions-list .red-ui-editableList-header'
+                                            ).toggleClass('input-error', !valid);
+                                        });
+                                },
+                            });
+
+                        if (instance.param && instance.param.input.length > 0) {
+                            let size = instance.param.input.length;
+                            for (let i = 0; i < size; i++) {
+                                $('#node-config-input-instance-parameters-list-' + index).editableList(
+                                    'addItem',
+                                    instance.param
+                                );
+                            }
+                        }
+                    },
+                });
+
+            if (node.instances) {
+                for (let i = 0; i < node.instances.length; i++) {
+                    $('#node-config-input-instance-expressions-list').editableList('addItem', {
+                        instance: node.instances[i],
+                    });
+                }
+            }
+        },
+        oneditsave: function () {
+            let node = this;
+
+            this.disabled = $('#node-config-input-disabled').prop('checked');
+            this.hidden = $('#node-config-input-hidden').prop('checked');
+            this.pageType = $('#node-config-input-page-type').val();
+            this.inheritInst = $('#node-config-input-inherit-instances').prop('checked');
+
+            // Inherited Housekeeping
+            if (this.pageType == 'inherited') {
+                this.refPage = $('#node-config-input-referenced-page').val();
+
+                let refPageIsMulti = false;
+
+                if (this.refPage && this.refPage !== 'none') {
+                    let refPageNode = RED.nodes.node(this.refPage);
+                    if (refPageNode) {
+                        refPageIsMulti = refPageNode.isMulti;
+                    }
+                }
+
+                if (refPageIsMulti) {
+                    this.isSingle = false;
+                    this.isMulti = true;
+                } else {
+                    this.isSingle = true;
+                    this.isMulti = false;
+                }
+            }
+
+            // Single Housekeeping
+            if (this.pageType === 'single' || this.isSingle) {
+                this.isSingle = true;
+                this.isMulti = false;
+            }
+
+            // Multi Housekeeping
+            if (this.pageType == 'multi' || this.isMulti) {
+                this.isSingle = false;
+                this.isMulti = true;
+
+                let instances = $('#node-config-input-instance-expressions-list').editableList('items');
+                let node = this;
+
+                node.instances = [];
+
+                instances.each(function (index, inst) {
+                    let container = $(this);
+
+                    let parameters = $('#node-config-input-instance-parameters-list-' + index).editableList('items');
+
+                    let rawNames = container.find('#instance-name-' + index).val();
+                    let namesArr = rawToArr(rawNames);
+
+                    let rawParams = [];
+                    let paramsArr = [];
+
+                    // build rawParams
+                    parameters.each((i, p) => {
+                        let rawParamVar = $(this)
+                            .find('#instance-parameter-variable-' + index + '-' + i)
+                            .val();
+                        let rawParamVals = $(this)
+                            .find('#instance-parameter-values-' + index + '-' + i)
+                            .val();
+
+                        rawParams.push({ variable: rawParamVar, values: rawParamVals });
+                    });
+
+                    // build paramsArr
+                    namesArr.forEach((n, i) => {
+                        let paramObj = {};
+
+                        parameters.each((ii, p) => {
+                            let rawParamVar = $(this)
+                                .find('#instance-parameter-variable-' + index + '-' + ii)
+                                .val();
+                            let rawParamVals = rawToArr(
+                                $(this)
+                                    .find('#instance-parameter-values-' + index + '-' + ii)
+                                    .val()
+                            );
+
+                            paramObj[rawParamVar] = rawParamVals[i];
+                        });
+
+                        paramsArr.push(paramObj);
+                    });
+
+                    let i = {
+                        names: {
+                            input: container.find('#instance-name-' + index).val(),
+                            _arr: [...namesArr],
+                        },
+                        param: {
+                            input: [...rawParams],
+                            _arr: [...paramsArr],
+                        },
+                    };
+
+                    node.instances.push(i);
+                });
+            }
+        },
+    });
+
+    function explodeRange(exp) {
+        if (exp.indexOf('-') === -1) {
+            return exp;
+        }
+        let [a, b] = exp.split('-');
+        a = parseInt(a);
+        b = parseInt(b);
+        let start = Math.min(a, b);
+        let end = Math.max(a, b);
+        let range = [];
+        while (start <= end) {
+            range.push(start++);
+        }
+        return range.join(',');
+    }
+
+    function rawToArr(raw) {
+        let result = [];
+        let rawCopy = raw;
+
+        rawCopy = rawCopy.split(/\s*\,\s*/).filter((x) => x);
+        for (let i = 0; i < rawCopy.length; i++) {
+            let temp = explodeRange(rawCopy[i]).split(',');
+            if (temp.length !== 0) {
+                result = result.concat(temp);
+            }
+        }
+
+        return result;
+    }
+
+    function getRefPages(self, select, value) {
+        var node_def = RED.nodes.getType('ur_page');
+        select.children().remove();
+
+        $('<option value="none"' + (value ? ' selected' : '') + '>NONE</option>').appendTo(select);
+
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
+
+        var configNodes = [];
+        RED.nodes.eachConfig(function (config) {
+            if (
+                config.id !== self.id &&
+                config.type == 'ur_page' &&
+                config.pageType !== 'inherited' &&
+                (!config.z || config.z === activeWorkspace.id)
+            ) {
+                var label = RED.utils.getNodeLabel(config, config.id);
+                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
+                configNodes.push(config);
+            }
+        });
+        try {
+            configNodes.sort(function (A, B) {
+                if (A.__label__ < B.__label__) {
+                    return -1;
+                } else if (A.__label__ > B.__label__) {
+                    return 1;
+                }
+                return 0;
+            });
+        } catch (ignore) {}
+        configNodes.forEach(function (cn) {
+            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
+                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
+                .appendTo(select);
+            delete cn.__label__;
+        });
+        window.setTimeout(function () {
+            select.trigger('change', [self.pageType]);
+        }, 50);
+    }
+</script>
+
+<script type="text/html" data-template-name="ur_page">
+    <div class="form-row">
+        <label for="node-config-input-name">
+            <i class="fa fa-tag"></i> <span data-i18n="ur_page.label.name"></span>
+        </label>
+        <input type="text" id="node-config-input-name" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-folder">
+            <i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span>
+        </label>
+        <input type="text" id="node-config-input-folder" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-disabled-btn">
+            <i class="fa fa-ban"></i> <span data-i18n="ur_page.label.state"></span>
+        </label>
+        <button id="node-config-input-disabled-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-disabled-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-disabled" style="display: none;" />
+        <span
+            id="node-config-input-disabled-info"
+            data-i18n="[html]ur_page.info.disabled"
+            style="display: none;"
+        ></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-hidden-btn">
+            <i class="fa fa-eye-slash"></i> <span data-i18n="ur_page.label.navmenu"></span>
+        </label>
+        <button id="node-config-input-hidden-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-on"></i> <span id="node-config-input-hidden-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-hidden" style="display:none;" />
+        <span id="node-config-input-hidden-info" data-i18n="[html]ur_page.info.hidden" style="display:none;"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-page-type"><i class="fa fa-list"></i> Page Type</label>
+        <select name="node-config-input-page-type" id="node-config-input-page-type" style="width:150px">
+            <option value="single">Single Page</option>
+            <option value="multi">Multi Page</option>
+            <option value="inherited">Inherited Page</option>
+        </select>
+    </div>
+    <div class="form-row" id="referenced-page">
+        <label for="node-config-input-referenced-page" style="display: inline-flex; align-items: center">
+            <i class="fa fa-file-text-o" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.refPage"></span>
+        </label>
+        <select id="node-config-input-referenced-page"></select>
+    </div>
+    <!-- <div class="form-row" id="inherited-is-multi">
+        <label for="node-config-input-inherited-multi"><i class="fa fa-files-o"></i> Is Multi?</label>
+        <input type="checkbox" id="node-config-input-inherited-multi" />
+    </div> -->
+    <div class="form-row" id="inherit-instances">
+        <label for="node-config-input-inherit-instances-btn" style="display: inline-flex; align-items: center">
+            <i class="fa fa-code-fork" style="margin-right: 5px"></i> Instances</span>
+        </label>
+        <button id="node-config-input-inherit-instances-btn" class="editor-button" style="width:100px; margin-right:6px;">
+            <i class="fa fa-toggle-off"></i> <span id="node-config-input-inherit-instances-label"></span>
+        </button>
+        <input type="checkbox" id="node-config-input-inherit-instances" style="display:none;" />
+        <span id="node-config-input-inherit-instances-info" data-i18n="[html]ur_page.info.inheritInstances" style="display:none;"></span>
+    </div>
+    <div class="form-row" id="instance-expression" >
+        <label for="node-config-input-expression" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-code" style="margin-right: 5px;"></i> <span data-i18n="ur_page.label.expression"></span
+        ></label>
+        <input type="text" id="node-config-input-expression" />
+        <div
+            id="length-invalid"
+            style="display: none; font-size: 10px; line-height: 12px; color: red; padding-left: 105px; margin-top: -15px"
+        >
+            must provide expression
+        </div>
+        <div
+            id="expression-invalid"
+            style="display: none; font-size: 10px; line-height: 12px; color: red; padding-left: 105px;"
+        >
+            must include {x}
+        </div>
+    </div>
+    <div class="form-row" id="instances-map" >
+        <label for="node-config-input-instances"
+            ><i class="fa fa-tags"></i> <span data-i18n="ur_page.label.instances"></span
+        ></label>
+        <ol id="node-config-input-instance-expressions-list"></ol>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-config-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-config-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+    <div class="form-tips" data-i18n="[html]ur_page.tip"></div>
+</script>
+
+<script type="text/html" data-help-name="ur_page">
+    <p>Page configuration for Unified-RED</p>
+    <p>
+        Configures a page in the menu to serve as an <em>endpoint</em> level node in the menu tree. May contain groups.
+    </p>
+    <p>
+        <b>Disabled</b> pages are not included in the app, and are therefore not functional. The page name still appears
+        in the Navigation Menu (unless it is also hidden).
+    </p>
+    <p>
+        <b>Hidden</b> pages are not listed in the Left-hand Navigation Menu. However, they are still active in the app.
+    </p>
+</script>

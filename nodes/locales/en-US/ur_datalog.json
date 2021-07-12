@@ -1,0 +1,10 @@
+{
+    "ur_datalog": {
+        "label": {
+            "category": "unified-red",
+            "name": "Name",
+            "format": "Value format",
+            "maxDays": "Retention"
+        }
+    }
+}

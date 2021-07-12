@@ -3,205 +3,205 @@
  *  Author     : RedStar Template
  *  Description: This scss file for orange theme style classes
  */
-@import "_theme-color-variables";
+@import '_theme-color-variables';
 
 .theme-orange {
-  &.menu_light {
-    .active .menu-toggle {
-      border-right: 2px solid $theme-orange;
+    &.menu_light {
+        .active .menu-toggle {
+            border-right: 2px solid $theme-orange;
+        }
     }
-  }
-  .navbar {
-    background-color: $theme-orange;
-    .collapse-menu-icon .nav-hdr-btn {
-      color: #fff;
+    .navbar {
+        background-color: $theme-orange;
+        .collapse-menu-icon .nav-hdr-btn {
+            color: #fff;
+        }
+        .navbar-right .nav-hdr-btn {
+            color: #fff;
+        }
     }
-    .navbar-right .nav-hdr-btn {
-      color: #fff;
+    .navbar.active {
+        background-color: $theme-orange !important;
+        -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+        .nav {
+            > li {
+                > a {
+                    color: #fff;
+                }
+            }
+        }
     }
-  }
-  .navbar.active {
-    background-color: $theme-orange !important;
-    -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
-    -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.25);
+
     .nav {
-      > li {
-        > a {
-          color: #fff;
-        }
-      }
-    }
-  }
+        > li {
+            > a {
+                color: $theme-orange-nav-anchor;
+                &:hover {
+                    background-color: $theme-orange-nav-anchor_hover;
+                    text-decoration: none;
+                }
 
-  .nav {
-    > li {
-      > a {
-        color: $theme-orange-nav-anchor;
+                &:focus {
+                    background-color: $theme-orange-nav-anchor_focus;
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+
+    .bars {
+        color: $theme-orange-bar;
+    }
+
+    .sidebar {
+        .menu {
+            .list {
+                li {
+                    &.active {
+                        background-color: $theme-orange-menu-list-active;
+                    }
+                    a {
+                        -moz-transition: all 0.3s;
+                        -o-transition: all 0.3s;
+                        -webkit-transition: all 0.3s;
+                        transition: all 0.3s;
+                        i,
+                        span {
+                            -moz-transition: all 0.3s;
+                            -o-transition: all 0.3s;
+                            -webkit-transition: all 0.3s;
+                            transition: all 0.3s;
+                        }
+                    }
+                }
+
+                .ml-menu {
+                    background-color: $theme-orange-menu-list-submenu;
+                    .active {
+                        a {
+                            font-weight: 1000;
+                        }
+                    }
+                    // li.active a:not(.menu-toggle):before {
+                    //     content: '';
+                    //     display: block;
+                    //     width: 7px;
+                    //     height: 7px;
+                    //     border-radius: 50%;
+                    //     position: absolute;
+                    //     background-color: #777676;
+                    //     border-color: #777676;
+                    //     left: 17%;
+                    //     top: 50%;
+                    //     -webkit-transform: translate(-10px, -50%);
+                    //     -moz-transform: translate(-10px, -50%);
+                    //     -ms-transform: translate(-10px, -50%);
+                    //     -o-transform: translate(-10px, -50%);
+                    //     transform: translate(-10px, -50%);
+                    //     opacity: 1;
+                    //     -webkit-transition: all 0.2s ease;
+                    //     -o-transition: all 0.2s ease;
+                    //     -moz-transition: all 0.2s ease;
+                    //     transition: all 0.2s ease;
+                    // }
+                }
+            }
+        }
+
+        .legal {
+            background-color: $theme-orange-legal-bg;
+
+            .copyright {
+                a {
+                    color: $theme-orange !important;
+                }
+            }
+        }
+    }
+
+    .breadcrumb li a {
+        color: $theme-orange !important;
+    }
+
+    .card .header h2 strong {
+        color: $theme-orange !important;
+    }
+
+    .page-item.active .page-link {
+        background-color: $theme-orange;
+        border-color: $theme-orange;
+        color: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+        background-color: $theme-orange !important;
+        color: #fff !important;
+        border-color: $theme-orange !important;
         &:hover {
-          background-color: $theme-orange-nav-anchor_hover;
-          text-decoration: none;
+            background-color: $theme-orange !important;
+            color: #fff !important;
         }
-
+        &:active {
+            background-color: $theme-orange !important;
+            color: #fff !important;
+        }
         &:focus {
-          background-color: $theme-orange-nav-anchor_focus;
-          text-decoration: none;
+            background-color: $theme-orange !important;
+            color: #fff !important;
         }
-      }
+        &:disabled {
+            background-color: $theme-orange !important;
+            color: #fff !important;
+        }
     }
-  }
-
-  .bars {
-    color: $theme-orange-bar;
-  }
-
-  .sidebar {
-    .menu {
-      .list {
-        li {
-          &.active {
-            background-color: $theme-orange-menu-list-active;
-          }
-          a {
-            -moz-transition: all 0.3s;
-            -o-transition: all 0.3s;
-            -webkit-transition: all 0.3s;
-            transition: all 0.3s;
-            i,
-            span {
-              -moz-transition: all 0.3s;
-              -o-transition: all 0.3s;
-              -webkit-transition: all 0.3s;
-              transition: all 0.3s;
+    .btn-outline-primary {
+        background: 0 0 !important;
+        color: $theme-orange !important;
+        border: 1px solid $theme-orange !important;
+        &:hover {
+            background: $theme-orange !important;
+            color: #fff !important;
+            border: 1px solid $theme-orange !important;
+        }
+    }
+    .timelineLabelColor strong {
+        color: $theme-orange !important;
+    }
+    .top-sidebar {
+        .horizontal-menu {
+            li {
+                &.active {
+                    > a {
+                        color: $theme-orange;
+                    }
+                }
+                a {
+                    -moz-transition: all 0.3s;
+                    -o-transition: all 0.3s;
+                    -webkit-transition: all 0.3s;
+                    transition: all 0.3s;
+                    &:hover {
+                        color: $theme-orange;
+                    }
+                }
             }
-          }
         }
-
-        .ml-menu {
-          background-color: $theme-orange-menu-list-submenu;
-          .active {
-            a {
-              font-weight: 700;
-            }
-          }
-          li.active a:not(.menu-toggle):before {
-            content: "";
-            display: block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            position: absolute;
-            background-color: #777676;
-            border-color: #777676;
-            left: 17%;
-            top: 50%;
-            -webkit-transform: translate(-10px, -50%);
-            -moz-transform: translate(-10px, -50%);
-            -ms-transform: translate(-10px, -50%);
-            -o-transform: translate(-10px, -50%);
-            transform: translate(-10px, -50%);
-            opacity: 1;
-            -webkit-transition: all 0.2s ease;
-            -o-transition: all 0.2s ease;
-            -moz-transition: all 0.2s ease;
-            transition: all 0.2s ease;
-          }
-        }
-      }
     }
 
-    .legal {
-      background-color: $theme-orange-legal-bg;
-
-      .copyright {
-        a {
-          color: $theme-orange !important;
-        }
-      }
+    .nav-tabs > li > a:before {
+        border-bottom: 2px solid $theme-orange;
     }
-  }
-
-  .breadcrumb li a {
-    color: $theme-orange !important;
-  }
-
-  .card .header h2 strong {
-    color: $theme-orange !important;
-  }
-
-  .page-item.active .page-link {
-    background-color: $theme-orange;
-    border-color: $theme-orange;
-    color: #ffffff;
-    border-radius: 50%;
-    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
-  }
-
-  .btn-primary {
-    background-color: $theme-orange !important;
-    color: #fff !important;
-    border-color: $theme-orange !important;
-    &:hover {
-      background-color: $theme-orange !important;
-      color: #fff !important;
+    .sidemenu-collapse i {
+        color: #fff;
     }
-    &:active {
-      background-color: $theme-orange !important;
-      color: #fff !important;
-    }
-    &:focus {
-      background-color: $theme-orange !important;
-      color: #fff !important;
-    }
-    &:disabled {
-      background-color: $theme-orange !important;
-      color: #fff !important;
-    }
-  }
-  .btn-outline-primary {
-    background: 0 0 !important;
-    color: $theme-orange !important;
-    border: 1px solid $theme-orange !important;
-    &:hover {
-      background: $theme-orange !important;
-      color: #fff !important;
-      border: 1px solid $theme-orange !important;
-    }
-  }
-  .timelineLabelColor strong {
-    color: $theme-orange !important;
-  }
-  .top-sidebar {
-    .horizontal-menu {
-      li {
-        &.active {
-          > a {
-            color: $theme-orange;
-          }
-        }
-        a {
-          -moz-transition: all 0.3s;
-          -o-transition: all 0.3s;
-          -webkit-transition: all 0.3s;
-          transition: all 0.3s;
-          &:hover {
-            color: $theme-orange;
-          }
-        }
-      }
-    }
-  }
-
-  .nav-tabs > li > a:before {
-    border-bottom: 2px solid $theme-orange;
-  }
-  .sidemenu-collapse i {
-    color: #fff;
-  }
 }
 /*Logo Header Background Color*/
 .logo-orange {
-  .navbar-header {
-    background-color: $theme-orange;
-  }
+    .navbar-header {
+        background-color: $theme-orange;
+    }
 }

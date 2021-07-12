@@ -1,0 +1,15 @@
+{
+    "ur_animation": {
+        "label": {
+            "category": "unified-red",
+            "tab": "Tab",
+            "size": "Size",
+            "name": "Name",
+            "template": "Template",
+            "expand": "Expand",
+            "viewport": "View",
+            "rules": "Rules",
+            "image": "Insert image"
+        }
+    }
+}

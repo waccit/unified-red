@@ -1,0 +1,10 @@
+{
+    "ur_schedule": {
+        "label": {
+            "category": "unified-red",
+            "name": "Name",
+            "events": "Events",
+            "values": "Values"
+        }
+    }
+}

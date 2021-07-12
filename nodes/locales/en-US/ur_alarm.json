@@ -1,0 +1,40 @@
+{
+    "ur_alarm": {
+        "label": {
+            "category": "unified-red",
+            "name": "Name",
+            "value": "Value",
+            "delayon": "On Delay",
+            "delayoff": "Off Delay",
+            "severity": "Severity",
+            "critical": "Critical Conditions",
+            "alert": "Alert Conditions",
+            "warning": "Warning Conditions",
+            "info": "Info Conditions",
+            "process": "Process by",
+            "checkall": "checking all rules",
+            "stopfirst": "stopping after first match",
+            "previous": "previous value",
+            "and": "and",
+            "ignorecase": "ignore case",
+            "ackreq": "Acknowledgement required"
+        },
+        "rules": {
+            "hask": "has key",
+            "btwn": "is between",
+            "cont": "contains",
+            "regex": "matches regex",
+            "true": "is true",
+            "false": "is false",
+            "null": "is null",
+            "nnull": "is not null",
+            "istype": "is of type",
+            "empty": "is empty",
+            "nempty": "is not empty",
+            "head": "head",
+            "index": "index between",
+            "tail": "tail",
+            "exp": "JSONata exp"
+        }
+    }
+}

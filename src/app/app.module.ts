@@ -12,16 +12,18 @@ import { PageLoaderComponent } from './layout/page-loader/page-loader.component'
 import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { RightSidebarComponent } from './layout/right-sidebar/right-sidebar.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
-import { DynamicScriptLoaderService } from './services/dynamic-script-loader.service';
 import { RightSidebarService } from './services/rightsidebar.service';
-import { SimpleDialogComponent } from './ui/modal/simpleDialog.component';
-import { DialogformComponent } from './ui/modal/dialogform/dialogform.component';
-import { BottomSheetOverviewExampleSheet } from './ui/bottom-sheet/bottom-sheet.component';
 import {
-  PerfectScrollbarModule,
-  PERFECT_SCROLLBAR_CONFIG,
-  PerfectScrollbarConfigInterface
+    PerfectScrollbarModule,
+    PERFECT_SCROLLBAR_CONFIG,
+    PerfectScrollbarConfigInterface,
 } from 'ngx-perfect-scrollbar';
+import { UsersModule } from './users/users.module';
+import { AuthenticationModule } from './authentication/authentication.module';
+import { JwtInterceptor } from './authentication/jwt.interceptor';
+import { ErrorInterceptor } from './authentication/error.interceptor';
+import { Page500Component } from './authentication/page500/page500.component';
+import { Page404Component } from './authentication/page404/page404.component';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -31,6 +33,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { NgxMaskModule } from 'ngx-mask';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -38,69 +41,86 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule } from '@angular/common/http';
-import { AdvanceTableService } from '../app/tables/advance-table/advance-table.service';
-import { AgmCoreModule } from '@agm/core';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { NgIdleModule } from '@ng-idle/core';
+import { FullCalendarModule } from '@fullcalendar/angular';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import { MenuEntityComponent } from './layout/sidebar/menu-entity/menu-entity.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MatStepperModule } from '@angular/material/stepper';
+import { InitialSetupModule } from './initial-setup/initial-setup.module';
+
+FullCalendarModule.registerPlugins([
+    // register FullCalendar plugins
+    dayGridPlugin,
+    timeGridPlugin,
+    interactionPlugin,
+]);
 
 const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
-  suppressScrollX: true,
-  wheelPropagation: false
+    suppressScrollX: true,
+    wheelPropagation: false,
 };
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    PageLoaderComponent,
-    SidebarComponent,
-    SimpleDialogComponent,
-    DialogformComponent,
-    BottomSheetOverviewExampleSheet,
-    RightSidebarComponent
-  ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    AppRoutingModule,
-    NgbModule,
-    HttpClientModule,
-    ReactiveFormsModule,
-    FormsModule,
-    PerfectScrollbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressBarModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatListModule,
-    MatSidenavModule,
-    MatButtonToggleModule,
-    MatCheckboxModule,
-    MatSlideToggleModule,
-    MatMenuModule,
-    NgxMaskModule.forRoot(),
-    AgmCoreModule.forRoot({
-      apiKey: 'YOUR API KEY'
-    })
-  ],
-  providers: [
-    { provide: LocationStrategy, useClass: HashLocationStrategy },
-    {
-      provide: PERFECT_SCROLLBAR_CONFIG,
-      useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG
-    },
-    DynamicScriptLoaderService,
-    RightSidebarService,
-    AdvanceTableService
-  ],
-  entryComponents: [
-    SimpleDialogComponent,
-    DialogformComponent,
-    BottomSheetOverviewExampleSheet
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        HeaderComponent,
+        PageLoaderComponent,
+        MenuEntityComponent,
+        SidebarComponent,
+        RightSidebarComponent,
+        Page500Component,
+        Page404Component,
+    ],
+    imports: [
+        BrowserModule,
+        BrowserAnimationsModule,
+        InitialSetupModule,
+        AuthenticationModule,
+        DashboardModule,
+        UsersModule,
+        AppRoutingModule,
+        NgbModule,
+        HttpClientModule,
+        ReactiveFormsModule,
+        FormsModule,
+        PerfectScrollbarModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressBarModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatListModule,
+        MatSidenavModule,
+        MatSnackBarModule,
+        MatStepperModule,
+        MatButtonToggleModule,
+        MatCheckboxModule,
+        MatSlideToggleModule,
+        MatMenuModule,
+        NgxMaskModule.forRoot(),
+        NgIdleModule.forRoot(),
+        FullCalendarModule,
+        NgxChartsModule,
+    ],
+    providers: [
+        { provide: LocationStrategy, useClass: HashLocationStrategy },
+        {
+            provide: PERFECT_SCROLLBAR_CONFIG,
+            useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
+        },
+        RightSidebarService,
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    ],
+    entryComponents: [],
+    bootstrap: [AppComponent],
 })
 export class AppModule {}

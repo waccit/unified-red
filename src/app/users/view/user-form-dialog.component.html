@@ -1,0 +1,139 @@
+<div class="addContainer">
+    <div class="modalHeader">
+        <div class="editRowModal">
+            <div class="modalHeader clearfix">
+                <div class="modal-about">
+                    <div class="font-weight-bold p-t-5 p-l-10 font-17">{{title}}</div>
+                </div>
+            </div>
+        </div>
+        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div mat-dialog-content>
+        <form class="register-form m-4" [formGroup]="form" (ngSubmit)="submit()">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Username</mat-label>
+                        <input matInput formControlName="username" required>
+                        <mat-icon matSuffix>face</mat-icon>
+                        <mat-error *ngIf="form.get('username').hasError('required') || form.get('username').touched">
+                            Please enter a valid username
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Email</mat-label>
+                        <input matInput formControlName="email" required>
+                        <mat-icon matSuffix>email</mat-icon>
+                        <mat-error *ngIf="form.get('email').hasError('required') || form.get('email').touched">
+                            Please enter a valid email address
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row" *ngIf="action !== 'edit'">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Password</mat-label>
+                        <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" required>
+                        <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        <mat-error *ngIf="form.get('password').hasError('required')">Password is required
+                        </mat-error>
+                        <mat-error *ngIf="form.get('password').hasError('passwordStrength')">
+                            {{ form.get('password').errors['passwordStrength'] }}</mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Confirm Password</mat-label>
+                        <input matInput formControlName="cpassword" [type]="chide ? 'password' : 'text'" required>
+                        <mat-icon matSuffix (click)="chide = !chide">{{chide ? 'visibility_off' : 'visibility'}}
+                        </mat-icon>
+                        <mat-error *ngIf="form.get('cpassword').hasError('required')">Confirm Password is required
+                        </mat-error>
+                        <mat-error *ngIf="form.get('cpassword').hasError('mustMatch')">Passwords must match
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>First Name</mat-label>
+                        <input matInput formControlName="firstName" required>
+                        <mat-icon matSuffix>face</mat-icon>
+                        <mat-error *ngIf="form.get('firstName').hasError('required')">First name is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Last Name</mat-label>
+                        <input matInput formControlName="lastName" required>
+                        <mat-icon matSuffix>face</mat-icon>
+                        <mat-error *ngIf="form.get('lastName').hasError('required')">Last name is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Expiration date (optional)</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="expirationDate"
+                            placeholder="mm/dd/yyyy" mask="00/00/0000">
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker touchUi></mat-datepicker>
+                        <mat-error *ngIf="form.get('expirationDate').hasError('required')">
+                            Please select date
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mt-3 mb-2">
+                    <mat-slide-toggle formControlName="enabled" color="primary">Account Enabled</mat-slide-toggle>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Role</mat-label>
+                        <select matNativeControl formControlName="role" required>
+                            <option *ngFor="let role of roles" [value]="role.level">{{ role.name }}</option>
+                        </select>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Session Expiration</mat-label>
+                        <input matInput type="number" formControlName="sessionExpiration">
+                        <span matSuffix>days</span>
+                        <mat-hint>Leave blank to never expire session</mat-hint>
+                    </mat-form-field>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
+                    <mat-form-field class="example-full-width" appearance="outline">
+                        <mat-label>Inactivity Logout</mat-label>
+                        <input matInput type="number" formControlName="sessionInactivity">
+                        <span matSuffix>mins</span>
+                        <mat-hint>Leave blank to disable inactivity logout</mat-hint>
+                    </mat-form-field>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 mb-2">
+                    <div class="example-button-row">
+                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
+                            [mat-dialog-close]="form.getRawValue()" (click)="confirm()">Save</button>
+                        <button mat-raised-button color="warn" (click)="dialogRef.close()" tabindex="-1">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

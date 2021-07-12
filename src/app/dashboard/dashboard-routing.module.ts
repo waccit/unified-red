@@ -1,31 +1,44 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MainComponent } from './main/main.component';
-import { Dashboard2Component } from './dashboard2/dashboard2.component';
-import { Dashboard3Component } from './dashboard3/dashboard3.component';
+import { PageComponent } from './page/page.component';
+import { AuthGuard } from '../authentication/auth.guard';
+import { HomePageComponent } from './home-page/home-page.component';
+import { Role } from '../data';
+import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
+import { AuditLogComponent } from './audit-log/audit-log.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'main',
-    pathMatch: 'full'
-  },
-  {
-    path: 'main',
-    component: MainComponent
-  },
-  {
-    path: 'dashboard2',
-    component: Dashboard2Component
-  },
-  {
-    path: 'dashboard3',
-    component: Dashboard3Component
-  }
+    {
+        path: 'd',
+        canActivate: [AuthGuard],
+        children: [
+            {
+                path: '',
+                component: HomePageComponent,
+                pathMatch: 'full',
+            },
+            {
+                path: '**',
+                component: PageComponent,
+            },
+        ],
+    },
+    {
+        path: 'alarm-console',
+        component: AlarmConsoleComponent,
+        canActivate: [AuthGuard],
+        data: { roles: Role.Level1 },
+    },
+    {
+        path: 'audit-log',
+        component: AuditLogComponent,
+        canActivate: [AuthGuard],
+        data: { roles: Role.Level5 },
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class DashboardRoutingModule {}

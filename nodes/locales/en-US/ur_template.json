@@ -1,0 +1,18 @@
+{
+    "ur_template": {
+        "label": {
+            "category": "unified-red",
+            "type": "Template type",
+            "local": "Widget in tab",
+            "global": "Added to site <head> section",
+            "tab": "Tab",
+            "size": "Size",
+            "name": "Name",
+            "pass-through": "Pass through messages from input.",
+            "store-state": "Add output messages to stored state.",
+            "template": "Template",
+            "expand": "Expand",
+            "resend": "Reload last value on refresh."
+        }
+    }
+}

@@ -1,79 +1,257 @@
 .gu-mirror {
-  position: fixed !important;
-  margin: 0 !important;
-  z-index: 9999 !important;
-  opacity: 0.8;
-  filter: alpha(opacity=80);
-}
-.gu-hide {
-  display: none !important;
-}
-.gu-unselectable {
-  //Instead of the line below you could use @include user-select($select)
-  user-select: none !important;
-}
-.gu-transit {
-  opacity: 0.2;
-  filter: alpha(opacity=20);
-}
-.taskbar {
-  .checked {
-    border: 3px solid #dda500 !important;
+    position: fixed !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
   }
-
-  .box {
-    padding-bottom: 7px;
-    .task-name {
-      font-size: 18px;
-      font-weight: 600;
-      color: green;
+  
+  .gu-hide {
+    display: none !important;
+  }
+  
+  .gu-unselectable {
+    //Instead of the line below you could use @include user-select($select)
+    user-select: none !important;
+  }
+  
+  .gu-transit {
+    opacity: 0.2;
+    filter: alpha(opacity=20);
+  }
+  
+  .taskbar {
+    .checked {
+      border: 3px solid #dda500 !important;
     }
-    .task-desc {
-      font-size: 1.1em;
-      color: #555;
+  
+    .box {
+      padding-bottom: 7px;
+  
+      .task-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: green;
+      }
+  
+      .task-desc {
+        font-size: 1.1em;
+        color: #555;
+      }
+  
+      .task-deadline {
+        margin-top: 5px;
+        margin-right: 5px;
+        font-size: 0.8em;
+        color: #555;
+      }
     }
-    .task-deadline {
-      margin-top: 5px;
-      margin-right: 5px;
-      font-size: 0.8em;
-      color: #555;
+  
+    .done div.box {
+      pointer-events: none;
+  
+      .tasks {
+        color: #fff !important;
+      }
+    }
+  
+    .avatar-image {
+      display: inline-block;
+      position: relative;
+    }
+  
+    .task-header {
+      text-align: center;
+      font-size: 25px;
+      padding: 20px;
+      color: #6b6a6a;
+    }
+  
+    .card-footer {
+      background: #fff !important;
+      border-radius: 0px 0px 10px 10px;
+  
+      .progress {
+        height: 5px;
+      }
     }
   }
-  .done div.box {
-    pointer-events: none;
-    .tasks {
-      color: #fff !important;
-    }
+  
+  .pad {
+    padding-left: 0;
+    padding-right: 0;
+    display: flex;
   }
-  .avatar-image {
-    display: inline-block;
-    position: relative;
-  }
-  .task-header {
+  
+  .move {
     text-align: center;
-    font-size: 25px;
-    padding: 20px;
-    color: #6b6a6a;
-  }
-  .card-footer {
-    background: #fff !important;
-    border-radius: 0px 0px 10px 10px;
-    .progress {
-      height: 5px;
+    background: #eee;
+  
+    .btn {
+      margin-bottom: 20px;
     }
   }
-}
-
-.pad {
-  padding-left: 0;
-  padding-right: 0;
-  display: flex;
-}
-
-.move {
-  text-align: center;
-  background: #eee;
-  .btn {
-    margin-bottom: 20px;
+  
+  .task-module {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    min-height: 100%;
+  
+    .mat-drawer.mat-drawer-end {
+      width: 500px;
+      min-width: 500px;
+      border: 1px solid #dcd6d6;
+    }
+  
+    .task-header {
+      display: flex;
+      flex: 0 1 auto;
+      align-items: center;
+      margin: 10px 0px 23px 0px;
+    }
+  
+    .header-button {
+      margin-left: auto;
+    }
   }
-}
+  
+  .task-container {
+    .header {
+      .header-title {
+        margin: 0px 0px 0px 5px;
+      }
+  
+      .header-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        list-style: none;
+      }
+    }
+  
+  }
+  
+  .task-list {
+    width: 100%;
+    max-width: 100%;
+    border: solid 1px #ccc;
+    min-height: 60px;
+    display: block;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+  
+    .task-user-img {
+      height: 30px;
+      width: 30px;
+      position: relative;
+      margin-left: 30px;
+      border-radius: 50%;
+    }
+  
+    .task-date {
+      margin-left: 30px;
+    }
+  
+    .lbl-low {
+      display: inline-flex;
+      vertical-align: middle;
+    }
+  
+    .lbl-high {
+      display: inline-flex;
+      vertical-align: middle;
+    }
+  
+    .lbl-normal {
+      display: inline-flex;
+      vertical-align: middle;
+    }
+  
+    .task-low {
+      color: #0bc53a;
+      position: relative;
+      margin-left: auto;
+    }
+  
+    .task-high {
+      color: #f9683a;
+      position: relative;
+      margin-left: auto;
+    }
+  
+    .task-normal {
+      color: #868688;
+      position: relative;
+      margin-left: auto;
+    }
+  
+  }
+  
+  .task-box {
+    padding: 10px 10px;
+    border-bottom: solid 1px #ccc;
+    color: rgba(0, 0, 0, 0.87);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    // justify-content: space-between;
+    box-sizing: border-box;
+    cursor: move;
+    background: white;
+    font-size: 14px;
+  
+    .mat-checkbox {
+      margin-bottom: -5px;
+    }
+  
+    &:hover {
+      cursor: pointer;
+    }
+  }
+  
+  .cdk-drag-preview {
+    box-sizing: border-box;
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+      0 8px 10px 1px rgba(0, 0, 0, 0.14),
+      0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  }
+  
+  .cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  
+  .task-box:last-child {
+    border: none;
+  }
+  
+  .task-list.cdk-drop-list-dragging .task-box:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  
+  .task-custom-placeholder {
+    background: #ccc;
+    border: dotted 3px #999;
+    min-height: 60px;
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+  }
+  
+  .task-handle {
+    color: #ccc;
+    cursor: move;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .done {
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  
+  .mat-list-item-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }

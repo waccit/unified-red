@@ -1,0 +1,222 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_button', {
+        category: 'unified-red',
+        color: 'rgb(176, 223, 227)',
+        defaults: {
+            name: { value: '' },
+            tab: { type: 'ur_tab', required: true },
+            order: { value: 0 },
+            width: { value: 12 },
+            height: { value: 0 },
+            passthru: { value: false },
+            label: { value: 'button' },
+            tooltip: { value: '' },
+            color: { value: '' },
+            bgcolor: { value: '' },
+            icon: { value: '' },
+            payload: {
+                value: '',
+                validate: RED.validators.hasOwnProperty('typedInput')
+                    ? RED.validators.typedInput('payloadType')
+                    : function (v) {
+                          return true;
+                      },
+            },
+            payloadType: { value: 'str' },
+            topic: { value: '' },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        inputs: 1,
+        outputs: 1,
+        outputLabels: function () {
+            if (this.payloadType === 'str') {
+                return this.payload;
+            } else {
+                return this.payloadType;
+            }
+        },
+        icon: 'ur_button.png',
+        paletteLabel: 'button',
+        label: function () {
+            return this.name || (~this.label.indexOf('\{\{') ? null : this.label) || 'button';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+            });
+            $('#node-input-payload').typedInput({
+                default: 'str',
+                typeField: $('#node-input-payloadType'),
+                types: ['str', 'num', 'bool', 'json', 'bin', 'date', 'flow', 'global'],
+            });
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_button">
+    <div class="form-row">
+        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
+        <input type="text" id="node-input-tab" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-icon"><i class="fa fa-picture-o"></i> Icon</label>
+        <input type="text" id="node-input-icon" placeholder="optional icon " />
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="optional label" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
+        <input type="text" id="node-input-tooltip" placeholder="optional tooltip" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-color"><i class="fa fa-tint"></i> Color</label>
+        <input type="text" id="node-input-color" placeholder="optional text/icon color" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-bgcolor"><i class="fa fa-tint"></i> Background</label>
+        <input type="text" id="node-input-bgcolor" placeholder="optional background color" />
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-payload"><i class="fa fa-envelope-o"></i> When clicked, send:</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-payload" style="padding-left: 25px; margin-right: -25px">Payload</label>
+        <input type="text" id="node-input-payload" style="width:70%" />
+        <input type="hidden" id="node-input-payloadType" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic" style="padding-left: 25px; margin-right: -25px">Topic</label>
+        <input type="text" id="node-input-topic" />
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-passthru"
+            ><i class="fa fa-arrow-right"></i> If <code>msg</code> arrives on input, emulate a button click:
+        </label>
+        <input type="checkbox" id="node-input-passthru" style="display:inline-block; width:auto; vertical-align:top;" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center"
+            ><i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label
+        >
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ur_button">
+    <p>Adds a button to the user interface.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">any</span></dt>
+        <dd>any value triggers a button click</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>the MQTT topic to publish to.</dd>
+        <dt class="optional">enable <span class="property-type">boolean</span></dt>
+        <dd>disables the input when set to false</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>new value sent by a button click</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>message topic associated with the new value</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>
+        Clicking the button generates a message with <code>msg.payload</code> set to the <b>Payload</b> field. If no
+        payload is specified, the node id is used. If set to ‘pass through mode’, an arriving <code>msg.payload</code> 
+        will act like pressing the button. The output payload will be as defined in the node configuration.
+    </p>
+    <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the button.</p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+    
+    <p>
+        <b>Icon</b> can be defined as a <a href="https://material.io/resources/icons/" target="_blank">Material icon</a>
+        <i>e.g. 'check', 'close'</i> 
+        <!-- or a <a href="https://fontawesome.com/v4.7.0/icons/" target="_blank">Font Awesome icon</a> <i>(e.g. 'fa-fire')</i> -->
+        .
+        You can use the full set of Google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
+    </p>
+    <p><b>Colors</b> of the text and background may be set.</p>
+    <p><b>Label</b> is the button text.</p>
+    <p>
+        <b>Label</b> is the button text. Label can also be a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the button text.
+    </p>
+
+    <p><b>Topic</b> is added to the message as <code>msg.topic</code> when provided.</p>
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>

@@ -1,0 +1,211 @@
+<script type="text/javascript">
+    RED.nodes.registerType('ur_text_input', {
+        category: 'unified-red',
+        color: 'rgb(176, 223, 227)',
+        defaults: {
+            name: { value: '' },
+            label: { value: '' },
+            format: { value: '{{msg.payload.value}}' },
+            tooltip: { value: '' },
+            tab: { type: 'ur_tab', required: true },
+            order: { value: 0 },
+            width: { value: 12 },
+            height: { value: 0 },
+            passthru: { value: false },
+            mode: { value: 'text', required: true },
+            delay: { value: 0, validate: RED.validators.number() },
+            topic: { value: '' },
+            topicPattern: { value: '' },
+            access: { value: '' },
+            accessBehavior: { value: '' },
+        },
+        inputs: 1,
+        outputs: 1,
+        outputLabels: function () {
+            return this.mode;
+        },
+        icon: 'ur_text.png',
+        paletteLabel: 'text input',
+        label: function () {
+            return this.name || (~this.label.indexOf('\{\{') ? null : this.label) || this.mode + ' input';
+        },
+        labelStyle: function () {
+            return this.name ? 'node_label_italic' : '';
+        },
+        oneditprepare: function () {
+            $('#node-input-size').elementSizer({
+                width: '#node-input-width',
+            });
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="ur_text_input">
+    <div class="form-row">
+        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
+        <input type="text" id="node-input-tab">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> Size</label>
+        <input type="hidden" id="node-input-width">
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
+        <input type="text" id="node-input-label">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-i-cursor"></i> Value format</label>
+        <input type="text" id="node-input-format" placeholder="{{msg.payload.value}}" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
+        <input type="text" id="node-input-tooltip" placeholder="optional tooltip">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-keyboard-o"></i> Mode</label>
+        <select style="width:128px" id="node-input-mode">
+            <option value="text">text input</option>
+            <option value="email">email address</option>
+            <option value="password">password</option>
+            <option value="number">number</option>
+            <option value="tel">telephone input</option>
+            <option value="color">color picker</option>
+            <option value="time">time picker</option>
+            <option value="week">week picker</option>
+            <option value="month">month picker</option>
+        </select>
+        <label for="node-input-delay" style="text-align:right; width:100px"><i class="fa fa-clock-o"></i> Delay (ms)</label>
+        <input type="text" style="width:58px" id="node-input-delay">
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-passthru"><i class="fa fa-arrow-right"></i> If <code>msg</code> arrives on input, pass through to output: </label>
+        <input type="checkbox" id="node-input-passthru" style="display:inline-block; width:auto; vertical-align:top;">
+    </div>
+    <div class="form-row">
+        <label style="width:auto" for="node-input-payload"><i class="fa fa-envelope-o"></i> When changed, send:</label>
+    </div>
+    <div class="form-row">
+        <label style="padding-left: 25px; margin-right: -25px">Payload</label>
+        <label style="width:auto">Current value</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic" style="padding-left: 25px; margin-right: -25px">Topic</label>
+        <input type="text" id="node-input-topic">
+    </div>
+    <div class="form-row" id="topic-pattern">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center">
+            <i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern</label>
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-access"><i class="fa fa-lock"></i> Access</label>
+        <select id="node-input-access" style="width: 35%">
+            <option value="">Default</option>
+            <option value="1">Level 1 Viewer</option>
+            <option value="2">Level 2 Limited Operator</option>
+            <option value="3">Level 3 Standard Operator</option>
+            <option value="4">Level 4 IT Operator</option>
+            <option value="5">Level 5 Security Operator</option>
+            <option value="6">Level 6 (reserved)</option>
+            <option value="7">Level 7 (reserved)</option>
+            <option value="8">Level 8 (reserved)</option>
+            <option value="9">Level 9 Tech</option>
+            <option value="10">Level 10 Admin</option>
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
+            <option value="hide">Show/Hide</option>
+            <option value="disable">Enable/Disable</option>
+        </select>
+    </div>
+    <div class="form-tips">Setting <b>Delay</b> to 0 waits for Enter or Tab key, to send input.</span></div>
+</script>
+
+<script type="text/html" data-help-name="ur_text_input">
+    <p>Adds a text input field to the user interface.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>updates the text field value based on the provided <b>Value Format</b></dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>the MQTT topic to publish to.</dd>
+        <dt class="optional">enable <span class="property-type">boolean</span></dt>
+        <dd>disables the input when set to false</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">string</span></dt>
+        <dd>new value provided from text input field</dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>message topic associated with the new value</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>
+        Any input is sent as <code>msg.payload</code>. If set to ‘pass through mode’, an arriving
+        <code>msg.payload</code> will be used if it is different from the existing text in the input field. This allows
+        you to preset the text of the input field.
+    </p>
+    <p>Setting <code>msg.enabled</code> to <code>false</code> will disable the input.</p>
+
+    <!-- TAB / SIZE 2020-12-30 - START -->
+    <p>
+        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+        interface layout.
+    </p>
+    <p>
+        <b>Size</b> controls the widget width using
+        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+    </p>
+    <!-- TAB / SIZE 2020-12-30 - END -->
+
+    <p><b>Name</b> is the name of a node in the workspace.</p>
+    <p>
+        <b>Label</b> provides a description of the text field in the user interface. Label can also be a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the label text.
+    </p>
+    <p>
+        <b>Value Format</b> is a
+        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>
+        used to evaluate the value displayed in the text field.
+    </p>
+    <p><b>Mode</b> can be regular text, number, password, email, color picker, or date picker.
+        <p>Not all browsers support the <i>time</i>, <i>week</i>, and <i>month</i> input types, and may return 
+            <i>undefined</i>. Please test your target browser(s) before use.</p>
+    </p>
+    <p><b>Delay</b> <i>(default : 0ms)</i> sets the amount of time in milliseconds before the output is sent.
+        When set to <code>0</code>, the payload is sent when you change the value and click out of the input field.
+    </p>
+    <p><b>Topic</b> is added to the message as <code>msg.topic</code> when provided.</p>
+
+    <!-- TOPIC PATTERN 2021-02-07 - START -->
+    <p>
+        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+    </p>
+    <!-- TOPIC PATTERN 2021-02-07 - END -->
+
+    <!-- ACCESS 2021-01-17 - START -->
+    <p>
+        <b>Access</b> controls the user's read/write access to this widget based on 
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+    </p>
+    <p>
+        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+        <code>enable/disable</code> the text field.
+    </p>
+    <!-- ACCESS 2021-01-17 - END -->
+
+    <!-- <h3>References</h3>
+    <ul>
+        <li></li>
+    </ul> -->
+</script>

@@ -1,46 +1,36 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { SigninComponent } from './signin/signin.component';
-import { SignupComponent } from './signup/signup.component';
+import { RouterModule, Routes } from '@angular/router';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
-import { LockedComponent } from './locked/locked.component';
-import { Page404Component } from './page404/page404.component';
-import { Page500Component } from './page500/page500.component';
+import { LoginComponent } from './login/login.component';
+import { RegisterComponent } from './register/register.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'signin',
-    pathMatch: 'full'
-  },
-  {
-    path: 'signin',
-    component: SigninComponent
-  },
-  {
-    path: 'signup',
-    component: SignupComponent
-  },
-  {
-    path: 'forgot-password',
-    component: ForgotPasswordComponent
-  },
-  {
-    path: 'locked',
-    component: LockedComponent
-  },
-  {
-    path: 'page404',
-    component: Page404Component
-  },
-  {
-    path: 'page500',
-    component: Page500Component
-  }
+    {
+        path: 'authentication',
+        children: [
+            {
+                path: 'login',
+                component: LoginComponent,
+            },
+            {
+                path: 'register',
+                component: RegisterComponent,
+            },
+            {
+                path: 'forgot-password',
+                component: ForgotPasswordComponent,
+            },
+            {
+                path: 'reset-password/:resetToken',
+                component: ResetPasswordComponent,
+            },
+        ]
+    },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule],
 })
 export class AuthenticationRoutingModule {}
