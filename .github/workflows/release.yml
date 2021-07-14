@@ -1,13 +1,13 @@
 # prettier-ignore
-name: Release
+name: Build and Deploy
 on:
   push:
      branches:
         - master
 
 jobs:
-  release:
-    name: Release
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,11 +15,28 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: '12.x'
       - name: Install Dependencies
         run: npm ci
       - name: Build
-        run: npm run-script build
+        run: npm run-script build:prod
+      - name: Archive Build
+        if: success()
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: dist
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Download Build
+        uses: actions/download-artifact@v1
+        with:
+          name: dist
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

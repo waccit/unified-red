@@ -1,11 +1,14 @@
 {
     "name": "unified-red",
     "version": "0.0.0",
-    "keywords": ["node-red"],
+    "keywords": [
+        "node-red"
+    ],
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
-        "build": "ng build --prod",
+        "build": "ng build",
+        "build:prod": "ng build --prod",
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e"
@@ -16,6 +19,21 @@
             "master"
         ]
     },
+    "files": [
+        "api/*",
+        "audit/*",
+        "nodes/*",
+        "src/*",
+        "static/*",
+        "admin-auth.js",
+        "index.js",
+        "LICENSE",
+        "monitor.js",
+        "socket.js",
+        "ui.js",
+        "dist/*",
+        "api/config.json"
+    ],
     "contributors": [
         {
             "name": "Nick Lee",
