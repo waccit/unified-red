@@ -1,11 +1,11 @@
 .DS_STORE
 
-# dist
+dist
 *.log
 node_modules
 .vscode
 static/img
-# api/config.json
+api/config.json
 
 *_BKUP.*
 unified-red-uid
