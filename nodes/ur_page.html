@@ -317,14 +317,15 @@
                                     let arrValues = rawToArr(rawValues);
 
                                     var paramRow = $('<div>', {
-                                        class: 'node-input-instance-parameter-' + index + '-' + i,
+                                        class: 'node-input-instance-parameter',
+                                        id: 'node-input-instance-parameter-' + index + '-' + idx,
                                     })
                                         .css({ display: 'flex', 'justify-content': 'space-evenly', padding: 0 })
                                         .appendTo(container);
 
                                     var instParamVarInputField = $('<input/>', {
                                         class: 'node-config-input-instance-parameter-variable',
-                                        id: 'instance-parameter-variable-' + index + '-' + i,
+                                        id: 'instance-parameter-variable-' + index + '-' + idx,
                                         type: 'text',
                                         placeholder: 'variable',
                                     })
@@ -333,7 +334,7 @@
 
                                     var instParamValInputField = $('<input/>', {
                                         class: 'node-config-input-instance-parameter-value',
-                                        id: 'instance-parameter-values-' + index + '-' + i,
+                                        id: 'instance-parameter-values-' + index + '-' + idx,
                                         type: 'text',
                                         placeholder: 'values',
                                     })
@@ -432,9 +433,11 @@
                 instances.each(function (index, inst) {
                     let container = $(this);
 
-                    let parameters = $('#node-config-input-instance-parameters-list-' + index).editableList('items');
+                    let parameters = container
+                        .find('.node-config-input-instance-parameters-list')
+                        .editableList('items');
 
-                    let rawNames = container.find('#instance-name-' + index).val();
+                    let rawNames = container.find('.node-config-input-instance-name').val();
                     let namesArr = rawToArr(rawNames);
 
                     let rawParams = [];
@@ -442,14 +445,12 @@
 
                     // build rawParams
                     parameters.each((i, p) => {
-                        let rawParamVar = $(this)
-                            .find('#instance-parameter-variable-' + index + '-' + i)
-                            .val();
-                        let rawParamVals = $(this)
-                            .find('#instance-parameter-values-' + index + '-' + i)
-                            .val();
+                        let rawParamVar = p.find('.node-config-input-instance-parameter-variable').val();
+                        let rawParamVals = p.find('.node-config-input-instance-parameter-value').val();
 
-                        rawParams.push({ variable: rawParamVar, values: rawParamVals });
+                        if (rawParamVar && rawParamVals) {
+                            rawParams.push({ variable: rawParamVar, values: rawParamVals });
+                        }
                     });
 
                     // build paramsArr
@@ -457,16 +458,12 @@
                         let paramObj = {};
 
                         parameters.each((ii, p) => {
-                            let rawParamVar = $(this)
-                                .find('#instance-parameter-variable-' + index + '-' + ii)
-                                .val();
-                            let rawParamVals = rawToArr(
-                                $(this)
-                                    .find('#instance-parameter-values-' + index + '-' + ii)
-                                    .val()
-                            );
+                            let rawParamVar = p.find('.node-config-input-instance-parameter-variable').val();
+                            let rawParamVals = rawToArr(p.find('.node-config-input-instance-parameter-value').val());
 
-                            paramObj[rawParamVar] = rawParamVals[i];
+                            if (rawParamVar && rawParamVals) {
+                                paramObj[rawParamVar] = rawParamVals[i];
+                            }
                         });
 
                         paramsArr.push(paramObj);
@@ -474,7 +471,7 @@
 
                     let i = {
                         names: {
-                            input: container.find('#instance-name-' + index).val(),
+                            input: rawNames,
                             _arr: [...namesArr],
                         },
                         param: {
