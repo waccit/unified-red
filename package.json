@@ -1,6 +1,7 @@
 {
     "name": "unified-red",
     "version": "0.0.0",
+    "description": "A set of nodes in Node-RED to create a customizable building automation user interface or HMI",
     "keywords": [
         "node-red"
     ],
