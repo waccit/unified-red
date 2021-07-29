@@ -34,7 +34,28 @@
                 <div class="overlay overlay-card" *ngIf="!this.disabled && tabs.length === 1 && tabs[0].disabled"></div>
                 <ng-template group-host></ng-template>
             </ng-container>
-            <mat-tab-group *ngIf="tabs.length > 1">
+            <div *ngIf="tabs.length > 1" style="float: right">
+                <ul class="header-dropdown m-r--5" style="width: 5px; margin-left: -7px; margin-top: 20px">
+                    <li class="dropdown">
+                        <a
+                            href="#"
+                            onClick="return false;"
+                            data-toggle="dropdown"
+                            role="button"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                        >
+                            <mat-icon color="primary">more_vert</mat-icon>
+                        </a>
+                        <ul class="dropdown-menu pull-right">
+                            <li *ngFor="let tab of tabs; index as i" style="display: inline;">
+                                <a style="cursor: pointer" (click)="changeTab(i)">{{ tab.header }}</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <mat-tab-group *ngIf="tabs.length > 1" [selectedIndex]="selectedTab">
                 <mat-tab *ngFor="let tab of tabs" label="{{ tab.header }}">
                     <ng-template matTabContent>
                         <div class="overlay" *ngIf="tab.disabled && !this.disabled"></div>
@@ -43,7 +64,6 @@
                         </ng-container>
                     </ng-template>
                 </mat-tab>
-                <!-- <ng-template group-host></ng-template> -->
             </mat-tab-group>
         </div>
     </div>
