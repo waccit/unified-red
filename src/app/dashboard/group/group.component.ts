@@ -26,6 +26,7 @@ export class GroupComponent implements OnInit, OnDestroy {
     disabled: boolean;
     @ViewChild(GroupDirective, { static: true }) groupHost: GroupDirective;
     private userRole;
+    selectedTab: number;
 
     constructor(
         private componentFactoryResolver: ComponentFactoryResolver,
@@ -58,6 +59,8 @@ export class GroupComponent implements OnInit, OnDestroy {
         if (this.tabs && this.tabs.length < 2) {
             this.loadTab();
         }
+
+        this.selectedTab = 0;
     }
 
     ngOnDestroy(): void {
@@ -84,5 +87,9 @@ export class GroupComponent implements OnInit, OnDestroy {
                 this.renderer2.addClass(componentRef.location.nativeElement, colClass);
             });
         }
+    }
+
+    changeTab(tabIndex: number) {
+        this.selectedTab = tabIndex;
     }
 }

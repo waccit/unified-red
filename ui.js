@@ -527,7 +527,7 @@ function init(server, app, log, redSettings) {
     if (uiSettings.hasOwnProperty('path') && typeof uiSettings.path === 'string') {
         settings.path = uiSettings.path;
     } else {
-        settings.path = '/';
+        settings.path = '/ui'; // We must not be installed so default to Node-RED's UI folder
     }
     if (uiSettings.hasOwnProperty('readOnly') && typeof uiSettings.readOnly === 'boolean') {
         settings.readOnly = uiSettings.readOnly;

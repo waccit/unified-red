@@ -24,10 +24,10 @@ function init(_log, _settings) {
 async function isInstalled() {
     if (
         settings &&
-        settings.adminAuth &&
+        settings.adminAuth && settings.adminAuth.isUnified &&
         settings.httpStatic &&
         settings.httpAdminRoot && settings.httpAdminRoot === '/admin/' &&
-        settings.httpRoot === '/' &&
+        (!settings.httpRoot || settings.httpRoot === '/') &&
         settings.ui && settings.ui.path && settings.ui.path === '/' &&
         config &&
         config.dbConnection &&
@@ -67,14 +67,41 @@ async function install(setup) {
 
         // Add settings to Node-RED settings file
         let data = fs.readFileSync(settings.settingsFile, { encoding: 'utf8' });
-        if (!settings.adminAuth || setup.adminAuthPath) {
+        if ((!settings.adminAuth || !settings.adminAuth.isUnified) || setup.adminAuthPath) {
             log.info('Self-installing Unified-RED adminAuth hook on ' + settings.settingsFile);
             let defaultAdminAuthPath = path.resolve(__dirname + '/../../admin-auth');
             let adminAuthPath = setup.adminAuthPath || defaultAdminAuthPath;
-            data = data.replace(
-                /(\/\/[\s]*)?(adminAuth[\s]*\:.*\n)/i,
-                'adminAuth: require("' + adminAuthPath + '"),\n// $2'
-            );
+            let findAdminAuth = (str) => {
+                try {
+                    let adminAuthRegex = /\s+adminAuth\s*:\s*\{/gi;
+                    let matches = adminAuthRegex.exec(str);
+                    if (matches.length) {
+                        let start = str.search(adminAuthRegex);
+                        let firstBrace = start + matches[0].length;
+                        let stack = [firstBrace];
+                        let i = firstBrace;
+                        for (; i < str.length; i++) {
+                            let c = str.charAt(i);
+                            if (c === '{') {
+                                stack.push(i);
+                            }
+                            else if (c === '}') {
+                                stack.pop();
+                                if (!stack.length) {
+                                    break;
+                                }
+                            }
+                        }
+                        return { start: start, end: i+1 };
+                    }
+                }
+                catch (ignore) {}
+            };
+            let pos = findAdminAuth(data);
+            if (pos && typeof pos.start !== 'undefined' && typeof pos.end !== 'undefined') {
+                let commentedAdminAuth = data.substring(pos.start, pos.end).replace(/[\n\r]+/g, "\n//");
+                data = data.substring(0, pos.start) + '\n    adminAuth: require("' + adminAuthPath + '"),' + commentedAdminAuth + data.substring(pos.end);
+            }
         }
         if (!settings.httpStatic || setup.staticPath || settings.httpStatic === '/usr/bin/apollo/node-red/js') {
             log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
