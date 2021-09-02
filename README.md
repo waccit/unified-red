@@ -31,7 +31,7 @@ To install the stable version:
     ```
     npm i unified-red
     ```
--   Restart your Node-RED instance and you should have UI nodes available in the palette and a new `dashboard` tab in the
+-   Restart your Node-RED instance and you should have UI nodes available in the palette and a new `Unified-RED` tab in the
     right side panel.
 -   Continue to the user interface at <http://localhost:1880/ui> (if the default settings are used) to complete the initial setup.
 
@@ -49,7 +49,7 @@ For a typical installation, the initial setup provides you with everything you n
     ```
     or on the Dialog SmartServer IoT:
     ```json
-    adminAuth: require("/media/sdcard/unified-red/admin-auth"),
+    adminAuth: require("/media/sdcard/data/unified-red/admin-auth"),
     ```
 -   **Static Web Files** - The `httpStatic` setting is used (and required) to include static files (CSS, JS, image, etc) into the web interface. For example, on a Linux machine:
     ```json
@@ -57,7 +57,7 @@ For a typical installation, the initial setup provides you with everything you n
     ```
     or on the Dialog SmartServer IoT:
     ```json
-    httpStatic: "/media/sdcard/unified-red/static/",
+    httpStatic: "/media/sdcard/data/unified-red/static/",
     ```
 
 ### Unified-RED's config.json File
