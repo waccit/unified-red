@@ -38,4 +38,3 @@ Please provide any relevant information about your setup. This is important in c
 
 **Additional context**
 Add any other context about the problem here.
-
