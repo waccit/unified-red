@@ -15,7 +15,8 @@ module.exports = {
     // reauthenticating with Node-RED or logging in and out of Unified-RED.
     // TODO: Revoke Node-RED JWT token whenever Unified-RED JWT token expires.
     sessionExpiryTime: 365*86400, // expire Node-RED token after 1 year
-    
+
+    isUnified: true,
     type: 'credentials',
     users: function (username) {
         return new Promise(function (resolve) {
