@@ -73,7 +73,7 @@ async function install(setup) {
             let adminAuthPath = setup.adminAuthPath || defaultAdminAuthPath;
             let findAdminAuth = (str) => {
                 try {
-                    let adminAuthRegex = /\s+adminAuth\s*:\s*\{/gi;
+                    let adminAuthRegex = /\s+(\/\/[\s]*)?adminAuth\s*:\s*\{/gi;
                     let matches = adminAuthRegex.exec(str);
                     if (matches.length) {
                         let start = str.search(adminAuthRegex);
