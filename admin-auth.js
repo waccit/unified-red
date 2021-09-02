@@ -7,6 +7,7 @@
 
 const http = require('http');
 const https = require('https');
+let USE_HTTPS = false;
 
 module.exports = {
     
@@ -34,8 +35,10 @@ module.exports = {
                 path: '/api/users/authenticate',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Content-Length': data.length },
+                rejectUnauthorized: false,
             };
-            const req = http.request(options, (res) => {
+
+            let handler = (res) => {
                 if (res.statusCode === 200) {
                     res.setEncoding('utf8');
                     let rawData = '';
@@ -62,10 +65,27 @@ module.exports = {
                     // Resolve with null to indicate the username/password pair were not valid.
                     resolve(null);
                 }
-            });
+            };
+
+            let httpClient = USE_HTTPS ? https : http;
+            const req = httpClient.request(options, handler);
             req.on('error', (error) => {
-                console.error(error);
-                resolve(null);
+                // Socket hang up occurs when attempting to make an HTTP connection to an HTTPS server
+                if (!USE_HTTPS && error.code === "ECONNRESET" && error.message === "socket hang up") {
+                    // Switch to HTTPS and retry
+                    USE_HTTPS = true;
+                    const reqHttps = https.request(options, handler);
+                    reqHttps.on('error', (error) => {
+                        console.error(error);
+                        resolve(null);
+                    });
+                    reqHttps.write(data);
+                    reqHttps.end();
+                }
+                else {
+                    console.error(error);
+                    resolve(null);
+                }
             });
             req.write(data);
             req.end();
