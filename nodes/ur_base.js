@@ -4,7 +4,7 @@ module.exports = function (RED) {
     var fs = require('fs');
     var multer = require('multer');
     var node;
-    var set = RED.settings.ui || '{}';
+    var set = RED.settings.ui || { path: '/ui' };
     let monitor = require('../monitor');
 
     function BaseNode(config) {

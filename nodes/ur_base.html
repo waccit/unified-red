@@ -3895,38 +3895,46 @@
         });
     }
 
-    // TODO: MUST update this if root is changed
-    let apiInstallPath =
-        window.location.pathname !== '/admin/' ? window.location.pathname + 'api/install/' : '/api/install/';
-    $.get(apiInstallPath, function (isInstalled) {
-        if (!isInstalled) {
-            var notification = RED.notify(
-                '<p>Thanks for installing Unified-RED!</p>\
-                <p>Ready to start using Unified-RED? Click the setup button below to continue.</p>',
-                {
-                    modal: true,
-                    fixed: true,
-                    type: 'success', // 'compact', 'success', 'warning', 'error'
-                    buttons: [
-                        {
-                            text: 'close',
-                            click: function (e) {
-                                notification.close();
-                            },
-                        },
-                        {
-                            text: 'setup',
-                            class: 'primary',
-                            click: function (e) {
-                                window.open('./#/initial-setup', '_blank');
-                                notification.close();
-                            },
-                        },
-                    ],
-                }
-            );
-        }
+    let uiRoot = '/ui';
+    $.get('./uisettings', function (uiSettings) {
+        uiRoot = uiSettings.path || '/ui';
     });
+    let possibleApiRoots = [ '/', '/admin/' ];
+    if (!possibleApiRoots.includes(window.location.pathname)) {
+        possibleApiRoots.push(window.location.pathname);
+    }
+    for (let apiRoot of possibleApiRoots) {
+        $.get(apiRoot + 'api/install/', function (isInstalled) {
+            if (!isInstalled) {
+                var notification = RED.notify(
+                    '<p>Thanks for installing Unified-RED!</p>\
+                    <p>Ready to start using Unified-RED? Click the setup button below to continue.</p>',
+                    {
+                        modal: true,
+                        fixed: true,
+                        type: 'success', // 'compact', 'success', 'warning', 'error'
+                        buttons: [
+                            {
+                                text: 'close',
+                                click: function (e) {
+                                    notification.close();
+                                },
+                            },
+                            {
+                                text: 'setup',
+                                class: 'primary',
+                                click: function (e) {
+                                    let setupLink = uiRoot + (!uiRoot.endsWith('/') ? '/' : '') + '#/initial-setup';
+                                    window.open(setupLink, '_blank');
+                                    notification.close();
+                                },
+                            },
+                        ],
+                    }
+                );
+            }
+        });
+    }
 </script>
 
 <script type="text/html" data-template-name="ur_base">
