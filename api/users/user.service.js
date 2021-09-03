@@ -176,7 +176,8 @@ function checkValidUser(user) {
 }
 
 function validateEmailAddress(email) {
-    if (!email || !/^([^@]+)@([^\.]+)\.[a-z]+$/.test(email)) {
+    // Email Regex from the WHATWG HTML specification: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+    if (!email || !/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email)) {
         throw 'Invalid email address';
     }
 }
