@@ -102,9 +102,12 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         return str;
     }
 
-    send(msg: any) {
+    send(msg: any = {}) {
         if (this.nodeId) {
-            if (msg && msg.topic) {
+            if (typeof msg === 'undefined' || msg === null) {
+                msg = {};
+            }
+            if (msg.topic) {
                 // check if msg.topic exists, not all do, e.g. ur-button sends a null message
                 msg.topic = this.evalInstanceParameters(msg.topic); // handle multi-page. substitute {variables}
             }
