@@ -74,9 +74,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
             }
         });
         this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
-            this.site = data.site;
-            if (this.site && this.site.name) {
-                this.titleService.setTitle(this.site.name + ' - Unified-RED');
+            if (data && data.site) {
+                this.site = data.site;
+                if (this.site && this.site.name) {
+                    this.titleService.setTitle(this.site.name + ' - Unified-RED');
+                }
             }
         });
     }
