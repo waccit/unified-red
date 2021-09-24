@@ -88,3 +88,10 @@ $holidateEventColor: tomato;
         @extend .bg-indigo;
     }
 }
+
+.ur-schedule-container {
+    a:not([href]), a:not([href]):hover {
+        color: #555555;
+        text-decoration:none
+    }
+}
