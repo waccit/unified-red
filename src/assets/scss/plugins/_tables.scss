@@ -4,9 +4,9 @@
  *  Description: This scss file for tables style classes
  */
 // ngx-datatables material theme import
-@import '~@swimlane/ngx-datatable/index.css';
-@import '~@swimlane/ngx-datatable/themes/material.scss';
-@import '~@swimlane/ngx-datatable/assets/icons.css';
+// @import '~@swimlane/ngx-datatable/index.css';
+// @import '~@swimlane/ngx-datatable/themes/material.scss';
+// @import '~@swimlane/ngx-datatable/assets/icons.css';
 
 $white: #fff;
 
@@ -188,30 +188,30 @@ tr.shown td.details-control {
 
 // ngx-datatables material theme import
 
-.ngx-datatable.material {
-    background: #fff;
-    border: 1px solid #f5f5f5;
-    box-shadow: none !important;
-    .datatable-footer {
-        .datatable-pager {
-            .pager li a {
-                margin: 5px;
-                .datatable-icon-right,
-                .datatable-icon-skip,
-                .datatable-icon-left,
-                .datatable-icon-prev {
-                    line-height: 30px;
-                }
-            }
-            li.active a {
-                background-color: #0d8df3;
-                transition: 0.25s ease;
-                color: #ffffff;
-                box-shadow: 4px 3px 6px 0 rgba(0, 0, 0, 0.2);
-            }
-        }
-    }
-}
+// .ngx-datatable.material {
+//     background: #fff;
+//     border: 1px solid #f5f5f5;
+//     box-shadow: none !important;
+//     .datatable-footer {
+//         .datatable-pager {
+//             .pager li a {
+//                 margin: 5px;
+//                 .datatable-icon-right,
+//                 .datatable-icon-skip,
+//                 .datatable-icon-left,
+//                 .datatable-icon-prev {
+//                     line-height: 30px;
+//                 }
+//             }
+//             li.active a {
+//                 background-color: #0d8df3;
+//                 transition: 0.25s ease;
+//                 color: #ffffff;
+//                 box-shadow: 4px 3px 6px 0 rgba(0, 0, 0, 0.2);
+//             }
+//         }
+//     }
+// }
 .ngx-table-form-select {
     margin-top: 0px;
     padding-left: 40px !important;
@@ -221,118 +221,118 @@ tr.shown td.details-control {
     width: 30% !important;
     font-size: 13px !important;
 }
-.ngx-datatable {
-    .datatable-body-cell {
-        display: table !important;
-    }
-    .datatable-body-cell-label {
-        display: table-cell !important;
-        vertical-align: middle !important;
-    }
-    .datatable-header-cell {
-        line-height: 2.4 !important;
-    }
-}
-.ngxTableHeader {
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    border-color: #e6e9ed;
-    background-color: #ebebee;
-    min-width: 800px;
-    height: 70px;
-    .header-buttons {
-        position: absolute;
-        right: 15px;
-        list-style: none;
-        top: 20px;
-        li {
-            display: inline-block;
-        }
-        .material-icons {
-            color: #000000;
-            vertical-align: text-bottom;
-        }
-    }
-    .header-buttons-left {
-        position: absolute;
-        list-style: none;
-        li {
-            display: inline-block;
-        }
+// .ngx-datatable {
+//     .datatable-body-cell {
+//         display: table !important;
+//     }
+//     .datatable-body-cell-label {
+//         display: table-cell !important;
+//         vertical-align: middle !important;
+//     }
+//     .datatable-header-cell {
+//         line-height: 2.4 !important;
+//     }
+// }
+// .ngxTableHeader {
+//     padding: 10px 20px;
+//     display: flex;
+//     align-items: center;
+//     border-color: #e6e9ed;
+//     background-color: #ebebee;
+//     min-width: 800px;
+//     height: 70px;
+//     .header-buttons {
+//         position: absolute;
+//         right: 15px;
+//         list-style: none;
+//         top: 20px;
+//         li {
+//             display: inline-block;
+//         }
+//         .material-icons {
+//             color: #000000;
+//             vertical-align: text-bottom;
+//         }
+//     }
+//     .header-buttons-left {
+//         position: absolute;
+//         list-style: none;
+//         li {
+//             display: inline-block;
+//         }
 
-        .searchbox {
-            position: relative;
-        }
-        ::placeholder {
-            color: rgba(0, 0, 0, 0.54);
-        }
-        .search-icon {
-            position: absolute;
-            top: 10px;
-            padding-left: 10px;
-            color: rgba(0, 0, 0, 0.54);
-        }
-        input.search-field {
-            font-weight: 500;
-            color: rgba(0, 0, 0, 0.54);
-            border-radius: 25px;
-            border: 0;
-            height: 45px;
-            padding: 8px 8px 8px 50px;
-            width: 250px;
-            background: #ffffff;
-            transition: background 0.2s, width 0.2s;
-            &:hover {
-                background: #fffefe;
-            }
-            &:focus {
-                outline: none;
-                width: 380px;
-                color: #212121;
-                &:hover {
-                    background: #f7f7f7;
-                }
-            }
-        }
-    }
-    h2 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: normal;
-        color: #5b626b;
-    }
-}
+//         .searchbox {
+//             position: relative;
+//         }
+//         ::placeholder {
+//             color: rgba(0, 0, 0, 0.54);
+//         }
+//         .search-icon {
+//             position: absolute;
+//             top: 10px;
+//             padding-left: 10px;
+//             color: rgba(0, 0, 0, 0.54);
+//         }
+//         input.search-field {
+//             font-weight: 500;
+//             color: rgba(0, 0, 0, 0.54);
+//             border-radius: 25px;
+//             border: 0;
+//             height: 45px;
+//             padding: 8px 8px 8px 50px;
+//             width: 250px;
+//             background: #ffffff;
+//             transition: background 0.2s, width 0.2s;
+//             &:hover {
+//                 background: #fffefe;
+//             }
+//             &:focus {
+//                 outline: none;
+//                 width: 380px;
+//                 color: #212121;
+//                 &:hover {
+//                     background: #f7f7f7;
+//                 }
+//             }
+//         }
+//     }
+//     h2 {
+//         margin: 0;
+//         font-size: 16px;
+//         font-weight: normal;
+//         color: #5b626b;
+//     }
+// }
 .mat-table {
     .mat-header-cell {
         font-size: 14px;
         font-weight: 600;
     }
 }
-.ngx-datatable.material {
-    background: #fff;
-    border: 1px solid #f5f5f5;
-    box-shadow: none !important;
-    .datatable-footer {
-        .datatable-pager {
-            .pager li a {
-                margin: 5px;
-                .datatable-icon-right,
-                .datatable-icon-skip,
-                .datatable-icon-left,
-                .datatable-icon-prev {
-                    line-height: 30px;
-                }
-            }
-            li.active a {
-                background-color: #0d8df3;
-                transition: 0.25s ease;
-                color: #ffffff;
-                box-shadow: 4px 3px 6px 0 rgba(0, 0, 0, 0.2);
-            }
-        }
-    }
-}
+// .ngx-datatable.material {
+//     background: #fff;
+//     border: 1px solid #f5f5f5;
+//     box-shadow: none !important;
+//     .datatable-footer {
+//         .datatable-pager {
+//             .pager li a {
+//                 margin: 5px;
+//                 .datatable-icon-right,
+//                 .datatable-icon-skip,
+//                 .datatable-icon-left,
+//                 .datatable-icon-prev {
+//                     line-height: 30px;
+//                 }
+//             }
+//             li.active a {
+//                 background-color: #0d8df3;
+//                 transition: 0.25s ease;
+//                 color: #ffffff;
+//                 box-shadow: 4px 3px 6px 0 rgba(0, 0, 0, 0.2);
+//             }
+//         }
+//     }
+// }
 .ngx-table-form-select {
     margin-top: 0px;
     padding-left: 40px !important;
@@ -342,18 +342,18 @@ tr.shown td.details-control {
     width: 30% !important;
     font-size: 13px !important;
 }
-.ngx-datatable {
-    .datatable-body-cell {
-        display: table !important;
-    }
-    .datatable-body-cell-label {
-        display: table-cell !important;
-        vertical-align: middle !important;
-    }
-    .datatable-header-cell {
-        line-height: 2.4 !important;
-    }
-}
+// .ngx-datatable {
+//     .datatable-body-cell {
+//         display: table !important;
+//     }
+//     .datatable-body-cell-label {
+//         display: table-cell !important;
+//         vertical-align: middle !important;
+//     }
+//     .datatable-header-cell {
+//         line-height: 2.4 !important;
+//     }
+// }
 .materialTableHeader {
     padding: 10px 20px;
     -webkit-box-align: center;

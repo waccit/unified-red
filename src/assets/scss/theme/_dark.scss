@@ -487,47 +487,47 @@
     .ngx-search {
         color: #bbb;
     }
-    .ngx-datatable {
-        background: #434f5a;
-        border: 1px solid #343d45;
-        &.material {
-            background: #434f5a;
-            .datatable-header {
-                .datatable-header-cell {
-                    background: #434f5a;
-                }
-                .resize-handle {
-                    border-right: solid 1px #434f5a;
-                }
-            }
-            .datatable-footer {
-                color: #fff;
-                .datatable-pager {
-                    a {
-                        color: #fff;
-                    }
-                    li.disabled a {
-                        color: #fff !important;
-                    }
-                }
-            }
-            .datatable-body .datatable-body-row .datatable-body-cell {
-                color: #bbb;
-            }
-            &:not(.cell-selection) .datatable-body-row:hover {
-                background: #32383e;
-                .datatable-row-group {
-                    background: #32383e;
-                }
-            }
-        }
-        &.fixed-header
-            .datatable-header
-            .datatable-header-inner
-            .datatable-header-cell {
-            color: #bbb;
-        }
-    }
+    // .ngx-datatable {
+    //     background: #434f5a;
+    //     border: 1px solid #343d45;
+    //     &.material {
+    //         background: #434f5a;
+    //         .datatable-header {
+    //             .datatable-header-cell {
+    //                 background: #434f5a;
+    //             }
+    //             .resize-handle {
+    //                 border-right: solid 1px #434f5a;
+    //             }
+    //         }
+    //         .datatable-footer {
+    //             color: #fff;
+    //             .datatable-pager {
+    //                 a {
+    //                     color: #fff;
+    //                 }
+    //                 li.disabled a {
+    //                     color: #fff !important;
+    //                 }
+    //             }
+    //         }
+    //         .datatable-body .datatable-body-row .datatable-body-cell {
+    //             color: #bbb;
+    //         }
+    //         &:not(.cell-selection) .datatable-body-row:hover {
+    //             background: #32383e;
+    //             .datatable-row-group {
+    //                 background: #32383e;
+    //             }
+    //         }
+    //     }
+    //     &.fixed-header
+    //         .datatable-header
+    //         .datatable-header-inner
+    //         .datatable-header-cell {
+    //         color: #bbb;
+    //     }
+    // }
     .ngxTableHeader {
         background-color: #343d45;
         .header-buttons-left strong,
