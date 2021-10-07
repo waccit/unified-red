@@ -140,7 +140,6 @@
         "socket.io": "^2.3.0",
         "socket.io-client": "^2.3.0",
         "sqlite3": "^5.0.0",
-        "sweetalert2": "^9.8.2",
         "tslib": "^1.11.0",
         "uuid": "^8.0.0",
         "zone.js": "~0.10.3"
