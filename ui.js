@@ -466,7 +466,7 @@ function add(opt) {
                 let filename =
                     timestamp.getFullYear() +
                     '.' +
-                    (timestamp.getMonth() < 10 ? '0' + (timestamp.getMonth() + 1) : timestamp.getMonth() + 1) +
+                    (timestamp.getMonth() < 9 ? '0' + (timestamp.getMonth() + 1) : timestamp.getMonth() + 1) +
                     '.json';
                 let logURL = __dirname + '/audit/' + filename;
                 let log = [];
