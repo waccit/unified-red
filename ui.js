@@ -414,10 +414,20 @@ function add(opt) {
 
     // This is the handler for messages coming back from the UI
     var handler = function (msg) {
-        let idParts = msg.id.split('.');
-        // prettier-ignore
-        if (idParts.length > 2) { // is extended node id? (multi page)
-            msg.id = idParts[0] + '.' + idParts[1]; // set id to base node id
+        // let idParts = msg.id.split('.');
+        // // prettier-ignore
+        // if (idParts.length > 2) { // is extended node id? (multi page)
+        //     msg.id = idParts[0] + '.' + idParts[1]; // set id to base node id
+        // }
+        // console.log('5', msg.id, opt.node.id);
+        let newMultiPageIdPattern = /([a-fA-F0-9]{16})\.(.+)/;
+        let oldMultiPageIdPattern = /([a-fA-F0-9]+\.[a-fA-F0-9]+)\.(.+)/;
+        if (oldMultiPageIdPattern.test(msg.id)) {
+            // is extended node id? (multi page)
+            msg.id = oldMultiPageIdPattern.exec(msg.id)[1];
+        } else if (newMultiPageIdPattern.test(msg.id)) {
+            // is extended node id? (multi page)
+            msg.id = newMultiPageIdPattern.exec(msg.id)[1];
         }
         if (msg.id !== opt.node.id) {
             return;

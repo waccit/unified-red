@@ -25,7 +25,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService
-    ) {}
+    ) { }
 
     ngAfterViewInit(): void {
         this.webSocketService.join(this.nodeId);
@@ -63,7 +63,16 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     getBaseNodeId(nodeId = this.data.id): string {
         if (nodeId) {
-            return nodeId.split('.').slice(0, 2).join('.');
+            let newMultiPageIdPattern = /([a-fA-F0-9]{16})\.(.+)/;
+            let oldMultiPageIdPattern = /([a-fA-F0-9]+\.[a-fA-F0-9]+)\.(.+)/;
+            if (oldMultiPageIdPattern.test(nodeId)) {
+                // is extended node id? (multi page)
+                nodeId = oldMultiPageIdPattern.exec(nodeId)[1];
+            } else if (newMultiPageIdPattern.test(nodeId)) {
+                // is extended node id? (multi page)
+                nodeId = newMultiPageIdPattern.exec(nodeId)[1];
+            }
+            return nodeId;
         }
         return null;
     }
@@ -169,7 +178,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                             return a;
                         }, {});
                         value = enumMap[value];
-                    } catch (ignore) {}
+                    } catch (ignore) { }
                 }
 
                 if (typeof value !== 'undefined') {
@@ -188,7 +197,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         }
         try {
             return eval('(' + ret + '); ' + this.expressionGlobals);
-        } catch (ignore) {}
+        } catch (ignore) { }
         return ret;
     }
 
