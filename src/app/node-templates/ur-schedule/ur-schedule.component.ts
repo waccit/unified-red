@@ -19,7 +19,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     calendarComponent: FullCalendarComponent;
 
     calendarOptions: CalendarOptions = {
-        initialView: this.isMobile() ? 'timeGridWeek' : 'dayGridMonth',
         headerToolbar: this.isMobile()
             ? { left: '', center: 'title', right: '' } // mobile
             : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop
@@ -49,6 +48,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         eventClick: this.handleEventClick.bind(this),
         eventChange: this.handleEventChange.bind(this),
         datesSet: this.renderDateRange.bind(this),
+        viewClassNames: this.saveCurrentViewType.bind(this)
     };
 
     dirty = false;
@@ -69,12 +69,32 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         super.ngAfterViewInit();
         this.setupScheduleAccess();
         this.calendarLoadSchedules();
+        this.setViewType();
     }
 
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
         }
+    }
+
+    private saveCurrentViewType () {
+        if (this.calendarComponent) {
+            let currentViewType = this.calendarComponent.getApi().currentData.currentViewType;
+            localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
+        }
+    }
+
+    private setViewType () { 
+        // Get locally stored view type
+        let viewType = localStorage.getItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`)
+        
+        if (!viewType) {
+            // Default view if there's no stored view.
+            this.isMobile() ? viewType = 'timeGridWeek' : viewType = 'dayGridMonth';
+        }
+
+        this.calendarComponent.getApi().changeView(viewType);
     }
 
     private sortChronologically(scheduleArray) {
