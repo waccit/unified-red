@@ -85,15 +85,30 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
     }
 
-    private setViewType () { 
+    private setViewType () {
         // Get locally stored view type
         let viewType = localStorage.getItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`)
         
+        // Default view if there's no stored view
         if (!viewType) {
-            // Default view if there's no stored view.
-            this.isMobile() ? viewType = 'timeGridWeek' : viewType = 'dayGridMonth';
-        }
+            switch (this.data.defaultView) {
+                case "1":
+                    viewType = "dayGridMonth";
+                    break;
+                
+                case "2":
+                    viewType = "timeGridWeek";
+                    break;
 
+                case "3":
+                    viewType = "dayGridDay";
+                    break;
+
+                default:
+                    viewType = "dayGridMonth";
+                    break;
+            }
+        }
         this.calendarComponent.getApi().changeView(viewType);
     }
 
