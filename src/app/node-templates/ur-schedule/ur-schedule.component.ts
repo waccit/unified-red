@@ -280,34 +280,47 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     }
 
     private handleDateClick(data) {
-        // console.log('handleDateClick', data);
         const dialogData = {
             data: { type: 'weekday', values: this.data.values, events: [] },
             action: 'add',
         };
-        // if click was on week grid, then assume the user wants to add a weekday schedule,
-        // if click was on the day/month grid, then assume the user wants to add a date schedule.
-        switch (data.view.type) {
-            case 'timeGridWeek':
-                dialogData.data.type = 'weekday';
-                dialogData.data.events.push({
-                    weekday: data.date.getDay(),
-                    value: this.data.values[0]?.name,
-                    hour: data.date.getHours(),
-                    minute: data.date.getMinutes().toString().padStart(2, '0'),
-                });
-                break;
-            case 'dayGridDay':
-            case 'dayGridMonth':
-                dialogData.data.type = 'date';
-                dialogData.data.events.push({
-                    date: data.date.toString(),
-                    value: this.data.values[0]?.name,
-                    hour: data.date.getHours(),
-                    minute: data.date.getMinutes().toString().padStart(2, '0'),
-                });
-                break;
+        // If the calendar is clicked, populate fields accordingly
+        if (data) {
+            // if click was on week grid, then assume the user wants to add a weekday schedule,
+            // if click was on the day/month grid, then assume the user wants to add a date schedule.
+            switch (data.view.type) {
+                case 'timeGridWeek':
+                    dialogData.data.type = 'weekday';
+                    dialogData.data.events.push({
+                        weekday: data.date.getDay(),
+                        value: this.data.values[0]?.name,
+                        hour: data.date.getHours(),
+                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                    });
+                    break;
+                case 'dayGridDay':
+                case 'dayGridMonth':
+                    dialogData.data.type = 'date';
+                    dialogData.data.events.push({
+                        date: data.date.toString(),
+                        value: this.data.values[0]?.name,
+                        hour: data.date.getHours(),
+                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                    });
+                    break;
+            }
         }
+        // If the add button is pressed, set fields to default
+        else {
+            dialogData.data.type = 'date';
+            dialogData.data.events.push({
+                date: '',
+                value: this.data.values[0]?.name,
+                hour: 0,
+                minute: '00'
+            });
+        }
+        
         this.dialog
             .open(UrScheduleFormDialogComponent, { data: dialogData })
             .afterClosed()
