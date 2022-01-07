@@ -10,7 +10,13 @@
             "values": "Values",
             "weekdays": "Weekdays",
             "dates": "Dates",
-            "holidays": "Holidays"
+            "holidays": "Holidays",
+            "default-view": "Default View"
+        },
+        "default-view-options": {
+            "month": "Month",
+            "week": "Week",
+            "day": "Day"
         }
     }
 }
