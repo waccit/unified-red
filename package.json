@@ -47,6 +47,10 @@
         {
             "name": "Michael Montalvo",
             "email": "mmontalvo@wasocal.com"
+        },
+        {
+            "name": "Eric Ko",
+            "email": "sko@wasocal.com"
         }
     ],
     "license": "Apache-2.0",

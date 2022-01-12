@@ -1,6 +1,18 @@
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
     <span #container [id]="data.id" class="ur-schedule-container">
-        <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+        <full-calendar class="calendarPosition" #calendar [options]="calendarOptions"></full-calendar>
+    
+        <button 
+            mat-fab 
+            [ngClass]="[
+                this.isMobile() ? 'add-button-mobile' : 'add-button-desktop',
+                !this.isMobile() && dirty ? 'add-button-desktop-deploy' : '',
+                this.isMobile() && dirty ? 'add-button-mobile-deploy' : ''
+            ]" 
+            color="primary">
+            <mat-icon id="add" (click)="handleDateClick(null)">add</mat-icon>
+        </button>
+
         <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
             <div class="col-12 mt-2 mb-2">
                 <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"

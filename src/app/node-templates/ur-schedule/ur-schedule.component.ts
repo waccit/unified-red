@@ -19,7 +19,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     calendarComponent: FullCalendarComponent;
 
     calendarOptions: CalendarOptions = {
-        initialView: this.isMobile() ? 'timeGridWeek' : 'dayGridMonth',
         headerToolbar: this.isMobile()
             ? { left: '', center: 'title', right: '' } // mobile
             : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop
@@ -49,6 +48,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         eventClick: this.handleEventClick.bind(this),
         eventChange: this.handleEventChange.bind(this),
         datesSet: this.renderDateRange.bind(this),
+        viewClassNames: this.saveCurrentViewType.bind(this)
     };
 
     dirty = false;
@@ -69,12 +69,47 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         super.ngAfterViewInit();
         this.setupScheduleAccess();
         this.calendarLoadSchedules();
+        this.setViewType();
     }
 
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
         }
+    }
+
+    private saveCurrentViewType () {
+        if (this.calendarComponent) {
+            let currentViewType = this.calendarComponent.getApi().currentData.currentViewType;
+            localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
+        }
+    }
+
+    private setViewType () {
+        // Get locally stored view type
+        let viewType = localStorage.getItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`)
+        
+        // Default view if there's no stored view
+        if (!viewType) {
+            switch (this.data.defaultView) {
+                case "1":
+                    viewType = "dayGridMonth";
+                    break;
+                
+                case "2":
+                    viewType = "timeGridWeek";
+                    break;
+
+                case "3":
+                    viewType = "dayGridDay";
+                    break;
+
+                default:
+                    viewType = "dayGridMonth";
+                    break;
+            }
+        }
+        this.calendarComponent.getApi().changeView(viewType);
     }
 
     private sortChronologically(scheduleArray) {
@@ -280,34 +315,47 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     }
 
     private handleDateClick(data) {
-        // console.log('handleDateClick', data);
         const dialogData = {
             data: { type: 'weekday', values: this.data.values, events: [] },
             action: 'add',
         };
-        // if click was on week grid, then assume the user wants to add a weekday schedule,
-        // if click was on the day/month grid, then assume the user wants to add a date schedule.
-        switch (data.view.type) {
-            case 'timeGridWeek':
-                dialogData.data.type = 'weekday';
-                dialogData.data.events.push({
-                    weekday: data.date.getDay(),
-                    value: this.data.values[0]?.name,
-                    hour: data.date.getHours(),
-                    minute: data.date.getMinutes().toString().padStart(2, '0'),
-                });
-                break;
-            case 'dayGridDay':
-            case 'dayGridMonth':
-                dialogData.data.type = 'date';
-                dialogData.data.events.push({
-                    date: data.date.toString(),
-                    value: this.data.values[0]?.name,
-                    hour: data.date.getHours(),
-                    minute: data.date.getMinutes().toString().padStart(2, '0'),
-                });
-                break;
+        // If the calendar is clicked, populate fields accordingly
+        if (data) {
+            // if click was on week grid, then assume the user wants to add a weekday schedule,
+            // if click was on the day/month grid, then assume the user wants to add a date schedule.
+            switch (data.view.type) {
+                case 'timeGridWeek':
+                    dialogData.data.type = 'weekday';
+                    dialogData.data.events.push({
+                        weekday: data.date.getDay(),
+                        value: this.data.values[0]?.name,
+                        hour: data.date.getHours(),
+                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                    });
+                    break;
+                case 'dayGridDay':
+                case 'dayGridMonth':
+                    dialogData.data.type = 'date';
+                    dialogData.data.events.push({
+                        date: data.date.toString(),
+                        value: this.data.values[0]?.name,
+                        hour: data.date.getHours(),
+                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                    });
+                    break;
+            }
         }
+        // If the add button is pressed, set fields to default
+        else {
+            dialogData.data.type = 'date';
+            dialogData.data.events.push({
+                date: '',
+                value: this.data.values[0]?.name,
+                hour: 0,
+                minute: '00'
+            });
+        }
+        
         this.dialog
             .open(UrScheduleFormDialogComponent, { data: dialogData })
             .afterClosed()
