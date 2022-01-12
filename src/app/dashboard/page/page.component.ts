@@ -1,4 +1,5 @@
 import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
+import { Router } from '@angular/router';
 import { PageDirective } from '../../directives/page.directive';
 import { GroupComponent } from '../group/group.component';
 import { Group } from '../../data/group.model';
@@ -27,6 +28,7 @@ export class PageComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private componentFactoryResolver: ComponentFactoryResolver,
         private widgetService: WidgetService,
         private menuService: MenuService,
@@ -51,6 +53,7 @@ export class PageComponent implements OnInit {
                     }
 
                     this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
+                        if (!menu.length) this.router.navigateByUrl('404'); // If the menu is empty, route to 404 page.
                         this.setGroups(menu);
                         this.loadGroups();
                     });
