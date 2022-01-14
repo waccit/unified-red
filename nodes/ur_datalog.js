@@ -27,7 +27,7 @@ module.exports = function (RED) {
             return false;
         };
 
-        let processMessage = function (msg) {
+        let processMessage = async function (msg) {
             try {
                 let entry = { topic: msg.topic };
                 let configure = false;
@@ -55,7 +55,7 @@ module.exports = function (RED) {
                 }
 
                 if (configure) {
-                    datalogService.configureLogger(entry);
+                    await datalogService.configureLogger(entry);
                 }
 
                 entry.value = RED.util.evaluateNodeProperty(node.format, 'msg', node, msg);

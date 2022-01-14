@@ -21,6 +21,7 @@
                 topicPattern: { value: '' },
                 access: { value: '' },
                 accessBehavior: { value: '' },
+                defaultView: { value: '' }
             },
             inputs: 0,
             outputs: 1,
@@ -307,7 +308,17 @@
         ></label>
         <input type="text" id="node-input-topic" />
     </div>
-    <div class="form-row" style="margin-bottom:0px;">
+    <div class="form-row">
+        <label for="node-input-defaultView">
+            <i class="fa fa-television"></i> <span data-i18n="ur_schedule.label.default-view"></span>
+        </label>
+        <select id="node-input-defaultView" style="width: 70%">
+            <option selected value="1" data-i18n="ur_schedule.default-view-options.month"></option>
+            <option value="2" data-i18n="ur_schedule.default-view-options.week"></option>
+            <option value="3" data-i18n="ur_schedule.default-view-options.day"></option>
+        </select>
+    </div>
+    <div class="form-row" style="margin-bottom: 0px">
         <label for="node-input-value-container"
             ><i class="fa fa-list"></i> <span data-i18n="ur_schedule.label.values"></span
         ></label>

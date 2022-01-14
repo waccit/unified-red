@@ -14,7 +14,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
-        this.originalValues = { ...this.data.formValue };
         this.data.options.forEach((opt) => {
             this.formLabels[this.evalInstanceParameters(opt.topic)] = opt.label;
         });
@@ -35,6 +34,8 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                         field.options = options;
                     }
                     this.data.formValue[field.topic] = this.formatFromData(data);
+                    // Update Original Values
+                    this.originalValues[data.msg.topic] = data.msg.payload.value;
                     break;
                 }
             }
