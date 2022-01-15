@@ -53,7 +53,6 @@ export class PageComponent implements OnInit {
                     }
 
                     this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
-                        if (!menu.length) this.router.navigateByUrl('404'); // If the menu is empty, route to 404 page.
                         this.setGroups(menu);
                         this.loadGroups();
                     });
@@ -80,6 +79,7 @@ export class PageComponent implements OnInit {
 
         this.folder = this.pathList[this.pathList.length - 2];
         this.page = this.pathList[this.pathList.length - 1];
+        let foundPage: any;
 
         const foundFolder = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.folder);
 
@@ -92,11 +92,12 @@ export class PageComponent implements OnInit {
             this.breadcrumbs.push('DISABLED');
             return;
         }
-
-        let foundPage: any;
+        
         if (foundFolder) {
             this.breadcrumbs.push(foundFolder.title);
             foundPage = this.findMenuEntityByKeyValue(foundFolder.items, 'title', this.page);
+        } else {
+            this.router.navigateByUrl('404');
         }
 
         if (foundPage) {
@@ -129,6 +130,8 @@ export class PageComponent implements OnInit {
                     });
                 }
             });
+        } else {
+            this.router.navigateByUrl('404');
         }
     }
 

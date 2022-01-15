@@ -17,6 +17,10 @@ const routes: Routes = [
         component: InitialSetupComponent,
         pathMatch: 'full'
     },
+    {
+        path: '404',
+        component: Page404Component,
+    },
     // otherwise page not found
     {
         path: '**',

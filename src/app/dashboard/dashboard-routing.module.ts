@@ -6,7 +6,6 @@ import { HomePageComponent } from './home-page/home-page.component';
 import { Role } from '../data';
 import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
 import { AuditLogComponent } from './audit-log/audit-log.component';
-import { Page404Component } from '../authentication/page404/page404.component';
 
 
 const routes: Routes = [
@@ -18,10 +17,6 @@ const routes: Routes = [
                 path: '',
                 component: HomePageComponent,
                 pathMatch: 'full',
-            },
-            {
-                path: '404',
-                component: Page404Component,
             },
             {
                 path: '**',
