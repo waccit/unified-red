@@ -7,7 +7,7 @@ import AuditService from '../../services/audit.service';
 
 const MONTHS = {
     '01': 'Jan',
-    '02': 'Feg',
+    '02': 'Feb',
     '03': 'Mar',
     '04': 'Apr',
     '05': 'May',
@@ -34,7 +34,7 @@ export class AuditLogComponent implements OnInit {
     logs: String[] = [];
     log: String;
 
-    constructor(private auditService: AuditService) {}
+    constructor(private auditService: AuditService) { }
 
     ngOnInit(): void {
         this.auditService.getLogsList().subscribe((list: String[]) => {
