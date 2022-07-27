@@ -25,6 +25,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { TabDirective } from '../directives/tab.directive';
 import { AuditLogComponent } from './audit-log/audit-log.component';
 import { MatSelectModule } from '@angular/material/select';
+import { NodeREDRouterComponent } from './node-red-router/node-red-router.component';
 
 @NgModule({
     declarations: [
@@ -38,6 +39,7 @@ import { MatSelectModule } from '@angular/material/select';
         AlarmConsoleComponent,
         AlarmDialogComponent,
         AuditLogComponent,
+        NodeREDRouterComponent,
     ],
     imports: [
         CommonModule,

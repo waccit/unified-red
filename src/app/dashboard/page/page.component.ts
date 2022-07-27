@@ -1,4 +1,5 @@
 import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
+import { Router } from '@angular/router';
 import { PageDirective } from '../../directives/page.directive';
 import { GroupComponent } from '../group/group.component';
 import { Group } from '../../data/group.model';
@@ -27,6 +28,7 @@ export class PageComponent implements OnInit {
 
     constructor(
         private route: ActivatedRoute,
+        private router: Router,
         private componentFactoryResolver: ComponentFactoryResolver,
         private widgetService: WidgetService,
         private menuService: MenuService,
@@ -77,6 +79,7 @@ export class PageComponent implements OnInit {
 
         this.folder = this.pathList[this.pathList.length - 2];
         this.page = this.pathList[this.pathList.length - 1];
+        let foundPage: any;
 
         const foundFolder = this.findMenuEntityByKeyValue(parent ? parent.items : menu, 'title', this.folder);
 
@@ -89,11 +92,12 @@ export class PageComponent implements OnInit {
             this.breadcrumbs.push('DISABLED');
             return;
         }
-
-        let foundPage: any;
+        
         if (foundFolder) {
             this.breadcrumbs.push(foundFolder.title);
             foundPage = this.findMenuEntityByKeyValue(foundFolder.items, 'title', this.page);
+        } else {
+            this.router.navigateByUrl('404');
         }
 
         if (foundPage) {
@@ -126,6 +130,8 @@ export class PageComponent implements OnInit {
                     });
                 }
             });
+        } else {
+            this.router.navigateByUrl('404');
         }
     }
 
