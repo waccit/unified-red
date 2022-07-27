@@ -7,6 +7,7 @@ import { Role } from '../data';
 import { AlarmConsoleComponent } from './alarm-console/alarm-console.component';
 import { AuditLogComponent } from './audit-log/audit-log.component';
 
+
 const routes: Routes = [
     {
         path: 'd',

@@ -16,7 +16,7 @@ export class AuthenticationService {
     private decodedJwtPayload;
 
     constructor(private http: HttpClient, private red: NodeRedApiService) {
-        this.tokenSubject = new BehaviorSubject<string>(sessionStorage.getItem('token'));
+        this.tokenSubject = new BehaviorSubject<string>(localStorage.getItem('unified-auth-token'));
         this.token = this.tokenSubject.asObservable();
         this.decodedJwtPayload = this.decodeJwt();
     }
@@ -34,7 +34,7 @@ export class AuthenticationService {
                     this.red.login(username, password).subscribe();
 
                     // store jwt token in session storage to keep user logged in between page refreshes
-                    sessionStorage.setItem('token', user.token);
+                    localStorage.setItem('unified-auth-token', user.token);
                     this.tokenSubject.next(user.token);
                     this.decodedJwtPayload = this.decodeJwt();
                     return user.token;
@@ -43,8 +43,8 @@ export class AuthenticationService {
     }
 
     logout() {
-        // remove user from session storage, set token to null, and logout of Node-RED
-        sessionStorage.removeItem('token');
+        // remove user from local storage, set token to null, and logout of Node-RED
+        localStorage.removeItem('unified-auth-token');
         this.tokenSubject.next(null);
         this.red.logout();
     }
