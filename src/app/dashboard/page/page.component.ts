@@ -36,7 +36,7 @@ export class PageComponent implements OnInit {
         private renderer2: Renderer2,
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.viewContainerRef = this.pageHost.viewContainerRef;
@@ -53,8 +53,10 @@ export class PageComponent implements OnInit {
                     }
 
                     this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
-                        this.setGroups(menu);
-                        this.loadGroups();
+                        if (menu.length) {
+                            this.setGroups(menu);
+                            this.loadGroups();
+                        }
                     });
                 });
             }
@@ -92,7 +94,7 @@ export class PageComponent implements OnInit {
             this.breadcrumbs.push('DISABLED');
             return;
         }
-        
+
         if (foundFolder) {
             this.breadcrumbs.push(foundFolder.title);
             foundPage = this.findMenuEntityByKeyValue(foundFolder.items, 'title', this.page);
