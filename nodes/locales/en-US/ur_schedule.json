@@ -11,12 +11,17 @@
             "weekdays": "Weekdays",
             "dates": "Dates",
             "holidays": "Holidays",
-            "default-view": "Default View"
+            "default-view": "Default View",
+            "payload-type": "Payload"
         },
         "default-view-options": {
             "month": "Month",
             "week": "Week",
             "day": "Day"
+        },
+        "payload-type-options": {
+            "single": "Single Value",
+            "tod": "Time-of-Day Object"
         }
     }
 }

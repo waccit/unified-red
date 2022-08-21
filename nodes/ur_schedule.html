@@ -21,7 +21,8 @@
                 topicPattern: { value: '' },
                 access: { value: '' },
                 accessBehavior: { value: '' },
-                defaultView: { value: '' }
+                defaultView: { value: '' },
+                payloadType: { value: '' },
             },
             inputs: 0,
             outputs: 1,
@@ -309,6 +310,15 @@
         <input type="text" id="node-input-topic" />
     </div>
     <div class="form-row">
+        <label for="node-input-payloadType">
+            <i class="fa fa-share"></i> <span data-i18n="ur_schedule.label.payload-type"></span>
+        </label>
+        <select id="node-input-payloadType" style="width: 70%">
+            <option selected value="single" data-i18n="ur_schedule.payload-type-options.single"></option>
+            <option value="tod" data-i18n="ur_schedule.payload-type-options.tod"></option>
+        </select>
+    </div>
+    <div class="form-row">
         <label for="node-input-defaultView">
             <i class="fa fa-television"></i> <span data-i18n="ur_schedule.label.default-view"></span>
         </label>
@@ -416,6 +426,11 @@
 
     <p><b>Name</b> is the name of a node in the workspace.</p>
     <p><b>Topic</b> is added to the message as <code>msg.topic</code>.</p>
+    <p>
+        <b>Payload</b> configures the node to output a single value (the current state) or
+        a time-of-day object consisting of <code>current_state</code>, <code>next_state</code>, 
+        and <code>time_to_next_state</code> (in minutes).</p>
+    <p><b>Default View</b> sets the user interface's default view to month, week, or day.</p>
     <p>
         <b>Values</b> is a list of possible commands that can be sent when a scheduled event is fired.
         Each consisting of: 
