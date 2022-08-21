@@ -42,53 +42,46 @@ module.exports = function (RED) {
                 try {
                     // set value in priority object
                     node.valuePriority[this.type] = getValueFromName(this.event.value);
+                    let value = undefined;
 
                     if (node.valuePriority.holiday) {
                         //prioritize holiday schedules over date schedules
                         if (this.type === 'holiday' && node.valuePriority.holiday.value) {
-                            if (RED.settings.verbose) {
-                                node.log('fireEvent ' + this.type + ' ' + JSON.stringify(node.valuePriority.holiday));
-                            }
-                            node.send({ topic: config.topic, payload: buildPayload(node.valuePriority.holiday.value) });
+                            value = node.valuePriority.holiday.value;
                         }
                     } else if (node.valuePriority.date) {
                         //prioritize date schedules over weekday schedules
                         if (this.type === 'date' && node.valuePriority.date.value) {
-                            if (RED.settings.verbose) {
-                                node.log('fireEvent ' + this.type + ' ' + JSON.stringify(node.valuePriority.date));
-                            }
-                            node.send({ topic: config.topic, payload: buildPayload(node.valuePriority.date.value) });
+                            value = node.valuePriority.date.value;
                         }
                     } else if (node.valuePriority.weekday) {
                         if (this.type === 'weekday' && node.valuePriority.weekday.value) {
-                            if (RED.settings.verbose) {
-                                node.log('fireEvent ' + this.type + ' ' + JSON.stringify(node.valuePriority.weekday));
-                            }
-                            node.send({ topic: config.topic, payload: buildPayload(node.valuePriority.weekday.value) });
+                            value = node.valuePriority.weekday.value;
                         }
                     }
-                    node.status({ text: this.type });
+
+                    if (value) {
+                        let next = nextEvent();
+                        let nextState = getValueFromName(next.event.value).value;
+                        let nextTimestamp = next.timestamp;
+                        let payload = value;
+                        if (config.payloadType && config.payloadType === 'tod') {
+                            payload = {
+                                'current_state': value,
+                                'next_state': nextState,
+                                'time_to_next_state': Math.floor((nextTimestamp - Date.now()) / 60000) /* minutes */
+                            };
+                        }
+                        if (RED.settings.verbose) {
+                            node.log(`fireEvent ${this.type} ${JSON.stringify(payload)}`);
+                        }
+                        node.send({ topic: config.topic, payload: payload });
+                        node.status({ text: `now: ${value} [${this.type}],  next: ${nextState} @ ${new Date(nextTimestamp).toLocaleString()}` });
+                    }
                 } catch (err) {
                     node.error(err);
                 }
             }
-        };
-
-        let buildPayload = function(value) {
-            try {
-                if (config.payloadType && config.payloadType === 'tod') {
-                    let next = nextEvent();
-                    let payload = {
-                        'current_state': value,
-                        'next_state': getValueFromName(next.event.value).value,
-                        'time_to_next_state': Math.floor((next.timestamp - Date.now()) / 60000) /* minutes */
-                    };
-                    return payload;
-                }
-            } catch (err) {
-                node.error(err);
-            }
-            return value;
         };
 
         let nextEvent = function() {
