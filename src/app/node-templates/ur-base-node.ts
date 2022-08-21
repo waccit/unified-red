@@ -15,6 +15,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     `;
 
     access: any = {};
+    disabled: boolean = false;
     private _data: any;
     private _wsSubscription: Subscription;
     @ViewChild('container', { static: true }) private _container: ElementRef;
@@ -86,6 +87,9 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     updateValue(data: any) {
+        if (data.hasOwnProperty('disabled')) {
+            this.disabled = !!data.disabled;
+        }
         if (this.container && this.container.length) {
             this.container.trigger([data]);
             // when health is available, insert hook into all point values, except for Animation and Template

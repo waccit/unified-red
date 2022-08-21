@@ -195,6 +195,7 @@ function add(opt) {
         if (typeof msg.enabled === 'boolean') {
             var state = replayMessages[opt.node.id];
             if (!state) {
+                state = {};
                 if (msg.topic) {
                     state = { id: opt.node.id };
                     setReplayMessage(opt.node.id, msg.topic, state);
@@ -346,6 +347,7 @@ function add(opt) {
             addField('units');
             if (msg.hasOwnProperty('enabled')) {
                 toEmit.disabled = !msg.enabled;
+                delete toEmit.msg.enabled;
             }
 
             let newId = opt.node.id;
