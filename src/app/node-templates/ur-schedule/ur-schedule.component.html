@@ -1,6 +1,6 @@
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
     <span #container [id]="data.id" class="ur-schedule-container">
-        <full-calendar class="calendarPosition" #calendar [options]="calendarOptions"></full-calendar>
+        <full-calendar class="calendarPosition" #calendar [options]="calendarOptions" [activated]="calendarReady.next(true)"></full-calendar>
     
         <button 
             mat-fab 

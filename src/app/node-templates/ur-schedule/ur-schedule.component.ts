@@ -6,6 +6,8 @@ import * as moment from 'moment';
 import { BaseNode } from '../ur-base-node';
 import { UrScheduleFormDialogComponent } from './ur-schedule-form-dialog.component';
 import { WebSocketService, SnackbarService, NodeRedApiService, CurrentUserService, RoleService } from '../../services';
+import { BehaviorSubject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 declare const $: any;
 
@@ -54,6 +56,8 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     dirty = false;
     mobile = undefined;
 
+    private calendarReady = new BehaviorSubject<boolean>(false);
+
     constructor(
         protected webSocketService: WebSocketService,
         protected currentUserService: CurrentUserService,
@@ -68,10 +72,13 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupScheduleAccess();
-        this.calendarLoadSchedules();
-        this.setViewType();
+        this.calendarReady.asObservable()
+            .pipe(debounceTime(150), distinctUntilChanged())
+            .subscribe(() => {
+                this.calendarLoadSchedules();
+                this.setViewType();
+            });
     }
-
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
@@ -244,9 +251,10 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     private buildHolidaySchedules() {
         const events = [];
-        const year = new Date().getFullYear();
-        const parserStartDate = new Date(year, 0, 1);
-        const parserEndDate = new Date(year + 1, 0, 1);
+        const today = new Date();
+        const year = today.getFullYear();
+        const parserStartDate = new Date(year - 1, today.getMonth(), today.getDate());
+        const parserEndDate = new Date(year + 1, today.getMonth(), today.getDate());
 
         if (this.data && this.data.holidays) {
             const holidaySchedules = {};
