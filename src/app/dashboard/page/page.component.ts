@@ -7,6 +7,7 @@ import { CurrentUserService, RoleService } from '../../services';
 import { WidgetService } from '../../services/widget.service';
 import { ActivatedRoute, UrlSegment } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { MenuService } from '../../services/menu.service';
 import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 import { User } from '../../data';
@@ -52,7 +53,9 @@ export class PageComponent implements OnInit {
                         this._menuSubscription.unsubscribe();
                     }
 
-                    this._menuSubscription = this.menuService.menu.subscribe((menu: RouteInfo[]) => {
+                    this._menuSubscription = this.menuService.menu
+                        .pipe(debounceTime(300))
+                        .subscribe((menu: RouteInfo[]) => {
                         if (menu.length) {
                             this.setGroups(menu);
                             this.loadGroups();
