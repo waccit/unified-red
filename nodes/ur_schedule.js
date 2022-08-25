@@ -35,7 +35,7 @@ module.exports = function (RED) {
 
         let getValueFromName = function(value) {
             return config.values.find((v) => v.name === value);
-        }
+        };
 
         let fireEvent = function () {
             if (this.event && this.type) {
@@ -296,6 +296,17 @@ module.exports = function (RED) {
             node.cronJobs[endPattern] = { job: endJob, event: sch, type: 'background' };
         };
 
+        let destroyCronJobs = function() {
+            try {
+                for (let pattern in node.cronJobs) {
+                    node.cronJobs[pattern].job.destroy();
+                }
+            } catch (e) {
+                node.error(e);
+            }
+            node.cronJobs = {};
+        };
+
         /*
         SCHEDULE MAGIC
         */
@@ -304,14 +315,7 @@ module.exports = function (RED) {
             node.log('Building schedules...');
 
             // stop and delete any existing cron jobs
-            try {
-                for (let pattern in node.cronJobs) {
-                    node.cronJobs[pattern].destroy();
-                }
-            } catch (e) {
-                node.error(e);
-            }
-            node.cronJobs = {};
+            destroyCronJobs();
 
             // build map of all holiday events and index by cron pattern
             if (node.holidays && node.holidays.length) {
@@ -472,10 +476,7 @@ module.exports = function (RED) {
             if (RED.settings.verbose) {
                 this.log(RED._('schedule.stopped'));
             }
-            for (let pattern in this.cronJobs) {
-                this.cronJobs[pattern].destroy();
-            }
-            this.cronJobs = {};
+            destroyCronJobs();
             done();
         });
     }
