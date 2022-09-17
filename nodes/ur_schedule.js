@@ -10,6 +10,7 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         this.holidays = RED.nodes.getNode(config.holidays).events;
         this.cronJobs = {}; // { job, event, type }
+        this.heartbeatTimer = null;
         this.valuePriority = { holiday: null, date: null, weekday: null };
         var node = this;
 
@@ -75,12 +76,40 @@ module.exports = function (RED) {
                         if (RED.settings.verbose) {
                             node.log(`fireEvent ${this.type} ${JSON.stringify(payload)}`);
                         }
-                        node.send({ topic: config.topic, payload: payload });
+                        heartbeatSend({ topic: config.topic, payload: payload });
                         node.status({ text: `now: ${value} [${this.type}],  next: ${nextState} @ ${new Date(nextTimestamp).toLocaleString()}` });
                     }
                 } catch (err) {
                     node.error(err);
                 }
+            }
+        };
+
+        let heartbeatSend = function(msg) {
+            try {
+                node.send(msg);
+                if (typeof msg !== undefined && typeof msg.payload !== undefined && 
+                    typeof msg.payload.time_to_next_state !== undefined && msg.payload.time_to_next_state > 0) {
+                    let heartbeatMins = 5; /* heartbeat in minutes */
+                    let heartbeatMs = heartbeatMins * 60000; /* heartbeat in milliseconds */
+                    let lasttime = msg.payload.time_to_next_state;
+                    let topic = msg.topic;
+                    let payload = msg.payload;
+                    let heartbeatFunc = function() {
+                        lasttime -= heartbeatMins;
+                        let newMsg = { topic: topic, payload: payload }; // create new msg object
+                        newMsg.payload.time_to_next_state = lasttime;
+                        node.send(newMsg);
+                        if (lasttime > 0) {
+                            clearTimeout(node.heartbeatTimer);
+                            node.heartbeatTimer = setTimeout(heartbeatFunc, heartbeatMs);
+                        }
+                    };
+                    clearTimeout(node.heartbeatTimer);
+                    node.heartbeatTimer = setTimeout(heartbeatFunc, heartbeatMs);
+                }
+            } catch (err) {
+                node.error(err);
             }
         };
 
@@ -297,6 +326,7 @@ module.exports = function (RED) {
         };
 
         let destroyCronJobs = function() {
+            clearTimeout(node.heartbeatTimer);
             try {
                 for (let pattern in node.cronJobs) {
                     node.cronJobs[pattern].job.destroy();
