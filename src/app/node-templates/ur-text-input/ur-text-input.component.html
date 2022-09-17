@@ -11,7 +11,7 @@
             </span>
             <input matInput [type]="data.mode"
                 [value]="access.read ? stripHTML(valueIn) : ''"
-                [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
                 (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
                 #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below"/>
         </mat-form-field>
@@ -24,7 +24,7 @@
             </span>
             <input matInput placeholder="EX: (435) 345-3454" mask="(000) 000-0000"
                 [value]="access.read ? stripHTML(valueIn) : ''"
-                [disabled]="!access.write && data.accessBehavior === 'disable'" 
+                [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
                 (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
                 #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below"/>
         </mat-form-field>

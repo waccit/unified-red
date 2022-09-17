@@ -1,7 +1,7 @@
 <ng-template [ngIf]="access.write || data.accessBehavior !== 'hide'">
     <button mat-raised-button class="w-100" [color]="!data.bgcolor ? 'primary' : ''" [style.color]="data.color"
         [style.background-color]="data.bgcolor" style="white-space: normal;" (click)="send()" 
-        [disabled]="!access.write && data.accessBehavior === 'disable'" 
+        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
         #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below">
         <mat-icon class="mr-2" *ngIf="data.icon">{{ data.icon }}</mat-icon>
         {{ label }}
