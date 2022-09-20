@@ -106,8 +106,8 @@
         cursor: move;
     }
 
-    .nr-db-sb-list-header:hover > .nr-db-sb-list-handle,
-    .nr-db-sb-list-header:hover > .nr-db-sb-list-header-button-group {
+    .nr-db-sb-list-header:hover>.nr-db-sb-list-handle,
+    .nr-db-sb-list-header:hover>.nr-db-sb-list-header-button-group {
         opacity: 1;
     }
 
@@ -120,12 +120,12 @@
         padding: 5px;
     }
 
-    .nr-db-sb-folder-list-header > .nr-db-sb-list-chevron {
+    .nr-db-sb-folder-list-header>.nr-db-sb-list-chevron {
         /* margin-left: 0px; */
         transition: transform 0.2s ease-in-out;
     }
 
-    .nr-db-sb-group-list-header > .nr-db-sb-list-chevron {
+    .nr-db-sb-group-list-header>.nr-db-sb-list-chevron {
         /* margin-left: 20px; */
         transition: transform 0.2s ease-in-out;
     }
@@ -138,19 +138,19 @@
         border-bottom-color: var(--nr-db-light-text);
     }
 
-    .nr-db-sb-group-list > li.ui-sortable-helper {
+    .nr-db-sb-group-list>li.ui-sortable-helper {
         border-top: 1px solid var(--nr-db-light-text);
     }
 
-    .nr-db-sb-group-list > li:last-child {
+    .nr-db-sb-group-list>li:last-child {
         border-bottom: none;
     }
 
-    .nr-db-sb-widget-list > li {
+    .nr-db-sb-widget-list>li {
         border: none !important;
     }
 
-    .nr-db-sb-group-list > li > .red-ui-editableList-item-handle {
+    .nr-db-sb-group-list>li>.red-ui-editableList-item-handle {
         left: 10px;
     }
 
@@ -700,18 +700,18 @@
                 // var angular_label = c_('label.angular');
                 var liLayoutTab = $(
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Layout"><span>' +
-                        layout_label +
-                        '</span></a></li>'
+                    layout_label +
+                    '</span></a></li>'
                 ).appendTo(ulDashboardTabs);
                 var liSiteTab = $(
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Site" style="width:60px;"><span>' +
-                        site_label +
-                        '</span></a></li>'
+                    site_label +
+                    '</span></a></li>'
                 ).appendTo(ulDashboardTabs);
                 var liFilesTab = $(
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Files" style="width:80px;"><span>' +
-                        files_label +
-                        '</span></a></li>'
+                    files_label +
+                    '</span></a></li>'
                 )
                     .appendTo(ulDashboardTabs)
                     .click(function () {
@@ -818,6 +818,7 @@
                 ulDashboardTabs.find('li.red-ui-tab a').on('click', onTabClick);
 
                 // Site Tab
+                $('<div>', { id: 'nr-db-field-format-editor' }).css('display', 'none').appendTo(siteTab);
                 var divTitle = $('<div>', { class: 'form-row compact' }).appendTo(siteTab);
                 $('<div>')
                     .html('<b>' + c_('label.sitename') + '</b>')
@@ -1074,8 +1075,8 @@
                 // Add Folder button
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                        c_('layout.folder') +
-                        '</a>'
+                    c_('layout.folder') +
+                    '</a>'
                 )
                     .click(function (evt) {
                         folderContainer.editableList('addItem', { type: 'ur_folder', child: false });
@@ -1086,8 +1087,8 @@
                 // Add Link button
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                        c_('layout.link') +
-                        '</a>'
+                    c_('layout.link') +
+                    '</a>'
                 )
                     .click(function (evt) {
                         folderContainer.editableList('addItem', { type: 'ur_link' });
@@ -1392,8 +1393,8 @@
 
                     var editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
-                            c_('layout.edit') +
-                            '</a>'
+                        c_('layout.edit') +
+                        '</a>'
                     ).appendTo(buttonGroup);
 
                     editButton.on('click', function (evt) {
@@ -1479,14 +1480,14 @@
 
                     let addGroupButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.group') +
-                            '</a>'
+                        c_('layout.group') +
+                        '</a>'
                     ).appendTo(buttonGroup);
 
                     var editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
-                            c_('layout.edit') +
-                            '</a>'
+                        c_('layout.edit') +
+                        '</a>'
                     ).appendTo(buttonGroup);
 
                     let content = $('<div>', { class: 'nr-db-sb-group-list-container' }).appendTo(container);
@@ -1577,14 +1578,14 @@
 
                     let addTabButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                            c_('layout.tab') +
-                            '</a>'
+                        c_('layout.tab') +
+                        '</a>'
                     ).appendTo(buttonGroup);
 
                     let editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
-                            c_('layout.edit') +
-                            '</a>'
+                        c_('layout.edit') +
+                        '</a>'
                     ).appendTo(buttonGroup);
 
                     let content = $('<div>', { class: 'nr-db-sb-tab-list-container' }).appendTo(container);
@@ -1675,8 +1676,8 @@
 
                     let editButton = $(
                         '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> ' +
-                            c_('layout.edit') +
-                            '</a>'
+                        c_('layout.edit') +
+                        '</a>'
                     ).appendTo(buttonGroup);
 
                     let content = $('<div>', {
@@ -1735,8 +1736,8 @@
 
                                 var editButton = $(
                                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa=pencil"></i> ' +
-                                        c_('layout.edit') +
-                                        '</a>'
+                                    c_('layout.edit') +
+                                    '</a>'
                                 ).appendTo(buttonGroup);
 
                                 container.on('mouseover', function () {
@@ -1843,12 +1844,12 @@
                         let parentType = node.folder
                             ? 'folder'
                             : node.page
-                            ? 'page'
-                            : node.group
-                            ? 'group'
-                            : node.tab
-                            ? 'tab'
-                            : null;
+                                ? 'page'
+                                : node.group
+                                    ? 'group'
+                                    : node.tab
+                                        ? 'tab'
+                                        : null;
 
                         if (parent && parentType && node[parentType] !== parent.node.id) {
                             let oldFolderNode = RED.nodes.node(node[parentType]);
@@ -2521,7 +2522,6 @@
                         // ) {
                         //     addLightAndDarkResetButton('base-color', $('#base-settings-ul').children().first());
                         // }
-
                         if (editor === undefined) {
                             editor = RED.editor.createEditor({
                                 id: 'nr-db-field-format-editor',
@@ -3345,8 +3345,8 @@
                             cell.on('mouseup', function () {
                                 that.element.text(
                                     $(this).data('w') +
-                                        1 +
-                                        (that.options.hasOwnProperty('height') ? ' x ' + ($(this).data('h') + 1) : '')
+                                    1 +
+                                    (that.options.hasOwnProperty('height') ? ' x ' + ($(this).data('h') + 1) : '')
                                 );
                                 $(that.options.width)
                                     .val($(this).data('w') + 1)
@@ -3370,30 +3370,30 @@
                                                 x === 0 && y <= h
                                                     ? cellBorderHighlight
                                                     : x === 0
-                                                    ? y <= height - 1
-                                                        ? cellBorderExisting
-                                                        : cellBorder
-                                                    : '',
+                                                        ? y <= height - 1
+                                                            ? cellBorderExisting
+                                                            : cellBorder
+                                                        : '',
                                             borderTop:
                                                 y === 0 && x <= w
                                                     ? cellBorderHighlight
                                                     : y === 0
-                                                    ? x <= width - 1
-                                                        ? cellBorderExisting
-                                                        : cellBorder
-                                                    : '',
+                                                        ? x <= width - 1
+                                                            ? cellBorderExisting
+                                                            : cellBorder
+                                                        : '',
                                             borderRight:
                                                 x === w && y <= h
                                                     ? cellBorderHighlight
                                                     : x === width - 1 && y <= height - 1
-                                                    ? cellBorderExisting
-                                                    : cellBorder,
+                                                        ? cellBorderExisting
+                                                        : cellBorder,
                                             borderBottom:
                                                 y === h && x <= w
                                                     ? cellBorderHighlight
                                                     : y === height - 1 && x <= width - 1
-                                                    ? cellBorderExisting
-                                                    : cellBorder,
+                                                        ? cellBorderExisting
+                                                        : cellBorder,
                                         });
                                     }
                                 }
@@ -3433,31 +3433,37 @@
         border: 1px solid #ccc;
         border-radius: 0 0 4px 4px;
     }
+
     #dashboard-files .dataTable tr.selected {
         background-color: #ffebc7;
         color: #555;
     }
+
     #dashboard-files .dataTable tr.cut .name {
         font-style: italic;
         font-weight: bold;
         color: #888;
     }
+
     #dashboard-files .dataTable tr.copy .name {
         font-style: italic;
         font-weight: bold;
         color: #333;
     }
+
     #dashboard-files .dataTable thead th,
     #dashboard-files .dataTable tbody td {
         padding: 0;
         font-size: 13px;
     }
+
     #dashboard-files .dataTable th.icon,
     #dashboard-files .dataTable td.icon {
         width: 15px !important;
         padding: 0 5px;
         text-align: right;
     }
+
     #dashboard-files .dataTable th.name,
     #dashboard-files .dataTable td.name {
         white-space: nowrap;
@@ -3465,6 +3471,7 @@
         text-overflow: ellipsis;
         text-align: left;
     }
+
     #dashboard-files .dataTable td.name .edit {
         width: auto;
         font-size: 13px;
@@ -3472,12 +3479,14 @@
         border-radius: 4px;
         color: #555;
     }
+
     #dashboard-files .dataTable td.mtime {
         white-space: nowrap;
         font-size: 10px;
         border-left: 1px solid #ccc;
         padding: 0 5px;
     }
+
     #dashboard-files .dataTable td.size {
         font-size: 10px;
         text-align: right;
@@ -3485,6 +3494,7 @@
         padding-right: 5px;
         border-left: 1px solid #ccc;
     }
+
     #dashboard-files .toolbar {
         border-top: 1px solid #ccc;
         border-left: 1px solid #ccc;
@@ -3494,6 +3504,7 @@
         padding: 3px 0px 3px 8px;
         color: #555;
     }
+
     #dashboard-files .toolbar input {
         border: 1px solid #ddd;
         border-radius: 4px;
@@ -3502,6 +3513,7 @@
         font-size: 13px;
         width: calc(100% - 76px);
     }
+
     #dashboard-files .toolbar button {
         border: 1px solid #ccc;
         color: #888 !important;
@@ -3510,10 +3522,12 @@
         height: 28px;
         margin: 4px 0 3px;
     }
+
     #dashboard-files .toolbar button:hover {
         color: #666 !important;
         background: #e6e6e6;
     }
+
     #dashboard-files .toolbar .more {
         border-color: transparent;
         background: transparent;
@@ -3527,6 +3541,7 @@
         border-radius: 4px;
         background: #f0f0f0;
     }
+
     #uploadForm div {
         position: absolute;
         top: 40px;
@@ -3536,6 +3551,7 @@
         user-select: none;
         pointer-events: none;
     }
+
     #uploadForm .uploadProgressBar {
         margin: 5px 0px;
         border: 1px solid #ddd;
@@ -3550,6 +3566,7 @@
         -o-transition: 1s linear width;
         -ms-transition: 1s linear width;
     }
+
     #uploadForm #filesInput {
         width: 100%;
         height: 100px;
@@ -3829,7 +3846,7 @@
                 }
                 return true;
             }
-        } catch (e) {}
+        } catch (e) { }
         return false;
     }
     refreshFileSystem('/');
@@ -3854,7 +3871,7 @@
     $.get('./uisettings', function (uiSettings) {
         uiRoot = uiSettings.path || '/ui';
     });
-    let possibleApiRoots = [ '/', '/admin/' ];
+    let possibleApiRoots = ['/', '/admin/'];
     if (!possibleApiRoots.includes(window.location.pathname)) {
         possibleApiRoots.push(window.location.pathname);
     }

@@ -69,7 +69,7 @@ async function install(setup) {
         let data = fs.readFileSync(settings.settingsFile, { encoding: 'utf8' });
         if ((!settings.adminAuth || !settings.adminAuth.isUnified) || setup.adminAuthPath) {
             log.info('Self-installing Unified-RED adminAuth hook on ' + settings.settingsFile);
-            let defaultAdminAuthPath = path.resolve(__dirname + '/../../admin-auth');
+            let defaultAdminAuthPath = path.resolve(__dirname + '/../../admin-auth').replace(/\\/g, '\\\\');
             let adminAuthPath = setup.adminAuthPath || defaultAdminAuthPath;
             let findAdminAuth = (str) => {
                 try {
@@ -105,21 +105,21 @@ async function install(setup) {
         }
         if (!settings.httpStatic || setup.staticPath || settings.httpStatic === '/usr/bin/apollo/node-red/js') {
             log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
-            let defaultStaticPath = path.resolve(__dirname + '/../../static/');
+            let defaultStaticPath = path.resolve(__dirname + '/../../static/').replace(/\\/g, '\\\\');
             let staticPath = setup.staticPath || defaultStaticPath;
-            data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2');
+            data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2 //unified-red');
         }
         if (!settings.httpAdminRoot || settings.httpAdminRoot !== '/admin/') {
             log.info('Setting Node-RED httpAdminRoot path on ' + settings.settingsFile);
-            data = data.replace(/(\/\/[\s]*)?(httpAdminRoot[\s]*\:.*\n)/i, 'httpAdminRoot: "/admin/",\n// $2');
+            data = data.replace(/(\/\/[\s]*)?(httpAdminRoot[\s]*\:.*\n)/i, 'httpAdminRoot: "/admin/",\n// $2 //unified-red');
         }
         if (settings.httpRoot !== '/') {
             log.info('Removing Node-RED httpRoot setting');
-            data = data.replace(/(\/\/[\s]*)?(httpRoot[\s]*\:.*\n)/i, '// $2');
+            data = data.replace(/(\/\/[\s]*)?(httpRoot[\s]*\:.*\n)/i, '// $2 //unified-red');
         }
         if (!settings.ui || !settings.ui.path || settings.ui.path !== '/') {
             log.info('Setting Node-RED ui path on ' + settings.settingsFile);
-            data = data.replace(/(\/\/[\s]*)?(ui[\s]*\:.*\n)/i, 'ui: { path: "/" },\n// $2');
+            data = data.replace(/(\/\/[\s]*)?(ui[\s]*\:[\s]*\{[\s]*path\:.*\n)/ig, 'ui: { path: "/" },\n// $2 //unified-red');
         }
         fs.writeFileSync(settings.settingsFile, data, { encoding: 'utf8' });
 
