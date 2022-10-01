@@ -69,8 +69,13 @@ module.exports = function (RED) {
             //     access: config.access || '',
             //     accessBehavior: config.accessBehavior || 'disable',
             // },
-            beforeSend: function (msg) {
-                msg.topic = config.topic || msg.topic;
+            beforeSend: function (msg, fromUI) {
+                if (fromUI && fromUI.msg && fromUI.msg.topic) {
+                    msg.topic = fromUI.msg.topic;
+                }
+                else {
+                    msg.topic = config.topic || msg.topic;
+                }
             },
             convertBack: function (value) {
                 if (payloadType === 'date') {
