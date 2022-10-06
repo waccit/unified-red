@@ -14,6 +14,7 @@ import * as shape from 'd3-shape';
 import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
+import { element } from 'protractor';
 
 declare const $: any;
 
@@ -180,11 +181,17 @@ export class UrChartComponent extends BaseNode implements OnInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupTrendsAccess();
+        if (this.topics && this.topics.length) {
+            this.webSocketService.join(this.topics);
+        }
     }
 
     ngOnDestroy(): void {
         if (this.liveSubscription) {
             this.liveSubscription.unsubscribe();
+        }
+        if (this.webSocketService) {
+            this.webSocketService.leave(this.topics);
         }
     }
 
