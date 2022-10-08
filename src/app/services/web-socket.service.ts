@@ -66,11 +66,11 @@ export class WebSocketService {
     //     this.socket.off(eventName, handler)
     // }
 
-    join(room: string) {
+    join(room: string | string[]) {
         this.socket.emit('join', room);
     }
 
-    leave(room: string) {
+    leave(room: string | string[]) {
         this.socket.emit('leave', room);
     }
 }

@@ -68,17 +68,20 @@ function log(param) {
         datalog.logger = logger._id;
         datalog.expires = new Date(Date.now() + Math.max(logger.maxDays, 1) * 86400000);
         datalog.save();
-        socketio.connection().emit('ur-datalog-update', {
-            'action': 'log',
-            'payload': {
-                topic: logger.topic,
-                units: logger.units,
-                tags: logger.tags,
-                timestamp: datalog.timestamp || new Date(),
-                value: datalog.value,
-                status: datalog.status,
-            },
-        });
+        socketio
+            .connection()
+            .to(logger.topic)
+            .emit('ur-datalog-update', {
+                'action': 'log',
+                'payload': {
+                    topic: logger.topic,
+                    units: logger.units,
+                    tags: logger.tags,
+                    timestamp: datalog.timestamp || new Date(),
+                    value: datalog.value,
+                    status: datalog.status,
+                },
+            });
     });
 }
 
