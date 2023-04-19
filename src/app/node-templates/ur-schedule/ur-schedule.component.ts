@@ -295,6 +295,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                                 const start = holidaySchedules[dateKey][j];
                                 const end = holidaySchedules[dateKey][j + 1];
                                 const d = new Date(start.date);
+                                const year = d.getFullYear();
                                 const month = d.getMonth();
                                 const date = d.getDate();
                                 const event = {
