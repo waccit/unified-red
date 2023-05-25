@@ -196,7 +196,7 @@ ng build --prod
 
 Then symlink Node-RED to your development folder:
 
-For NPM version > 9.0.0, run
+For NPM version < 9.0.0, run
 ```
 cd ~/.node-red
 npm install --save ~/unified-red
