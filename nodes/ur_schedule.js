@@ -329,7 +329,7 @@ module.exports = function (RED) {
             clearTimeout(node.heartbeatTimer);
             try {
                 for (let pattern in node.cronJobs) {
-                    node.cronJobs[pattern].job.destroy();
+                    node.cronJobs[pattern].job.stop();
                 }
             } catch (e) {
                 node.error(e);
