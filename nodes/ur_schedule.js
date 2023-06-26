@@ -276,7 +276,7 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'holiday' }));
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'holiday' }), {recoverMissedExecutions: true});
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'holiday' };
         };
 
@@ -287,7 +287,7 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'date' }));
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'date' }), {recoverMissedExecutions: true});
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'date' };
         };
 
@@ -298,7 +298,7 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'weekday' }));
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'weekday' }), {recoverMissedExecutions: true});
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'weekday' };
         };
 
@@ -317,11 +317,11 @@ module.exports = function (RED) {
                 time ? time.getMinutes() : 0,
                 time ? time.getSeconds() : 0
             );
-            let startJob = cron.schedule(startPattern, setPrioritySchedule.bind({ event: sch, type: type }));
+            let startJob = cron.schedule(startPattern, setPrioritySchedule.bind({ event: sch, type: type }), {recoverMissedExecutions: true});
             node.cronJobs[startPattern] = { job: startJob, event: sch, type: 'background' };
             // deactivate date or holiday schedule at end of day
             let endPattern = setCronTime(sch.pattern, 23, 59, 59);
-            let endJob = cron.schedule(endPattern, clearPrioritySchedule.bind({ event: sch, type: type }));
+            let endJob = cron.schedule(endPattern, clearPrioritySchedule.bind({ event: sch, type: type }), {recoverMissedExecutions: true});
             node.cronJobs[endPattern] = { job: endJob, event: sch, type: 'background' };
         };
 
@@ -451,7 +451,7 @@ module.exports = function (RED) {
         buildSchedules();
         // rebuild schedules everyday at midnight
         if (!buildJob) {
-            buildJob = cron.schedule('0 0 0 * * *', buildSchedules);
+            buildJob = cron.schedule('0 0 0 * * *', buildSchedules, {recoverMissedExecutions: true});
         }
 
         this.config = {
