@@ -41,7 +41,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'; //Added HttpClient
 import { DashboardModule } from './dashboard/dashboard.module';
 import { NgIdleModule } from '@ng-idle/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -52,6 +52,10 @@ import { MenuEntityComponent } from './layout/sidebar/menu-entity/menu-entity.co
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatStepperModule } from '@angular/material/stepper';
 import { InitialSetupModule } from './initial-setup/initial-setup.module';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core'; //Added DI
+import { TranslateHttpLoader } from '@ngx-translate/http-loader'; //Added DI
+import { MatSelectModule } from '@angular/material/select';
+
 
 FullCalendarModule.registerPlugins([
     // register FullCalendar plugins
@@ -109,6 +113,8 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         NgIdleModule.forRoot(),
         FullCalendarModule,
         NgxChartsModule,
+		TranslateModule.forRoot({ loader: { provide: TranslateLoader, useFactory: httpTranslateLoader, deps: [HttpClient]}}), //Added DI
+        MatSelectModule,
     ],
     providers: [
         { provide: LocationStrategy, useClass: HashLocationStrategy },
@@ -124,3 +130,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
     bootstrap: [AppComponent],
 })
 export class AppModule {}
+
+export function httpTranslateLoader(http: HttpClient) { //Added DI
+  return new TranslateHttpLoader(http);
+}

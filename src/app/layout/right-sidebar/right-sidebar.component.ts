@@ -3,6 +3,9 @@ import { Component, Inject, ElementRef, OnInit, Renderer2 } from '@angular/core'
 import { RightSidebarService } from '../../services/rightsidebar.service';
 import { Role } from '../../data/';
 import { AuthenticationService } from '../../services/';
+
+import { TranslateService } from '@ngx-translate/core'; //Added DI
+
 @Component({
     selector: 'app-right-sidebar',
     templateUrl: './right-sidebar.component.html',
@@ -20,6 +23,7 @@ export class RightSidebarComponent implements OnInit {
 
     constructor(
         @Inject(DOCUMENT) private document: Document,
+        public translate: TranslateService, //Added DI
         private renderer: Renderer2,
         public elementRef: ElementRef,
         private dataService: RightSidebarService,
@@ -115,4 +119,7 @@ export class RightSidebarComponent implements OnInit {
             (this.dataService.currentStatus._isScalar = !this.dataService.currentStatus._isScalar)
         );
     }
+    switchLanguage(lang: string) { //Added DI
+        this.translate.use(lang);
+      }
 }

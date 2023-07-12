@@ -114,6 +114,8 @@
         "@fullcalendar/timegrid": "^5.1.0",
         "@ng-bootstrap/ng-bootstrap": "^6.0.0",
         "@ng-idle/core": "^8.0.0-beta.4",
+        "@ngx-translate/core": "^12.1.2",
+        "@ngx-translate/http-loader": "^5.0.0",
         "@swimlane/ngx-charts": "^13.0.2",
         "@types/d3-shape": "^1.3.2",
         "angular-archwizard": "^6.0.0",
