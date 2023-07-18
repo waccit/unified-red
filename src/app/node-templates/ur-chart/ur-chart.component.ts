@@ -54,6 +54,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private showSeries = {};
     private lttb = new LargestTriangleThreeBuckets();
     private nativeTimestamp = true;
+    private needXRange: boolean = true;
+    private queriedStartTimestamp: Date;
+    private queriedEndTimestamp: Date;
 
     /*
      *      Table Members
@@ -155,7 +158,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.queryParams = {
             limit: 50000,
             topic: this.topics,
-            startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
+            // startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
             // endTimestamp: this.currentTime,
             // value: any,
             // lowValue: parseFloat(this.data.ymin),
@@ -163,6 +166,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
             // status: string,
             // tags: string[]
         };
+
+        this.refreshTime();
+        this.dirty = false;
+
         if (this.data.chartType === 'table') {
             // init table
             this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
@@ -171,6 +178,20 @@ export class UrChartComponent extends BaseNode implements OnInit {
             this.initGraph();
         }
         this.live.next(this.data.live);
+    }
+
+    getPSTDatetime(ISODateString: string) {
+      const date = new Date(ISODateString).toLocaleString('en-US', {
+        year: '2-digit',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: 'America/Los_Angeles',
+      });
+  
+      return date !== 'Invalid Date' ? date : '';
     }
 
     private _filter(value: string): string[] {
@@ -211,6 +232,84 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.queryParams.startTimestamp = new Date(
             new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000
         );
+        let currentTimestamp = new Date();
+        this.queriedStartTimestamp = new Date();
+        this.queriedEndTimestamp = new Date();
+        this.queriedStartTimestamp.setHours(0, 0, 0, 0);
+        this.queriedEndTimestamp.setHours(0, 0, 0, 0);
+        this.needXRange = true;
+
+        if (this.data.xrangeunits === 'fixed_date_range') {
+          this.needXRange = false;
+          
+        } else if (this.data.xrangeunits === 'today') {
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'yesterday') {
+          this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - 1);
+          this.queriedEndTimestamp.setDate(this.queriedEndTimestamp.getDate() - 1);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'week_to_date') {
+          this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - this.queriedStartTimestamp.getDay());
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'last_week') {
+          this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - this.queriedStartTimestamp.getDay() - 7);
+          this.queriedEndTimestamp.setDate(this.queriedEndTimestamp.getDate() - this.queriedEndTimestamp.getDay() - 1);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'month_to_date') {
+          this.queriedStartTimestamp.setDate(1);
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'last_month') {
+          this.queriedStartTimestamp.setDate(0);
+          this.queriedStartTimestamp.setDate(1);
+          this.queriedEndTimestamp.setDate(0);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'year_to_date') {
+          this.queriedStartTimestamp.setMonth(0, 1);
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'last_year') {
+          this.queriedStartTimestamp.setMonth(0, 0);
+          this.queriedStartTimestamp.setMonth(0, 1);
+          this.queriedEndTimestamp.setMonth(0, 0);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'years') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 31104000 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'months') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 2592000 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'days') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 86400 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'hours') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 3600 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'minutes') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 60 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'seconds') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        }
+        
+        this.queryParams.startTimestamp = this.queriedStartTimestamp;
+        this.queryParams.endTimestamp = this.queriedEndTimestamp;
+
         this.queryGraphData();
     }
 
@@ -368,7 +467,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     setXRangeUnits(value: any) {
-        this.data.xrangeunits = parseFloat(value);
+        // this.data.xrangeunits = isNaN(value) ? value : parseFloat(value);
         this.refreshTime();
         this.setDirty();
     }

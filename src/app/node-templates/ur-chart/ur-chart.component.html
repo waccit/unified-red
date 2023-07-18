@@ -60,7 +60,7 @@
             <ng-template mat-tab-label>
                 <mat-icon>settings</mat-icon>
             </ng-template>
-            <div class="row pt-4">
+            <div class="row pt-4 flex-nowrap">
                 <div class="col-3">
                     <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                         <mat-label>Type</mat-label>
@@ -71,25 +71,34 @@
                     </mat-form-field>
                 </div>
                 <div class="col-3">
-                    <mat-form-field appearance="outline" style="width:100%">
-                        <mat-label>Time Range</mat-label>
-                        <input matInput type="number" (change)="setXRange($event.target.value)" [value]="data.xrange" />
-                    </mat-form-field>
-                </div>
-                <div class="col-3">
-                    <mat-form-field appearance="outline" style="width:100%">
-                        <mat-label>Range Units</mat-label>
-                        <select matNativeControl [ngModel]="data.xrangeunits"
-                            (change)="setXRangeUnits($event.target.value)">
-                            <option value="1">seconds</option>
-                            <option value="60">minutes</option>
-                            <option value="3600">hours</option>
-                            <option value="86400">days</option>
-                            <option value="2592000">months</option>
-                            <option value="31104000">years</option>
-                        </select>
-                    </mat-form-field>
-                </div>
+                  <mat-form-field appearance="outline" style="width:100%">
+                    <mat-label>Range Units</mat-label>
+                    <select matNativeControl [(ngModel)]="data.xrangeunits"
+                    (change)="setXRangeUnits($event.target.value)">
+                    <option value="seconds">seconds</option>
+                    <option value="minutes">minutes</option>
+                    <option value="hours">hours</option>
+                    <option value="days">days</option>
+                    <option value="months">months</option>
+                    <option value="years">years</option>
+                    <option value="fixed_date_range">Fixed Date Range</option>
+                    <option value="today">Today</option>
+                    <option value="yesterday">Yesterday</option>
+                    <option value="week_to_date">Week to Date</option>
+                    <option value="last_week">Last Week</option>
+                    <option value="month_to_date">Month to Date</option>
+                    <option value="last_month">Last Month</option>
+                    <option value="year_to_date">Year to Date</option>
+                    <option value="last_year">Last Year</option>
+                  </select>
+                </mat-form-field>
+              </div>
+              <div class="col-3" *ngIf="needXRange">
+                  <mat-form-field appearance="outline" style="width:100%">
+                      <mat-label>Time Range</mat-label>
+                      <input matInput type="number" (change)="setXRange($event.target.value)" [value]="data.xrange" />
+                  </mat-form-field>
+              </div>
                 <div class="col-3 pt-4">
                     <mat-checkbox [(ngModel)]="data.live" (change)="live.next($event.checked); setDirty()">Live
                     </mat-checkbox>
