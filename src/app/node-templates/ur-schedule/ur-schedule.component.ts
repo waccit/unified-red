@@ -354,16 +354,18 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     break;
             }
         }
-        // If the add button is pressed, set fields to default
-        else {
-            dialogData.data.type = 'date';
-            dialogData.data.events.push({
-                date: '',
-                value: this.data.values[0]?.name,
-                hour: 0,
-                minute: '00'
-            });
-        }
+// If the add button is pressed, set fields to default (current date)
+else {
+    let now = new Date();
+    let nowDate = String(now.getMonth() + 1).concat("/").concat(String(now.getDate()));
+    dialogData.data.type = 'date';
+    dialogData.data.events.push({
+        date: nowDate,
+        value: this.data.values[0]?.name,
+        hour: 0,
+        minute: '00'
+    });
+}
         
         this.dialog
             .open(UrScheduleFormDialogComponent, { data: dialogData })
