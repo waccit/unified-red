@@ -60,7 +60,7 @@
             <ng-template mat-tab-label>
                 <mat-icon>settings</mat-icon>
             </ng-template>
-            <div class="row pt-4 flex-nowrap">
+            <div class="row pt-4 flex-nowrap" style="overflow: scroll;">
                 <div class="col-3">
                     <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                         <mat-label>Type</mat-label>
@@ -93,13 +93,28 @@
                   </select>
                 </mat-form-field>
               </div>
-              <div class="col-3" *ngIf="needXRange">
+              <div class="col-4" *ngIf="needXRange">
                   <mat-form-field appearance="outline" style="width:100%">
                       <mat-label>Time Range</mat-label>
                       <input matInput type="number" (change)="setXRange($event.target.value)" [value]="data.xrange" />
                   </mat-form-field>
               </div>
                 <div class="col-3 pt-4">
+                <div *ngIf="data.xrangeunits === 'fixed_date_range'" class="col-3">
+                  <mat-form-field style="width:80%">
+                    <mat-label>Start Date</mat-label>
+                    <input matInput [matDatepicker]="startDatePicker" (dateChange)="setXRangeStartDate($event.target.value)" [(ngModel)]="data.xrangeStartDate">
+                    <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #startDatePicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field style="width:80%">
+                    <mat-label>End Date</mat-label>
+                    <input matInput [matDatepicker]="endDatePicker" (dateChange)="setXRangeEndDate($event.target.value)" [(ngModel)]="data.xrangeEndDate">
+                    <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #endDatePicker></mat-datepicker>
+                  </mat-form-field>
+                </div>
+                <div class="col-2 pt-4">
                     <mat-checkbox [(ngModel)]="data.live" (change)="live.next($event.checked); setDirty()">Live
                     </mat-checkbox>
                 </div>

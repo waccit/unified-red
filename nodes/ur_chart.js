@@ -20,6 +20,8 @@ module.exports = function (RED) {
             height: parseInt(config.height || group.config.width / 2 + 1) || 6,
             xrange: config.xrange,
             xrangeunits: config.xrangeunits,
+            xrangeStartDate: config.xrangeStartDate,
+            xrangeEndDate: config.xrangeEndDate,
             ymin: config.ymin,
             ymax: config.ymax,
             topics: config.topics,

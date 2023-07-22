@@ -54,9 +54,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private showSeries = {};
     private lttb = new LargestTriangleThreeBuckets();
     private nativeTimestamp = true;
-    private needXRange: boolean = true;
     private queriedStartTimestamp: Date;
     private queriedEndTimestamp: Date;
+    needXRange: boolean = true;
 
     /*
      *      Table Members
@@ -229,9 +229,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     private refreshTime() {
-        this.queryParams.startTimestamp = new Date(
-            new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000
-        );
         let currentTimestamp = new Date();
         this.queriedStartTimestamp = new Date();
         this.queriedEndTimestamp = new Date();
@@ -240,6 +237,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.needXRange = true;
 
         if (this.data.xrangeunits === 'fixed_date_range') {
+          this.queriedStartTimestamp = new Date(this.data.xrangeStartDate);
+          this.queriedEndTimestamp = new Date(this.data.xrangeEndDate);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
           this.needXRange = false;
           
         } else if (this.data.xrangeunits === 'today') {
@@ -472,6 +472,18 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.setDirty();
     }
 
+    setXRangeStartDate(value: any) {
+      this.data.xrangeStartDate = new Date(value).toISOString().split('T')[0] + 'T00:00';
+      this.refreshTime();
+      this.setDirty();
+    }
+    
+    setXRangeEndDate(value: any) {
+      this.data.xrangeEndDate = new Date(value).toISOString().split('T')[0] + 'T00:00';
+      this.refreshTime();
+      this.setDirty();
+    }
+
     setYAxisMin(value: any) {
         this.data.ymin = parseFloat(value);
         if (isNaN(value)) {
@@ -556,6 +568,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
                         existing.topics = this.data.topics;
                         existing.xrange = this.data.xrange;
                         existing.xrangeunits = this.data.xrangeunits;
+                        existing.xrangeStartDate = this.data.xrangeStartDate;
+                        existing.xrangeEndDate = this.data.xrangeEndDate;
                         existing.curve = this.data.curve;
                         existing.live = this.data.live;
                         existing.legend = this.data.legend;

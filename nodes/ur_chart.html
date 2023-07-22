@@ -54,6 +54,8 @@
                     return value === '' || RED.validators.number();
                 },
             },
+            xrangeStartDate: { value: '' },
+            xrangeEndDate: { value: '' },
             ymin: {
                 value: '',
                 validate: function (value) {
@@ -104,6 +106,26 @@
                     $('#line-chart-options').show();
                 } else {
                     $('#line-chart-options').hide();
+                }
+            });
+
+            $('#node-input-xrangeunits').on('change', function() {
+              console.log($(this).val())
+              if ($(this).val() === 'fixed_date_range') {
+                $('#date-ranges').show();
+              } else {
+                $('#date-ranges').hide();
+              }
+
+              if ($(this).val() === 'seconds' 
+                || $(this).val() === 'minutes'
+                || $(this).val() === 'hours'
+                || $(this).val() === 'days'
+                || $(this).val() === 'months'
+                || $(this).val() === 'years') {
+                  $('#node-input-xrange').show();
+                } else {
+                  $('#node-input-xrange').hide();
                 }
             });
 
@@ -277,21 +299,32 @@
         <label for="node-input-xrange">Range</label>
         <input type="number" id="node-input-xrange" style="width: 35%" />
         <select id="node-input-xrangeunits" style="width: 35%">
-            <!-- <option value="1">seconds</option>
-            <option value="60">minutes</option>
-            <option value="3600">hours</option>
-            <option value="86400">days</option>
-            <option value="2592000">months</option>
-            <option value="31104000">years</option> -->
-
             <option value="seconds">seconds</option>
             <option value="minutes">minutes</option>
             <option value="hours">hours</option>
             <option value="days">days</option>
             <option value="months">months</option>
             <option value="years">years</option>
+            <option value="fixed_date_range">Fixed Date Range</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="week_to_date">Week to Date</option>
+            <option value="last_week">Last Week</option>
+            <option value="month_to_date">Month to Date</option>
+            <option value="last_month">Last Month</option>
+            <option value="year_to_date">Year to Date</option>
+            <option value="last_year">Last Year</option>
         </select>
     </div>
+    <span id="date-ranges">
+        <div class="form-row">
+            <label for="node-input-xrangeStartDate">Start Date</label>
+            <input type='datetime-local' id='node-input-xrangeStartDate'>
+
+            <label for="node-input-xrangeEndDate">End Date</label>
+            <input type='datetime-local' id='node-input-xrangeEndDate'>
+        </div>
+    </span>
     <span id="line-chart-options">
         <div class="form-row">
             <label id="y-label-show" for="node-input-ymin">Y-Axis</label>
