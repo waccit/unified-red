@@ -15,6 +15,9 @@
                     [curve]="chartOpt.curve" [showRefLines]="data.showRefLines" [referenceLines]="data.referenceLines"
                     [results]="graphedResults" (select)="onSelect($event)" (activate)="onActivate($event)"
                     (deactivate)="onDeactivate($event)">
+                    <ng-template #tooltipTemplate let-model="model">
+                      {{ model.series }} · {{ getPSTDatetime(model.name) }} <br> {{ model.value }}
+                    </ng-template>
                 </ngx-charts-line-chart>
             </div>
         </mat-tab>
