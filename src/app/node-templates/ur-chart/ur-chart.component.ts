@@ -15,6 +15,7 @@ import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
 import { element } from 'protractor';
+import { UtilService } from '../../services/util.service';
 
 declare const $: any;
 
@@ -54,6 +55,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private showSeries = {};
     private lttb = new LargestTriangleThreeBuckets();
     private nativeTimestamp = true;
+    private utilService: UtilService
 
     /*
      *      Table Members
@@ -165,7 +167,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         };
         if (this.data.chartType === 'table') {
             // init table
-            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
+            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels, this.utilService);
         } else {
             // init graph
             this.initGraph();
