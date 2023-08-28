@@ -1,5 +1,5 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
@@ -84,7 +84,8 @@ export class UrScheduleFormDialogComponent {
     constructor(
         public dialogRef: MatDialogRef<UrScheduleFormDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private cd: ChangeDetectorRef
     ) {
         this.action = dialogData.action;
         this.data = dialogData.data;
@@ -151,9 +152,16 @@ export class UrScheduleFormDialogComponent {
                 repeatYearWeekdayOccurrence: [r.year.weekdayOccurrence],
                 repeatYearWeekday: [r.year.weekday],
             },
-            {
-                validator: HolidayValidator(),
-            });
+            // {
+            //     validator: HolidayValidator(),
+            // }
+            );
+            // document.getElementById("typeSelector").addEventListener("change", this.logger);
+            
+            // document.addEventListener('DOMContentLoaded', function () {
+            //     document.getElementById("typeSelector").addEventListener('change', this.logger, false);
+            // });
+            
             this.events = this.sortChronologically(this.data.events).map((e, i) => {
                 e.id = i;
                 e.minute = e.minute.toString().padStart(2, '0');
@@ -315,5 +323,16 @@ export class UrScheduleFormDialogComponent {
     private isYearlyWeekdayPattern(pattern) {
         /* Yearly weekday expression e.g. 0 0 0 * 11 4#4 */
         return /([\*\d-,]+\s+){3}\*\s+[\d-,]+\s+[\d-,]+(#\d|L)$/.test(pattern);
+    }
+
+    onChange() {
+        this.removeValidators(this.form);
+    }
+
+    removeValidators(form: FormGroup) {
+        for (const key in form.controls) {
+            form.get(key).clearValidators();
+            form.get(key).updateValueAndValidity({onlySelf: true});
+        }
     }
 }
