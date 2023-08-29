@@ -2,6 +2,7 @@ import { FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 
 export function HolidayValidator() {
     return (formGroup: FormGroup) => {
+        const type = formGroup.controls.type;
         const repeat = formGroup.controls.repeat;
         const repeatWeekdays = formGroup.controls.repeatWeekdays;
         const repeatMonthType = formGroup.controls.repeatMonthType;
@@ -25,48 +26,49 @@ export function HolidayValidator() {
         repeatYearDate.setErrors(null);
         repeatYearWeekdayOccurrence.setErrors(null);
         repeatYearWeekday.setErrors(null);
-
-        if (repeat.value === 'weekly') {
-            if (!repeatWeekdays.value || !repeatWeekdays.value.length) {
-                repeatWeekdays.setErrors({ required: true });
-            }
-        }
-        else if (repeat.value === 'monthly') {
-            if (!repeatMonthType.value) {
-                repeatMonthType.setErrors({ required: true });
-            }
-            else if (repeatMonthType.value === 'date') {
-                if (!repeatMonthDate.value || !repeatMonthDate.value.length) {
-                    repeatMonthDate.setErrors({ required: true });
+        if (type.value === 'holiday') {
+            if (repeat.value === 'weekly') {
+                if (!repeatWeekdays.value || !repeatWeekdays.value.length) {
+                    repeatWeekdays.setErrors({ required: true });
                 }
             }
-            else if (repeatMonthType.value === 'weekday') {
-                if (!repeatMonthWeekdayOccurrence.value) {
-                    repeatMonthWeekdayOccurrence.setErrors({ required: true });
+            else if (repeat.value === 'monthly') {
+                if (!repeatMonthType.value) {
+                    repeatMonthType.setErrors({ required: true });
                 }
-                if (!repeatMonthWeekday.value) {
-                    repeatMonthWeekday.setErrors({ required: true });
+                else if (repeatMonthType.value === 'date') {
+                    if (!repeatMonthDate.value || !repeatMonthDate.value.length) {
+                        repeatMonthDate.setErrors({ required: true });
+                    }
                 }
-            }
-        }
-        else if (repeat.value === 'yearly') {
-            if (!repeatYearMonth.value || !repeatYearMonth.value.length) {
-                repeatYearMonth.setErrors({ required: true });
-            }
-            if (!repeatYearType.value) {
-                repeatYearType.setErrors({ required: true });
-            }
-            else if (repeatYearType.value === 'date') {
-                if (!repeatYearDate.value || !repeatYearDate.value.length) {
-                    repeatYearDate.setErrors({ required: true });
+                else if (repeatMonthType.value === 'weekday') {
+                    if (!repeatMonthWeekdayOccurrence.value) {
+                        repeatMonthWeekdayOccurrence.setErrors({ required: true });
+                    }
+                    if (!repeatMonthWeekday.value) {
+                        repeatMonthWeekday.setErrors({ required: true });
+                    }
                 }
             }
-            else if (repeatYearType.value === 'weekday') {
-                if (!repeatYearWeekdayOccurrence.value) {
-                    repeatYearWeekdayOccurrence.setErrors({ required: true });
+            else if (repeat.value === 'yearly') {
+                if (!repeatYearMonth.value || !repeatYearMonth.value.length) {
+                    repeatYearMonth.setErrors({ required: true });
                 }
-                if (!repeatYearWeekday.value) {
-                    repeatYearWeekday.setErrors({ required: true });
+                if (!repeatYearType.value) {
+                    repeatYearType.setErrors({ required: true });
+                }
+                else if (repeatYearType.value === 'date') {
+                    if (!repeatYearDate.value || !repeatYearDate.value.length) {
+                        repeatYearDate.setErrors({ required: true });
+                    }
+                }
+                else if (repeatYearType.value === 'weekday') {
+                    if (!repeatYearWeekdayOccurrence.value) {
+                        repeatYearWeekdayOccurrence.setErrors({ required: true });
+                    }
+                    if (!repeatYearWeekday.value) {
+                        repeatYearWeekday.setErrors({ required: true });
+                    }
                 }
             }
         }

@@ -17,7 +17,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Event Type</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="type" required>
+                        <select (change)="onChange()"matNativeControl formControlName="type" required>
                             <option value="weekday">Weekday</option>
                             <option value="date">Date</option>
                             <option value="holiday">Holiday</option>
@@ -30,7 +30,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'weekday'">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Weekday</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="weekday" required>
+                        <select matNativeControl formControlName="weekday" required>
                             <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
                         <mat-error *ngIf="form.get('weekday').hasError('required')">
@@ -52,7 +52,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12" *ngIf="form.controls.type.value === 'holiday'">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Repeat</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeat" required>
+                        <select matNativeControl formControlName="repeat" required>
                             <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
@@ -82,7 +82,7 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>By</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeatMonthType" required>
+                        <select matNativeControl formControlName="repeatMonthType" required>
                             <option value="date">Date</option>
                             <option value="weekday">Weekday</option>
                         </select>
@@ -108,7 +108,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>On the</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeatMonthWeekdayOccurrence" required>
+                        <select matNativeControl formControlName="repeatMonthWeekdayOccurrence" required>
                             <option *ngFor="let i of nth" [value]="i.value">{{ i.text }}</option>
                         </select>
                         <mat-error *ngIf="form.get('repeatMonthWeekdayOccurrence').hasError('required')">
@@ -119,7 +119,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Weekday</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeatMonthWeekday" required>
+                        <select matNativeControl formControlName="repeatMonthWeekday" required>
                             <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
                         <mat-error *ngIf="form.get('repeatMonthWeekday').hasError('required')">
@@ -146,7 +146,7 @@
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>By</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeatYearType" required>
+                        <select matNativeControl formControlName="repeatYearType" required>
                             <option value="date">Date</option>
                             <option value="weekday">Weekday</option>
                         </select>
@@ -172,7 +172,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>On the</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeatYearWeekdayOccurrence" required>
+                        <select matNativeControl formControlName="repeatYearWeekdayOccurrence" required>
                             <option *ngFor="let i of nth" [value]="i.value">{{ i.text }}</option>
                         </select>
                         <mat-error *ngIf="form.get('repeatYearWeekdayOccurrence').hasError('required')">
@@ -183,7 +183,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Weekday</mat-label>
-                        <select (change)="onChange()" matNativeControl formControlName="repeatYearWeekday" required>
+                        <select matNativeControl formControlName="repeatYearWeekday" required>
                             <option *ngFor="let i of weekdays" [value]="i.value">{{ i.text }}</option>
                         </select>
                         <mat-error *ngIf="form.get('repeatYearWeekday').hasError('required')">
@@ -230,7 +230,7 @@
                                                         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                                                             <mat-form-field class="example-full-width" appearance="outline">
                                                                 <mat-label>Value</mat-label>
-                                                                <select (change)="onChange()" matNativeControl formControlName="value" required>
+                                                                <select matNativeControl formControlName="value" required>
                                                                     <option *ngFor="let value of data.values" [value]="value.name">{{ value.name }}</option>
                                                                 </select>
                                                             </mat-form-field>
@@ -238,7 +238,7 @@
                                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
                                                             <mat-form-field class="example-full-width" appearance="outline">
                                                                 <mat-label>Hour</mat-label>
-                                                                <select (change)="onChange()" matNativeControl formControlName="hour" required>
+                                                                <select matNativeControl formControlName="hour" required>
                                                                     <option *ngFor="let i of hours" [value]="i">{{ i }}</option>
                                                                 </select>
                                                             </mat-form-field>
@@ -246,7 +246,7 @@
                                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
                                                             <mat-form-field class="example-full-width" appearance="outline">
                                                                 <mat-label>Minute</mat-label>
-                                                                <select (change)="onChange()" matNativeControl formControlName="minute" required>
+                                                                <select matNativeControl formControlName="minute" required>
                                                                     <option *ngFor="let i of minutes" [value]="i">{{ i }}</option>
                                                                 </select>
                                                             </mat-form-field>

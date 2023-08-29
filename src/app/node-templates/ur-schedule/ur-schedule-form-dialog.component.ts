@@ -152,9 +152,10 @@ export class UrScheduleFormDialogComponent {
                 repeatYearWeekdayOccurrence: [r.year.weekdayOccurrence],
                 repeatYearWeekday: [r.year.weekday],
             },
-            // {
-            //     validator: HolidayValidator(),
-            // }
+            {
+                // PROBABLY WILL FIX FLICKERING
+                validator: HolidayValidator(),
+            }
             );
             // document.getElementById("typeSelector").addEventListener("change", this.logger);
             
@@ -330,9 +331,11 @@ export class UrScheduleFormDialogComponent {
     }
 
     removeValidators(form: FormGroup) {
+        console.log(form);
         for (const key in form.controls) {
             form.get(key).clearValidators();
             form.get(key).updateValueAndValidity({onlySelf: true});
+            // form.get(key).updateValueAndValidity();
         }
     }
 }
