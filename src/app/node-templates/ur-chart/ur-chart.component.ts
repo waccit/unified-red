@@ -15,7 +15,6 @@ import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
 import { element } from 'protractor';
-import { UtilService } from '../../services/util.service';
 
 declare const $: any;
 
@@ -58,7 +57,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private queriedStartTimestamp: Date;
     private queriedEndTimestamp: Date;
     needXRange: boolean = true;
-    private utilService: UtilService
+
+    xRangeStart: string;
+    xRangeEnd: string;
 
     /*
      *      Table Members
@@ -88,7 +89,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         protected snackbar: SnackbarService,
         private dataLogService: DataLogService,
         private formBuilder: FormBuilder,
-        private red: NodeRedApiService
+        private red: NodeRedApiService,
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
     }
@@ -169,17 +170,31 @@ export class UrChartComponent extends BaseNode implements OnInit {
             // tags: string[]
         };
 
+        // Init query range dates
+        this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
+        this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
+
         this.refreshTime();
         this.dirty = false;
 
         if (this.data.chartType === 'table') {
             // init table
-            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels, this.utilService);
+            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
         } else {
             // init graph
             this.initGraph();
         }
         this.live.next(this.data.live);
+    }
+
+    rebuildChartAndTable() {
+      if (this.data.chartType === 'table') {
+         // init table
+          this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
+      } else {
+          // init graph
+          this.initGraph();
+      }  
     }
 
     getPSTDatetime(ISODateString: string) {
@@ -481,7 +496,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
     
     setXRangeEndDate(value: any) {
-      this.data.xrangeEndDate = new Date(value).toISOString().split('T')[0] + 'T00:00';
+      this.data.xrangeEndDate = new Date(value).toISOString().split('T')[0] + 'T23:59';
       this.refreshTime();
       this.setDirty();
     }
