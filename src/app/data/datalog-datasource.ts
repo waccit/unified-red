@@ -4,12 +4,13 @@ import { DataLogService } from '../services';
 import { DataLogQuery } from './datalog-query.model';
 import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { UtilService } from '../services/util.service';
 
 export class DataLogDataSource extends DataSource<DataLog> {
     private data = [];
     private dataSubject = new BehaviorSubject<any[]>(this.data);
 
-    constructor(private dataLogService: DataLogService, queryParams: DataLogQuery, private labels) {
+    constructor(private dataLogService: DataLogService, queryParams: DataLogQuery, private labels, private utilService: UtilService) {
         super();
         this.labels = labels;
         this.dataLogService.query(queryParams).subscribe((data: any) => {
