@@ -10,7 +10,7 @@ export class DataLogDataSource extends DataSource<DataLog> {
     private data = [];
     private dataSubject = new BehaviorSubject<any[]>(this.data);
 
-    constructor(private dataLogService: DataLogService, queryParams: DataLogQuery, private labels, private utilService: UtilService) {
+    constructor(private dataLogService: DataLogService, queryParams: DataLogQuery, private labels) {
         super();
         this.labels = labels;
         this.dataLogService.query(queryParams).subscribe((data: any) => {

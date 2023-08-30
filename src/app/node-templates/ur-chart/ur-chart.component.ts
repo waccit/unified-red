@@ -180,7 +180,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
         if (this.data.chartType === 'table') {
             // init table
-            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels, this.utilService);
+            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
         } else {
             // init graph
             this.initGraph();
