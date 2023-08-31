@@ -55,8 +55,14 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private showSeries = {};
     private lttb = new LargestTriangleThreeBuckets();
     private nativeTimestamp = true;
-    private utilService: UtilService
+    private queriedStartTimestamp: Date;
+    private queriedEndTimestamp: Date;
+    msgFlag: boolean = true;;
+    needXRange: boolean = true;
 
+    xRangeStart: string;
+    xRangeEnd: string;
+  
     /*
      *      Table Members
      */
@@ -85,7 +91,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         protected snackbar: SnackbarService,
         private dataLogService: DataLogService,
         private formBuilder: FormBuilder,
-        private red: NodeRedApiService
+        private red: NodeRedApiService,
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
     }
@@ -157,7 +163,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.queryParams = {
             limit: 50000,
             topic: this.topics,
-            startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
+            // startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
             // endTimestamp: this.currentTime,
             // value: any,
             // lowValue: parseFloat(this.data.ymin),
@@ -165,14 +171,85 @@ export class UrChartComponent extends BaseNode implements OnInit {
             // status: string,
             // tags: string[]
         };
+
+        // Init query range dates
+
+        //check for empty string in start/end date
+
+        if (this.data.xrangeStartDate && this.data.xrangeEndDate) {
+            this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
+            this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
+        }
+        else {
+            this.msgFlag = false;
+            if (this.data.xrangeStartDate) {
+                this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
+                let endOfStartDate = new Date(this.data.xrangeStartDate);
+                endOfStartDate.setHours(23, 59, 59, 0);
+                this.xRangeEnd = endOfStartDate.toISOString();
+            }
+            else if (this.data.xrangeEndDate) {
+                this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
+                let startOfEndDate = new Date(this.data.xrangeEndDate);
+                startOfEndDate.setHours(0, 0, 0, 0);
+                this.xRangeStart = startOfEndDate.toISOString();
+            }
+            else {
+                let today = new Date();
+                today.setHours(0, 0, 0, 0);
+                this.xRangeStart = today.toISOString();
+                this.xRangeEnd = new Date().toISOString();
+            }
+            this.data.xrangeStartDate = this.dateConvert(this.xRangeStart);
+            this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd);
+            this.deploy();
+        }
+
+        this.refreshTime();
+        this.dirty = false;
+
         if (this.data.chartType === 'table') {
             // init table
-            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels, this.utilService);
+            this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
         } else {
             // init graph
             this.initGraph();
+            // this.initGraph();
         }
         this.live.next(this.data.live);
+    }
+
+    rebuildChartAndTable() {
+      if (this.data.chartType === 'table') {
+         // init table
+          this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
+      } else {
+          // init graph
+          this.initGraph();
+      }  
+    }
+
+    getPSTDatetime(ISODateString: string, second?: boolean): Date | string {
+        if (second) {
+            return new Date(ISODateString).toLocaleString('en-US', {
+                year: '2-digit',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'America/Los_Angeles',
+          });
+        }
+
+        return new Date(ISODateString).toLocaleString('en-US', {
+            year: '2-digit',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',   
+            timeZone: 'America/Los_Angeles',
+        });
     }
 
     private _filter(value: string): string[] {
@@ -207,12 +284,94 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.setCurve(this.data.curve);
         this.chartOpt.colorScheme.domain = this.data.colors;
         this.queryGraphData();
+
+        // These lines repeated ensure the graph is rendered correctly
+        this.setYAxisMin(this.data.ymin);
+        this.setYAxisMax(this.data.ymax);
     }
 
     private refreshTime() {
-        this.queryParams.startTimestamp = new Date(
-            new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000
-        );
+        let currentTimestamp = new Date();
+        this.queriedStartTimestamp = new Date();
+        this.queriedEndTimestamp = new Date();
+        this.queriedStartTimestamp.setHours(0, 0, 0, 0);
+        this.queriedEndTimestamp.setHours(0, 0, 0, 0);
+        this.needXRange = true;
+
+        if (this.data.xrangeunits === 'fixed_date_range') {
+          this.queriedStartTimestamp = new Date(this.data.xrangeStartDate);
+          this.queriedEndTimestamp = new Date(this.data.xrangeEndDate);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+          
+        } else if (this.data.xrangeunits === 'today') {
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'yesterday') {
+          this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - 1);
+          this.queriedEndTimestamp.setDate(this.queriedEndTimestamp.getDate() - 1);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'week_to_date') {
+          this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - this.queriedStartTimestamp.getDay());
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'last_week') {
+          this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - this.queriedStartTimestamp.getDay() - 7);
+          this.queriedEndTimestamp.setDate(this.queriedEndTimestamp.getDate() - this.queriedEndTimestamp.getDay() - 1);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'month_to_date') {
+          this.queriedStartTimestamp.setDate(1);
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'last_month') {
+          this.queriedStartTimestamp.setDate(0);
+          this.queriedStartTimestamp.setDate(1);
+          this.queriedEndTimestamp.setDate(0);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'year_to_date') {
+          this.queriedStartTimestamp.setMonth(0, 1);
+          this.queriedEndTimestamp = currentTimestamp;
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'last_year') {
+          this.queriedStartTimestamp.setMonth(0, 0);
+          this.queriedStartTimestamp.setMonth(0, 1);
+          this.queriedEndTimestamp.setMonth(0, 0);
+          this.queriedEndTimestamp.setHours(23, 59, 59, 999);
+          this.needXRange = false;
+
+        } else if (this.data.xrangeunits === 'years') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 31104000 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'months') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 2592000 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'days') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 86400 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'hours') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 3600 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'minutes') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 60 * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        } else if (this.data.xrangeunits === 'seconds') {
+          this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 1000);
+          this.queriedEndTimestamp = currentTimestamp;
+        }
+        
+        this.queryParams.startTimestamp = this.queriedStartTimestamp;
+        this.queryParams.endTimestamp = this.queriedEndTimestamp;
+
         this.queryGraphData();
     }
 
@@ -370,9 +529,21 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     setXRangeUnits(value: any) {
-        this.data.xrangeunits = parseFloat(value);
+        // this.data.xrangeunits = isNaN(value) ? value : parseFloat(value);
         this.refreshTime();
         this.setDirty();
+    }
+
+    setXRangeStartDate(value: any) {
+      this.data.xrangeStartDate = new Date(value).toISOString().split('T')[0] + 'T00:00';
+      this.refreshTime();
+      this.setDirty();
+    }
+    
+    setXRangeEndDate(value: any) {
+      this.data.xrangeEndDate = new Date(value).toISOString().split('T')[0] + 'T23:59';
+      this.refreshTime();
+      this.setDirty();
     }
 
     setYAxisMin(value: any) {
@@ -459,6 +630,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
                         existing.topics = this.data.topics;
                         existing.xrange = this.data.xrange;
                         existing.xrangeunits = this.data.xrangeunits;
+                        existing.xrangeStartDate = this.data.xrangeStartDate;
+                        existing.xrangeEndDate = this.data.xrangeEndDate;
                         existing.curve = this.data.curve;
                         existing.live = this.data.live;
                         existing.legend = this.data.legend;
@@ -470,10 +643,11 @@ export class UrChartComponent extends BaseNode implements OnInit {
                         existing.colors = this.data.colors;
                         break;
                 }
-                return existing;
+                this.msgFlag = true;
+                return existing;  
             })
             .subscribe((response: any) => {
-                if (response?.rev) {
+                if (response?.rev && this.msgFlag) {
                     this.snackbar.success('Deployed successfully!');
                 }
             });
@@ -481,5 +655,12 @@ export class UrChartComponent extends BaseNode implements OnInit {
             payload: {},
             point: 'Chart',
         });
+    }
+
+    // written to convert UTC to local time and convert date into format used in flows.json
+    dateConvert (originalDate) {
+        let dateStr = new Date(originalDate);
+        dateStr.setHours(dateStr.getHours() - (dateStr.getTimezoneOffset() / 60), dateStr.getMinutes())
+        return JSON.stringify(dateStr).slice(1, -9);
     }
 }
