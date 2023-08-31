@@ -172,8 +172,38 @@ export class UrChartComponent extends BaseNode implements OnInit {
         };
 
         // Init query range dates
-        this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
-        this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
+
+        // EDGE CASES FOR ONLY ONE STARTDATE/ENDDATE
+
+        //check for empty string in start/end date, add default behavior
+
+        if (this.data.xrangeStartDate && this.data.xrangeEndDate) {
+            this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
+            this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
+        }
+        else {
+            if (this.data.xrangeStartDate) {
+                this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
+                let endOfStartDate = new Date(this.data.xrangeStartDate);
+                endOfStartDate.setHours(23, 59, 59, 0);
+                this.xRangeEnd = endOfStartDate.toISOString();
+            }
+            else if (this.data.xrangeEndDate) {
+                this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
+                let startOfEndDate = new Date(this.data.xrangeEndDate);
+                startOfEndDate.setHours(0, 0, 0, 0);
+                this.xRangeStart = startOfEndDate.toISOString();
+            }
+            else {
+                let today = new Date();
+                today.setHours(0, 0, 0, 0);
+                this.xRangeStart = today.toISOString();
+                this.xRangeEnd = new Date().toISOString();
+            }
+            this.data.xrangeStartDate = this.dateConvert(this.xRangeStart);
+            this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd);
+            this.deploy(false);
+        }
 
         this.refreshTime();
         this.dirty = false;
@@ -184,6 +214,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         } else {
             // init graph
             this.initGraph();
+            // this.initGraph();
         }
         this.live.next(this.data.live);
     }
@@ -198,18 +229,27 @@ export class UrChartComponent extends BaseNode implements OnInit {
       }  
     }
 
-    getPSTDatetime(ISODateString: string) {
-      const date = new Date(ISODateString).toLocaleString('en-US', {
-        year: '2-digit',
-        month: 'numeric',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'America/Los_Angeles',
-      });
-  
-      return date !== 'Invalid Date' ? date : '';
+    getPSTDatetime(ISODateString: string, second?: boolean): Date | string {
+        if (second) {
+            return new Date(ISODateString).toLocaleString('en-US', {
+                year: '2-digit',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'America/Los_Angeles',
+          });
+        }
+
+        return new Date(ISODateString).toLocaleString('en-US', {
+            year: '2-digit',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',   
+            timeZone: 'America/Los_Angeles',
+        });
     }
 
     private _filter(value: string): string[] {
@@ -244,6 +284,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.setCurve(this.data.curve);
         this.chartOpt.colorScheme.domain = this.data.colors;
         this.queryGraphData();
+
+        // These lines repeated ensure the graph is rendered correctly
+        this.setYAxisMin(this.data.ymin);
+        this.setYAxisMax(this.data.ymax);
     }
 
     private refreshTime() {
@@ -575,7 +619,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.setDirty();
     }
 
-    deploy() {
+    deploy(msgFlag) {
         const baseNodeId = this.getBaseNodeId(this.data.id);
         const nodesToReplace = [baseNodeId];
         this.red
@@ -602,7 +646,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
                 return existing;
             })
             .subscribe((response: any) => {
-                if (response?.rev) {
+                if (response?.rev && msgFlag) {
                     this.snackbar.success('Deployed successfully!');
                 }
             });
@@ -610,5 +654,12 @@ export class UrChartComponent extends BaseNode implements OnInit {
             payload: {},
             point: 'Chart',
         });
+    }
+
+    // written to convert UTC to local time and convert date into format used in flows.json
+    dateConvert (originalDate) {
+        let dateStr = new Date(originalDate);
+        dateStr.setHours(dateStr.getHours() - (dateStr.getTimezoneOffset() / 60), dateStr.getMinutes())
+        return JSON.stringify(dateStr).slice(1, -9);
     }
 }

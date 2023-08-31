@@ -16,7 +16,7 @@
                     [results]="graphedResults" (select)="onSelect($event)" (activate)="onActivate($event)"
                     (deactivate)="onDeactivate($event)">
                     <ng-template #tooltipTemplate let-model="model">
-                      {{ model.series }} · {{ getPSTDatetime(model.name) }} <br> {{ model.value }}
+                      {{ model.series }} · {{ getPSTDatetime(model.name, true) }} <br> {{ model.value }}
                     </ng-template>
                 </ngx-charts-line-chart>
             </div>
@@ -177,7 +177,7 @@
             </div>
             <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
                 <div class="col-12 mt-2 mb-2">
-                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
+                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy(true)"
                         [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
@@ -304,7 +304,7 @@
             </div>
             <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
                 <div class="col-12 mt-2 mb-2">
-                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
+                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy(true)"
                         [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
