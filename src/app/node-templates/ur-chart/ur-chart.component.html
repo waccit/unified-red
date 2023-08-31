@@ -177,7 +177,7 @@
             </div>
             <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
                 <div class="col-12 mt-2 mb-2">
-                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy(true)"
+                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
                         [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
@@ -304,7 +304,7 @@
             </div>
             <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
                 <div class="col-12 mt-2 mb-2">
-                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy(true)"
+                    <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
                         [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>

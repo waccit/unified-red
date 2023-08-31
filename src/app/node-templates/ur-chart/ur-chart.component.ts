@@ -57,6 +57,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private nativeTimestamp = true;
     private queriedStartTimestamp: Date;
     private queriedEndTimestamp: Date;
+    msgFlag: boolean = true;;
     needXRange: boolean = true;
 
     xRangeStart: string;
@@ -173,15 +174,14 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
         // Init query range dates
 
-        // EDGE CASES FOR ONLY ONE STARTDATE/ENDDATE
-
-        //check for empty string in start/end date, add default behavior
+        //check for empty string in start/end date
 
         if (this.data.xrangeStartDate && this.data.xrangeEndDate) {
             this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
             this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
         }
         else {
+            this.msgFlag = false;
             if (this.data.xrangeStartDate) {
                 this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
                 let endOfStartDate = new Date(this.data.xrangeStartDate);
@@ -202,7 +202,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
             }
             this.data.xrangeStartDate = this.dateConvert(this.xRangeStart);
             this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd);
-            this.deploy(false);
+            this.deploy();
         }
 
         this.refreshTime();
@@ -619,7 +619,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.setDirty();
     }
 
-    deploy(msgFlag) {
+    deploy() {
         const baseNodeId = this.getBaseNodeId(this.data.id);
         const nodesToReplace = [baseNodeId];
         this.red
@@ -643,10 +643,11 @@ export class UrChartComponent extends BaseNode implements OnInit {
                         existing.colors = this.data.colors;
                         break;
                 }
-                return existing;
+                this.msgFlag = true;
+                return existing;  
             })
             .subscribe((response: any) => {
-                if (response?.rev && msgFlag) {
+                if (response?.rev && this.msgFlag) {
                     this.snackbar.success('Deployed successfully!');
                 }
             });
