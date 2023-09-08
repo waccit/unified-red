@@ -9,8 +9,8 @@
                 !this.isMobile() && dirty ? 'add-button-desktop-deploy' : '',
                 this.isMobile() && dirty ? 'add-button-mobile-deploy' : ''
             ]" 
-            color="primary">
-            <mat-icon id="add" (click)="handleDateClick(null)">add</mat-icon>
+            color="primary" (click)="handleDateClick(null)">
+            <mat-icon id="add">add</mat-icon>
         </button>
 
         <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
