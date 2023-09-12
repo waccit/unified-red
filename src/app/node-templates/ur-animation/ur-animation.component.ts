@@ -33,6 +33,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
         this.container.ready(() => { // ensure container has loaded
             // setTimeout used to stall so that container width can be properly calculated.
             // https://stackoverflow.com/questions/6132141/jquery-why-does-width-sometimes-return-0-after-inserting-elements-with-html
+            // setTimeout may no longer be necessary due to changes to convertToPercent()- MC 9/12/2023
             setTimeout(() => {
                 const staticElement = this.container.find('[static]');
                 if (staticElement.length) {
@@ -61,9 +62,15 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
             const left = 100 * position.left / containerWidth;
             anime.css({ position: 'absolute', top: top + '%', left: left + '%' });
             if (anime.is('img')) {
-                const width = anime.width();
-                const widthPerc = 100 * width / containerWidth;
-                anime.css({ width: widthPerc + '%', 'max-width': width + 'px' });
+                // wait until animation has loaded (width > 0), then resize
+                let interval = setInterval(function(){
+                    if(anime[0].clientWidth != 0){
+                        clearInterval(interval);
+                        const width = anime.width();
+                        const widthPerc = 100 * width / containerWidth;
+                        anime.css({ width: widthPerc + '%', 'max-width': width + 'px' });
+                    }
+                }, 25);
             }
         });
     }
