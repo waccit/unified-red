@@ -33,8 +33,8 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
         this.container.ready(() => { // ensure container has loaded
             // setTimeout used to stall so that container width can be properly calculated.
             // https://stackoverflow.com/questions/6132141/jquery-why-does-width-sometimes-return-0-after-inserting-elements-with-html
-            // setTimeout may no longer be necessary due to changes to convertToPercent()- MC 9/12/2023
-            setTimeout(() => {
+            // removed setTimeout to address issue with animations appearing in top-left corner
+            // setTimeout(() => {
                 const staticElement = this.container.find('[static]');
                 if (staticElement.length) {
                     const that = this;
@@ -50,7 +50,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
                 else {
                     this.convertToPercent(this.container.height(), this.container.width());
                 }
-            }, 100);
+            // }, 100);
         });
     }
 
@@ -105,10 +105,12 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
     private vis(element, exp, data?) {
         const result = this.formatFromData(data, exp);
         if (result) {
-            element.show();
+            // element.show();
+            element.css({ visibility: 'visible' });
         }
         else {
-            element.hide();
+            // element.hide();
+            element.css({ visibility: 'hidden' });
         }
         return result;
     }
