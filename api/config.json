@@ -1,12 +1,12 @@
 {
-    "dbConnection": "mongodb://localhost:27017/unified-red",
-    "jwtsecret": "%)7}AQ`N`48BdM!Wxx5B;M,/sX(5z=#qsSBR9kmsVxg6sd3%(~/A#~6a3SQtd~@fj;NK_B%$D~m^~;/Db5BWR#952_C.@JF.{8(ngjqE)hW`?<_gb22RdD/M7H*GBX3qKJkkzsmP@M)'KRLPH;ee5Hm=KZ;-j4/8mb+g3(;Sq+7s{qNFX}X(CDA(DTB_C`pZH;{XsU3]Xc,-vk/)2(?+-`N:e93&(nQmUKBPkJvc+%h^{.w!!U8:qd?TK7*P,B)a",
+    "dbConnection": "sqlite:node_modules/unified-red/unified-red.db",
+    "jwtsecret": "RunczO/8IBCIfAv7vbnp79GmiMJgD9HErIlMHJUHi0mYx1wkT/plYT47gt1yoZwNZguIuZJpoDqSXhjv6Z8s48Szv/VZBsk+74rOcVS20EtJqa9CmBtoQchZ2ozjLkxHx0DhF/opbKlIi4LrGOTabyOoh4RiLG2Cn2+kr8fpVmg4TlLP4Q/lJ/k+7oNTFKagK8GS0fy7CkbFd31YsoomDFmhpZDzo3wpLkBNfdrbzU616jXAU73DJAtcnMVf7S3R",
     "smtp": {
-        "fromAddress": null,
-        "host": null,
-        "port": 587,
+        "fromAddress": "'Unified' <unified@your_email_server.com>",
+        "host": "your_email_server.com",
+        "port": "587",
         "ssl": false,
-        "user": null,
-        "password": null
+        "user": "",
+        "password": ""
     }
 }
