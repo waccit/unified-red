@@ -1,6 +1,6 @@
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
     <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
-    <mat-tab-group #container [id]="data.id" (selectedTabChange)='rebuildChartAndTable()'>
+    <mat-tab-group #container [id]="data.id">
         <mat-tab *ngIf="data.chartType === 'line'">
             <ng-template mat-tab-label>
                 <mat-icon>timeline</mat-icon>
@@ -67,7 +67,7 @@
                 <div class="col-3">
                     <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                         <mat-label>Type</mat-label>
-                        <select matNativeControl [(ngModel)]="data.chartType" (change)="setDirty()">
+                        <select matNativeControl [(ngModel)]="data.chartType" (change)="setDirty(); rebuildChartAndTable()">
                             <option value="line">Line Chart</option>
                             <option value="table">Table</option>
                         </select>
