@@ -15,7 +15,6 @@ import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
 import { element } from 'protractor';
-import { UtilService } from '../../services/util.service';
 
 declare const $: any;
 
@@ -98,9 +97,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     ngOnInit(): void {
-
-      console.log(this.data);
-
         for (let topic of this.data.topics) {
             topic.topicSubbed = this.evalInstanceParameters(topic.topic); // handle multi-page. substitute {variables}
             this.topics.push(topic.topicSubbed);
@@ -108,12 +104,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
             this.labels[topic.topicSubbed] = topic.label;
             this.showSeries[topic.labelSubbed] = true;
         }
-
-        // console.log(this.labels)
-        // console.log(this.showSeries)
-        console.log(this.topics);
-        console.log(this.topicsWithVariables);
-        
 
         // Init settings
         this.dataLogService
@@ -174,6 +164,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.queryParams = {
             limit: 50000,
             topic: this.topics,
+            startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.getRangeInSeconds() * 1000)
             // startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
             // endTimestamp: this.currentTime,
             // value: any,
@@ -197,13 +188,55 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     rebuildChartAndTable() {
+      this.queryParams = {
+        limit: 50000,
+        topic: this.topics,
+        startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.getRangeInSeconds() * 1000)
+    };
+
       if (this.data.chartType === 'table') {
          // init table
           this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
       } else {
           // init graph
-          // this.initGraph();
+          this.initGraph();
       }  
+    }
+
+    getRangeInSeconds() {
+      let rangeInSeconds;
+
+      if (
+        this.data.xrangeunits === 'seconds'
+        || this.data.xrangeunits === 'minutes'
+        || this.data.xrangeunits === 'hours'
+        || this.data.xrangeunits === 'days'
+        || this.data.xrangeunits === 'months'
+        || this.data.xrangeunits === 'years'
+        ) {
+          switch (this.data.xrangeunits) {
+            case 'seconds':
+              rangeInSeconds = 1;
+              break;
+            case 'minutes':
+              rangeInSeconds = 60;
+              break;
+            case 'hours':
+              rangeInSeconds = 3600;
+              break;
+            case 'days':
+              rangeInSeconds = 86400;
+              break;
+            case 'months':
+              rangeInSeconds = 2628000;
+              break;
+            case 'years':
+              rangeInSeconds = 31556952;
+              break;
+          }
+        }
+
+        return rangeInSeconds;
     }
 
     getPSTDatetime(ISODateString: string, second?: boolean): Date | string {
@@ -276,10 +309,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.needXRange = true;
 
         if (this.data.xrangeunits === 'fixed_date_range') {
-
           // if the start and end dates are empty in the flow
           if (!this.data.xrangeStartDate && !this.data.xrangeEndDate) {
-            console.log("Both are empty");
             this.xRangeStart = new Date();
             this.xRangeStart.setHours(0, 0, 0, 0);
             this.data.xrangeStartDate = this.dateConvert(this.xRangeStart.toISOString());
@@ -294,8 +325,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
           }
           // if only the start date is empty in the flow 
           else if (!this.data.xrangeStartDate) {
-            console.log("Start is empty");
-
             this.xRangeStart = new Date(this.data.xrangeEndDate);
             this.xRangeStart.setHours(0, 0, 0, 0);
             this.data.xrangeStartDate = this.dateConvert(this.xRangeStart.toISOString());
@@ -309,8 +338,6 @@ export class UrChartComponent extends BaseNode implements OnInit {
           }
           // if only the end date is empty in the flow
           else if (!this.data.xrangeEndDate) {
-            console.log("End is empty");
-
             this.xRangeStart = new Date(this.data.xrangeStartDate);
             this.xRangeStart.setHours(0, 0, 0, 0);
             this.data.xrangeStartDate = this.dateConvert(this.xRangeStart.toISOString());
