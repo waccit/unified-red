@@ -60,8 +60,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
     msgFlag: boolean = true;;
     needXRange: boolean = true;
 
-    xRangeStart: string;
-    xRangeEnd: string;
+    xRangeStart;
+    xRangeEnd;
   
     /*
      *      Table Members
@@ -83,6 +83,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     sampled = true;
     live = new BehaviorSubject<boolean>(false);
     filteredTopics: Observable<string[]>;
+    topicsWithVariables = [];
 
     constructor(
         protected webSocketService: WebSocketService,
@@ -97,12 +98,22 @@ export class UrChartComponent extends BaseNode implements OnInit {
     }
 
     ngOnInit(): void {
+
+      console.log(this.data);
+
         for (let topic of this.data.topics) {
-            topic.topic = this.evalInstanceParameters(topic.topic); // handle multi-page. substitute {variables}
-            this.topics.push(topic.topic);
-            this.labels[topic.topic] = topic.label;
-            this.showSeries[topic.label] = true;
+            topic.topicSubbed = this.evalInstanceParameters(topic.topic); // handle multi-page. substitute {variables}
+            this.topics.push(topic.topicSubbed);
+            this.topicsWithVariables.push(topic.topic);
+            this.labels[topic.topicSubbed] = topic.label;
+            this.showSeries[topic.labelSubbed] = true;
         }
+
+        // console.log(this.labels)
+        // console.log(this.showSeries)
+        console.log(this.topics);
+        console.log(this.topicsWithVariables);
+        
 
         // Init settings
         this.dataLogService
@@ -172,41 +183,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
             // tags: string[]
         };
 
-        // Init query range dates
-
-        //check for empty string in start/end date
-
-        if (this.data.xrangeStartDate && this.data.xrangeEndDate) {
-            this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
-            this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
-        }
-        else {
-            this.msgFlag = false;
-            if (this.data.xrangeStartDate) {
-                this.xRangeStart = new Date(this.data.xrangeStartDate).toISOString();
-                let endOfStartDate = new Date(this.data.xrangeStartDate);
-                endOfStartDate.setHours(23, 59, 59, 0);
-                this.xRangeEnd = endOfStartDate.toISOString();
-            }
-            else if (this.data.xrangeEndDate) {
-                this.xRangeEnd= new Date(this.data.xrangeEndDate).toISOString();
-                let startOfEndDate = new Date(this.data.xrangeEndDate);
-                startOfEndDate.setHours(0, 0, 0, 0);
-                this.xRangeStart = startOfEndDate.toISOString();
-            }
-            else {
-                let today = new Date();
-                today.setHours(0, 0, 0, 0);
-                this.xRangeStart = today.toISOString();
-                this.xRangeEnd = new Date().toISOString();
-            }
-            this.data.xrangeStartDate = this.dateConvert(this.xRangeStart);
-            this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd);
-            this.deploy();
-        }
-
         this.refreshTime();
-        this.dirty = false;
 
         if (this.data.chartType === 'table') {
             // init table
@@ -225,7 +202,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
           this.tableDataSource = new DataLogDataSource(this.dataLogService, this.queryParams, this.labels);
       } else {
           // init graph
-          this.initGraph();
+          // this.initGraph();
       }  
     }
 
@@ -254,7 +231,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
     private _filter(value: string): string[] {
         const filterValue = value.toLowerCase();
-        return this.availableTopics.filter((topic) => topic.toLowerCase().includes(filterValue));
+        return [...this.topicsWithVariables.filter((topic) => topic.toLowerCase().includes(filterValue)), ...this.availableTopics.filter((topic) => topic.toLowerCase().includes(filterValue))];
     }
 
     ngAfterViewInit(): void {
@@ -299,6 +276,62 @@ export class UrChartComponent extends BaseNode implements OnInit {
         this.needXRange = true;
 
         if (this.data.xrangeunits === 'fixed_date_range') {
+
+          // if the start and end dates are empty in the flow
+          if (!this.data.xrangeStartDate && !this.data.xrangeEndDate) {
+            console.log("Both are empty");
+            this.xRangeStart = new Date();
+            this.xRangeStart.setHours(0, 0, 0, 0);
+            this.data.xrangeStartDate = this.dateConvert(this.xRangeStart.toISOString());
+            this.xRangeStart.toISOString();
+
+            this.xRangeEnd = new Date();
+            this.xRangeEnd.setHours(23, 59, 59, 0);
+            this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd.toISOString());
+            this.xRangeEnd.toISOString();
+
+            this.dirty = true;   
+          }
+          // if only the start date is empty in the flow 
+          else if (!this.data.xrangeStartDate) {
+            console.log("Start is empty");
+
+            this.xRangeStart = new Date(this.data.xrangeEndDate);
+            this.xRangeStart.setHours(0, 0, 0, 0);
+            this.data.xrangeStartDate = this.dateConvert(this.xRangeStart.toISOString());
+            this.xRangeStart.toISOString();
+
+            this.xRangeEnd = new Date(this.data.xrangeEndDate);
+            this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd.toISOString());
+            this.xRangeEnd.toISOString();
+
+            this.dirty = true;
+          }
+          // if only the end date is empty in the flow
+          else if (!this.data.xrangeEndDate) {
+            console.log("End is empty");
+
+            this.xRangeStart = new Date(this.data.xrangeStartDate);
+            this.xRangeStart.setHours(0, 0, 0, 0);
+            this.data.xrangeStartDate = this.dateConvert(this.xRangeStart.toISOString());
+            this.xRangeStart.toISOString();
+
+            this.xRangeEnd = new Date(this.data.xrangeStartDate);
+            this.xRangeEnd.setHours(23, 59, 59, 0);
+            this.data.xrangeEndDate = this.dateConvert(this.xRangeEnd.toISOString());
+            this.xRangeEnd.toISOString();
+
+            this.dirty = true;
+          }
+
+          // if both start and end date are present
+          else {
+            this.xRangeStart = new Date(this.data.xrangeStartDate);
+            this.xRangeEnd = new Date(this.data.xrangeEndDate);
+
+            this.dirty = false;    
+          }
+
           this.queriedStartTimestamp = new Date(this.data.xrangeStartDate);
           this.queriedEndTimestamp = new Date(this.data.xrangeEndDate);
           this.queriedEndTimestamp.setHours(23, 59, 59, 999);
@@ -307,28 +340,33 @@ export class UrChartComponent extends BaseNode implements OnInit {
         } else if (this.data.xrangeunits === 'today') {
           this.queriedEndTimestamp = currentTimestamp;
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'yesterday') {
           this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - 1);
           this.queriedEndTimestamp.setDate(this.queriedEndTimestamp.getDate() - 1);
           this.queriedEndTimestamp.setHours(23, 59, 59, 999);
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'week_to_date') {
           this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - this.queriedStartTimestamp.getDay());
           this.queriedEndTimestamp = currentTimestamp;
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'last_week') {
           this.queriedStartTimestamp.setDate(this.queriedStartTimestamp.getDate() - this.queriedStartTimestamp.getDay() - 7);
           this.queriedEndTimestamp.setDate(this.queriedEndTimestamp.getDate() - this.queriedEndTimestamp.getDay() - 1);
           this.queriedEndTimestamp.setHours(23, 59, 59, 999);
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'month_to_date') {
           this.queriedStartTimestamp.setDate(1);
           this.queriedEndTimestamp = currentTimestamp;
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'last_month') {
           this.queriedStartTimestamp.setDate(0);
@@ -336,11 +374,13 @@ export class UrChartComponent extends BaseNode implements OnInit {
           this.queriedEndTimestamp.setDate(0);
           this.queriedEndTimestamp.setHours(23, 59, 59, 999);
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'year_to_date') {
           this.queriedStartTimestamp.setMonth(0, 1);
           this.queriedEndTimestamp = currentTimestamp;
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'last_year') {
           this.queriedStartTimestamp.setMonth(0, 0);
@@ -348,25 +388,37 @@ export class UrChartComponent extends BaseNode implements OnInit {
           this.queriedEndTimestamp.setMonth(0, 0);
           this.queriedEndTimestamp.setHours(23, 59, 59, 999);
           this.needXRange = false;
+          this.dirty = false;
 
         } else if (this.data.xrangeunits === 'years') {
           this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 31104000 * 1000);
           this.queriedEndTimestamp = currentTimestamp;
+          this.dirty = false;
+
         } else if (this.data.xrangeunits === 'months') {
           this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 2592000 * 1000);
           this.queriedEndTimestamp = currentTimestamp;
+          this.dirty = false;
+
         } else if (this.data.xrangeunits === 'days') {
           this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 86400 * 1000);
           this.queriedEndTimestamp = currentTimestamp;
+          this.dirty = false;
+
         } else if (this.data.xrangeunits === 'hours') {
           this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 3600 * 1000);
           this.queriedEndTimestamp = currentTimestamp;
+          this.dirty = false;
+
         } else if (this.data.xrangeunits === 'minutes') {
           this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 60 * 1000);
           this.queriedEndTimestamp = currentTimestamp;
+          this.dirty = false;
+
         } else if (this.data.xrangeunits === 'seconds') {
           this.queriedStartTimestamp = new Date(currentTimestamp.getTime() - this.data.xrange * 1000);
           this.queriedEndTimestamp = currentTimestamp;
+          this.dirty = false;
         }
         
         this.queryParams.startTimestamp = this.queriedStartTimestamp;
@@ -423,10 +475,42 @@ export class UrChartComponent extends BaseNode implements OnInit {
             if (this.data.chartType === 'table' && this.tableDataSource) {
                 this.tableDataSource.add(data.payload);
             } else if (typeof this.graphDataSource !== 'undefined') {
-                this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
-                this.chartOpt.xScaleMin = new Date(
-                    this.chartOpt.xScaleMax.getTime() - this.data.xrange * this.data.xrangeunits * 1000
-                );
+
+              if (
+                this.data.xrangeunits === 'seconds'
+                || this.data.xrangeunits === 'minutes'
+                || this.data.xrangeunits === 'hours'
+                || this.data.xrangeunits === 'days'
+                || this.data.xrangeunits === 'months'
+                || this.data.xrangeunits === 'years'
+                ) {
+                  let rangeInSeconds;
+                  switch (this.data.xrangeunits) {
+                    case 'seconds':
+                      rangeInSeconds = 1;
+                      break;
+                    case 'minutes':
+                      rangeInSeconds = 60;
+                      break;
+                    case 'hours':
+                      rangeInSeconds = 3600;
+                      break;
+                    case 'days':
+                      rangeInSeconds = 86400;
+                      break;
+                    case 'months':
+                      rangeInSeconds = 2628000;
+                      break;
+                    case 'years':
+                      rangeInSeconds = 31556952;
+                      break;
+                  }
+
+                  this.chartOpt.xScaleMax = new Date(data.payload.timestamp);
+                  this.chartOpt.xScaleMin = new Date(
+                      this.chartOpt.xScaleMax.getTime() - this.data.xrange * rangeInSeconds * 1000
+                  );
+                }
 
                 // add point to dataSource
                 let label = this.chartLabel(data.payload);
@@ -566,7 +650,8 @@ export class UrChartComponent extends BaseNode implements OnInit {
         if (this.topicForm.invalid) {
             return;
         }
-        if (!this.data.topics.find((t) => t.topic === this.topicForm.value.topic)) {
+        this.topicForm.value.topicSubbed = this.topicForm.value.topic;
+        if (!this.data.topics.find((t) => t.topicSubbed === this.topicForm.value.topicSubbed)) {
             this.data.topics = [...this.data.topics, this.topicForm.value];
             this.setDirty();
         }
@@ -574,7 +659,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
     removeTopic(topic) {
         this.data.topics = this.data.topics.filter((t) => {
-            return t.label !== topic.label && t.topic !== topic.topic;
+            return t.label !== topic.label && t.topicSubbed !== topic.topicSubbed;
         });
         this.setDirty();
     }

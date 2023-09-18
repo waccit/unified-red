@@ -9,6 +9,7 @@ export class DataLogService {
     constructor(private http: HttpClient) {}
 
     query(queryParams: DataLogQuery) {
+      this.http.put<DataLog[]>(`/api/datalog/`, queryParams).subscribe(data => console.log("DATA", data));
         return this.http.put<DataLog[]>(`/api/datalog/`, queryParams);
     }
 
