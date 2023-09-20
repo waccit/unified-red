@@ -15,7 +15,8 @@ export class DataLogDataSource extends DataSource<DataLog> {
         this.labels = labels;
         this.dataLogService.query(queryParams).subscribe((data: any) => {
             this.data = data.map((entry) => {
-                entry.timestamp = new Date(entry.timestamp.replaceAll('-', '/'));
+                let parsed = entry.timestamp.split(/[^0-9]/);
+                entry.timestamp = new Date(Date.UTC(parsed[0], parsed[1]-1, parsed[2], parsed[3], parsed[4], parsed[5]));
                 entry.name = labels[entry.topic] || entry.topic;
                 return entry;
             });
