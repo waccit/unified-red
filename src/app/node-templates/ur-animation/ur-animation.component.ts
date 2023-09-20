@@ -70,7 +70,7 @@ export class UrAnimationComponent extends UrTemplateComponent implements AfterVi
                         const widthPerc = 100 * width / containerWidth;
                         anime.css({ width: widthPerc + '%', 'max-width': width + 'px' });
                     }
-                }, 25);
+                }, 100);
             }
         });
     }
