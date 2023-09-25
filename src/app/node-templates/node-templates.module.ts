@@ -23,6 +23,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatTableExporterModule } from 'mat-table-exporter';
 
 import { UrTextComponent } from './ur-text/ur-text.component';
+import { UrAlarmComponent } from './ur-alarm/ur-alarm.component';
 import { UrButtonComponent } from './ur-button/ur-button.component';
 import { UrTextInputComponent } from './ur-text-input/ur-text-input.component';
 import { UrTemplateComponent } from './ur-template/ur-template.component';
@@ -54,6 +55,7 @@ import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autoco
         UrFormComponent,
         UrChartComponent,
         UrGaugeComponent,
+        UrAlarmComponent,
     ],
     imports: [
         RouterModule,
