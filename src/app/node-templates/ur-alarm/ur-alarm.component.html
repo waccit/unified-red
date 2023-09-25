@@ -221,7 +221,7 @@
                             </ng-container>
         
                             <!-- actions -->
-                            <ng-container style="max-width: 25%;"matColumnDef="actions">
+                            <ng-container matColumnDef="actions">
                                 <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
                                 <mat-cell *matCellDef="let row; let i=index;">
                                     <button mat-icon-button class="btn-tbl-edit" (click)="removeEntry(row, entry.key)">
