@@ -10,6 +10,7 @@ import { UrTableComponent } from '../node-templates/ur-table/ur-table.component'
 import { UrFormComponent } from '../node-templates/ur-form/ur-form.component';
 import { UrChartComponent } from '../node-templates/ur-chart/ur-chart.component';
 import { UrGaugeComponent } from '../node-templates/ur-gauge/ur-gauge.component';
+import { UrAlarmComponent } from '../node-templates/ur-alarm/ur-alarm.component';
 
 @Injectable({
     providedIn: 'root',
@@ -38,6 +39,8 @@ export class WidgetService {
                     return new Widget(UrTableComponent, widget);
                 case 'form':
                     return new Widget(UrFormComponent, widget);
+                case 'alarm':
+                    return new Widget(UrAlarmComponent, widget);
             }
         });
     }
