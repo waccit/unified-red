@@ -4,17 +4,17 @@
     <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
 
     <div class="row pt-4 flex-nowrap" style="overflow: scroll;">
-        <div class="col-3">
+        <!-- <div class="col-3">
             <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                 <mat-label>Name</mat-label>
                 <input matInput [(ngModel)]="data.name" (change)="setDirty()">
             </mat-form-field>
-        </div>
+        </div> -->
 
         <div class="col-3">
             <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                 <mat-label>Value Type</mat-label>
-                <select matNativeControl [(ngModel)]="data.propertyType"
+                <select matNativeControl [(ngModel)]="data.instanceSettings[this.topic].propertyType"
                 (change)="setDirty()">
                 <option value="msg">msg.</option>
                 <option value="flow">flow.</option>
@@ -28,7 +28,14 @@
         <div class="col-3">
             <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                 <mat-label>Value</mat-label>
-                <input matInput [(ngModel)]="data.property" (change)="setDirty()">
+                <input matInput [(ngModel)]="data.instanceSettings[this.topic].property" (change)="setDirty()">
+            </mat-form-field>
+        </div>
+
+        <div class="col-3">
+            <mat-form-field class="mr-3" appearance="outline" style="width:100%">
+                <mat-label>Topic</mat-label>
+                <input matInput [(ngModel)]="this.topic" (change)="setDirty()">
             </mat-form-field>
         </div>
     </div>
@@ -38,21 +45,21 @@
         <div class="col-2">
             <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                 <mat-label>On Delay</mat-label>
-                <input matInput [(ngModel)]="data.delayon" (change)="setDirty()">
+                <input matInput [(ngModel)]="data.instanceSettings[this.topic].delayon" (change)="setDirty()">
             </mat-form-field>
         </div>
 
         <div class="col-2">
             <mat-form-field class="mr-3" appearance="outline" style="width:100%">
                 <mat-label>Off Delay</mat-label>
-                <input matInput [(ngModel)]="data.delayoff" (change)="setDirty()">
+                <input matInput [(ngModel)]="data.instanceSettings[this.topic].delayoff" (change)="setDirty()">
             </mat-form-field>
         </div>
 
         <div class="col-3">
             <mat-form-field appearance="outline" style="width:100%">
             <mat-label>Process By</mat-label>
-                <select matNativeControl [(ngModel)]="data.checkall"
+                <select matNativeControl [(ngModel)]="data.instanceSettings[this.topic].checkall"
                 (change)="setDirty()">
                 <option value="true">checking all rules</option>
                 <option value="false">stopping after first match</option>
@@ -61,7 +68,7 @@
         </div>
 
         <div class="col-2 pt-4">
-            <mat-checkbox [(ngModel)]="data.ackreq" (change)="live.next($event.checked); setDirty()">Acknowledgement Required
+            <mat-checkbox [(ngModel)]="data.instanceSettings[this.topic].ackreq" (change)="live.next($event.checked); setDirty()">Acknowledgement Required
             </mat-checkbox>
         </div>
     </div>
@@ -70,20 +77,20 @@
         <div class="col-12">
 
             <mat-tab-group #container [id]="data.id">
-                <div *ngFor="let entry of data.rules | keyvalue">
+                <div *ngFor="let entry of data.instanceSettings[this.topic].rules | keyvalue">
                     <mat-tab>
                         
                         <ng-template mat-tab-label>
                             <div class="p-l-10 font-17">{{entry.key}} conditions</div>
                         </ng-template>
 
-                        <mat-table [dataSource]="data.rules[entry.key]" class="mat-cell" style="margin-bottom: 2rem;">
+                        <mat-table [dataSource]="data.instanceSettings[this.topic].rules[entry.key]" class="mat-cell" style="margin-bottom: 2rem;">
 
                             <ng-container matColumnDef="condition">
                                 <mat-header-cell *matHeaderCellDef>Condition</mat-header-cell>
                                 
                                 <mat-cell *matCellDef="let row; let i = index">
-
+                                    
                                     <form [formGroup]="alarmForm" (change)="editCondition(row, entry.key, i)">
                                         <div class="row">
                                             <div>
@@ -233,6 +240,9 @@
                             <mat-row *matRowDef="let row; columns: conditionsDisplayedColumns;" matRipple></mat-row>
                         </mat-table>
 
+
+                        <!-- *ngIf="this.topic === row.top"  -->
+
                         <div class="col-2 pl-2 p-t-10">
                             <button mat-raised-button color="primary" (click)="addCondition(entry.key)">Add</button>
                         </div>
@@ -253,5 +263,9 @@
             <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
                 [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
         </div>
+    </div>
+
+    <div class="col-2 pl-2 p-t-10">
+        <button mat-raised-button color="primary" (click)="debug()">debug</button>
     </div>
 </ng-template>

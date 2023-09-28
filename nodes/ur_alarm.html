@@ -30,6 +30,31 @@ Modeled after Node-RED's Switch core node.
             { v: "jsonata_exp", t: "rules.exp", kind: 'O' }
         ];
 
+        dict = {}
+        opts = {}
+        testarray = ["temp_1", "temp_2", "temp_4"];
+        for (let e of testarray) {
+            dict[e] = { 
+                property: "payload",
+                propertyType: "msg",
+                delayon: 120,
+                delayoff: 120,
+                ackreq: "false",
+                checkall: "true",
+                rules: {
+
+                        critical: [],
+                        alert: [],
+                        warning: [],
+                        info: [],
+
+                },
+            };
+            opts[e] = e;
+        }
+        console.log(dict);
+        console.log(opts);
+
         RED.nodes.registerType('ur_alarm', {
             category: 'unified-red',
             color: '#FFCC66',
@@ -38,20 +63,28 @@ Modeled after Node-RED's Switch core node.
                 order: { value: 0 },
                 width: { value: 12 },
                 name: { value: "" },
-                property: { value: "payload", required: true, validate: RED.validators.typedInput("propertyType") },
-                propertyType: { value: "msg" },
-                delayon: { value: 120, required: true },
-                delayoff: { value: 120, required: true },
-                rules: {
-                    value: {
-                        critical: [],
-                        alert: [{ t: "eq", v: "", vt: "str" }],
-                        warning: [],
-                        info: [],
-                    }
-                },
-                checkall: { value: "true", required: true },
-                ackreq: { value: "false" },
+                topicPattern: { value: '' },
+
+                instanceSettings: {
+                    value: dict
+                }
+                // property: { value: "payload", required: true, validate: RED.validators.typedInput("propertyType") },
+                // propertyType: { value: "msg" },
+                // delayon: { value: 120, required: true },
+                // delayoff: { value: 120, required: true },
+                // ackreq: { value: "false" },
+                // checkall: { value: "true", required: true },
+                // rules: {
+                //     value: {
+                //         critical: [],
+                //         alert: [{ t: "eq", v: "", vt: "str" }],
+                //         warning: [],
+                //         info: [],
+                //     }
+                // },
+
+
+
             },
             inputs: 1,
             outputs: 1,
@@ -65,7 +98,29 @@ Modeled after Node-RED's Switch core node.
                 return this.name ? "node_label_italic" : "";
             },
             oneditprepare: function () {
-                var node = this;
+
+
+                console.log("script!", opts);
+                var selectElem = document.getElementById("node-input-topic");
+                console.log(selectElem);
+
+                for (const [key, value] of Object.entries(opts)) {
+                    // var item = opts[i];
+                    console.log(value);
+                    var element = document.createElement("option");
+                    element.innerText = value;
+                    selectElem.append(element);
+                }
+
+                console.log(selectElem);
+                
+                
+                // console.log("RULES");
+                // var node = this;
+                // let tab = this.tab ? RED.nodes.getNode(this.tab) : null;
+                // console.log("ANAANA", this.name);
+
+
                 var previousValueType = { value: "prev", label: c_("label.previous"), hasValue: false };
 
                 $("#node-input-property").typedInput({ default: this.propertyType || 'msg', types: ['msg', 'flow', 'global', 'jsonata', 'env'] });
@@ -314,6 +369,7 @@ Modeled after Node-RED's Switch core node.
                     node.rules[severity] = [];
                     $("#node-input-" + severity + "-container").editableList('items').each(function (i) {
                         var rule = $(this);
+                        console.log("rule", rule);
                         var ruleData = rule.data('data');
                         var type = rule.find("select").val();
                         var r = { t: type };
@@ -330,6 +386,7 @@ Modeled after Node-RED's Switch core node.
                                 r.v = rule.find(".node-input-rule-exp-value").typedInput('value');
                                 r.vt = rule.find(".node-input-rule-exp-value").typedInput('type');
                             } else {
+                                r.top = r.top;
                                 r.v = rule.find(".node-input-rule-value").typedInput('value');
                                 r.vt = rule.find(".node-input-rule-value").typedInput('type');
                             }
@@ -361,26 +418,46 @@ Modeled after Node-RED's Switch core node.
         <input type="hidden" id="node-input-width" />
         <button class="editor-button" id="node-input-size"></button>
     </div>
-
-
-
-
-
-
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_alarm.label.name"></span></label>
         <input type="text" id="node-input-name">
     </div>
     <div class="form-row">
+        <label for="node-input-topicPattern" style="display: inline-flex; align-items: center">
+            <i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic Pattern
+        </label>
+        <input type="text" id="node-input-topicPattern" />
+    </div>
+
+
+    <div class="form-row" style="margin-bottom: 2rem;">
+        <label for="node-input-topic"><i class="fa fa-asterisk"></i>Topic</label>
+        <select id="node-input-topic" style="width: 70%">
+            <!-- <option value="true" data-i18n="ur_alarm.label.checkall"></option>
+            <option value="false" data-i18n="ur_alarm.label.stopfirst"></option> -->
+        </select>
+    </div>
+
+
+<!-- 
+    <div class="form-row" style="margin-bottom: 2rem;">
+        <label for="node-input-topic" style="display: inline-flex; align-items: center">
+            <i class="fa fa-cogs" style="margin-right: 5px;"></i> Topic
+        </label>
+        <input type="text" id="node-input-topic" />
+    </div> -->
+
+    <div class="form-row">
         <label for="node-input-property"><i class="fa fa-ellipsis-h"></i> <span data-i18n="ur_alarm.label.value"></span></label>
         <input type="text" id="node-input-property" style="width: 70%"/>
     </div>
+
     <div class="form-row">
         <label for="node-input-delayon"><i class="fa fa-hourglass"></i> <span data-i18n="ur_alarm.label.delayon"></span></label>
         <input type="text" id="node-input-delayon">
     </div>
     <div class="form-row">
-        <label for="node-input-delayon"><i class="fa fa-hourglass"></i> <span data-i18n="ur_alarm.label.delayoff"></span></label>
+        <label for="node-input-delayoff"><i class="fa fa-hourglass"></i> <span data-i18n="ur_alarm.label.delayoff"></span></label>
         <input type="text" id="node-input-delayoff">
     </div>
     <div class="form-row">
@@ -392,24 +469,52 @@ Modeled after Node-RED's Switch core node.
     </div>
     <div class="form-row">
         <input type="checkbox" id="node-input-ackreq" style="display: inline-block; width: auto; vertical-align: top;">
-        <label style="width: auto;" for="node-input-ackreq"><span data-i18n="ur_alarm.label.ackreq"></span></label></input>
-    </div>
-    <div class="form-row node-input-critical-container-row">
-        <label for="node-input-critical-container" style="width: 100%"><span data-i18n="ur_alarm.label.critical"></span></label>
-        <ol id="node-input-critical-container"></ol>
+        <label style="width: auto;" for="node-input-ackreq"><span data-i18n="ur_alarm.label.ackreq"></span></label>
     </div>
     <div class="form-row node-input-alert-container-row">
         <label for="node-input-alert-container" style="width: 100%"><span data-i18n="ur_alarm.label.alert"></span></label>
         <ol id="node-input-alert-container"></ol>
     </div>
-    <div class="form-row node-input-warning-container-row">
-        <label for="node-input-warning-container" style="width: 100%"><span data-i18n="ur_alarm.label.warning"></span></label>
-        <ol id="node-input-warning-container"></ol>
+    <div class="form-row node-input-critical-container-row">
+        <label for="node-input-critical-container" style="width: 100%"><span data-i18n="ur_alarm.label.critical"></span></label>
+        <ol id="node-input-critical-container"></ol>
     </div>
     <div class="form-row node-input-info-container-row">
         <label for="node-input-info-container" style="width: 100%"><span data-i18n="ur_alarm.label.info"></span></label>
         <ol id="node-input-info-container"></ol>
     </div>
+    <div class="form-row node-input-warning-container-row">
+        <label for="node-input-warning-container" style="width: 100%"><span data-i18n="ur_alarm.label.warning"></span></label>
+        <ol id="node-input-warning-container"></ol>
+    </div>
+</script>
+
+
+<!-- populate topics-->
+
+<script type="text/javascript">
+
+
+
+
+
+
+    // var ui = require('../ui')(RED);
+    // var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
+    // console.log(page.config.instances[0].param.input);
+
+    // console.log("topiclist", this.topicList);
+    // var select = document.getElementById("node-input-topic");
+    
+    // let testList = ["1", "3", "4", "hello"];
+
+    // for(var i = 0; i < this.topicList.length; i++) {
+    //     var opt = this.topicList[i];
+    //     var el = document.createElement("option");
+    //     el.textContent = opt;
+    //     el.value = opt;
+    //     select.appendChild(el);
+    // }
 </script>
 
 <script type="text/html" data-help-name="ur_alarm">

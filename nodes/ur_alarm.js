@@ -104,7 +104,7 @@ module.exports = function (RED) {
 
         this.inhibit = false;
         this.inhibitTimer = null;
-        this.rules = config.rules || { 'critical': [], 'alert': [], 'warning': [], 'info': [] };
+        this.rules = config.rules || { 'critical': [], 'alert': [], 'warning': [], 'info': []};
         this.lastState = { 'critical': false, 'alert': false, 'warning': false, 'info': false };
         this.delayon = parseInt(config.delayon) || 0;
         this.delayoff = parseInt(config.delayoff) || 0;
@@ -114,7 +114,12 @@ module.exports = function (RED) {
         this.previousValue = null;
         this.property = config.property;
         this.propertyType = config.propertyType || 'msg';
+        this.topicList = [];
+        this.instanceSettings = config.instanceSettings || {},
 
+
+        // console.log(page.config.instances[0].param.input);
+        // console.log(page);
 
         this.config = {
             ...config,
@@ -126,6 +131,7 @@ module.exports = function (RED) {
             values: config.values,
             payloadType: config.payloadType,
             defaultView: config.defaultView,
+            // topics: config.topics,
             topicPattern: config.topicPattern || '',
             access: config.access || '',
             accessBehavior: config.accessBehavior || 'disable',
@@ -141,14 +147,32 @@ module.exports = function (RED) {
             control: this.config,
         });
 
-        node.on('close', () => {
-            // tear down all cron jobs
-            if (RED.settings.verbose) {
-                this.log(RED._('schedule.stopped'));
-            }
+        node.on('close', function () {
             done();
         });
 
+        // TODO: add some condition here that will only be true for multipage
+        // if (true) {
+        //     let instances = page.config.instances[0].param.input[0].values;
+        //     let working = instances.split(",");
+
+        //     for (let i in working) {
+        //         if (working[i].includes("-")) {
+        //             let chunk = working[i].split("-");
+        //             for (let j in chunk) {
+        //                 chunk[j] = Number(chunk[j]);
+        //             }
+        //             // why does this work? what does "x" do?
+        //             for (num of Array.from(Array(chunk[1] - chunk[0] + 1),(x,i)=>i + chunk[0])) {
+        //                 this.topicList.push(config.topicPattern.replace(page.config.instances[0].param.input[0].variable, String(num)));
+        //             }             
+        //         }
+        //         else {
+        //             this.topicList.push(config.topicPattern.replace(page.config.instances[0].param.input[0].variable, working[i]));
+        //         }
+        //     }
+        // }
+        // console.log(this.topicList);
 
         if (this.propertyType === 'jsonata') {
             try {
@@ -245,8 +269,11 @@ module.exports = function (RED) {
         let checkRules = function (msg, severity) {
             try {
                 let results = 0;
-                let rules = node.rules[severity];
+                let rules = node.instanceSettings[msg.topic].rules[severity];
                 for (let rule of rules) {
+                    console.log("msg:", msg);
+                    console.log("rule:", rule);
+
                     let v1 = getV1(msg, rule);
                     let v2 = getV2(msg, rule);
                     if (operators[rule.t](node.presentValue, v1, v2, rule.case, msg.parts)) {
@@ -261,6 +288,7 @@ module.exports = function (RED) {
                             return false;
                         }
                     }
+                     
                 }
                 return !!results && results === rules.length;
             } catch (err) {
@@ -365,15 +393,16 @@ module.exports = function (RED) {
         };
 
         let processMessage = function (msg) {
+            console.log("checkpoint");
             try {
-                if (node.propertyType === 'jsonata') {
+                if (node.instanceSettings[msg.topic].propertyType === 'jsonata') {
                     try {
-                        node.presentValue = RED.util.evaluateJSONataExpression(node.property, msg);
+                        node.presentValue = RED.util.evaluateJSONataExpression(node.instanceSettings[msg.topic].property, msg);
                     } catch (err) {
                         throw RED._('switch.errors.invalid-expr', { error: err.message });
                     }
                 } else {
-                    node.presentValue = RED.util.evaluateNodeProperty(node.property, node.propertyType, node, msg);
+                    node.presentValue = RED.util.evaluateNodeProperty(node.instanceSettings[msg.topic].property, node.instanceSettings[msg.topic].propertyType, node, msg);
                 }
             } catch (err) {
                 node.warn(err);
@@ -382,6 +411,7 @@ module.exports = function (RED) {
 
             for (let severity of severities) {
                 try {
+
                     let currentState = checkRules(msg, severity);
                     let lastState = node.lastState[severity];
                     if (lastState !== currentState) {
@@ -475,6 +505,6 @@ module.exports = function (RED) {
 
         updateNodeStatus();
     }
-
     RED.nodes.registerType('ur_alarm', AlarmNode);
+
 };

@@ -49,6 +49,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     private graphDataSource: {};
     graphedResults: any[];
     private queryParams: DataLogQuery;
+    topic: "";
     private conditions: Array<string> = [];
     private labels = {};
     private showSeries = {};
@@ -127,6 +128,10 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     }
 
     ngOnInit(): void {
+
+        this.topic = this.evalInstanceParameters(this.data.topicPattern);
+
+
         this.alarmForm = this.formBuilder.group({
             severity: [Validators.required],
             operator: [Validators.required],
@@ -152,20 +157,21 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     }
 
     removeEntry(entry, severity) {
-        this.data.rules[severity] = this.data.rules[severity].filter((t) => {
+        this.data.instanceSettings[this.topic].rules[severity] = this.data.instanceSettings[this.topic].rules[severity].filter((t) => {
             return t !== entry;
         });
         this.setDirty();
     }
 
     addCondition(severity) {
-        let ruleCategory = this.data.rules[severity];
-        this.data.rules[severity] = [...ruleCategory, {}];
+        let ruleCategory = this.data.instanceSettings[this.topic].rules[severity];
+        this.data.instanceSettings[this.topic].rules[severity] = [...ruleCategory, {}];
         this.snackbar.success('Added successfully!');
     }
 
     editCondition(row, severity, index) {
-        this.data.rules[severity][index] = row;
+        this.data.instanceSettings[this.topic].rules[severity][index] = row;
+        this.setDirty();
     }
 
     formatOutput (formInfo) {
@@ -259,18 +265,18 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
 
     deploy() {
         this.addFlag = true
-        for (let severity in this.data.rules) {
-            for (let condition in this.data.rules[severity]) {                
-                let fields = this.formatOutput(this.data.rules[severity][condition]);
-                if (this.addFlag) {
-                    this.data.rules[severity][condition] = fields;
-                }
-                else {
-                    this.snackbar.error('A condition is missing information!');
-                    console.log("fld", fields);
-                    console.log(severity, this.data.rules[severity][condition])
-                    return
-                }
+        for (let severity in this.data.instanceSettings[this.topic].rules) {
+            for (let condition in this.data.instanceSettings[this.topic].rules[severity]) {      
+                // if (this.data.instanceSettings[this.topic].rules[severity][condition]["top"] === this.topic) {          
+                    let fields = this.formatOutput(this.data.instanceSettings[this.topic].rules[severity][condition]);
+                    if (this.addFlag) {
+                        this.data.instanceSettings[this.topic].rules[severity][condition] = fields;
+                    }
+                    else {
+                        this.snackbar.error('A condition is missing information!');
+                        return
+                    }
+                // }
             }
         }
 
@@ -281,14 +287,15 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
             .deployNodes(nodesToReplace, (existing) => {
                 switch (existing.id) {
                     case baseNodeId:
-                        existing.delayon = this.data.delayon;
-                        existing.delayoff = this.data.delayoff;
-                        existing.checkall = this.data.checkall;
-                        existing.ackreq = this.data.ackreq;
-                        existing.name = this.data.name;
-                        existing.property = this.data.property;
-                        existing.propertyType = this.data.propertyType;
-                        existing.rules = this.data.rules;
+                        // existing.delayon = this.data.delayon;
+                        // existing.delayoff = this.data.delayoff;
+                        // existing.checkall = this.data.checkall;
+                        // existing.ackreq = this.data.ackreq;
+                        // // existing.name = this.data.name;
+                        // existing.property = this.data.property;
+                        // existing.propertyType = this.data.propertyType;
+                        // existing.rules = this.data.rules;
+                        existing.instanceSettings = this.data.instanceSettings;
                         break;
                 }
                 this.msgFlag = true;
@@ -303,5 +310,10 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
             payload: {},
             point: 'Alarm',
         });
+    }
+
+    debug() {
+        console.log(this.topic);
+        console.log(this.tableDataSource);
     }
 }
