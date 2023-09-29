@@ -131,7 +131,6 @@ module.exports = function (RED) {
             values: config.values,
             payloadType: config.payloadType,
             defaultView: config.defaultView,
-            // topics: config.topics,
             topicPattern: config.topicPattern || '',
             access: config.access || '',
             accessBehavior: config.accessBehavior || 'disable',
@@ -271,9 +270,6 @@ module.exports = function (RED) {
                 let results = 0;
                 let rules = node.instanceSettings[msg.topic].rules[severity];
                 for (let rule of rules) {
-                    console.log("msg:", msg);
-                    console.log("rule:", rule);
-
                     let v1 = getV1(msg, rule);
                     let v2 = getV2(msg, rule);
                     if (operators[rule.t](node.presentValue, v1, v2, rule.case, msg.parts)) {
@@ -368,32 +364,31 @@ module.exports = function (RED) {
             if (msg.payload.state) {
                 if (!ontimer[msg.payload.severity]) {
                     clearOffTimer(msg.payload.severity);
-                    nodeStatus[msg.payload.severity].ontimer = node.delayon;
+                    nodeStatus[msg.payload.severity].ontimer = node.instanceSettings[msg.topic].delayon;
                     updateNodeStatus();
                     // run on timer
                     ontimer[msg.payload.severity] = setTimeout(() => {
                         sendAlarm(msg, startValue);
                         clearOnTimer(msg.payload.severity);
                         updateNodeStatus();
-                    }, node.delayon * 1000);
+                    }, node.instanceSettings[msg.topic].delayon * 1000);
                 }
             } else {
                 if (!offtimer[msg.payload.severity]) {
                     clearOnTimer(msg.payload.severity);
-                    nodeStatus[msg.payload.severity].offtimer = node.delayoff;
+                    nodeStatus[msg.payload.severity].offtimer = node.instanceSettings[msg.topic].delayoff;
                     updateNodeStatus();
                     // run off timer
                     offtimer[msg.payload.severity] = setTimeout(() => {
                         sendAlarm(msg, startValue);
                         clearOffTimer(msg.payload.severity);
                         updateNodeStatus();
-                    }, node.delayoff * 1000);
+                    }, node.instanceSettings[msg.topic].delayoff * 1000);
                 }
             }
         };
 
         let processMessage = function (msg) {
-            console.log("checkpoint");
             try {
                 if (node.instanceSettings[msg.topic].propertyType === 'jsonata') {
                     try {

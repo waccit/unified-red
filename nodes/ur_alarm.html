@@ -8,6 +8,10 @@ Modeled after Node-RED's Switch core node.
             return RED._("unified-red/ur_alarm:ur_alarm." + x);
         }
 
+        function debug () {
+            console.log("hi");
+        }
+
         let severities = ["critical", "alert", "warning", "info"];
         let operators = [
             { v: "eq", t: "==", kind: 'V' },
@@ -52,8 +56,8 @@ Modeled after Node-RED's Switch core node.
             };
             opts[e] = e;
         }
-        console.log(dict);
-        console.log(opts);
+        // console.log(dict);
+        // console.log(opts);
 
         RED.nodes.registerType('ur_alarm', {
             category: 'unified-red',
@@ -100,27 +104,28 @@ Modeled after Node-RED's Switch core node.
             oneditprepare: function () {
 
 
-                console.log("script!", opts);
-                var selectElem = document.getElementById("node-input-topic");
-                console.log(selectElem);
 
+                var selectElem = document.getElementById("node-input-topic");
+
+                // populate
                 for (const [key, value] of Object.entries(opts)) {
                     // var item = opts[i];
-                    console.log(value);
+                    // console.log(value);
                     var element = document.createElement("option");
                     element.innerText = value;
+                    element.value = value;
                     selectElem.append(element);
                 }
 
-                console.log(selectElem);
-                
-                
-                // console.log("RULES");
-                // var node = this;
-                // let tab = this.tab ? RED.nodes.getNode(this.tab) : null;
-                // console.log("ANAANA", this.name);
+                console.log($('#node-input-topic').val());
+                $('#node-input-topic').on('change', function() {
+                    console.log($(this).val());
+                    debug();
+                })
 
 
+
+                
                 var previousValueType = { value: "prev", label: c_("label.previous"), hasValue: false };
 
                 $("#node-input-property").typedInput({ default: this.propertyType || 'msg', types: ['msg', 'flow', 'global', 'jsonata', 'env'] });
@@ -349,24 +354,31 @@ Modeled after Node-RED's Switch core node.
 
                 for (let severity of severities) {
                     let ruleContainer = $("#node-input-" + severity + "-container");
-                    if (ruleContainer && ruleContainer.length && this.rules[severity]) {
+                    if (ruleContainer && ruleContainer.length && this.instanceSettings[$('#node-input-topic').val()].rules[severity]) {
                         ruleContainer.css('min-height', '150px').css('min-width', '450px').editableList({
                             addItem: addRule,
                             resizeItem: resizeRule,
                             sortable: true,
                             removable: true
                         });
-                        for (let i = 0; i < this.rules[severity].length; i++) {
-                            var r = this.rules[severity][i];
+                        for (let i = 0; i < this.instanceSettings[$('#node-input-topic').val()].rules[severity].length; i++) {
+                            var r = this.instanceSettings[$('#node-input-topic').val()].rules[severity][i];
                             ruleContainer.editableList('addItem', { r: r, i: i });
                         }
                     }
                 }
+                
+                let inst = $("#node-input-" + $('#node-input-topic').val() + "-container");
+                console.log("testing", inst);
+                // for (let field of this.instanceSettings[$('#node-input-topic').val()]) {
+
+                // }
             },
             oneditsave: function () {
                 var node = this;
+                // TODO add extra layer to account for all topics!
                 for (let severity of severities) {
-                    node.rules[severity] = [];
+                    node.instanceSettings[$('#node-input-topic').val()].rules[severity] = [];
                     $("#node-input-" + severity + "-container").editableList('items').each(function (i) {
                         var rule = $(this);
                         console.log("rule", rule);
@@ -394,7 +406,7 @@ Modeled after Node-RED's Switch core node.
                                 r.case = rule.find(".node-input-rule-case").prop("checked");
                             }
                         }
-                        node.rules[severity].push(r);
+                        node.instanceSettings[$('#node-input-topic').val()].rules[severity].push(r);
                     });
                 }
                 this.propertyType = $("#node-input-property").typedInput('type');
@@ -487,34 +499,6 @@ Modeled after Node-RED's Switch core node.
         <label for="node-input-warning-container" style="width: 100%"><span data-i18n="ur_alarm.label.warning"></span></label>
         <ol id="node-input-warning-container"></ol>
     </div>
-</script>
-
-
-<!-- populate topics-->
-
-<script type="text/javascript">
-
-
-
-
-
-
-    // var ui = require('../ui')(RED);
-    // var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
-    // console.log(page.config.instances[0].param.input);
-
-    // console.log("topiclist", this.topicList);
-    // var select = document.getElementById("node-input-topic");
-    
-    // let testList = ["1", "3", "4", "hello"];
-
-    // for(var i = 0; i < this.topicList.length; i++) {
-    //     var opt = this.topicList[i];
-    //     var el = document.createElement("option");
-    //     el.textContent = opt;
-    //     el.value = opt;
-    //     select.appendChild(el);
-    // }
 </script>
 
 <script type="text/html" data-help-name="ur_alarm">
