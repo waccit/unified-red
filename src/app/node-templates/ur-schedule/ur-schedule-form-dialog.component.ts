@@ -316,4 +316,11 @@ export class UrScheduleFormDialogComponent {
         /* Yearly weekday expression e.g. 0 0 0 * 11 4#4 */
         return /([\*\d-,]+\s+){3}\*\s+[\d-,]+\s+[\d-,]+(#\d|L)$/.test(pattern);
     }
+
+    onTypeChange() {
+        for (const key in this.form.controls) {
+            this.form.get(key).clearValidators();
+            this.form.get(key).updateValueAndValidity({onlySelf: true});
+        }
+    }
 }

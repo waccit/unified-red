@@ -17,7 +17,7 @@
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
                     <mat-form-field class="example-full-width" appearance="outline">
                         <mat-label>Event Type</mat-label>
-                        <select matNativeControl formControlName="type" required>
+                        <select (change)='onTypeChange()'matNativeControl formControlName="type" required>
                             <option value="weekday">Weekday</option>
                             <option value="date">Date</option>
                             <option value="holiday">Holiday</option>

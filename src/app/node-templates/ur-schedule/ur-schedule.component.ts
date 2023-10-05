@@ -295,6 +295,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                                 const start = holidaySchedules[dateKey][j];
                                 const end = holidaySchedules[dateKey][j + 1];
                                 const d = new Date(start.date);
+                                const year = d.getFullYear();
                                 const month = d.getMonth();
                                 const date = d.getDate();
                                 const event = {
@@ -353,11 +354,13 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     break;
             }
         }
-        // If the add button is pressed, set fields to default
+        // If the add button is pressed, set fields to default (current date)
         else {
+            let now = new Date();
+            let nowDate = String(now.getMonth() + 1).concat("/").concat(String(now.getDate()));
             dialogData.data.type = 'date';
             dialogData.data.events.push({
-                date: '',
+                date: nowDate,
                 value: this.data.values[0]?.name,
                 hour: 0,
                 minute: '00'
