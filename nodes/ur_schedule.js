@@ -62,7 +62,7 @@ module.exports = function (RED) {
                     }
 
                     if (value) {
-                        let next = nextEvent(this.type);
+                        let next = nextEvent();
                         let nextState = getValueFromName(next.event.value).value;
                         let nextTimestamp = next.timestamp;
                         let payload = value;
@@ -113,7 +113,7 @@ module.exports = function (RED) {
             }
         };
 
-        let nextEvent = function(eventType) {
+        let nextEvent = function() {
             let currentTime = Date.now();
             let nextFires = [];
             let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
@@ -137,13 +137,6 @@ module.exports = function (RED) {
             }
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp || a.typeNum - b.typeNum);
             let next = sortedFireTimes[0];
-            // select next event based on event type
-            for (let elem of sortedFireTimes) {
-                if (elem.type === eventType) {
-                    next = elem;
-                    break;
-                }
-            }
             return next;
         };
 
