@@ -8,6 +8,7 @@ import { UrScheduleFormDialogComponent } from './ur-schedule-form-dialog.compone
 import { WebSocketService, SnackbarService, NodeRedApiService, CurrentUserService, RoleService } from '../../services';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { StyleService } from '../../services/style.service';
 
 declare const $: any;
 
@@ -64,9 +65,10 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         protected roleService: RoleService,
         protected snackbar: SnackbarService,
         public dialog: MatDialog,
-        private red: NodeRedApiService
+        private red: NodeRedApiService,
+        protected styleService: StyleService,
     ) {
-        super(webSocketService, currentUserService, roleService, snackbar);
+        super(webSocketService, currentUserService, roleService, snackbar, styleService);
     }
 
     ngAfterViewInit(): void {

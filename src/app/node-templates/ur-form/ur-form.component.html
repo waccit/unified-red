@@ -10,7 +10,8 @@
                     <span matPrefix *ngIf="field.type === 'email'">
                         <mat-icon class="mr-2">email</mat-icon>
                     </span>
-                    <input matInput [type]="field.type" class="colorIndicator"
+                    <input matInput [type]="field.type" class="colorIndicator" 
+                        [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)"
                         [value]="access.read ? precision(stripHTML(data.formValue[field.topic]), field.options.precision) : ''"
                         [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
                         (change)="valueChange(field.topic, $event.target.value, field.type)" />
@@ -20,7 +21,8 @@
                 <mat-form-field class="example-full-width healthIndicator" appearance="outline" *ngIf="field.type === 'multiline'">
                     <span [title]="field.intopic" hidden></span> <!-- health -->
                     <mat-label>{{ field.label }}</mat-label>
-                    <textarea matInput [rows]="field.options.rows" class="colorIndicator"
+                    <textarea matInput [rows]="field.options.rows" class="colorIndicator" 
+                        [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)"
                         [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
                         [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
                         (change)="valueChange(field.topic, $event.target.value, field.type)"></textarea>

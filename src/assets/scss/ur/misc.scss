@@ -29,3 +29,38 @@ app-ur-button {
 .mat-tab-body-content {
     overflow-x: hidden !important;
 }
+
+.success {
+  background-color: #00c853;
+    * {
+        color: #ffffff;
+    }
+}
+
+.info {
+  background-color: #2ca8ff;
+  * {
+      color: #ffffff;
+  }
+}
+
+.warning {
+  background-color: #ffc107;
+    * {
+        color: #333333;
+    }
+}
+
+.danger {
+  background-color: #f44336;
+  * {
+      color: #ffffff;
+  }
+}
+
+.disabled {
+  background-color: #9E9E9E;
+  * {
+    color: #616161;
+  }
+}

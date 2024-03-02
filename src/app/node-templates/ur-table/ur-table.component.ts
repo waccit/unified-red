@@ -1,6 +1,7 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { CurrentUserService, MenuService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
+import { StyleService } from '../../services/style.service';
 
 @Component({
 	selector: 'app-ur-table',
@@ -14,13 +15,14 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 	private pages = {};
 
 	constructor(
-        protected webSocketService: WebSocketService,
-        protected currentUserService: CurrentUserService,
-        protected roleService: RoleService,
+    protected webSocketService: WebSocketService,
+    protected currentUserService: CurrentUserService,
+    protected roleService: RoleService,
 		protected snackbar: SnackbarService,
-		private menuService: MenuService
+		private menuService: MenuService,
+    protected styleService: StyleService
     ) {
-		super(webSocketService, currentUserService, roleService, snackbar);
+		super(webSocketService, currentUserService, roleService, snackbar, styleService);
 	}
 
 	ngAfterViewInit(): void {
@@ -76,6 +78,8 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 					} catch (ignore) {}
 					this.dataSource[deviceName][pointName] = point;
 				}
+
+        this.styleService.setStyle(data, pointName);
 			});
 		}
 	}

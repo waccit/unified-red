@@ -1,6 +1,7 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
+import { StyleService } from '../../services/style.service';
 
 declare var $: any;
 @Component({
@@ -13,9 +14,10 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         protected webSocketService: WebSocketService,
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
-        protected snackbar: SnackbarService
+        protected snackbar: SnackbarService,
+        protected styleService: StyleService,
     ) {
-        super(webSocketService, currentUserService, roleService, snackbar);
+        super(webSocketService, currentUserService, roleService, snackbar, styleService);
         this.processHealthIndicator = false;
     }
 
