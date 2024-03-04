@@ -11,8 +11,8 @@
             passthru: { value: false },
             label: { value: 'button' },
             tooltip: { value: '' },
-            color: { value: '' },
-            bgcolor: { value: '' },
+            // color: { value: '' },
+            // bgcolor: { value: '' },
             icon: { value: '' },
             payload: {
                 value: '',
@@ -80,14 +80,14 @@
         <label for="node-input-tooltip"><i class="fa fa-info-circle"></i> Tooltip</label>
         <input type="text" id="node-input-tooltip" placeholder="optional tooltip" />
     </div>
-    <div class="form-row">
+    <!-- <div class="form-row">
         <label for="node-input-color"><i class="fa fa-tint"></i> Color</label>
         <input type="text" id="node-input-color" placeholder="optional text/icon color" />
     </div>
     <div class="form-row">
         <label for="node-input-bgcolor"><i class="fa fa-tint"></i> Background</label>
         <input type="text" id="node-input-bgcolor" placeholder="optional background color" />
-    </div>
+    </div> -->
     <div class="form-row">
         <label style="width:auto" for="node-input-payload"><i class="fa fa-envelope-o"></i> When clicked, send:</label>
     </div>
@@ -182,8 +182,6 @@
         .
         You can use the full set of Google material icons if you add 'mi-' to the icon name. e.g. 'mi-videogame_asset'.
     </p>
-    <p><b>Colors</b> of the text and background may be set.</p>
-    <p><b>Label</b> is the button text.</p>
     <p>
         <b>Label</b> is the button text. Label can also be a
         <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a>

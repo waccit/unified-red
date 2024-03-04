@@ -15,6 +15,7 @@ import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
 import { element } from 'protractor';
+import { StyleService } from '../../services/style.service';
 
 declare const $: any;
 
@@ -92,8 +93,9 @@ export class UrChartComponent extends BaseNode implements OnInit {
         private dataLogService: DataLogService,
         private formBuilder: FormBuilder,
         private red: NodeRedApiService,
+        protected styleService: StyleService,
     ) {
-        super(webSocketService, currentUserService, roleService, snackbar);
+        super(webSocketService, currentUserService, roleService, snackbar, styleService);
     }
 
     ngOnInit(): void {
