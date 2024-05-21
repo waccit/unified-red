@@ -7,11 +7,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { TranslateModule } from '@ngx-translate/core'; //Added DI
 
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+
+
 
 @NgModule({
     declarations: [
@@ -28,6 +31,9 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
         MatInputModule,
         MatIconModule,
         MatButtonModule,
+        TranslateModule
     ],
 })
 export class AuthenticationModule {}
+
+  
