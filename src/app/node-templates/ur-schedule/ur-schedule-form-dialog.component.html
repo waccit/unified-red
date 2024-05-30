@@ -215,8 +215,8 @@
                                                     <h2 class="header-title">{{dialogTitle}}</h2>
                                                     <div class="header-close m-l-0">
                                                         <button mat-icon-button *ngIf="!isNewEvent" (click)="deleteEvent(sidenav)" matTooltip="Delete Event"><mat-icon>delete</mat-icon></button>
-                                                        <button mat-icon-button *ngIf="isNewEvent" (click)="saveEvent(sidenav)" matTooltip="Save Event"><mat-icon>save</mat-icon></button>
-                                                        <button mat-icon-button *ngIf="!isNewEvent" (click)="editEvent(sidenav)" matTooltip="Edit Event"><mat-icon>save</mat-icon></button>
+                                                        <button mat-icon-button [disabled]="eventForm.invalid" *ngIf="isNewEvent" (click)="saveEvent(sidenav)" matTooltip="Save Event"><mat-icon>save</mat-icon></button>
+                                                        <button mat-icon-button [disabled]="eventForm.invalid" *ngIf="!isNewEvent" (click)="editEvent(sidenav)" matTooltip="Edit Event"><mat-icon>save</mat-icon></button>
                                                         <button mat-icon-button (click)="closeSlider(sidenav)"><mat-icon>close</mat-icon></button>
                                                     </div>
                                                 </div>
