@@ -3,24 +3,28 @@
         <div class="content">
             <div class="row healthIndicator" *ngIf="data.layout === 'row' && data.layoutAlign === 'space-between center'">
                 <div class="col-6 text-left">{{ label }}</div>
-                <div class="col-6 text-right" [innerHTML]="text"></div>
+                <div class="col-6 text-right" [ngStyle]="this.styleService.getStyle(data)" 
+                      [ngClass]="this.styleService.getClass(data)" [innerHTML]="text"></div>
             </div>
             <div class="row healthIndicator" *ngIf="data.layout === 'row' && data.layoutAlign === 'start center'">
                 <div class="col-6 text-left">{{ label }}</div>
-                <div class="col-6 text-left" [innerHTML]="text"></div>
+                <div class="col-6 text-left" [ngStyle]="this.styleService.getStyle(data)" 
+                      [ngClass]="this.styleService.getClass(data)" [innerHTML]="text"></div>
             </div>
             <div class="row healthIndicator" *ngIf="data.layout === 'row' && data.layoutAlign === 'center center'">
                 <div class="col-6 text-center">{{ label }}</div>
-                <div class="col-6 text-center" [innerHTML]="text"></div>
+                <div class="col-6 text-center" [ngStyle]="this.styleService.getStyle(data)" 
+                      [ngClass]="this.styleService.getClass(data)" [innerHTML]="text"></div>
             </div>
             <div class="row healthIndicator" *ngIf="data.layout === 'row' && data.layoutAlign === 'end center'">
                 <div class="col-6 text-right">{{ label }}</div>
-                <div class="col-6 text-right" [innerHTML]="text"></div>
+                <div class="col-6 text-right" [ngStyle]="this.styleService.getStyle(data)" 
+                      [ngClass]="this.styleService.getClass(data)" [innerHTML]="text"></div>
             </div>
             <div class="row healthIndicator" *ngIf="data.layout === 'column' && data.layoutAlign === 'center center'">
                 <div class="col-12 text-center">
                     <h3>{{ label }}</h3>
-                    <p [innerHTML]="text"></p>        
+                    <p [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)" [innerHTML]="text"></p>        
                 </div>
             </div>
         </div>

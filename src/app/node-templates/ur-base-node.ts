@@ -2,6 +2,7 @@ import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive } from '@ang
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
 import { User } from '../data';
+import { StyleService } from '../services/style.service';
 
 declare var $: any;
 
@@ -25,7 +26,8 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         protected webSocketService: WebSocketService,
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
-        protected snackbar: SnackbarService
+        protected snackbar: SnackbarService,
+        protected styleService: StyleService
     ) { }
 
     ngAfterViewInit(): void {
@@ -106,6 +108,9 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                 });
             }
         }
+
+        this.styleService.setStyle(data);
+        this.styleService.setClass(data);
     }
 
     stripHTML(str: string) {

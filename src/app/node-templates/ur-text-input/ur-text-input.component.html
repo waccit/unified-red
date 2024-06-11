@@ -10,7 +10,8 @@
                 <mat-icon class="mr-2">color_lens</mat-icon>
             </span>
             <input matInput [type]="data.mode"
-                [value]="access.read ? stripHTML(valueIn) : ''"
+                [value]="access.read ? stripHTML(valueIn) : ''" 
+                [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)"
                 [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
                 (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
                 #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below"/>
@@ -23,7 +24,8 @@
                 <mat-icon class="mr-2">phone</mat-icon>
             </span>
             <input matInput placeholder="EX: (435) 345-3454" mask="(000) 000-0000"
-                [value]="access.read ? stripHTML(valueIn) : ''"
+                [value]="access.read ? stripHTML(valueIn) : ''" 
+                [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)"
                 [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
                 (keyup)="delay > 0 && keyup($event.target.value)" (change)="delay === 0 && change($event.target.value)"
                 #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below"/>
