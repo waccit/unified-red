@@ -34,6 +34,9 @@ Modeled after Node-RED's Switch core node.
             category: 'unified-red',
             color: '#FFCC66',
             defaults: {
+                tab: { type: 'ur_tab', required: true },
+                order: { value: 0 },
+                width: { value: 12 },
                 name: { value: "" },
                 property: { value: "payload", required: true, validate: RED.validators.typedInput("propertyType") },
                 propertyType: { value: "msg" },
@@ -66,7 +69,9 @@ Modeled after Node-RED's Switch core node.
                 var previousValueType = { value: "prev", label: c_("label.previous"), hasValue: false };
 
                 $("#node-input-property").typedInput({ default: this.propertyType || 'msg', types: ['msg', 'flow', 'global', 'jsonata', 'env'] });
-
+                $('#node-input-size').elementSizer({
+                    width: '#node-input-width',
+                });
                 var andLabel = c_("label.and");
                 var caseLabel = c_("label.ignorecase");
 
@@ -342,6 +347,26 @@ Modeled after Node-RED's Switch core node.
 </script>
 
 <script type="text/html" data-template-name="ur_alarm">
+
+
+
+    <div class="form-row">
+        <label for="node-input-tab"
+            ><i class="fa fa-columns"></i> <span data-i18n="ur_alarm.label.tab"></span
+        ></label>
+        <input type="text" id="node-input-tab" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-object-group"></i> <span data-i18n="ur_alarm.label.size"></span></label>
+        <input type="hidden" id="node-input-width" />
+        <button class="editor-button" id="node-input-size"></button>
+    </div>
+
+
+
+
+
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="ur_alarm.label.name"></span></label>
         <input type="text" id="node-input-name">

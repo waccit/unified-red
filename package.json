@@ -51,6 +51,10 @@
         {
             "name": "Eric Ko",
             "email": "sko@wasocal.com"
+        },
+        {
+            "name": "Maxwell Christy",
+            "email": "mchristy@wasocal.com"
         }
     ],
     "license": "Apache-2.0",
