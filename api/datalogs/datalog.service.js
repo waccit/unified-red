@@ -2,6 +2,7 @@ const db = require('../db');
 const socketio = require('../../socket');
 const Datalog = db.Datalog;
 const Logger = db.Logger;
+const { Op } = require('sequelize');
 
 module.exports = {
     query,
@@ -115,8 +116,8 @@ async function query(param) {
     let criteria = [];
     if (param.topic) {
         if (Array.isArray(param.topic)) {
-            const loggers = await db.find(Logger, { 'topic': { '$in': param.topic } });
-            criteria.push({ logger: { '$in': loggers.map((logger) => logger._id) } });
+            const loggers = await db.find(Logger, { 'topic': { [Op.in]: param.topic } });
+            criteria.push({ logger: { [Op.in]: loggers.map((logger) => logger._id) } });
         } else {
             const logger = await db.findOne(Logger, { 'topic': param.topic });
             criteria.push({ logger: logger._id });
@@ -124,20 +125,20 @@ async function query(param) {
     }
     if (param.startTimestamp) {
         let startDate = new Date(param.startTimestamp);
-        criteria.push({ timestamp: { '$gte': startDate } });
+        criteria.push({ timestamp: { [Op.gte]: startDate } });
     }
     if (param.endTimestamp) {
         let endDate = new Date(param.endTimestamp);
-        criteria.push({ timestamp: { '$lte': endDate } });
+        criteria.push({ timestamp: { [Op.lte]: endDate } });
     }
     if (param.value) {
         criteria.push({ value: param.value });
     } else {
         if (param.lowValue) {
-            criteria.push({ value: { '$gte': param.lowValue } });
+            criteria.push({ value: { [Op.gte]: param.lowValue } });
         }
         if (param.highValue) {
-            criteria.push({ value: { '$lte': param.highValue } });
+            criteria.push({ value: { [Op.lte]: param.highValue } });
         }
     }
     if (param.status) {
@@ -147,13 +148,13 @@ async function query(param) {
         if (!Array.isArray(param.tags)) {
             param.tags = [param.tags];
         }
-        criteria.push({ tags: { '$in': param.tags } });
+        criteria.push({ tags: { [Op.in]: param.tags } });
     }
 
     if (criteria.length === 1) {
         criteria = criteria[0];
     } else if (criteria.length > 1) {
-        criteria = { '$and': criteria };
+        criteria = { [Op.and]: criteria };
     } else {
         criteria = {};
     }
