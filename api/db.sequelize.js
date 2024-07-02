@@ -1,5 +1,6 @@
 const { Sequelize, Op } = require('sequelize');
 const cron = require('node-cron');
+const db = require ("../api/db")
 
 async function testConnection(conn) {
     try {
@@ -44,7 +45,7 @@ module.exports = {
         }
 
         function databaseMaintenance() {
-            sequelize.models.Datalog.destroy({ where: { expires: { [Op.lte] : new Date() } } });
+            sequelize.models.Datalog.destroy({ where: { expires: { [db.chooseOperator("$lte")] : new Date() } } });
         }
         
         (async () => {
