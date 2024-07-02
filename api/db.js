@@ -1,7 +1,7 @@
 const config = require('./config.json');
 let mongoose = require('./db.mongoose');
 let sequelize = require('./db.sequelize');
-import { Op } from 'sequelize';
+const { Op } = require('sequelize');
 
 const dbConnection = process.env.DB_URI || config.dbConnection;
 if (dbConnection.toLowerCase().startsWith('mongodb')) {
@@ -18,7 +18,7 @@ module.exports.test = function (conn) {
     }
 };
 
-export function chooseOperator(genericOperator) {
+module.exports.chooseOperator = function(genericOperator) {
     const isMongo = dbConnection.toLowerCase().startsWith('mongodb');
     switch (genericOperator) {
         case '$eq':
