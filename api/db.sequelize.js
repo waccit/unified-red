@@ -15,7 +15,6 @@ async function testConnection(conn) {
 module.exports = {
     testConnection,
     connect: function(dbConnection) {
-        let sequelizeStatus = 'disconnected';
 
         //'sqlite:unified-red.db'
         //'mysql://user:pass@localhost:3306/unified-red'
@@ -30,8 +29,8 @@ module.exports = {
 
         // Models
         const modelDefiners = [
-            require('./models/sequelize/user.model'),
             require('./models/sequelize/role-name.model'),
+            require('./models/sequelize/user.model'),
             require('./models/sequelize/alarm.model'),
             require('./models/sequelize/logger.model'),
             require('./models/sequelize/datalog.model'),
