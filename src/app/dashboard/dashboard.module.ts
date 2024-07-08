@@ -58,6 +58,5 @@ import { NodeREDRouterComponent } from './node-red-router/node-red-router.compon
         MatTabsModule,
         MatSelectModule,
     ],
-    entryComponents: [GroupComponent],
 })
 export class DashboardModule {}
