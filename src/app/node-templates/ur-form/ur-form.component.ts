@@ -1,6 +1,7 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
+import { StyleService } from '../../services/style.service'; 
 
 @Component({
     selector: 'app-ur-form',
@@ -10,6 +11,21 @@ import { WebSocketService, SnackbarService, CurrentUserService, RoleService } fr
 export class UrFormComponent extends BaseNode implements AfterViewInit {
     private originalValues = {};
     private formLabels = {};
+    public dynamicStyles: { [key: string]: string } = {};
+
+    @ViewChild('myTextarea') myTextarea!: ElementRef;
+
+    constructor(
+        private renderer: Renderer2,
+        private localStyleService: StyleService,
+        websocketService: WebSocketService,
+        snackbarService: SnackbarService,
+        currentUserService: CurrentUserService,
+        roleService: RoleService
+    ) {
+        super(websocketService, currentUserService, roleService, snackbarService, localStyleService);
+    }
+
 
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
@@ -20,7 +36,61 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         for (let field of this.data.options) {
             field.topic = this.evalInstanceParameters(field.topic); // handle multi-page. substitute {variables}
         }
+
+        // Apply the styles from the textarea to the grandparent and its children
+        this.applyStylesToTree();
     }
+
+    
+
+    applyStylesToTree() {
+        // Get the textarea element using ViewChild
+        const textarea = this.myTextarea.nativeElement;
+        console.log('Textarea element:', textarea);
+        
+        // Get the computed styles of the textarea element from the style service
+        const styles = this.styleService.getStyle(this.data);
+        console.log('Textarea styles from styleService:', styles);
+        
+        // Get the background color
+        const backgroundColor = styles['background-color'];
+        console.log('Background color to apply:', backgroundColor);
+    
+        // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
+        let currentElement = textarea;
+        let matFormFieldFlex: HTMLElement | null = null;
+        while (currentElement.parentElement) {
+            currentElement = currentElement.parentElement;
+            if (currentElement.classList.contains('mat-form-field-flex')) {
+                matFormFieldFlex = currentElement;
+                break;
+            }
+        }
+        console.log('mat-form-field-flex element:', matFormFieldFlex);
+    
+        if (matFormFieldFlex) {
+            // Traverse down to find children with the specified classes
+            const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
+            outlineElements.forEach(element => {
+                console.log('Applying background-color to:', element);
+                // Apply the background color to each element directly
+                this.renderer.setStyle(element, 'background-color', backgroundColor);
+            });
+        } else {
+            console.log('mat-form-field-flex element not found');
+        }
+    }
+    
+    
+    
+
+    // applyStyles(styles: CSSStyleDeclaration, element: Element) {
+    //     for (let i = 0; i < styles.length; i++) {
+    //         const styleName = styles[i];
+    //         const styleValue = styles.getPropertyValue(styleName);
+    //         this.renderer.setStyle(element, styleName, styleValue);
+    //     }
+    // }
 
     updateValue(data: any) {
         super.updateValue(data);
@@ -40,13 +110,19 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 }
             }
         }
+        // Applies style changes when payload is sent
+        this.applyStylesToTree();
     }
+    
+
 
     valueChange(field: string, value: any, fieldType: string) {
         if (fieldType === 'number' && !isNaN(value)) {
             value = parseFloat(value);
         }
         this.data.formValue[field] = value;
+
+        this.applyStylesToTree();
     }
 
     submit() {
@@ -85,6 +161,8 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
 
     reset() {
         this.data.formValue = { ...this.originalValues };
+
+        // this.applyStylesToTree();
     }
 
     precision(value, precision) {

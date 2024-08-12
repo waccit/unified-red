@@ -12,7 +12,7 @@ app-ur-form:not(:last-child) {
 }
 
 .health-down:not(.mat-form-field), .health-down .mat-form-field-flex {
-    background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px);
+    background-color: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px) !important;
     border: 1px solid  #ffd000 !important;
 }
 
