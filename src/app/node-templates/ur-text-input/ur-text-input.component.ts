@@ -65,40 +65,40 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     }
 
     applyStylesToTree() {
-        // // Get the input element using ViewChild
-        // const inputElement = this.myInputarea.nativeElement;
-        // console.log('Input element:', inputElement);
-
-        // // Get the styles of the input element
-        // const styles = window.getComputedStyle(inputElement);
-        // console.log('Input styles:', styles);
-
-        //  // Attempt to get the background color from the inline styles
-        //  let backgroundColor = inputElement.style.backgroundColor;
-        //  console.log('Textarea inline background-color:', backgroundColor);
-
-        // // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
-        // let currentElement = inputElement;
-        // let matFormFieldFlex: HTMLElement | null = null;
-        // while (currentElement.parentElement) {
-        //     currentElement = currentElement.parentElement;
-        //     if (currentElement.classList.contains('mat-form-field-flex')) {
-        //         matFormFieldFlex = currentElement;
-        //         break;
-        //     }
-        // }
-        // console.log('mat-form-field-flex element:', matFormFieldFlex);
-
-        // if (matFormFieldFlex) {
-        //     // Traverse down to find children with the specified classes
-        //     const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
-        //     outlineElements.forEach(element => {
-        //         console.log('Child element with class mat-form-field-outline or mat-form-field-outline-thick:', element);
-        //         // Testing applying styles. Just working on
-        //         this.renderer.setStyle(element, 'background-color', backgroundColor);
-        //     });
-        // } else {
-        //     console.log('mat-form-field-flex element not found');
-        // }
+      // Get the textarea element using ViewChild
+      const inputarea = this.myInputarea.nativeElement;
+      console.log('Textarea element:', inputarea);
+      
+      // Get the computed styles of the textarea element from the style service
+      const styles = this.styleService.getStyle(this.data);
+      console.log('Textarea styles from styleService:', styles);
+      
+      // Get the background color
+      const backgroundColor = styles['background-color'];
+      console.log('Background color to apply:', backgroundColor);
+  
+      // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
+      let currentElement = inputarea;
+      let matFormFieldFlex: HTMLElement | null = null;
+      while (currentElement.parentElement) {
+          currentElement = currentElement.parentElement;
+          if (currentElement.classList.contains('mat-form-field-flex')) {
+              matFormFieldFlex = currentElement;
+              break;
+          }
+      }
+      console.log('mat-form-field-flex element:', matFormFieldFlex);
+  
+      if (matFormFieldFlex) {
+          // Traverse down to find children with the specified classes
+          const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
+          outlineElements.forEach(element => {
+              console.log('Applying background-color to:', element);
+              // Apply the background color to each element directly
+              this.renderer.setStyle(element, 'background-color', backgroundColor);
+          });
+      } else {
+          console.log('mat-form-field-flex element not found');
+      }
     }
 }

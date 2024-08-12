@@ -9,7 +9,7 @@
             <span matPrefix *ngIf="data.mode === 'color'">
                 <mat-icon class="mr-2">color_lens</mat-icon>
             </span>
-            <input matInput [type]="data.mode"
+            <input matInput #myInputarea [type]="data.mode"
                 [value]="access.read ? stripHTML(valueIn) : ''" 
                 [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)"
                 [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
