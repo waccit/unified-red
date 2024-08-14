@@ -88,30 +88,46 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         this._data = data;
     }
 
+    
     updateValue(data: any) {
+        let downFlag = false; // Default to false
+    
         if (data.hasOwnProperty('disabled')) {
             this.disabled = !!data.disabled;
         }
+    
         if (this.container && this.container.length) {
             this.container.trigger([data]);
-            // when health is available, insert hook into all point values, except for Animation and Template
+    
             if (this.processHealthIndicator && data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
                 data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
                 let health = data.msg.payload.health.toString().toLowerCase();
+                
                 $(document).ready(() => {
                     let indicator = this.container.find('[title="' + data.msg.topic + '"]').closest('.healthIndicator');
                     if (health === 'down') {
                         indicator.addClass('health-down');
+                        downFlag = true; 
+                        console.log("Health is down, skipping style and class application.");
                     } else {
                         indicator.removeClass('health-down');
                     }
+    
+                    // Only applis styles and classes if health is NOT 'down'
+                    if (!downFlag) {
+                        this.styleService.setStyle(data);
+                        this.styleService.setClass(data);
+                    }
                 });
+            } else {
+                // If no health property, proceeds with the style application (hopefully)
+                this.styleService.setStyle(data);
+                this.styleService.setClass(data);
             }
         }
-
-        this.styleService.setStyle(data);
-        this.styleService.setClass(data);
     }
+    
+    
 
     stripHTML(str: string) {
         if (typeof str === 'string') {
