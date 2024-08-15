@@ -1,4 +1,4 @@
-import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive } from '@angular/core';
+import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive, Renderer2  } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
 import { User } from '../data';
@@ -19,6 +19,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     disabled: boolean = false;
     private _data: any;
     private _wsSubscription: Subscription;
+    
     @ViewChild('container', { static: true }) private _container: ElementRef;
     protected processHealthIndicator: Boolean = true;
 
@@ -27,7 +28,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService,
-        protected styleService: StyleService
+        protected styleService: StyleService,
     ) { }
 
     ngAfterViewInit(): void {
@@ -108,6 +109,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                     if (health === 'down') {
                         indicator.addClass('health-down');
                         downFlag = true; 
+                        console.log("right here!:", indicator);
                         console.log("Health is down, skipping style and class application.");
                     } else {
                         indicator.removeClass('health-down');

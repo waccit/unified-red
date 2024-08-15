@@ -13,13 +13,14 @@ export class StyleService {
     if (topic) {
       return this.style?.[data.id]?.[topic]?.['css'];
     }
-
     else {
       return this.style?.[data.id]?.['css'];
     }
+    
   }
 
   setStyle(data: any, pointName?: any) {
+    console.log(data)
     if (this.style === null) {
       this.style = {};
     }
