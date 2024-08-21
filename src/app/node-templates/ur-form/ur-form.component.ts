@@ -46,15 +46,15 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     applyStylesToTree() {
         // Get the textarea element using ViewChild
         const textarea = this.myTextarea.nativeElement;
-        // console.log('Textarea element:', textarea);
+        console.log('Textarea element:', textarea);
         
         // Get the computed styles of the textarea element from the style service
         const styles = this.styleService.getStyle(this.data);
-        // console.log('Textarea styles from styleService:', styles);
+        console.log('Textarea styles from styleService:', styles);
         
         // Get the background color
         const backgroundColor = styles['background-color'];
-        // console.log('Background color to apply:', backgroundColor);
+        console.log('Background color to apply:', backgroundColor);
     
         // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
         let currentElement = textarea;
@@ -66,20 +66,20 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 break;
             }
         }
-        // console.log('mat-form-field-flex element:', matFormFieldFlex);
+        console.log('mat-form-field-flex element:', matFormFieldFlex);
     
         if (matFormFieldFlex) {
             // Traverse down to find children with the specified classes
             const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
             outlineElements.forEach(element => {
-                // console.log('Applying background-color to:', element);
+                console.log('Applying background-color to:', element);
                 // Apply the background color to each element directly
                 this.renderer.setStyle(element, 'background-color', backgroundColor);
             });
         } else {
             console.log('mat-form-field-flex element not found');
         }
-    }
+      }
     
     
     
@@ -111,7 +111,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             }
         }
         // Applies style changes when payload is sent
-      
+        this.applyStylesToTree()
 
     }
     
