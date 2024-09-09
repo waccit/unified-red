@@ -110,12 +110,30 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 }
             }
         }
+        console.log("Hey it worked!: ", data.msg.payload.health)
         // Applies style changes when payload is sent
         this.applyStylesToTree()
 
+        this.toggleHealthClass(data.msg.payload.health);
+        // Apply or remove health-down class based on health status
+        const healthClass = this.localStyleService.getHealthClass(data.msg.payload.health);
+        const element = this.myTextarea.nativeElement;
+        if (healthClass) {
+            this.renderer.addClass(element, healthClass);
+        } else {
+            this.renderer.removeClass(element, 'health-down');
+        }
     }
     
+    toggleHealthClass(healthStatus: string) {
+        const element = this.myTextarea.nativeElement;
 
+        if (healthStatus === 'down') {
+            this.renderer.addClass(element, 'health-down');
+        } else {
+            this.renderer.removeClass(element, 'health-down');
+        }
+    }
 
     valueChange(field: string, value: any, fieldType: string) {
         if (fieldType === 'number' && !isNaN(value)) {

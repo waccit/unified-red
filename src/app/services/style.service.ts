@@ -20,7 +20,7 @@ export class StyleService {
   }
 
   setStyle(data: any, pointName?: any) {
-    console.log(data)
+    
     if (this.style === null) {
       this.style = {};
     }
@@ -73,5 +73,12 @@ export class StyleService {
     else {
       this.style[data.id]['class'] = data.msg.payload.class;
     }
+  }
+  getHealthClass(data: any): string | null {
+    const healthStatus = data.msg.payload.health;
+    if (healthStatus === 'down') {
+      return 'health-down';
+    }
+    return null;
   }
 }

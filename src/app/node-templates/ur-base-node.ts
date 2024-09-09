@@ -109,8 +109,8 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                     if (health === 'down') {
                         indicator.addClass('health-down');
                         downFlag = true; 
-                        console.log("right here!:", indicator);
-                        console.log("Health is down, skipping style and class application.");
+                        // console.log("right here!:", indicator);
+                        // console.log("Health is down, skipping style and class application.");
                     } else {
                         indicator.removeClass('health-down');
                     }
