@@ -68,15 +68,12 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     applyStylesToTree() {
       // Get the textarea element using ViewChild
       const inputarea = this.myInputarea.nativeElement;
-      console.log('Textarea element:', inputarea);
       
       // Get the computed styles of the textarea element from the style service
       const styles = this.styleService.getStyle(this.data);
-      console.log('Textarea styles from styleService:', styles);
       
       // Get the background color
       const backgroundColor = styles['background-color'];
-      console.log('Background color to apply:', backgroundColor);
   
       // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
       let currentElement = inputarea;

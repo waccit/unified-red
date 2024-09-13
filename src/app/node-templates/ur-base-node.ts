@@ -128,30 +128,16 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     //         }
     //     }
     // }
-        updateValue(data: any) {
+    updateValue(data: any) {
         // Log the incoming data to check the payload
         console.log('updateValue called with data:', data);
 
         // Log the class before setting it
         console.log('Class being passed:', data.msg.payload?.class);
-        let healthStatus = data.msg.payload.health
+    
         this.styleService.setStyle(data);
         this.styleService.setClass(data);
-        
-        // if (healthStatus == 'down') {
-        //     return
-        // }
-        // else {
-        //     this.styleService.setStyle(data);
-        //     this.styleService.setClass(data);
-        // }
-
-        // Apply styles and classes using the StyleService
-        
-        
-        // Optionally log after applying the styles and class
-        // console.log('Styles and class applied successfully.');
-        console.log("Bruh sound effect: ", healthStatus )
+    
     }
     
 
