@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, Renderer2 } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
 import { StyleService } from '../../services/style.service';
@@ -16,8 +16,9 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         protected roleService: RoleService,
         protected snackbar: SnackbarService,
         protected styleService: StyleService,
+        protected renderer: Renderer2
     ) {
-        super(webSocketService, currentUserService, roleService, snackbar, styleService);
+        super(webSocketService, currentUserService, roleService, snackbar, styleService, renderer);
         this.processHealthIndicator = false;
     }
 

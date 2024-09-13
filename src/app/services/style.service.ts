@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Renderer2 } from '@angular/core';
+import { render } from '@fullcalendar/common';
 
 @Injectable({
   providedIn: 'root'
@@ -67,18 +68,14 @@ export class StyleService {
         this.style[data.id][pointName] = {};
       }
 
-      this.style[data.id][pointName]['class'] = data.msg.payload.class;
+      this.style[data.id][pointName]['class'] = data.msg.payload['class'];
+      
     }
     
     else {
-      this.style[data.id]['class'] = data.msg.payload.class;
+      this.style[data.id]['class'] = data.msg.payload['class'];
     }
-  }
-  getHealthClass(data: any): string | null {
-    const healthStatus = data.msg.payload.health;
-    if (healthStatus === 'down') {
-      return 'health-down';
-    }
-    return null;
+    console.log('Class set by StyleService:', data.msg.payload['class']); // Add this log
+
   }
 }

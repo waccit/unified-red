@@ -1,6 +1,6 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, Renderer2 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { FullCalendarComponent, CalendarOptions } from '@fullcalendar/angular';
+import { FullCalendarComponent, CalendarOptions, render } from '@fullcalendar/angular';
 import * as parser from 'cron-parser';
 import * as moment from 'moment';
 import { BaseNode } from '../ur-base-node';
@@ -67,8 +67,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         public dialog: MatDialog,
         private red: NodeRedApiService,
         protected styleService: StyleService,
+        protected renderer: Renderer2
     ) {
-        super(webSocketService, currentUserService, roleService, snackbar, styleService);
+        super(webSocketService, currentUserService, roleService, snackbar, styleService, renderer);
     }
 
     ngAfterViewInit(): void {

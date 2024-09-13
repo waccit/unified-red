@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectorRef } from '@angular/core';
 import {
     CurrentUserService,
     DataLogService,
@@ -94,8 +94,10 @@ export class UrChartComponent extends BaseNode implements OnInit {
         private formBuilder: FormBuilder,
         private red: NodeRedApiService,
         protected styleService: StyleService,
+        protected renderer: Renderer2,
+        protected cdRef: ChangeDetectorRef
     ) {
-        super(webSocketService, currentUserService, roleService, snackbar, styleService);
+        super(webSocketService, currentUserService, roleService, snackbar, styleService, renderer);
     }
 
     ngOnInit(): void {

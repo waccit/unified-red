@@ -1,7 +1,8 @@
-import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service'; 
+import { reduce } from 'rxjs/operators';
 
 @Component({
     selector: 'app-ur-form',
@@ -21,9 +22,10 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         websocketService: WebSocketService,
         snackbarService: SnackbarService,
         currentUserService: CurrentUserService,
-        roleService: RoleService
+        roleService: RoleService,
+        protected cdRef: ChangeDetectorRef
     ) {
-        super(websocketService, currentUserService, roleService, snackbarService, localStyleService);
+        super(websocketService, currentUserService, roleService, snackbarService, localStyleService, renderer);
     }
 
 
@@ -55,7 +57,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         // Get the background color
         const backgroundColor = styles['background-color'];
         console.log('Background color to apply:', backgroundColor);
-    
         // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
         let currentElement = textarea;
         let matFormFieldFlex: HTMLElement | null = null;
@@ -74,16 +75,38 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             outlineElements.forEach(element => {
                 console.log('Applying background-color to:', element);
                 // Apply the background color to each element directly
-                this.renderer.setStyle(element, 'background-color', backgroundColor);
+                this.renderer.removeClass(element, 'health-down');
+                // if (this.data.msg.payload.health != 'down') {
+                //     // this.renderer.removeClass(element, 'health-down')
+                // }
+                // this.renderer.setStyle(element, 'background-color', backgroundColor);
             });
         } else {
             console.log('mat-form-field-flex element not found');
         }
+        this.cdRef.detectChanges();
       }
+    //   if (matFormFieldFlex) {
+    //     // Traverse down to find children with the specified classes
+    //     const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
+    //     outlineElements.forEach(element => {
+    //       console.log('Processing element:', element);
     
-    
-    
-
+    //       if (this.data.msg.payload.health === 'down') {
+    //         // If health is 'down', add the health-down class and skip setting background color
+    //         console.log('Health is down, applying health-down class');
+    //         this.renderer.addClass(element, 'health-down');
+    //       } else {
+    //         // If health is not 'down', apply the background color and other styles
+    //         console.log('Health is not down, applying background color:', backgroundColor);
+    //         this.renderer.removeClass(element, 'health-down');
+    //         this.renderer.setStyle(element, 'background-color', backgroundColor);
+    //       }
+    //     });
+    //   } else {
+    //     console.log('mat-form-field-flex element not found');
+    //   }
+      
     // applyStyles(styles: CSSStyleDeclaration, element: Element) {
     //     for (let i = 0; i < styles.length; i++) {
     //         const styleName = styles[i];
@@ -110,30 +133,30 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 }
             }
         }
-        console.log("Hey it worked!: ", data.msg.payload.health)
         // Applies style changes when payload is sent
+        console.log("Hey it worked!: ", data.msg.payload.health)
         this.applyStylesToTree()
 
-        this.toggleHealthClass(data.msg.payload.health);
-        // Apply or remove health-down class based on health status
-        const healthClass = this.localStyleService.getHealthClass(data.msg.payload.health);
-        const element = this.myTextarea.nativeElement;
-        if (healthClass) {
-            this.renderer.addClass(element, healthClass);
-        } else {
-            this.renderer.removeClass(element, 'health-down');
-        }
+        // this.toggleHealthClass(data.msg.payload.health);
+        // // Apply or remove health-down class based on health status
+        // const healthClass = this.localStyleService.getHealthClass(data.msg.payload.health);
+        // const element = this.myTextarea.nativeElement;
+        // if (healthClass) {
+        //     this.renderer.addClass(element, healthClass);
+        // } else {
+        //     this.renderer.removeClass(element, 'health-down');
+        // }
     }
     
-    toggleHealthClass(healthStatus: string) {
-        const element = this.myTextarea.nativeElement;
+    // toggleHealthClass(healthStatus: string) {
+    //     const element = this.myTextarea.nativeElement;
 
-        if (healthStatus === 'down') {
-            this.renderer.addClass(element, 'health-down');
-        } else {
-            this.renderer.removeClass(element, 'health-down');
-        }
-    }
+    //     if (healthStatus === 'down') {
+    //         this.renderer.addClass(element, 'health-down');
+    //     } else {
+    //         this.renderer.removeClass(element, 'health-down');
+    //     }
+    // }
 
     valueChange(field: string, value: any, fieldType: string) {
         if (fieldType === 'number' && !isNaN(value)) {

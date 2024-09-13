@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service'; 
+import { render } from '@fullcalendar/common';
 
 @Component({
     selector: 'app-ur-text-input',
@@ -19,14 +20,14 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     @ViewChild('myInputarea') myInputarea!: ElementRef
 
     constructor(
-        private renderer: Renderer2,
+        protected renderer: Renderer2,
         private localStyleService: StyleService,
         websocketService: WebSocketService,
         snackbarService: SnackbarService,
         currentUserService: CurrentUserService,
         roleService: RoleService
     ) {
-        super(websocketService, currentUserService, roleService, snackbarService, localStyleService);
+        super(websocketService, currentUserService, roleService, snackbarService, localStyleService, renderer);
     }
 
     ngAfterViewInit(): void {
