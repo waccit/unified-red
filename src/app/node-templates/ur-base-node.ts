@@ -138,7 +138,6 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         {
             this.styleService.setStyle(data);
         }
-
         this.styleService.setClass(data);
     
     }
