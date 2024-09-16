@@ -134,8 +134,11 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
         // Log the class before setting it
         console.log('Class being passed:', data.msg.payload?.class);
-    
-        this.styleService.setStyle(data);
+        if (data.msg.payload.health !== 'down' )
+        {
+            this.styleService.setStyle(data);
+        }
+
         this.styleService.setClass(data);
     
     }

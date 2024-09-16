@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, RendererStyleFlags2 } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service'; 
@@ -80,7 +80,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         } else {
             console.log('mat-form-field-flex element not found');
         }
-        this.cdRef.detectChanges(); // Ensure view updates
     }
     
     updateValue(data: any) {
@@ -123,21 +122,23 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 break;
             }
         }
-
+        if (textarea) {
+            console.log('Removing background color from textarea');
+            this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
+        }
         if (matFormFieldFlex) {
             const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
             outlineElements.forEach(element => {
                 console.log('Applying health-down class to:', element);
                 this.renderer.removeStyle(element, 'background-color');
                 this.renderer.addClass(element, 'health-down');
+                
             });
+    
         }
 
         // Remove background color from the textarea directly
-        if (textarea) {
-            console.log('Removing background color from textarea');
-            this.renderer.removeStyle(textarea, 'background-color');
-        }
+      
     }
 }
 
