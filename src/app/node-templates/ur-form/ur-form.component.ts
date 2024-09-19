@@ -81,61 +81,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             console.log('mat-form-field-flex element not found');
         }
     }
-    
-    // updateValue(data: any) {
-    //     super.updateValue(data);
-    //     if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
-    //         for (let field of this.data.options) {
-    //             if (data.msg.topic.includes(field.topic)) {
-    //                 field.intopic = data.msg.topic;
-    //                 if (!field.options?.units && data.msg.payload.units) {
-    //                     let options = field.options || {};
-    //                     options.units = data.msg.payload.units;
-    //                     field.options = options;
-    //                 }
-    //                 this.data.formValue[field.topic] = this.formatFromData(data);
-    //                 // Update Original Values
-    //                 this.originalValues[data.msg.topic] = data.msg.payload.value;
-    //                 break;
-    //             }
-    //         }
-    //     }
-
-    //     // Check the health status and apply relevant styles
-    //     console.log("Health status: ", data.msg.payload.health);
-    //     console.log("Class set: ", data.msg.payload['class']);
-        
-    //     // Get the textarea element using ViewChild
-    //     const textarea = this.myTextarea.nativeElement;
-
-    //     if (data.msg.payload.health !== 'down') {
-    //         // If health is not 'down', apply styles
-    //         this.applyStylesToTree();
-    //     } else {
-    //         // If health is 'down', directly add the 'health-down' class and remove background-color for textarea
-    //         let currentElement = textarea;
-    //         let matFormFieldFlex: HTMLElement | null = null;
-    //         while (currentElement.parentElement) {
-    //             currentElement = currentElement.parentElement;
-    //             if (currentElement.classList.contains('mat-form-field-flex')) {
-    //                 matFormFieldFlex = currentElement;
-    //                 break;
-    //             }
-    //         }
-    //         if (matFormFieldFlex) {
-    //             const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
-    //             outlineElements.forEach(element => {
-    //                 console.log('Applying health-down class to:', element);
-    //                 this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
-    //                 this.renderer.removeStyle(textarea, 'color', RendererStyleFlags2.Important)
-    //                 this.renderer.removeStyle(element, 'background-color');
-    //                 this.renderer.addClass(element, 'health-down');
-                    
-    //             });
-    //         }
-    //     }
-    // }   
-
+     
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
@@ -155,11 +101,9 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             }
         }
 
-        // Check the health status and apply relevant styles
         console.log("Health status: ", data.msg.payload.health);
         console.log("Class set: ", data.msg.payload['class']);
         
-        // Get the textarea element using ViewChild
         const textarea = this.myTextarea.nativeElement;
 
         if (data.msg.payload.health == 'down') {
@@ -178,12 +122,8 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 outlineElements.forEach(element => {
                     const classes = element.classList
                     console.log('Classes here: ', classes)
-                    // for (let i = 0; i < classes.length; i++) {
-                    //     this.renderer.removeClass(element, classes[i]);
-                    // }
                     this.renderer.removeClass(element, classes[3]);
                     console.log('Removed all existing classes from element')
-
                     console.log('Applying health-down class to:', element);
                     this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
                     this.renderer.removeStyle(textarea, 'color')
@@ -193,7 +133,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 });
             }
         } else if (data.msg.payload['class']) {
-            // If a class is present in the payload, apply that class to the element (not textarea)
         let currentElement = textarea;
         let matFormFieldFlex: HTMLElement | null = null;
         while (currentElement.parentElement) {
@@ -213,6 +152,8 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 this.renderer.removeStyle(element, 'background-color');
                 this.renderer.removeClass(element, 'health-down')
                 this.renderer.addClass(element, data.msg.payload['class']); // Apply class to element
+                this.renderer.addClass(textarea, data.msg.payload['class']); // Apply class to element
+                console.log("Color changed to: ", data.msg.payload['class'] )
             });
         }
         } else {
@@ -220,17 +161,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         }
     }   
     
-    
-    // toggleHealthClass(healthStatus: string) {
-    //     const element = this.myTextarea.nativeElement;
-
-    //     if (healthStatus === 'down') {
-    //         this.renderer.addClass(element, 'health-down');
-    //     } else {
-    //         this.renderer.removeClass(element, 'health-down');
-    //     }
-    // }
-
     valueChange(field: string, value: any, fieldType: string) {
         if (fieldType === 'number' && !isNaN(value)) {
             value = parseFloat(value);

@@ -89,45 +89,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     set data(data: any) {
         this._data = data;
     }
-
     
-    // updateValue(data: any) {
-    //     let downFlag = false; // Default to false
-    
-    //     if (data.hasOwnProperty('disabled')) {
-    //         this.disabled = !!data.disabled;
-    //     }
-    
-    //     if (this.container && this.container.length) {
-    //         this.container.trigger([data]);
-    
-    //         if (this.processHealthIndicator && data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
-    //             data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
-    //             let health = data.msg.payload.health.toString().toLowerCase();
-                
-    //             $(document).ready(() => {
-    //                 let indicator = this.container.find('[title="' + data.msg.topic + '"]').closest('.healthIndicator');
-    //                 if (health === 'down') {
-    //                     indicator.addClass('health-down');
-    //                     downFlag = true; 
-    //                     // console.log("right here!:", indicator);
-    //                     // console.log("Health is down, skipping style and class application.");
-    //                 } else {
-    //                     indicator.removeClass('health-down');
-    //                 }
-    
-    //                 // Only applis styles and classes if health is NOT 'down'
-    //                 if (!downFlag) {
-                        
-    //                 }
-    //             });
-    //         } else {
-    //             // If no health property, proceeds with the style application (hopefully)
-    //             this.styleService.setStyle(data);
-    //             this.styleService.setClass(data);
-    //         }
-    //     }
-    // }
     updateValue(data: any) {
         // Log the incoming data to check the payload
         console.log('updateValue called with data:', data);
