@@ -46,14 +46,8 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     
 
     applyStylesToTree() {
-        // Get the textarea element using ViewChild
         const textarea = this.myTextarea.nativeElement;
-        console.log('textarea:::', textarea)
-        // Get the computed styles of the textarea element from the style service
         const styles = this.styleService.getStyle(this.data);
-        console.log('Data here: ', this.data);
-    
-        // Get the background color
         const backgroundColor = styles['background-color'];
     
         // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
@@ -72,8 +66,10 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
             outlineElements.forEach(element => {
                 console.log('Applying background-color to:', element);
-                // Remove the 'health-down' class if present
-                this.renderer.removeClass(element, 'health-down');
+                const classes = element.classList
+                //Remove classes
+                console.log('Classes here: ', classes)
+                this.renderer.removeClass(element, classes[3]);
                 // Apply the background color
                 this.renderer.setStyle(element, 'background-color', backgroundColor);
             });
@@ -105,7 +101,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         console.log("Class set: ", data.msg.payload['class']);
         
         const textarea = this.myTextarea.nativeElement;
-
         if (data.msg.payload.health == 'down') {
             // If health is 'down', directly add the 'health-down' class and remove background-color for textarea
             let currentElement = textarea;
@@ -152,7 +147,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 this.renderer.removeStyle(element, 'background-color');
                 this.renderer.removeClass(element, 'health-down')
                 this.renderer.addClass(element, data.msg.payload['class']); // Apply class to element
-                this.renderer.addClass(textarea, data.msg.payload['class']); // Apply class to element
+                // this.renderer.addClass(textarea, data.msg.payload['class']); // Apply class to element
                 console.log("Color changed to: ", data.msg.payload['class'] )
             });
         }

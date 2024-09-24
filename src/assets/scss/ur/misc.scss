@@ -18,10 +18,13 @@ app-ur-form:not(:last-child) {
 //     background-blend-mode: overlay !important;
 // }
 
-.health-down {
-    background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px);
+.health-down:not(textarea):not(input) {
+    background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px) !important;
     border: 1px solid  #ffd000 !important;
     background-blend-mode: overlay !important;
+    background-color: transparent !important;
+    color: black !important;
+
 }
 app-ur-table {
     a {
@@ -38,36 +41,36 @@ app-ur-button {
 }
 
 .success {
-  background-color: #00c853;
+  background-color: #00c853 !important;
     * {
-        color: #ffffff;
+        color: #ffffff !important;
     }
 }
 
 .info {
-  background-color: #2ca8ff;
+  background-color: #2ca8ff !important;
   * {
-      color: #ffffff;
+      color: #ffffff !important;
   }
 }
 
 .warning {
-  background-color: #ffc107;
+  background-color: #ffc107 !important; 
     * {
-        color: #333333;
+        color: #333333 !important;
     }
 }
 
 .danger {
-  background-color: #f44336;
+  background-color: #f44336 !important;
   * {
-      color: #ffffff;
+      color: #ffffff !important;
   }
 }
 
 .disabled {
-  background-color: #9E9E9E;
+  background-color: #9E9E9E !important;
   * {
-    color: #616161;
+    color: #616161 !important;
   }
 }
