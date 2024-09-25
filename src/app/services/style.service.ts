@@ -66,7 +66,8 @@ export class StyleService {
     if (data.msg.payload.health === 'down') {
       this.style[data.id]['class'] = 'health-down';
     } else {
-      // Otherwise, proceed with setting the class from the payload
+      console.log("Data:", data)
+      console.log("Point", pointName)
       if (pointName) {
         if (!(pointName in this.style[data.id])) {
           this.style[data.id][pointName] = {};
@@ -76,7 +77,6 @@ export class StyleService {
         this.style[data.id]['class'] = data.msg.payload['class'];
       }
     }
-  
     console.log('Class set by StyleService:', this.style[data.id]['class']);
   }
   

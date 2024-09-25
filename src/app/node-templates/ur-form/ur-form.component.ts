@@ -121,7 +121,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                     console.log('Removed all existing classes from element')
                     console.log('Applying health-down class to:', element);
                     this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
-                    this.renderer.removeStyle(textarea, 'color')
+                    // this.renderer.removeStyle(textarea, 'color')
                     this.renderer.removeStyle(element, 'background-color');
                     this.renderer.addClass(element, 'health-down');
                     
@@ -143,7 +143,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             outlineElements.forEach(element => {
                 console.log('Applying custom class from payload:', data.msg.payload['class']);
                 this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
-                this.renderer.removeStyle(textarea, 'color', RendererStyleFlags2.Important)
+                // this.renderer.removeStyle(textarea, 'color', RendererStyleFlags2.Important)
                 this.renderer.removeStyle(element, 'background-color');
                 this.renderer.removeClass(element, 'health-down')
                 this.renderer.addClass(element, data.msg.payload['class']); // Apply class to element
