@@ -1,4 +1,4 @@
-import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive, Renderer2  } from '@angular/core';
+import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive, Renderer2 } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
 import { User } from '../data';
@@ -19,7 +19,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     disabled: boolean = false;
     private _data: any;
     private _wsSubscription: Subscription;
-    
+
     @ViewChild('container', { static: true }) private _container: ElementRef;
     protected processHealthIndicator: Boolean = true;
 
@@ -30,7 +30,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         protected snackbar: SnackbarService,
         protected styleService: StyleService,
         protected renderer: Renderer2
-    ) { }
+    ) {}
 
     ngAfterViewInit(): void {
         this.webSocketService.join(this.nodeId);
@@ -89,21 +89,13 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     set data(data: any) {
         this._data = data;
     }
-    
-    updateValue(data: any) {
-        // Log the incoming data to check the payload
-        console.log('updateValue called with data:', data);
 
-        // Log the class before setting it
-        console.log('Class being passed:', data.msg.payload?.class);
-        if (data.msg.payload.health !== 'down' )
-        {
+    updateValue(data: any) {
+        if (data.msg.payload.health !== 'down') {
             this.styleService.setStyle(data);
         }
         this.styleService.setClass(data);
-    
     }
-    
 
     stripHTML(str: string) {
         if (typeof str === 'string') {
@@ -179,7 +171,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                             return a;
                         }, {});
                         value = enumMap[value];
-                    } catch (ignore) { }
+                    } catch (ignore) {}
                 }
 
                 if (typeof value !== 'undefined') {
@@ -198,7 +190,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         }
         try {
             return eval('(' + ret + '); ' + this.expressionGlobals);
-        } catch (ignore) { }
+        } catch (ignore) {}
         return ret;
     }
 

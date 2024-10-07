@@ -81,6 +81,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 				}
 
         this.styleService.setStyle(data, pointName);
+		this.styleService.setClass(data, pointName);
 			});
 		}
 	}

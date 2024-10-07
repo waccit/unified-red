@@ -12,11 +12,11 @@
                             <ng-container *ngFor="let point of dataSource[device] | keyvalue">
                                 <ng-container *ngIf="point.key.includes(c.param)">
                                     <ng-container *ngIf="c.formatType !== 'link'">
-                                        <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data)" 
+                                        <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
                                             [innerHTML]="point.value[c.label]"></td>
                                     </ng-container>
                                     <ng-container *ngIf="c.formatType === 'link'">
-                                        <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data)" 
+                                        <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
                                                 [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
                                     </ng-container>
                                 </ng-container>
@@ -36,11 +36,11 @@
                             <ng-container *ngFor="let point of dataSource[device] | keyvalue">
                                 <ng-container *ngIf="point.key.includes(c.param)">
                                     <ng-container *ngIf="c.formatType !== 'link'">
-                                        <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data)" 
+                                        <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
                                             [innerHTML]="point.value[c.label]"></td>
                                     </ng-container>
                                     <ng-container *ngIf="c.formatType === 'link'">
-                                        <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data)" 
+                                        <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
                                                 [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
                                     </ng-container>
                                 </ng-container>

@@ -1,9 +1,9 @@
-import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild, RendererStyleFlags2} from '@angular/core';
+import { Component, AfterViewInit, ElementRef, Renderer2, ViewChild, RendererStyleFlags2, ChangeDetectorRef } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
-import { StyleService } from '../../services/style.service'; 
+import { StyleService } from '../../services/style.service';
 import { render } from '@fullcalendar/common';
 import { __classPrivateFieldSet } from 'tslib';
 
@@ -18,7 +18,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
     valueSubject = new BehaviorSubject(this.valueIn);
     delay: number;
 
-    @ViewChild('myInputarea') myInputarea!: ElementRef
+    @ViewChild('myInputarea') myInputarea!: ElementRef;
 
     constructor(
         protected renderer: Renderer2,
@@ -26,7 +26,8 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
         websocketService: WebSocketService,
         snackbarService: SnackbarService,
         currentUserService: CurrentUserService,
-        roleService: RoleService
+        roleService: RoleService,
+        protected cdRef: ChangeDetectorRef
     ) {
         super(websocketService, currentUserService, roleService, snackbarService, localStyleService, renderer);
     }
@@ -48,10 +49,10 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
         this.applyStylesToTree();
     }
     applyStylesToTree() {
-        const inputarea = this.myInputarea.nativeElement;    
-        const styles = this.styleService.getStyle(this.data);     
-        const backgroundColor = styles['background-color'];
-    
+        const inputarea = this.myInputarea.nativeElement;
+        const styles = this.styleService.getStyle(this.data);
+        const backgroundColor = styles?.['background-color'];
+
         // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
         let currentElement = inputarea;
         let matFormFieldFlex: HTMLElement | null = null;
@@ -62,31 +63,38 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                 break;
             }
         }
-    
+
         if (matFormFieldFlex) {
             // Traverse down to find children with the specified classes
-            const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
-            outlineElements.forEach(element => {
-                console.log('Applying background-color to:', element);
-                const classes = element.classList
-                console.log("Input classes", classes)
-                this.renderer.removeClass(element, classes[3]);
+            const outlineElements = matFormFieldFlex.querySelectorAll(
+                '.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick'
+            );
+            const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success'];
+            outlineElements.forEach((element) => {
+                const classList = Array.from(element.classList);
+                classList.forEach((className) => {
+                    if (classestoRemove.includes(className)) {
+                        this.renderer.removeClass(element, className);
+                        this.renderer.removeClass(inputarea, className)
+                        console.log("Removing classes: ", className)
+                    }
+                });
                 this.renderer.setStyle(element, 'background-color', backgroundColor);
             });
         } else {
             console.log('mat-form-field-flex element not found');
         }
+        this.cdRef.detectChanges();
     }
-    
+
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && typeof data.msg.payload !== 'undefined') {
             this.label = this.formatFromData(data, this.data.label);
             this.valueIn = this.formatFromData(data);
         }
-    
+
         const inputarea = this.myInputarea.nativeElement;
-        console.log("New inputarea", inputarea)
         if (data.msg.payload.health == 'down') {
             // If health is 'down', add the 'health-down' class and remove background-color for input area
             let currentElement = inputarea;
@@ -99,16 +107,23 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                 }
             }
             if (matFormFieldFlex) {
-                const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
-                outlineElements.forEach(element => {
-                    const classes = element.classList;
-                    console.log('Classes here: ', classes);
-                    this.renderer.removeClass(element, classes[3]);  // Remove existing class
-                    console.log('New class list', classes[3]);
+                const outlineElements = matFormFieldFlex.querySelectorAll(
+                    '.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick'
+                );
+                const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success'];
+                outlineElements.forEach((element) => {
+                    const classList = Array.from(element.classList);
+                    classList.forEach((className) => {
+                        if (classestoRemove.includes(className)) {
+                            this.renderer.removeClass(element, className);
+                            this.renderer.removeClass(inputarea, className)
+                            console.log("Removing class for health-down: ", className)
+                        }
+                    });
                     this.renderer.removeStyle(inputarea, 'background-color', RendererStyleFlags2.Important);
                     this.renderer.removeStyle(inputarea, 'color');
                     this.renderer.removeStyle(element, 'background-color');
-                    this.renderer.addClass(element, 'health-down');  // Add 'health-down' class
+                    this.renderer.addClass(element, 'health-down');
                 });
             }
         } else if (data.msg.payload['class']) {
@@ -122,22 +137,32 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                 }
             }
             if (matFormFieldFlex) {
-                const outlineElements = matFormFieldFlex.querySelectorAll('.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick');
-                outlineElements.forEach(element => {
-                    console.log('Applying custom class from payload:', data.msg.payload['class']);
+                const outlineElements = matFormFieldFlex.querySelectorAll(
+                    '.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick'
+                );
+                const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success'];
+                outlineElements.forEach((element) => {
+                    const classList = Array.from(element.classList);
+                    classList.forEach((className) => {
+                        if (classestoRemove.includes(className)) {
+                            this.renderer.removeClass(element, className);
+                            this.renderer.removeClass(inputarea, className)
+                            console.log("Replacing classes. Removed: ", className)
+                        }
+                    });
                     this.renderer.removeStyle(inputarea, 'background-color', RendererStyleFlags2.Important);
                     this.renderer.removeStyle(inputarea, 'color', RendererStyleFlags2.Important);
                     this.renderer.removeStyle(element, 'background-color');
                     this.renderer.removeClass(element, 'health-down');
-                    this.renderer.addClass(element, data.msg.payload['class']);  // Apply class from payload
-                    console.log("Class changed to: ", data.msg.payload['class']);
+                    this.renderer.addClass(element, data.msg.payload['class']);
                 });
             }
         } else {
             this.applyStylesToTree();
         }
+        this.styleService.setStyle(data);
+        this.styleService.setClass(data);
     }
-    
 
     keyup(value: string) {
         this.valueSubject.next(value);
@@ -152,11 +177,8 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
             value = parseFloat(value);
         }
         this.data.formValue[field] = value;
-    
+
         // Apply styles after the value changes
         this.applyStylesToTree();
     }
-    
-
-    
 }
