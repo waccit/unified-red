@@ -11,7 +11,6 @@ import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service';
 import { reduce } from 'rxjs/operators';
-
 @Component({
     selector: 'app-ur-form',
     templateUrl: './ur-form.component.html',
@@ -45,52 +44,13 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
         for (let field of this.data.options) {
             field.topic = this.evalInstanceParameters(field.topic);
         }
-
-        this.applyStylesToTree();
+        // this.applyStyles();
     }
 
-    applyStylesToTree() {
-        const textarea = this.myTextarea.nativeElement;
-        const styles = this.styleService.getStyle(this.data);
-        const color = styles?.['color'] || null;
-        const backgroundColor = styles?.['background-color'] || null;
-
-        // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
-        let currentElement = textarea;
-        let matFormFieldFlex: HTMLElement | null = null;
-        while (currentElement.parentElement) {
-            currentElement = currentElement.parentElement;
-            if (currentElement.classList.contains('mat-form-field-flex')) {
-                matFormFieldFlex = currentElement;
-                break;
-            }
-        }
-
-        if (matFormFieldFlex) {
-            const outlineElements = matFormFieldFlex.querySelectorAll(
-                '.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick'
-            );
-            const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success'];
-            outlineElements.forEach((element) => {
-                const classList = Array.from(element.classList);
-                    classList.forEach((className) => {
-                        if (classestoRemove.includes(className)) {
-                            this.renderer.removeClass(element, className);
-                            this.renderer.removeClass(textarea, className)
-                            console.log("Removing class: ", className)
-                        }
-                    });
-                const classes = element.classList;
-                this.renderer.removeClass(element, 'health-down');
-                this.renderer.removeClass(textarea, 'health-down');
-                this.renderer.removeClass(element, classes[3]);
-                this.renderer.setStyle(textarea, 'color', color);
-                this.renderer.setStyle(element, 'background-color', backgroundColor);
-            });
-        } else {
-            ('mat-form-field-flex element not found');
-        }
+    ngAfterContentCheck(): void {
+        this.cdRef.detectChanges();
     }
+
     updateValue(data: any) {
         super.updateValue(data);
         if (data && data.msg && data.msg.topic && typeof data.msg.payload !== 'undefined') {
@@ -109,73 +69,17 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             }
         }
         const textarea = this.myTextarea.nativeElement;
-        if (data.msg.payload.health == 'down') {
-            // If health is 'down', directly add the 'health-down' class and remove background-color for textarea
-            let currentElement = textarea;
-            let matFormFieldFlex: HTMLElement | null = null;
-            while (currentElement.parentElement) {
-                currentElement = currentElement.parentElement;
-                if (currentElement.classList.contains('mat-form-field-flex')) {
-                    matFormFieldFlex = currentElement;
-                    break;
-                }
-            }
-            if (matFormFieldFlex) {
-                const outlineElements = matFormFieldFlex.querySelectorAll(
-                    '.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick'
-                );
-                const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success'];
-                outlineElements.forEach((element) => {
-                    const classList = Array.from(element.classList);
-                    classList.forEach((className) => {
-                        if (classestoRemove.includes(className)) {
-                            this.renderer.removeClass(element, className);
-                            this.renderer.removeClass(textarea, className)
-                            console.log("Removing class for health-down: ", className)
-                        }
-                    });
-                    this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
-                    this.renderer.removeStyle(textarea, 'color');
-                    this.renderer.removeStyle(element, 'background-color');
-                    this.renderer.addClass(element, 'health-down');
-                });
-            }
+        if (data.msg.payload.health === 'down') {
+            this.styleService.applyHealthDown(textarea, this.renderer, this.cdRef);
         } else if (data.msg.payload['class']) {
-            let currentElement = textarea;
-            let matFormFieldFlex: HTMLElement | null = null;
-            while (currentElement.parentElement) {
-                currentElement = currentElement.parentElement;
-                if (currentElement.classList.contains('mat-form-field-flex')) {
-                    matFormFieldFlex = currentElement;
-                    break;
-                }
-            }
-
-            if (matFormFieldFlex) {
-                const outlineElements = matFormFieldFlex.querySelectorAll(
-                    '.mat-form-field-outline, .mat-form-field-outline.mat-form-field-outline-thick'
-                );
-                const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success'];
-                outlineElements.forEach((element) => {
-                    const classList = Array.from(element.classList);
-                    classList.forEach((className) => {
-                        if (classestoRemove.includes(className)) {
-                            this.renderer.removeClass(element, className);
-                            this.renderer.removeClass(textarea, className)
-                            console.log("Replacing classes. Removed: ", className)
-                        }
-                    });
-                    this.renderer.removeStyle(textarea, 'background-color', RendererStyleFlags2.Important);
-                    this.renderer.removeStyle(textarea, 'color');
-                    this.renderer.removeStyle(element, 'background-color');
-                    this.renderer.removeClass(element, 'health-down');
-                    this.renderer.addClass(element, data.msg.payload['class']);
-                });
-            }
+            this.styleService.applyClass(textarea, data.msg.payload['class'], this.renderer, this.cdRef);
         } else {
-            this.applyStylesToTree();
+            this.styleService.applyStyles(textarea, data, this.renderer, this.cdRef);
         }
-        this.styleService.setStyle(data);
+
+        if (data.msg.payload.health !== 'down') {
+            this.styleService.setStyle(data);
+        }
         this.styleService.setClass(data);
     }
 
@@ -184,8 +88,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             value = parseFloat(value);
         }
         this.data.formValue[field] = value;
-
-        this.applyStylesToTree();
+        // this.applyStyles();
     }
 
     submit() {
@@ -224,6 +127,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
 
     reset() {
         this.data.formValue = { ...this.originalValues };
+        this.styleService.resetStyles();
     }
 
     precision(value, precision) {

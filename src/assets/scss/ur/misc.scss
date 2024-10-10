@@ -11,13 +11,6 @@ app-ur-form:not(:last-child) {
     padding-bottom:30px;
 }
 
-// .health-down .mat-form-field-outline, 
-// .health-down .mat-form-field-outline.mat-form-field-outline-thick {
-//     background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px);
-//     border: 1px solid  #ffd000 !important;
-//     background-blend-mode: overlay !important;
-// }
-
 .health-down:not(textarea):not(input) {
     background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px) !important;
     border: 1px solid  #ffd000 !important;

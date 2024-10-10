@@ -1,5 +1,6 @@
 import { Injectable, Renderer2 } from '@angular/core';
 import { render } from '@fullcalendar/common';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Injectable({
     providedIn: 'root',
@@ -7,7 +8,13 @@ import { render } from '@fullcalendar/common';
 export class StyleService {
     private style: object = {};
     private renderer: Renderer2;
-    constructor() {}
+    constructor() {
+        cdRef: ChangeDetectorRef;
+    }
+
+    resetStyles() {
+        this.style = {};
+    }
 
     getStyle(data: any, topic?: any) {
         if (topic) {
@@ -57,8 +64,9 @@ export class StyleService {
                     this.style[data.id][pointName] = {};
                 }
                 this.style[data.id][pointName]['class'] = 'health-down';
+            } else {
+                this.style[data.id]['class'] = 'health-down';
             }
-            this.style[data.id]['class'] = 'health-down';
         } else {
             if (pointName) {
                 if (!(pointName in this.style[data.id])) {
@@ -68,6 +76,123 @@ export class StyleService {
             } else {
                 this.style[data.id]['class'] = data.msg.payload['class'];
             }
+        }
+    }
+
+    applyStyles(element: HTMLElement, data: any, renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        const styles = this.getStyle(data);
+        const backgroundColor = styles?.['background-color'] || null;
+        const color = styles?.['color'] || null;
+
+        let currentElement = element;
+        let matFormFieldFlex: HTMLElement | null = null;
+
+        // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
+        while (currentElement.parentElement) {
+            currentElement = currentElement.parentElement;
+            if (currentElement.classList.contains('mat-form-field-flex')) {
+                matFormFieldFlex = currentElement;
+                break;
+            }
+        }
+
+        if (matFormFieldFlex) {
+            const outlineElements = matFormFieldFlex.querySelectorAll(
+                '.mat-form-field-outline, .mat-form-field-outline-thick'
+            );
+            const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success', 'health-down'];
+
+            outlineElements.forEach((outlineElement) => {
+                const classList = Array.from(outlineElement.classList);
+                classList.forEach((className) => {
+                    if (classestoRemove.includes(className)) {
+                        renderer.removeClass(outlineElement, className);
+                        renderer.removeClass(element, className);
+                    }
+                });
+
+                renderer.removeStyle(outlineElement, 'background-color');
+                renderer.removeStyle(element, 'background-color');
+                renderer.removeStyle(element, 'color');
+
+                renderer.setStyle(element, 'color', color);
+                renderer.setStyle(element, 'background-color', backgroundColor);
+                renderer.setStyle(outlineElement, 'background-color', backgroundColor);
+
+                cdRef.detectChanges();
+            });
+        }
+    }
+
+    applyClass(element: HTMLElement, className: string, renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        let currentElement = element;
+        let matFormFieldFlex: HTMLElement | null = null;
+
+        while (currentElement.parentElement) {
+            currentElement = currentElement.parentElement;
+            if (currentElement.classList.contains('mat-form-field-flex')) {
+                matFormFieldFlex = currentElement;
+                break;
+            }
+        }
+
+        if (matFormFieldFlex) {
+            const outlineElements = matFormFieldFlex.querySelectorAll(
+                '.mat-form-field-outline, .mat-form-field-outline-thick'
+            );
+            outlineElements.forEach((outlineElement) => {
+                const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success', 'health-down'];
+                const classList = Array.from(outlineElement.classList);
+
+                classList.forEach((className) => {
+                    if (classestoRemove.includes(className)) {
+                        renderer.removeClass(outlineElement, className);
+                        renderer.removeClass(element, className);
+                    }
+                });
+
+                renderer.addClass(element, className);
+                renderer.addClass(outlineElement, className);
+                cdRef.detectChanges();
+            });
+        }
+    }private
+
+    applyHealthDown(element: HTMLElement, renderer: Renderer2, cdRef: ChangeDetectorRef) {
+        let currentElement = element;
+        let matFormFieldFlex: HTMLElement | null = null;
+
+        while (currentElement.parentElement) {
+            currentElement = currentElement.parentElement;
+            if (currentElement.classList.contains('mat-form-field-flex')) {
+                matFormFieldFlex = currentElement;
+                break;
+            }
+        }
+
+        if (matFormFieldFlex) {
+            const outlineElements = matFormFieldFlex.querySelectorAll(
+                '.mat-form-field-outline, .mat-form-field-outline-thick'
+            );
+            const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success', 'health-down'];
+
+            outlineElements.forEach((outlineElement) => {
+                const classList = Array.from(outlineElement.classList);
+                classList.forEach((className) => {
+                    if (classestoRemove.includes(className)) {
+                        renderer.removeClass(outlineElement, className);
+                        renderer.removeClass(element, className);
+                    }
+                });
+
+                renderer.removeStyle(element, 'background-color');
+                renderer.removeStyle(outlineElement, 'background-color');
+                renderer.removeStyle(element, 'color');
+
+                renderer.addClass(element, 'health-down');
+                renderer.addClass(outlineElement, 'health-down');
+                cdRef.detectChanges();
+            });
         }
     }
 }

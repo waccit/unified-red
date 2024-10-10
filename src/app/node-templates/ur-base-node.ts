@@ -91,7 +91,8 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     updateValue(data: any) {
-        if (data.msg.payload.health !== 'down') {
+        const healthStatus = data.msg.payload?.health || 'unknown'; 
+        if (healthStatus !== 'down') {
             this.styleService.setStyle(data);
         }
         this.styleService.setClass(data);
