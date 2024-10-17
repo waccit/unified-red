@@ -15,7 +15,7 @@ export class UrTemplateComponent extends BaseNode implements AfterViewInit {
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService,
-        protected styleService: StyleService,
+        public styleService: StyleService,
         protected renderer: Renderer2
     ) {
         super(webSocketService, currentUserService, roleService, snackbar, styleService, renderer);

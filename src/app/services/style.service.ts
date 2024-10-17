@@ -8,6 +8,8 @@ import { ChangeDetectorRef } from '@angular/core';
 export class StyleService {
     private style: object = {};
     private renderer: Renderer2;
+    //Classes set here below
+    private classestoRemove = ['health-down', 'warning', 'info', 'disabled', 'success','danger']
     constructor() {
         cdRef: ChangeDetectorRef;
     }
@@ -100,12 +102,11 @@ export class StyleService {
             const outlineElements = matFormFieldFlex.querySelectorAll(
                 '.mat-form-field-outline, .mat-form-field-outline-thick'
             );
-            const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success', 'health-down'];
 
             outlineElements.forEach((outlineElement) => {
                 const classList = Array.from(outlineElement.classList);
                 classList.forEach((className) => {
-                    if (classestoRemove.includes(className)) {
+                    if (this.classestoRemove.includes(className)) {
                         renderer.removeClass(outlineElement, className);
                         renderer.removeClass(element, className);
                     }
@@ -141,22 +142,21 @@ export class StyleService {
                 '.mat-form-field-outline, .mat-form-field-outline-thick'
             );
             outlineElements.forEach((outlineElement) => {
-                const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success', 'health-down'];
                 const classList = Array.from(outlineElement.classList);
 
                 classList.forEach((className) => {
-                    if (classestoRemove.includes(className)) {
+                    if (this.classestoRemove.includes(className)) {
                         renderer.removeClass(outlineElement, className);
                         renderer.removeClass(element, className);
                     }
                 });
-
+                renderer.setStyle(element, 'color', 'white');
                 renderer.addClass(element, className);
                 renderer.addClass(outlineElement, className);
                 cdRef.detectChanges();
             });
         }
-    }private
+    }
 
     applyHealthDown(element: HTMLElement, renderer: Renderer2, cdRef: ChangeDetectorRef) {
         let currentElement = element;
@@ -174,12 +174,11 @@ export class StyleService {
             const outlineElements = matFormFieldFlex.querySelectorAll(
                 '.mat-form-field-outline, .mat-form-field-outline-thick'
             );
-            const classestoRemove = ['info', 'warning', 'danger', 'disabled', 'success', 'health-down'];
 
             outlineElements.forEach((outlineElement) => {
                 const classList = Array.from(outlineElement.classList);
                 classList.forEach((className) => {
-                    if (classestoRemove.includes(className)) {
+                    if (this.classestoRemove.includes(className)) {
                         renderer.removeClass(outlineElement, className);
                         renderer.removeClass(element, className);
                     }
