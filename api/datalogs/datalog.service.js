@@ -115,8 +115,8 @@ async function query(param) {
     let criteria = [];
     if (param.topic) {
         if (Array.isArray(param.topic)) {
-            const loggers = await db.find(Logger, { 'topic': { '$in': param.topic } });
-            criteria.push({ logger: { '$in': loggers.map((logger) => logger._id) } });
+            const loggers = await db.find(Logger, { 'topic': { [db.chooseOperator("$in")]: param.topic } });
+            criteria.push({ logger: { [db.chooseOperator("$in")]: loggers.map((logger) => logger._id) } });
         } else {
             const logger = await db.findOne(Logger, { 'topic': param.topic });
             criteria.push({ logger: logger._id });
@@ -124,20 +124,20 @@ async function query(param) {
     }
     if (param.startTimestamp) {
         let startDate = new Date(param.startTimestamp);
-        criteria.push({ timestamp: { '$gte': startDate } });
+        criteria.push({ timestamp: { [db.chooseOperator("$gte")]: startDate } });
     }
     if (param.endTimestamp) {
         let endDate = new Date(param.endTimestamp);
-        criteria.push({ timestamp: { '$lte': endDate } });
+        criteria.push({ timestamp: { [db.chooseOperator("$lte")]: endDate } });
     }
     if (param.value) {
         criteria.push({ value: param.value });
     } else {
         if (param.lowValue) {
-            criteria.push({ value: { '$gte': param.lowValue } });
+            criteria.push({ value: { [db.chooseOperator("$gte")]: param.lowValue } });
         }
         if (param.highValue) {
-            criteria.push({ value: { '$lte': param.highValue } });
+            criteria.push({ value: { [db.chooseOperator("$lte")]: param.highValue } });
         }
     }
     if (param.status) {
@@ -147,13 +147,13 @@ async function query(param) {
         if (!Array.isArray(param.tags)) {
             param.tags = [param.tags];
         }
-        criteria.push({ tags: { '$in': param.tags } });
+        criteria.push({ tags: { [db.chooseOperator("$in")]: param.tags } });
     }
 
     if (criteria.length === 1) {
         criteria = criteria[0];
     } else if (criteria.length > 1) {
-        criteria = { '$and': criteria };
+        criteria = { [db.chooseOperator("$and")]: criteria };
     } else {
         criteria = {};
     }
