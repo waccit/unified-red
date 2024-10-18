@@ -252,15 +252,19 @@ export class UrScheduleFormDialogComponent {
     }
 
     saveEvent(nav: any) {
-        this.events.push(this.eventForm.value);
-        this.resetEventFormField();
-        nav.close();
+        if (this.eventForm.valid) {
+            this.events.push(this.eventForm.value);
+            this.resetEventFormField();
+            nav.close();
+        }
     }
 
     editEvent(nav: any) {
-        const i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
-        this.events[i] = this.eventForm.value;
-        nav.close();
+        if (this.eventForm.valid) {
+            const i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
+            this.events[i] = this.eventForm.value;
+            nav.close();
+        }
     }
 
     deleteEvent(nav: any) {

@@ -1,7 +1,8 @@
 {
-    "dbConnection": "mongodb://localhost:27017/unified-red",
+    "dbConnection": "sqlite:node_modules/unified-red/unified-red.db",
     "jwtsecret": "%)7}AQ`N`48BdM!Wxx5B;M,/sX(5z=#qsSBR9kmsVxg6sd3%(~/A#~6a3SQtd~@fj;NK_B%$D~m^~;/Db5BWR#952_C.@JF.{8(ngjqE)hW`?<_gb22RdD/M7H*GBX3qKJkkzsmP@M)'KRLPH;ee5Hm=KZ;-j4/8mb+g3(;Sq+7s{qNFX}X(CDA(DTB_C`pZH;{XsU3]Xc,-vk/)2(?+-`N:e93&(nQmUKBPkJvc+%h^{.w!!U8:qd?TK7*P,B)a",
-    "smtp": {
+    "smtp":
+    {
         "fromAddress": null,
         "host": null,
         "port": 587,

@@ -57,7 +57,7 @@ async function update(id, alarmParam) {
 }
 
 async function _ack(query) {    
-    query["$or"] = [ { "acktime": null }, { "acktime": 0 } ];
+    query[db.chooseOperator("$or")] = [ { "acktime": null }, { "acktime": 0 } ];
     let alarms = await db.find(Alarm, query);
     if (!alarms) {
         throw 'Alarm(s) not found';

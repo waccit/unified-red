@@ -25,5 +25,7 @@ export class UrTextComponent extends BaseNode implements AfterViewInit {
                 this.text += ' ' + data.msg.payload.units;
             }
         }
+        this.styleService.setStyle(data);
+		this.styleService.setClass(data);
     }
 }
