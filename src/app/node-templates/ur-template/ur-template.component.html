@@ -1,1 +1,7 @@
-<span #container [id]="data.id" class="ur-template-container"></span>
+<span
+    #container
+    [id]="data.id"
+    class="ur-template-container"
+    [ngStyle]="this.styleService.getStyle(data)"
+    [ngClass]="this.styleService.getClass(data)"
+></span>

@@ -29,5 +29,7 @@ export class UrButtonComponent extends BaseNode implements AfterViewInit {
         if (data.msg.topic.includes(this.data.topic)) {
             this.intopic = data.msg.topic;
         }
+        this.styleService.setStyle(data);
+		this.styleService.setClass(data);
     }
 }

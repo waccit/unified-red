@@ -11,11 +11,14 @@ app-ur-form:not(:last-child) {
     padding-bottom:30px;
 }
 
-.health-down:not(.mat-form-field), .health-down .mat-form-field-flex {
-    background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px);
+.health-down:not(textarea):not(input) {
+    background-image: repeating-linear-gradient(45deg, #0000, #0000 3px, #ffd00070 3px, #ffd00070 6px) !important;
     border: 1px solid  #ffd000 !important;
+    background-blend-mode: overlay !important;
+    background-color: transparent !important;
+    color: black !important;
+    border-radius: 6px !important;
 }
-
 app-ur-table {
     a {
         white-space: nowrap;
@@ -28,4 +31,39 @@ app-ur-button {
 
 .mat-tab-body-content {
     overflow-x: hidden !important;
+}
+
+.success {
+  background-color: #00c853 !important;
+    * {
+        color: #ffffff !important;
+    }
+}
+
+.info {
+  background-color: #2ca8ff !important;
+  * {
+      color: #ffffff !important;
+  }
+}
+
+.warning {
+  background-color: #ffc107 !important; 
+    * {
+        color: #333333 !important;
+    }
+}
+
+.danger {
+  background-color: #f44336 !important;
+  * {
+      color: #ffffff !important;
+  }
+}
+
+.disabled {
+  background-color: #9E9E9E !important;
+  * {
+    color: #616161 !important;
+  }
 }

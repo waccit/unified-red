@@ -1,7 +1,8 @@
-import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive } from '@angular/core';
+import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive, Renderer2 } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
 import { User } from '../data';
+import { StyleService } from '../services/style.service';
 
 declare var $: any;
 
@@ -18,6 +19,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     disabled: boolean = false;
     private _data: any;
     private _wsSubscription: Subscription;
+
     @ViewChild('container', { static: true }) private _container: ElementRef;
     protected processHealthIndicator: Boolean = true;
 
@@ -25,8 +27,10 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         protected webSocketService: WebSocketService,
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
-        protected snackbar: SnackbarService
-    ) { }
+        protected snackbar: SnackbarService,
+        protected styleService: StyleService,
+        protected renderer: Renderer2
+    ) {}
 
     ngAfterViewInit(): void {
         this.webSocketService.join(this.nodeId);
@@ -87,25 +91,11 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     updateValue(data: any) {
-        if (data.hasOwnProperty('disabled')) {
-            this.disabled = !!data.disabled;
+        const healthStatus = data.msg.payload?.health || 'unknown'; 
+        if (healthStatus !== 'down') {
+            this.styleService.setStyle(data);
         }
-        if (this.container && this.container.length) {
-            this.container.trigger([data]);
-            // when health is available, insert hook into all point values, except for Animation and Template
-            if (this.processHealthIndicator && data.msg.payload && data.msg.payload.hasOwnProperty('health')) {
-                data.msg.payload.value = `<span title='${data.msg.topic}' hidden></span>${data.msg.payload.value}`;
-                let health = data.msg.payload.health.toString().toLowerCase();
-                $(document).ready(() => {
-                    let indicator = this.container.find('[title="' + data.msg.topic + '"]').closest('.healthIndicator');
-                    if (health === 'down') {
-                        indicator.addClass('health-down');
-                    } else {
-                        indicator.removeClass('health-down');
-                    }
-                });
-            }
-        }
+        this.styleService.setClass(data);
     }
 
     stripHTML(str: string) {
@@ -182,7 +172,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                             return a;
                         }, {});
                         value = enumMap[value];
-                    } catch (ignore) { }
+                    } catch (ignore) {}
                 }
 
                 if (typeof value !== 'undefined') {
@@ -201,7 +191,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         }
         try {
             return eval('(' + ret + '); ' + this.expressionGlobals);
-        } catch (ignore) { }
+        } catch (ignore) {}
         return ret;
     }
 
