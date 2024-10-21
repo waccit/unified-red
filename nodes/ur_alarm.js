@@ -3,6 +3,7 @@ Modeled after Node-RED's Switch core node.
  **/
 
 module.exports = function (RED) {
+    var ui = require('../ui')(RED);
     let severities = ['critical', 'alert', 'warning', 'info'];
     let operators = {
         'eq': function (a, b) {
@@ -89,6 +90,7 @@ module.exports = function (RED) {
 
     function AlarmNode(config) {
         RED.nodes.createNode(this, config);
+        var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
         let node = this;
         let valid = true;
         let ontimer = { 'critical': null, 'alert': null, 'warning': null, 'info': null };
@@ -112,6 +114,42 @@ module.exports = function (RED) {
         this.previousValue = null;
         this.property = config.property;
         this.propertyType = config.propertyType || 'msg';
+
+
+        this.config = {
+            ...config,
+            id: config.id,
+            type: 'alarm',
+            label: config.label,
+            order: config.order,
+            width: config.width || group.config.width || 12,
+            values: config.values,
+            payloadType: config.payloadType,
+            defaultView: config.defaultView,
+            topicPattern: config.topicPattern || '',
+            access: config.access || '',
+            accessBehavior: config.accessBehavior || 'disable',
+        };
+
+        var done = ui.add({
+            emitOnlyNewValues: false,
+            node: node,
+            folders: folders,
+            page: page,
+            group: group,
+            tab: tab,
+            control: this.config,
+        });
+
+        node.on('close', () => {
+            // tear down all cron jobs
+            if (RED.settings.verbose) {
+                this.log(RED._('schedule.stopped'));
+            }
+            done();
+        });
+
+
         if (this.propertyType === 'jsonata') {
             try {
                 this.property = RED.util.prepareJSONataExpression(this.property, this);
