@@ -342,7 +342,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                         weekday: data.date.getDay(),
                         value: this.data.values[0]?.name,
                         hour: data.date.getHours(),
-                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                        minute: data.date.getMinutes().toString(),
                     });
                     break;
                 case 'dayGridDay':
@@ -352,7 +352,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                         date: data.date.toString(),
                         value: this.data.values[0]?.name,
                         hour: data.date.getHours(),
-                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                        minute: data.date.getMinutes().toString(),
                     });
                     break;
             }
@@ -366,7 +366,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 date: nowDate,
                 value: this.data.values[0]?.name,
                 hour: 0,
-                minute: '00'
+                minute: '0'
             });
         }
         
@@ -374,7 +374,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             .open(UrScheduleFormDialogComponent, { data: dialogData })
             .afterClosed()
             .subscribe((result) => {
-                // console.log('add response', result);
                 if (result) {
                     this.dirty = true;
                     switch (result.type) {
@@ -668,6 +667,8 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     }
 
     private updateDateSchedule(sch, dateObj) {
+        console.log('dateObj', dateObj);
+        console.log('sch', sch);
         const date = moment(dateObj);
         sch.date = date.format('MM/DD');
         sch.hour = date.format('H');

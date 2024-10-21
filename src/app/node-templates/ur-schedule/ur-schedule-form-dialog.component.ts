@@ -98,7 +98,7 @@ export class UrScheduleFormDialogComponent {
             };
             this.oldHoliday = this.data.events[0]._pattern || '';
             if (this.oldHoliday) {
-                const [ sec, min, hour, date, month, weekday ] = this.oldHoliday.split(' ');
+                const [sec, min, hour, date, month, weekday] = this.oldHoliday.split(' ');
                 if (this.isWeeklyPattern(this.oldHoliday)) {
                     r.repeat = 'weekly';
                     r.weekly.weekday = weekday.split(',');
@@ -131,29 +131,31 @@ export class UrScheduleFormDialogComponent {
                 }
             }
 
-            this.form = this.formBuilder.group({
-                type: [this.data.type, Validators.required],
-                weekday: [this.data.events[0].weekday],
-                date: [
-                    this.data.events[0].date
-                        ? moment(Date.parse(this.data.events[0].date)).year(moment().year())
-                        : null,
-                ],
-                repeat: [r.repeat],
-                repeatWeekdays: [r.weekly.weekday],
-                repeatMonthType: [r.month.type],
-                repeatMonthDate: [r.month.date],
-                repeatMonthWeekdayOccurrence: [r.month.weekdayOccurrence],
-                repeatMonthWeekday: [r.month.weekday],
-                repeatYearMonth: [r.year.month],
-                repeatYearType: [r.year.type],
-                repeatYearDate: [r.year.date],
-                repeatYearWeekdayOccurrence: [r.year.weekdayOccurrence],
-                repeatYearWeekday: [r.year.weekday],
-            },
-            {
-                validator: HolidayValidator(),
-            });
+            this.form = this.formBuilder.group(
+                {
+                    type: [this.data.type, Validators.required],
+                    weekday: [this.data.events[0].weekday],
+                    date: [
+                        this.data.events[0].date
+                            ? moment(Date.parse(this.data.events[0].date)).year(moment().year())
+                            : null,
+                    ],
+                    repeat: [r.repeat],
+                    repeatWeekdays: [r.weekly.weekday],
+                    repeatMonthType: [r.month.type],
+                    repeatMonthDate: [r.month.date],
+                    repeatMonthWeekdayOccurrence: [r.month.weekdayOccurrence],
+                    repeatMonthWeekday: [r.month.weekday],
+                    repeatYearMonth: [r.year.month],
+                    repeatYearType: [r.year.type],
+                    repeatYearDate: [r.year.date],
+                    repeatYearWeekdayOccurrence: [r.year.weekdayOccurrence],
+                    repeatYearWeekday: [r.year.weekday],
+                },
+                {
+                    validator: HolidayValidator(),
+                }
+            );
             this.events = this.sortChronologically(this.data.events).map((e, i) => {
                 e.id = i;
                 e.minute = e.minute.toString().padStart(2, '0');
@@ -324,7 +326,7 @@ export class UrScheduleFormDialogComponent {
     onTypeChange() {
         for (const key in this.form.controls) {
             this.form.get(key).clearValidators();
-            this.form.get(key).updateValueAndValidity({onlySelf: true});
+            this.form.get(key).updateValueAndValidity({ onlySelf: true });
         }
     }
 }
