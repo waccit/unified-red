@@ -115,7 +115,6 @@ module.exports = function (RED) {
         this.property = config.property;
         this.propertyType = config.propertyType || 'msg';
 
-
         this.config = {
             ...config,
             id: config.id,
@@ -141,14 +140,9 @@ module.exports = function (RED) {
             control: this.config,
         });
 
-        node.on('close', () => {
-            // tear down all cron jobs
-            if (RED.settings.verbose) {
-                this.log(RED._('schedule.stopped'));
-            }
+        node.on('close', function () {
             done();
         });
-
 
         if (this.propertyType === 'jsonata') {
             try {
