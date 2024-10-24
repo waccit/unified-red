@@ -9,7 +9,15 @@ import {
 } from '../../services';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { FormBuilder, FormArray, FormsModule, FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import {
+    FormBuilder,
+    FormArray,
+    FormsModule,
+    FormControl,
+    FormGroup,
+    Validators,
+    AbstractControl,
+} from '@angular/forms';
 import { MatTable, MatTableDataSource } from '@angular/material/table';
 
 declare const $: any;
@@ -36,7 +44,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
 
     graphedResults: any[];
     private conditions: Array<string> = [];
-    tableDataSource: MatTableDataSource<AbstractControl>;
+    dataSources: { [key: string]: any[] } = {};
     @ViewChild(MatTable) table: MatTable<any>;
     data_valid: boolean = true;
     data2_valid: boolean = true;
@@ -94,12 +102,10 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         private dataLogService: DataLogService,
         private formBuilder: FormBuilder,
         private red: NodeRedApiService,
-        private cdr: ChangeDetectorRef,
+        private cdr: ChangeDetectorRef
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
     }
-
-    // validation on number type
 
     ngOnInit(): void {
         this.alarmForm = this.formBuilder.group({
@@ -115,11 +121,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
             critical: this.formBuilder.array([]),
             info: this.formBuilder.array([]),
             warning: this.formBuilder.array([]),
-
-            // rules: this.formBuilder.array([]),
         });
-
-        // const rules_array = this.alarmForm.get('rules') as FormArray;
         const alert_array = this.alarmForm.get('alert') as FormArray;
         const critical_array = this.alarmForm.get('critical') as FormArray;
         const info_array = this.alarmForm.get('info') as FormArray;
@@ -146,21 +148,13 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
                 );
             }
         }
-        this.tableDataSource = new MatTableDataSource(this.getSeverityArray("alert").controls);
+        this.severities.forEach((severity) => {
+            this.dataSources[severity] = this.getSeverityArray(severity).controls;
+        });
     }
 
     getSeverityArray(severity: string): FormArray {
-        return this.alarmForm.get(severity) as FormArray; // Cast to FormArray
-    }
-
-    onTabChange(event: any) {
-        console.log('event', event);
-        console.log(this.severities[event.index]);
-        // this.tableDataSource = new MatTableDataSource(this.getSeverityArray(this.severities[event.index]).controls);
-    }
-
-    debug(severity: string) {
-        console.log(this.alarmForm.get(severity).value);
+        return this.alarmForm.get(severity) as FormArray;
     }
 
     setDirty() {
@@ -178,17 +172,18 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     removeEntry(index: number, severity: string) {
         this.getSeverityArray(severity).removeAt(index);
         this.setDirty();
+        this.table.renderRows();
     }
 
     addCondition(severity: string) {
         this.getSeverityArray(severity).push(
             this.formBuilder.group({
-                t: [null, Validators.required],
-                vt: [null],
-                v: [null],
-                v2t: [null],
-                v2: [null],
-                case: [null],
+                t: ['', Validators.required],
+                vt: [''],
+                v: [''],
+                v2t: [''],
+                v2: [''],
+                case: [''],
             })
         );
         this.snackbar.success('Added successfully!');

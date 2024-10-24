@@ -74,17 +74,16 @@
                                 </ng-template>
 
                                 <table
-                                mat-table
-                                    [dataSource]="tableDataSource"
+                                    mat-table
+                                    [dataSource]="dataSources[severity]"
                                     class="mat-cell"
                                     style="margin-bottom: 2rem"
                                 >
                                     <ng-container matColumnDef="condition">
                                         <mat-header-cell *matHeaderCellDef>Condition</mat-header-cell>
-                                        
+
                                         <mat-cell *matCellDef="let row; let i = index">
                                             <div class="row" [formGroupName]="i">
-                                                <button (click)="debug(severity)">debug</button>
                                                 <div>
                                                     <mat-form-field appearance="outline">
                                                         <mat-label>Operator</mat-label>
