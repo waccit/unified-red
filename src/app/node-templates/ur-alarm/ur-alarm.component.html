@@ -65,7 +65,7 @@
 
         <div class="row">
             <div class="col-12">
-                <mat-tab-group #container [id]="data.id" (selectedTabChange)="onTabChange($event)">
+                <mat-tab-group #container [id]="data.id">
                     <div *ngFor="let severity of severities">
                         <ng-container [formArrayName]="severity">
                             <mat-tab>
@@ -278,11 +278,7 @@
                     class="example-full-width"
                     (click)="deploy()"
                     [disabled]="
-                        !dirty ||
-                        disabled ||
-                        (!access.edit && data.accessBehavior === 'disable') ||
-                        !data_valid ||
-                        !data2_valid
+                        !dirty || disabled || (!access.edit && data.accessBehavior === 'disable') || !alarmForm.valid
                     "
                 >
                     Deploy

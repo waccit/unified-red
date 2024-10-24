@@ -8,17 +8,9 @@ import {
     WebSocketService,
 } from '../../services';
 import { BaseNode } from '../ur-base-node';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import {
-    FormBuilder,
-    FormArray,
-    FormsModule,
-    FormControl,
-    FormGroup,
-    Validators,
-    AbstractControl,
-} from '@angular/forms';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
+import { BehaviorSubject } from 'rxjs';
+import { FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
+import { MatTable } from '@angular/material/table';
 
 declare const $: any;
 
@@ -46,8 +38,6 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     private conditions: Array<string> = [];
     dataSources: { [key: string]: any[] } = {};
     @ViewChild(MatTable) table: MatTable<any>;
-    data_valid: boolean = true;
-    data2_valid: boolean = true;
     msgFlag: boolean = true;
     addFlag: boolean = true;
     severities = ['alert', 'critical', 'info', 'warning'];
@@ -88,6 +78,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         'nempty': 'not empty',
         'jsonata_exp': 'JSONata Expression',
     };
+    common_fields = ['name', 'propertyType', 'property', 'delayon', 'delayoff', 'checkall', 'ackreq'];
 
     alarmForm: FormGroup;
     conditionsDisplayedColumns: string[] = ['condition', 'actions'];
@@ -259,17 +250,30 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     }
 
     deploy() {
+        let rules = {
+            'alert': [],
+            'critical': [],
+            'info': [],
+            'warning': [],
+        };
+
         this.addFlag = true;
-        for (let severity in this.data.rules) {
-            for (let condition in this.data.rules[severity]) {
-                let fields = this.formatOutput(this.data.rules[severity][condition]);
-                if (this.addFlag) {
-                    this.data.rules[severity][condition] = fields;
-                } else {
+
+        for (let severity of this.severities) {
+            for (let condition of this.dataSources[severity]) {
+                let temp_condition = this.formatOutput(condition.value);
+                if (!this.addFlag) {
                     this.snackbar.error('A condition is missing information!');
                     return;
                 }
+                rules[severity].push(temp_condition);
             }
+        }
+
+        this.data.rules = rules;
+
+        for (let field of this.common_fields) {
+            this.data[field] = this.alarmForm.get(field).value;
         }
 
         const baseNodeId = this.getBaseNodeId(this.data.id);
