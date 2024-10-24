@@ -1,206 +1,169 @@
 <div class="p-b-10 p-l-10 font-17">Alarm Settings</div>
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
     <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
+    <form [formGroup]="alarmForm">
+        <div class="row pt-4 flex-nowrap" style="overflow: scroll">
+            <div class="col-3">
+                <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
+                    <mat-label>Name</mat-label>
+                    <input matInput [formControlName]="'name'" (change)="setDirty()" (keyup)="setDirty()" />
+                </mat-form-field>
+            </div>
 
-    <div class="row pt-4 flex-nowrap" style="overflow: scroll">
-        <div class="col-3">
-            <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
-                <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="data.name" (change)="setDirty()" (keyup)="setDirty()" />
-            </mat-form-field>
+            <div class="col-3">
+                <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
+                    <mat-label>Value Type</mat-label>
+                    <select matNativeControl [formControlName]="'propertyType'" (change)="setDirty()">
+                        <option value="msg">msg.</option>
+                        <option value="flow">flow.</option>
+                        <option value="global">global.</option>
+                        <option value="jsonata">JSONata</option>
+                        <option value="env">env var</option>
+                    </select>
+                </mat-form-field>
+            </div>
+
+            <div class="col-3">
+                <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
+                    <mat-label>Value</mat-label>
+                    <input matInput [formControlName]="'property'" (change)="setDirty()" (keyup)="setDirty()" />
+                </mat-form-field>
+            </div>
         </div>
 
-        <div class="col-3">
-            <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
-                <mat-label>Value Type</mat-label>
-                <select matNativeControl [(ngModel)]="data.propertyType" (change)="setDirty()">
-                    <option value="msg">msg.</option>
-                    <option value="flow">flow.</option>
-                    <option value="global">global.</option>
-                    <option value="jsonata">JSONata</option>
-                    <option value="env">env var</option>
-                </select>
-            </mat-form-field>
+        <div class="row pt-4 flex-nowrap" style="overflow: scroll">
+            <div class="col-2">
+                <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
+                    <mat-label>On Delay</mat-label>
+                    <input matInput [formControlName]="'delayon'" (change)="setDirty()" (keyup)="setDirty()" />
+                </mat-form-field>
+            </div>
+
+            <div class="col-2">
+                <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
+                    <mat-label>Off Delay</mat-label>
+                    <input matInput [formControlName]="'delayoff'" (change)="setDirty()" (keyup)="setDirty()" />
+                </mat-form-field>
+            </div>
+
+            <div class="col-3">
+                <mat-form-field appearance="outline" style="width: 100%">
+                    <mat-label>Process By</mat-label>
+                    <select matNativeControl [formControlName]="'checkall'" (change)="setDirty()">
+                        <option value="true">checking all rules</option>
+                        <option value="false">stopping after first match</option>
+                    </select>
+                </mat-form-field>
+            </div>
+
+            <div class="col-2 pt-4">
+                <mat-checkbox [formControlName]="'ackreq'" (change)="live.next($event.checked); setDirty()"
+                    >Acknowledgement Required
+                </mat-checkbox>
+            </div>
         </div>
 
-        <div class="col-3">
-            <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
-                <mat-label>Value</mat-label>
-                <input matInput [(ngModel)]="data.property" (change)="setDirty()" (keyup)="setDirty()" />
-            </mat-form-field>
-        </div>
-    </div>
+        <div class="row">
+            <div class="col-12">
+                <mat-tab-group #container [id]="data.id">
+                    <div *ngFor="let severity of severities">
+                        <ng-container [formArrayName]="severity">
+                            <mat-tab>
+                                <ng-template mat-tab-label>
+                                    <div class="p-l-10 font-17">{{ severity }} conditions</div>
+                                </ng-template>
 
-    <div class="row pt-4 flex-nowrap" style="overflow: scroll">
-        <div class="col-2">
-            <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
-                <mat-label>On Delay</mat-label>
-                <input matInput [(ngModel)]="data.delayon" (change)="setDirty()" (keyup)="setDirty()" />
-            </mat-form-field>
-        </div>
+                                <mat-table
+                                    [dataSource]="getDataSource(severity)"
+                                    class="mat-cell"
+                                    style="margin-bottom: 2rem"
+                                >
+                                    <ng-container matColumnDef="condition">
+                                        <mat-header-cell *matHeaderCellDef>Condition</mat-header-cell>
 
-        <div class="col-2">
-            <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
-                <mat-label>Off Delay</mat-label>
-                <input matInput [(ngModel)]="data.delayoff" (change)="setDirty()" (keyup)="setDirty()" />
-            </mat-form-field>
-        </div>
-
-        <div class="col-3">
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Process By</mat-label>
-                <select matNativeControl [(ngModel)]="data.checkall" (change)="setDirty()">
-                    <option value="true">checking all rules</option>
-                    <option value="false">stopping after first match</option>
-                </select>
-            </mat-form-field>
-        </div>
-
-        <div class="col-2 pt-4">
-            <mat-checkbox [(ngModel)]="data.ackreq" (change)="live.next($event.checked); setDirty()"
-                >Acknowledgement Required
-            </mat-checkbox>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-12">
-            <mat-tab-group #container [id]="data.id">
-                <div *ngFor="let entry of data.rules | keyvalue">
-                    <mat-tab>
-                        <ng-template mat-tab-label>
-                            <div class="p-l-10 font-17">{{ entry.key }} conditions</div>
-                        </ng-template>
-
-                        <mat-table [dataSource]="data.rules[entry.key]" class="mat-cell" style="margin-bottom: 2rem">
-                            <ng-container matColumnDef="condition">
-                                <mat-header-cell *matHeaderCellDef>Condition</mat-header-cell>
-
-                                <mat-cell *matCellDef="let row; let i = index">
-                                    <form
-                                        [formGroup]="alarmForm"
-                                        (change)="editCondition(row, entry.key, i)"
-                                        (change)="setDirty()"
-                                        (keyup)="setDirty()"
-                                        (keyup)="editCondition(row, entry.key, i)"
-                                    >
-                                        <div class="row">
-                                            <div>
-                                                <mat-form-field appearance="outline">
-                                                    <mat-label>Operator</mat-label>
-                                                    <select
-                                                        matNativeControl
-                                                        [(ngModel)]="row.t"
-                                                        [ngModelOptions]="{ standalone: true }"
-                                                    >
-                                                        <option value="neq">!=</option>
-                                                        <option value="lt">&lt;</option>
-                                                        <option value="eq">==</option>
-                                                        <option value="lte">&lt;=</option>
-                                                        <option value="gt">&gt;</option>
-                                                        <option value="gte">&gt;=</option>
-                                                        <option value="hask">has key</option>
-                                                        <option value="btwn">is between</option>
-                                                        <option value="cont">contains</option>
-                                                        <option value="regex">matches regex</option>
-                                                        <option value="true">is true</option>
-                                                        <option value="false">is false</option>
-                                                        <option value="null">is null</option>
-                                                        <option value="nnull">is not null</option>
-                                                        <option value="istype">is of type</option>
-                                                        <option value="empty">is empty</option>
-                                                        <option value="nempty">is not empty</option>
-                                                        <option value="jsonata_exp">JSONata exp</option>
-                                                    </select>
-                                                </mat-form-field>
-                                            </div>
-
-                                            <div
-                                                class="col-3 pr-0 pl-1"
-                                                *ngIf="
-                                                    row.t &&
-                                                    !(
-                                                        row.t === 'true' ||
-                                                        row.t === 'false' ||
-                                                        row.t === 'null' ||
-                                                        row.t === 'nnull' ||
-                                                        row.t === 'empty' ||
-                                                        row.t === 'nempty'
-                                                    )
-                                                "
-                                            >
-                                                <div *ngIf="row.t === 'istype'">
-                                                    <mat-form-field appearance="outline" style="width: 100%">
-                                                        <mat-label>Data Type</mat-label>
-                                                        <select
-                                                            matNativeControl
-                                                            [(ngModel)]="row.vt"
-                                                            [ngModelOptions]="{ standalone: true }"
-                                                        >
-                                                            <option value="string">string</option>
-                                                            <option value="number">number</option>
-                                                            <option value="boolean">boolean</option>
-                                                            <option value="array">array</option>
-                                                            <option value="buffer">buffer</option>
-                                                            <option value="object">object</option>
-                                                            <option value="json">JSON string</option>
-                                                            <option value="undefined">undefined</option>
-                                                            <option value="null">null</option>
+                                        <mat-cell *matCellDef="let row; let i = index">
+                                            <div class="row" [formGroupName]="i">
+                                                <div>
+                                                    <mat-form-field appearance="outline">
+                                                        <mat-label>Operator</mat-label>
+                                                        <select matNativeControl formControlName="t">
+                                                            <option value="neq">!=</option>
+                                                            <option value="lt">&lt;</option>
+                                                            <option value="eq">==</option>
+                                                            <option value="lte">&lt;=</option>
+                                                            <option value="gt">&gt;</option>
+                                                            <option value="gte">&gt;=</option>
+                                                            <option value="hask">has key</option>
+                                                            <option value="btwn">is between</option>
+                                                            <option value="cont">contains</option>
+                                                            <option value="regex">matches regex</option>
+                                                            <option value="true">is true</option>
+                                                            <option value="false">is false</option>
+                                                            <option value="null">is null</option>
+                                                            <option value="nnull">is not null</option>
+                                                            <option value="istype">is of type</option>
+                                                            <option value="empty">is empty</option>
+                                                            <option value="nempty">is not empty</option>
+                                                            <option value="jsonata_exp">JSONata exp</option>
                                                         </select>
-                                                    </mat-form-field>
-                                                </div>
-
-                                                <div *ngIf="row.t === 'jsonata_exp'">
-                                                    <mat-form-field appearance="outline" style="width: 100%">
-                                                        <mat-label>Expression</mat-label>
-                                                        <input
-                                                            matInput
-                                                            [(ngModel)]="row.v"
-                                                            [ngModelOptions]="{ standalone: true }"
-                                                        />
                                                     </mat-form-field>
                                                 </div>
 
                                                 <div
+                                                    class="col-3 pr-0 pl-1"
                                                     *ngIf="
-                                                        row.t === 'eq' ||
-                                                        row.t === 'neq' ||
-                                                        row.t === 'lt' ||
-                                                        row.t === 'lte' ||
-                                                        row.t === 'gt' ||
-                                                        row.t === 'gte' ||
-                                                        row.t === 'hask' ||
-                                                        row.t === 'cont' ||
-                                                        row.t === 'btwn' ||
-                                                        row.t === 'regex'
+                                                        row.value.t &&
+                                                        !(
+                                                            row.value.t === 'true' ||
+                                                            row.value.t === 'false' ||
+                                                            row.value.t === 'null' ||
+                                                            row.value.t === 'nnull' ||
+                                                            row.value.t === 'empty' ||
+                                                            row.value.t === 'nempty'
+                                                        )
                                                     "
                                                 >
-                                                    <mat-form-field appearance="outline" style="width: 100%">
-                                                        <mat-label>Data Type</mat-label>
-                                                        <select
-                                                            matNativeControl
-                                                            [(ngModel)]="row.vt"
-                                                            [ngModelOptions]="{ standalone: true }"
-                                                        >
-                                                            <option value="msg">msg.</option>
-                                                            <option value="flow">flow.</option>
-                                                            <option value="global">global.</option>
-                                                            <option value="str">string</option>
-                                                            <option value="num">number</option>
-                                                            <option value="jsonata">JSONata</option>
-                                                            <option value="env">env var</option>
-                                                            <option value="prev">prev val</option>
-                                                        </select>
-                                                    </mat-form-field>
-
-                                                    <div *ngIf="row.t === 'btwn'">
+                                                    <div *ngIf="row.value.t === 'istype'">
                                                         <mat-form-field appearance="outline" style="width: 100%">
-                                                            <mat-label>Data Type 2</mat-label>
-                                                            <select
-                                                                matNativeControl
-                                                                [(ngModel)]="row.v2t"
-                                                                [ngModelOptions]="{ standalone: true }"
-                                                            >
+                                                            <mat-label>Data Type</mat-label>
+                                                            <select matNativeControl formControlName="vt">
+                                                                <option value="string">string</option>
+                                                                <option value="number">number</option>
+                                                                <option value="boolean">boolean</option>
+                                                                <option value="array">array</option>
+                                                                <option value="buffer">buffer</option>
+                                                                <option value="object">object</option>
+                                                                <option value="json">JSON string</option>
+                                                                <option value="undefined">undefined</option>
+                                                                <option value="null">null</option>
+                                                            </select>
+                                                        </mat-form-field>
+                                                    </div>
+
+                                                    <div *ngIf="row.value.t === 'jsonata_exp'">
+                                                        <mat-form-field appearance="outline" style="width: 100%">
+                                                            <mat-label>Expression</mat-label>
+                                                            <input matInput formControlName="v" />
+                                                        </mat-form-field>
+                                                    </div>
+
+                                                    <div
+                                                        *ngIf="
+                                                            row.value.t === 'eq' ||
+                                                            row.value.t === 'neq' ||
+                                                            row.value.t === 'lt' ||
+                                                            row.value.t === 'lte' ||
+                                                            row.value.t === 'gt' ||
+                                                            row.value.t === 'gte' ||
+                                                            row.value.t === 'hask' ||
+                                                            row.value.t === 'cont' ||
+                                                            row.value.t === 'btwn' ||
+                                                            row.value.t === 'regex'
+                                                        "
+                                                    >
+                                                        <mat-form-field appearance="outline" style="width: 100%">
+                                                            <mat-label>Data Type</mat-label>
+                                                            <select matNativeControl formControlName="vt">
                                                                 <option value="msg">msg.</option>
                                                                 <option value="flow">flow.</option>
                                                                 <option value="global">global.</option>
@@ -211,103 +174,121 @@
                                                                 <option value="prev">prev val</option>
                                                             </select>
                                                         </mat-form-field>
+
+                                                        <div *ngIf="row.value.t === 'btwn'">
+                                                            <mat-form-field appearance="outline" style="width: 100%">
+                                                                <mat-label>Data Type 2</mat-label>
+                                                                <select matNativeControl formControlName="v2t">
+                                                                    <option value="msg">msg.</option>
+                                                                    <option value="flow">flow.</option>
+                                                                    <option value="global">global.</option>
+                                                                    <option value="str">string</option>
+                                                                    <option value="num">number</option>
+                                                                    <option value="jsonata">JSONata</option>
+                                                                    <option value="env">env var</option>
+                                                                    <option value="prev">prev val</option>
+                                                                </select>
+                                                            </mat-form-field>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div
-                                                class="col-3 pr-0 pl-1"
-                                                *ngIf="
-                                                    row.vt &&
-                                                    (row.t === 'eq' ||
-                                                        row.t === 'neq' ||
-                                                        row.t === 'lt' ||
-                                                        row.t === 'lte' ||
-                                                        row.t === 'gt' ||
-                                                        row.t === 'gte' ||
-                                                        row.t === 'hask' ||
-                                                        row.t === 'cont' ||
-                                                        row.t === 'btwn' ||
-                                                        row.t === 'regex')
-                                                "
-                                            >
-                                                <mat-form-field
-                                                    appearance="outline"
-                                                    style="width: 100%"
-                                                    [ngClass]="{ 'red-outline': !data_valid }"
+                                                <div
+                                                    class="col-3 pr-0 pl-1"
+                                                    *ngIf="
+                                                        row.value.vt &&
+                                                        (row.value.t === 'eq' ||
+                                                            row.value.t === 'neq' ||
+                                                            row.value.t === 'lt' ||
+                                                            row.value.t === 'lte' ||
+                                                            row.value.t === 'gt' ||
+                                                            row.value.t === 'gte' ||
+                                                            row.value.t === 'hask' ||
+                                                            row.value.t === 'cont' ||
+                                                            row.value.t === 'btwn' ||
+                                                            row.value.t === 'regex')
+                                                    "
                                                 >
-                                                    <mat-label>Data</mat-label>
-                                                    <input
-                                                        matInput
-                                                        [(ngModel)]="row.v"
-                                                        [ngModelOptions]="{ standalone: true }"
-                                                    />
-                                                </mat-form-field>
-
-                                                <div *ngIf="row.t === 'btwn'">
-                                                    <mat-form-field appearance="outline" style="width: 100%">
-                                                        <mat-label>Data 2</mat-label>
-                                                        <input
-                                                            matInput
-                                                            [(ngModel)]="row.v2"
-                                                            [ngModelOptions]="{ standalone: true }"
-                                                        />
+                                                    <mat-form-field
+                                                        appearance="outline"
+                                                        style="width: 100%"
+                                                        [ngClass]="{ 'red-outline': !data_valid }"
+                                                    >
+                                                        <mat-label>Data</mat-label>
+                                                        <input matInput formControlName="v" />
                                                     </mat-form-field>
+
+                                                    <div *ngIf="row.value.t === 'btwn'">
+                                                        <mat-form-field appearance="outline" style="width: 100%">
+                                                            <mat-label>Data 2</mat-label>
+                                                            <input matInput formControlName="v2" />
+                                                        </mat-form-field>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-2 pt-4" *ngIf="row.value.vt && row.value.t === 'regex'">
+                                                    <mat-checkbox
+                                                        formControlName="case"
+                                                        (change)="live.next($event.checked); setDirty()"
+                                                        >Ignore Case
+                                                    </mat-checkbox>
                                                 </div>
                                             </div>
+                                        </mat-cell>
+                                    </ng-container>
 
-                                            <div class="col-2 pt-4" *ngIf="row.vt && row.t === 'regex'">
-                                                <mat-checkbox
-                                                    [(ngModel)]="row.case"
-                                                    [ngModelOptions]="{ standalone: true }"
-                                                    (change)="live.next($event.checked); setDirty()"
-                                                    >Ignore Case
-                                                </mat-checkbox>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </mat-cell>
-                            </ng-container>
+                                    <!-- actions -->
+                                    <ng-container matColumnDef="actions">
+                                        <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                                        <mat-cell *matCellDef="let row; let i = index">
+                                            <button
+                                                mat-icon-button
+                                                class="btn-tbl-edit"
+                                                (click)="removeEntry(i, severity)"
+                                            >
+                                                <mat-icon aria-label="Remove" class="col-white">delete</mat-icon>
+                                            </button>
+                                        </mat-cell>
+                                    </ng-container>
+                                    <mat-header-row *matHeaderRowDef="conditionsDisplayedColumns"></mat-header-row>
+                                    <mat-row
+                                        *matRowDef="let row; columns: conditionsDisplayedColumns"
+                                        matRipple
+                                    ></mat-row>
+                                </mat-table>
 
-                            <!-- actions -->
-                            <ng-container matColumnDef="actions">
-                                <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
-                                <mat-cell *matCellDef="let row; let i = index">
-                                    <button mat-icon-button class="btn-tbl-edit" (click)="removeEntry(row, entry.key)">
-                                        <mat-icon aria-label="Remove" class="col-white">delete</mat-icon>
+                                <div class="col-2 pl-2 p-t-10">
+                                    <button mat-raised-button color="primary" (click)="addCondition(severity)">
+                                        Add
                                     </button>
-                                </mat-cell>
-                            </ng-container>
-                            <mat-header-row *matHeaderRowDef="conditionsDisplayedColumns"></mat-header-row>
-                            <mat-row *matRowDef="let row; columns: conditionsDisplayedColumns" matRipple></mat-row>
-                        </mat-table>
-
-                        <div class="col-2 pl-2 p-t-10">
-                            <button mat-raised-button color="primary" (click)="addCondition(entry.key)">Add</button>
-                        </div>
-                    </mat-tab>
-                </div>
-            </mat-tab-group>
+                                </div>
+                            </mat-tab>
+                        </ng-container>
+                    </div>
+                </mat-tab-group>
+            </div>
         </div>
-    </div>
 
-    <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
-        <div class="col-12 mt-2 mb-2">
-            <button
-                mat-raised-button
-                color="primary"
-                class="example-full-width"
-                (click)="deploy()"
-                [disabled]="
-                    !dirty ||
-                    disabled ||
-                    (!access.edit && data.accessBehavior === 'disable') ||
-                    !data_valid ||
-                    !data2_valid
-                "
-            >
-                Deploy
-            </button>
+        <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
+            <div class="col-12 mt-2 mb-2">
+                <button
+                    mat-raised-button
+                    color="primary"
+                    class="example-full-width"
+                    (click)="deploy()"
+                    [disabled]="
+                        !dirty ||
+                        disabled ||
+                        (!access.edit && data.accessBehavior === 'disable') ||
+                        !data_valid ||
+                        !data2_valid
+                    "
+                >
+                    Deploy
+                </button>
+            </div>
         </div>
-    </div>
+    </form>
 </ng-template>
+
+<button (click)="debug()">debug</button>

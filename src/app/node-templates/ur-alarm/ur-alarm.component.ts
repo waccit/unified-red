@@ -9,7 +9,7 @@ import {
 } from '../../services';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormArray, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 
 declare const $: any;
 
@@ -39,6 +39,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     data2_valid: boolean = true;
     msgFlag: boolean = true;
     addFlag: boolean = true;
+    severities = ['alert', 'critical', 'info', 'warning'];
     valueTypeMap = {
         'msg': 'msg.',
         'flow': 'flow.',
@@ -98,14 +99,63 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
 
     ngOnInit(): void {
         this.alarmForm = this.formBuilder.group({
-            severity: [Validators.required],
-            operator: [Validators.required],
-            dataType: null,
-            data: null,
-            data2Type: null,
-            data2: null,
-            ignoreCase: null,
+            name: [this.data.name, Validators.required],
+            propertyType: [this.data.propertyType, Validators.required],
+            property: [this.data.property, Validators.required],
+            delayon: [this.data.delayon, Validators.required],
+            delayoff: [this.data.delayoff, Validators.required],
+            checkall: [this.data.checkall, Validators.required],
+            ackreq: [this.data.ackreq, Validators.required],
+
+            alert: this.formBuilder.array([]),
+            critical: this.formBuilder.array([]),
+            info: this.formBuilder.array([]),
+            warning: this.formBuilder.array([]),
+
+            // rules: this.formBuilder.array([]),
         });
+
+        // const rules_array = this.alarmForm.get('rules') as FormArray;
+        const alert_array = this.alarmForm.get('alert') as FormArray;
+        const critical_array = this.alarmForm.get('critical') as FormArray;
+        const info_array = this.alarmForm.get('info') as FormArray;
+        const warning_array = this.alarmForm.get('warning') as FormArray;
+
+        const formArrays = {
+            alert: alert_array,
+            critical: critical_array,
+            info: info_array,
+            warning: warning_array,
+        };
+
+        for (const [key] of Object.entries(this.data.rules)) {
+            for (let rule of this.data.rules[key]) {
+                formArrays[key].push(
+                    this.formBuilder.group({
+                        t: [rule.t, Validators.required],
+                        vt: [rule.vt],
+                        v: [rule.v],
+                        v2t: [rule.v2t],
+                        v2: [rule.v2],
+                        case: [rule.case],
+                    })
+                );
+            }
+        }
+    }
+
+    getSeverityArray(severity: string): FormArray {
+        return this.alarmForm.get(severity) as FormArray; // Cast to FormArray
+    }
+
+    getDataSource(severity: string) {
+        const severityArray = this.getSeverityArray(severity);
+        return severityArray.controls; // Now safe to access controls
+    }
+
+    debug() {
+        console.log(this.getDataSource('critical'));
+        console.log(this.alarmForm.get('critical'));
     }
 
     setDirty() {
@@ -120,16 +170,26 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         }
     }
 
-    removeEntry(entry, severity) {
-        this.data.rules[severity] = this.data.rules[severity].filter((t) => {
-            return t !== entry;
-        });
+    removeEntry(index: number, severity: string) {
+        const severityArray = this.getSeverityArray(severity);
+        severityArray.removeAt(index);
         this.setDirty();
     }
 
-    addCondition(severity) {
-        let ruleCategory = this.data.rules[severity];
-        this.data.rules[severity] = [...ruleCategory, {}];
+    addCondition(severity: string) {
+        // let ruleCategory = this.data.rules[severity];
+        // this.data.rules[severity] = [...ruleCategory, {}];
+        const severity_array = this.alarmForm.get(severity) as FormArray;
+        severity_array.push(
+            this.formBuilder.group({
+                t: [null, Validators.required],
+                vt: [null],
+                v: [null],
+                v2t: [null],
+                v2: [null],
+                case: [null],
+            })
+        );
         this.snackbar.success('Added successfully!');
     }
 
@@ -145,9 +205,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
                 't': formInfo['t'],
             };
         } else if (formInfo['t'] === 'istype') {
-            console.log('istype');
             if (formInfo['vt'] || formInfo['vt'] === 'undefined') {
-                console.log('valid');
                 fields = {
                     't': formInfo['t'],
                     'v': formInfo['vt'],
@@ -212,8 +270,6 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
                     this.data.rules[severity][condition] = fields;
                 } else {
                     this.snackbar.error('A condition is missing information!');
-                    console.log('fld', fields);
-                    console.log(severity, this.data.rules[severity][condition]);
                     return;
                 }
             }
