@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import {
     CurrentUserService,
     DataLogService,
@@ -9,7 +9,8 @@ import {
 } from '../../services';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { FormBuilder, FormArray, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormArray, FormsModule, FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { MatTable, MatTableDataSource } from '@angular/material/table';
 
 declare const $: any;
 
@@ -35,6 +36,8 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
 
     graphedResults: any[];
     private conditions: Array<string> = [];
+    tableDataSource: MatTableDataSource<AbstractControl>;
+    @ViewChild(MatTable) table: MatTable<any>;
     data_valid: boolean = true;
     data2_valid: boolean = true;
     msgFlag: boolean = true;
@@ -90,7 +93,8 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         protected snackbar: SnackbarService,
         private dataLogService: DataLogService,
         private formBuilder: FormBuilder,
-        private red: NodeRedApiService
+        private red: NodeRedApiService,
+        private cdr: ChangeDetectorRef,
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
     }
@@ -142,20 +146,21 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
                 );
             }
         }
+        this.tableDataSource = new MatTableDataSource(this.getSeverityArray("alert").controls);
     }
 
     getSeverityArray(severity: string): FormArray {
         return this.alarmForm.get(severity) as FormArray; // Cast to FormArray
     }
 
-    getDataSource(severity: string) {
-        const severityArray = this.getSeverityArray(severity);
-        return severityArray.controls; // Now safe to access controls
+    onTabChange(event: any) {
+        console.log('event', event);
+        console.log(this.severities[event.index]);
+        // this.tableDataSource = new MatTableDataSource(this.getSeverityArray(this.severities[event.index]).controls);
     }
 
-    debug() {
-        console.log(this.getDataSource('critical'));
-        console.log(this.alarmForm.get('critical'));
+    debug(severity: string) {
+        console.log(this.alarmForm.get(severity).value);
     }
 
     setDirty() {
@@ -171,16 +176,12 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
     }
 
     removeEntry(index: number, severity: string) {
-        const severityArray = this.getSeverityArray(severity);
-        severityArray.removeAt(index);
+        this.getSeverityArray(severity).removeAt(index);
         this.setDirty();
     }
 
     addCondition(severity: string) {
-        // let ruleCategory = this.data.rules[severity];
-        // this.data.rules[severity] = [...ruleCategory, {}];
-        const severity_array = this.alarmForm.get(severity) as FormArray;
-        severity_array.push(
+        this.getSeverityArray(severity).push(
             this.formBuilder.group({
                 t: [null, Validators.required],
                 vt: [null],
@@ -191,6 +192,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
             })
         );
         this.snackbar.success('Added successfully!');
+        this.table.renderRows();
     }
 
     editCondition(row, severity, index) {

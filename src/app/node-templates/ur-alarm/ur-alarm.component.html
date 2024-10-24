@@ -65,7 +65,7 @@
 
         <div class="row">
             <div class="col-12">
-                <mat-tab-group #container [id]="data.id">
+                <mat-tab-group #container [id]="data.id" (selectedTabChange)="onTabChange($event)">
                     <div *ngFor="let severity of severities">
                         <ng-container [formArrayName]="severity">
                             <mat-tab>
@@ -73,16 +73,18 @@
                                     <div class="p-l-10 font-17">{{ severity }} conditions</div>
                                 </ng-template>
 
-                                <mat-table
-                                    [dataSource]="getDataSource(severity)"
+                                <table
+                                mat-table
+                                    [dataSource]="tableDataSource"
                                     class="mat-cell"
                                     style="margin-bottom: 2rem"
                                 >
                                     <ng-container matColumnDef="condition">
                                         <mat-header-cell *matHeaderCellDef>Condition</mat-header-cell>
-
+                                        
                                         <mat-cell *matCellDef="let row; let i = index">
                                             <div class="row" [formGroupName]="i">
+                                                <button (click)="debug(severity)">debug</button>
                                                 <div>
                                                     <mat-form-field appearance="outline">
                                                         <mat-label>Operator</mat-label>
@@ -255,7 +257,7 @@
                                         *matRowDef="let row; columns: conditionsDisplayedColumns"
                                         matRipple
                                     ></mat-row>
-                                </mat-table>
+                                </table>
 
                                 <div class="col-2 pl-2 p-t-10">
                                     <button mat-raised-button color="primary" (click)="addCondition(severity)">
@@ -290,5 +292,3 @@
         </div>
     </form>
 </ng-template>
-
-<button (click)="debug()">debug</button>
