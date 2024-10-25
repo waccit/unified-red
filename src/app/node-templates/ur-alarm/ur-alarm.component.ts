@@ -1,12 +1,5 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import {
-    CurrentUserService,
-    DataLogService,
-    NodeRedApiService,
-    RoleService,
-    SnackbarService,
-    WebSocketService,
-} from '../../services';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { CurrentUserService, NodeRedApiService, RoleService, SnackbarService, WebSocketService } from '../../services';
 import { BaseNode } from '../ur-base-node';
 import { BehaviorSubject } from 'rxjs';
 import { FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms';
@@ -20,9 +13,6 @@ declare const $: any;
     styleUrls: ['./ur-alarm.component.sass'],
 })
 export class UrAlarmComponent extends BaseNode implements OnInit {
-    /*
-     *      Alarm Members
-     */
     alarmOpt = {
         delayon: null,
         delayoff: null,
@@ -34,13 +24,12 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         rules: null,
     };
 
-    graphedResults: any[];
     private conditions: Array<string> = [];
     dataSources: { [key: string]: any[] } = {};
     @ViewChild(MatTable) table: MatTable<any>;
     msgFlag: boolean = true;
     addFlag: boolean = true;
-    severities = ['alert', 'critical', 'info', 'warning'];
+    severities = ['critical', 'alert', 'warning', 'info'];
     valueTypeMap = {
         'msg': 'msg.',
         'flow': 'flow.',
@@ -79,10 +68,8 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         'jsonata_exp': 'JSONata Expression',
     };
     common_fields = ['name', 'propertyType', 'property', 'delayon', 'delayoff', 'checkall', 'ackreq'];
-
     alarmForm: FormGroup;
     conditionsDisplayedColumns: string[] = ['condition', 'actions'];
-    dirty = false;
     live = new BehaviorSubject<boolean>(false);
 
     constructor(
@@ -90,10 +77,8 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         protected currentUserService: CurrentUserService,
         protected roleService: RoleService,
         protected snackbar: SnackbarService,
-        private dataLogService: DataLogService,
         private formBuilder: FormBuilder,
         private red: NodeRedApiService,
-        private cdr: ChangeDetectorRef
     ) {
         super(webSocketService, currentUserService, roleService, snackbar);
     }
@@ -113,16 +98,11 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
             info: this.formBuilder.array([]),
             warning: this.formBuilder.array([]),
         });
-        const alert_array = this.alarmForm.get('alert') as FormArray;
-        const critical_array = this.alarmForm.get('critical') as FormArray;
-        const info_array = this.alarmForm.get('info') as FormArray;
-        const warning_array = this.alarmForm.get('warning') as FormArray;
-
         const formArrays = {
-            alert: alert_array,
-            critical: critical_array,
-            info: info_array,
-            warning: warning_array,
+            alert: this.alarmForm.get('alert') as FormArray,
+            critical: this.alarmForm.get('critical') as FormArray,
+            info: this.alarmForm.get('info') as FormArray,
+            warning: this.alarmForm.get('warning') as FormArray,
         };
 
         for (const [key] of Object.entries(this.data.rules)) {
@@ -148,8 +128,8 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         return this.alarmForm.get(severity) as FormArray;
     }
 
-    setDirty() {
-        this.dirty = true;
+    debug() {
+        console.log(this.getSeverityArray('critical'));
     }
 
     ngAfterViewInit(): void {
@@ -160,10 +140,62 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
         }
     }
 
-    removeEntry(index: number, severity: string) {
+    onConditionEdit(index: number, severity: string) {
+        const condition_value = this.getSeverityArray(severity).controls[index].value;
+        const condition_formgroup = this.getSeverityArray(severity).controls[index] as FormGroup;
+
+        for (const [key] of Object.entries(condition_formgroup.controls)) {
+            condition_formgroup.controls[key].clearValidators();
+        }
+
+        // operator is always required
+        condition_formgroup.controls['t'].setValidators([Validators.required]);
+
+        if (condition_value['t'] === 'regex') {
+            condition_formgroup.controls['vt'].setValidators([Validators.required]);
+            condition_formgroup.controls['case'].setValidators([Validators.required]);
+            if (condition_value['vt'] === 'num') {
+                condition_formgroup.controls['v'].setValidators([Validators.required, Validators.pattern(/^[0-9]*$/)]);
+            } else {
+                condition_formgroup.controls['v'].setValidators([Validators.required]);
+            }
+        } else if (condition_value['t'] === 'istype') {
+            condition_formgroup.controls['vt'].setValidators([Validators.required]);
+        } else if (condition_value['t'] === 'jsonata_exp') {
+            condition_formgroup.controls['v'].setValidators([Validators.required]);
+        } else if (['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'hask', 'cont'].includes(condition_value['t'])) {
+            condition_formgroup.controls['vt'].setValidators([Validators.required]);
+            if (condition_value['vt'] === 'num') {
+                condition_formgroup.controls['v'].setValidators([Validators.required, Validators.pattern(/^[0-9]*$/)]);
+            } else {
+                condition_formgroup.controls['v'].setValidators([Validators.required]);
+            }
+        } else if (condition_value['t'] === 'btwn') {
+            condition_formgroup.controls['vt'].setValidators([Validators.required]);
+            condition_formgroup.controls['v2t'].setValidators([Validators.required]);
+            if (condition_value['vt'] === 'num') {
+                condition_formgroup.controls['v'].setValidators([Validators.required, Validators.pattern(/^[0-9]*$/)]);
+            } else {
+                condition_formgroup.controls['v'].setValidators([Validators.required]);
+            }
+            if (condition_value['v2t'] === 'num') {
+                condition_formgroup.controls['v2'].setValidators([Validators.required, Validators.pattern(/^[0-9]*$/)]);
+            } else {
+                condition_formgroup.controls['v2'].setValidators([Validators.required]);
+            }
+        }
+
+        for (const [key] of Object.entries(condition_formgroup.controls)) {
+            condition_formgroup.controls[key].updateValueAndValidity();
+            condition_formgroup.controls[key].markAsTouched();
+        }
+    }
+
+    removeCondition(index: number, severity: string) {
         this.getSeverityArray(severity).removeAt(index);
-        this.setDirty();
+        this.dataSources[severity] = [...this.getSeverityArray(severity).controls];
         this.table.renderRows();
+        this.alarmForm.markAsDirty();
     }
 
     addCondition(severity: string) {
@@ -174,15 +206,13 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
                 v: [''],
                 v2t: [''],
                 v2: [''],
-                case: [''],
+                case: [false],
             })
         );
         this.snackbar.success('Added successfully!');
+        this.dataSources[severity] = [...this.getSeverityArray(severity).controls];
         this.table.renderRows();
-    }
-
-    editCondition(row, severity, index) {
-        this.data.rules[severity][index] = row;
+        this.alarmForm.markAsDirty();
     }
 
     formatOutput(formInfo) {
@@ -235,7 +265,7 @@ export class UrAlarmComponent extends BaseNode implements OnInit {
                 this.addFlag = false;
             }
         } else {
-            if (formInfo['vt'] && formInfo['v'] && formInfo['case']) {
+            if (formInfo['vt'] && formInfo['v']) {
                 fields = {
                     't': formInfo['t'],
                     'v': String(formInfo['v']),

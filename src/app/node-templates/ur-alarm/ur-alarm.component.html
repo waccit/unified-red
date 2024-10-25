@@ -6,14 +6,14 @@
             <div class="col-3">
                 <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
                     <mat-label>Name</mat-label>
-                    <input matInput [formControlName]="'name'" (change)="setDirty()" (keyup)="setDirty()" />
+                    <input matInput [formControlName]="'name'" />
                 </mat-form-field>
             </div>
 
             <div class="col-3">
                 <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
                     <mat-label>Value Type</mat-label>
-                    <select matNativeControl [formControlName]="'propertyType'" (change)="setDirty()">
+                    <select matNativeControl [formControlName]="'propertyType'">
                         <option value="msg">msg.</option>
                         <option value="flow">flow.</option>
                         <option value="global">global.</option>
@@ -26,7 +26,7 @@
             <div class="col-3">
                 <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
                     <mat-label>Value</mat-label>
-                    <input matInput [formControlName]="'property'" (change)="setDirty()" (keyup)="setDirty()" />
+                    <input matInput [formControlName]="'property'" />
                 </mat-form-field>
             </div>
         </div>
@@ -35,21 +35,21 @@
             <div class="col-2">
                 <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
                     <mat-label>On Delay</mat-label>
-                    <input matInput [formControlName]="'delayon'" (change)="setDirty()" (keyup)="setDirty()" />
+                    <input matInput [formControlName]="'delayon'" />
                 </mat-form-field>
             </div>
 
             <div class="col-2">
                 <mat-form-field class="mr-3" appearance="outline" style="width: 100%">
                     <mat-label>Off Delay</mat-label>
-                    <input matInput [formControlName]="'delayoff'" (change)="setDirty()" (keyup)="setDirty()" />
+                    <input matInput [formControlName]="'delayoff'" />
                 </mat-form-field>
             </div>
 
             <div class="col-3">
                 <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label>Process By</mat-label>
-                    <select matNativeControl [formControlName]="'checkall'" (change)="setDirty()">
+                    <select matNativeControl [formControlName]="'checkall'">
                         <option value="true">checking all rules</option>
                         <option value="false">stopping after first match</option>
                     </select>
@@ -57,37 +57,41 @@
             </div>
 
             <div class="col-2 pt-4">
-                <mat-checkbox [formControlName]="'ackreq'" (change)="live.next($event.checked); setDirty()"
-                    >Acknowledgement Required
-                </mat-checkbox>
+                <mat-checkbox [formControlName]="'ackreq'">Acknowledgement Required </mat-checkbox>
             </div>
         </div>
 
         <div class="row">
             <div class="col-12">
                 <mat-tab-group #container [id]="data.id">
+                    <!-- amount of tabs, 1 for each severity -->
                     <div *ngFor="let severity of severities">
+                        <!-- 1 form array for each severity defined in alarmForm -->
                         <ng-container [formArrayName]="severity">
                             <mat-tab>
                                 <ng-template mat-tab-label>
                                     <div class="p-l-10 font-17">{{ severity }} conditions</div>
                                 </ng-template>
-
+                                <!-- dataSources is a map of FormGroup control arrays, 1 for each severity -->
                                 <table
                                     mat-table
                                     [dataSource]="dataSources[severity]"
                                     class="mat-cell"
-                                    style="margin-bottom: 2rem"
+                                    style="margin-bottom: 2rem; width: 100%"
                                 >
                                     <ng-container matColumnDef="condition">
                                         <mat-header-cell *matHeaderCellDef>Condition</mat-header-cell>
-
                                         <mat-cell *matCellDef="let row; let i = index">
+                                            <!-- indexing severity FormArray's control array -->
                                             <div class="row" [formGroupName]="i">
                                                 <div>
                                                     <mat-form-field appearance="outline">
                                                         <mat-label>Operator</mat-label>
-                                                        <select matNativeControl formControlName="t">
+                                                        <select
+                                                            matNativeControl
+                                                            formControlName="t"
+                                                            (change)="onConditionEdit(i, severity)"
+                                                        >
                                                             <option value="neq">!=</option>
                                                             <option value="lt">&lt;</option>
                                                             <option value="eq">==</option>
@@ -127,7 +131,11 @@
                                                     <div *ngIf="row.value.t === 'istype'">
                                                         <mat-form-field appearance="outline" style="width: 100%">
                                                             <mat-label>Data Type</mat-label>
-                                                            <select matNativeControl formControlName="vt">
+                                                            <select
+                                                                matNativeControl
+                                                                formControlName="vt"
+                                                                (change)="onConditionEdit(i, severity)"
+                                                            >
                                                                 <option value="string">string</option>
                                                                 <option value="number">number</option>
                                                                 <option value="boolean">boolean</option>
@@ -164,7 +172,11 @@
                                                     >
                                                         <mat-form-field appearance="outline" style="width: 100%">
                                                             <mat-label>Data Type</mat-label>
-                                                            <select matNativeControl formControlName="vt">
+                                                            <select
+                                                                matNativeControl
+                                                                formControlName="vt"
+                                                                (change)="onConditionEdit(i, severity)"
+                                                            >
                                                                 <option value="msg">msg.</option>
                                                                 <option value="flow">flow.</option>
                                                                 <option value="global">global.</option>
@@ -179,7 +191,11 @@
                                                         <div *ngIf="row.value.t === 'btwn'">
                                                             <mat-form-field appearance="outline" style="width: 100%">
                                                                 <mat-label>Data Type 2</mat-label>
-                                                                <select matNativeControl formControlName="v2t">
+                                                                <select
+                                                                    matNativeControl
+                                                                    formControlName="v2t"
+                                                                    (change)="onConditionEdit(i, severity)"
+                                                                >
                                                                     <option value="msg">msg.</option>
                                                                     <option value="flow">flow.</option>
                                                                     <option value="global">global.</option>
@@ -228,24 +244,19 @@
                                                 </div>
 
                                                 <div class="col-2 pt-4" *ngIf="row.value.vt && row.value.t === 'regex'">
-                                                    <mat-checkbox
-                                                        formControlName="case"
-                                                        (change)="live.next($event.checked); setDirty()"
-                                                        >Ignore Case
-                                                    </mat-checkbox>
+                                                    <mat-checkbox formControlName="case">Ignore Case </mat-checkbox>
                                                 </div>
                                             </div>
                                         </mat-cell>
                                     </ng-container>
 
-                                    <!-- actions -->
                                     <ng-container matColumnDef="actions">
                                         <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
                                         <mat-cell *matCellDef="let row; let i = index">
                                             <button
                                                 mat-icon-button
                                                 class="btn-tbl-edit"
-                                                (click)="removeEntry(i, severity)"
+                                                (click)="removeCondition(i, severity)"
                                             >
                                                 <mat-icon aria-label="Remove" class="col-white">delete</mat-icon>
                                             </button>
@@ -270,16 +281,14 @@
             </div>
         </div>
 
-        <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
+        <div class="row" *ngIf="!alarmForm.pristine && (access.edit || data.accessBehavior !== 'hide')">
             <div class="col-12 mt-2 mb-2">
                 <button
                     mat-raised-button
                     color="primary"
                     class="example-full-width"
                     (click)="deploy()"
-                    [disabled]="
-                        !dirty || disabled || (!access.edit && data.accessBehavior === 'disable') || !alarmForm.valid
-                    "
+                    [disabled]="disabled || (!access.edit && data.accessBehavior === 'disable') || !alarmForm.valid"
                 >
                     Deploy
                 </button>
