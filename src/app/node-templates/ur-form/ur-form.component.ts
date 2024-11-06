@@ -38,6 +38,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
+        this.cdRef.detectChanges();
         this.data.options.forEach((opt) => {
             this.formLabels[this.evalInstanceParameters(opt.topic)] = opt.label;
         });
@@ -68,19 +69,25 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 }
             }
         }
-        const textarea = this.myTextarea.nativeElement;
-        if (data.msg.payload.health === 'down') {
-            this.styleService.applyHealthDown(textarea, this.renderer, this.cdRef);
-        } else if (data.msg.payload['class']) {
-            this.styleService.applyClass(textarea, data.msg.payload['class'], this.renderer, this.cdRef);
-        } else {
-            this.styleService.applyStyles(textarea, data, this.renderer, this.cdRef);
-        }
+        this.updateStylesAndClasses(data)
+    }
 
-        if (data.msg.payload.health !== 'down') {
-            this.styleService.setStyle(data);
+    updateStylesAndClasses(data: any) {
+        if (this.myTextarea) {
+            const textarea = this.myTextarea.nativeElement;
+            if (data.msg.payload.health === 'down') {
+                this.styleService.applyHealthDown(textarea, this.renderer, this.cdRef);
+            } else if (data.msg.payload['class']) {
+                this.styleService.applyClass(textarea, data.msg.payload['class'], this.renderer, this.cdRef);
+            } else {
+                this.styleService.applyStyles(textarea, data, this.renderer, this.cdRef);
+            }
+
+            if (data.msg.payload.health !== 'down') {
+                this.styleService.setStyle(data);
+            }
+            this.styleService.setClass(data);
         }
-        this.styleService.setClass(data);
     }
 
     valueChange(field: string, value: any, fieldType: string) {
