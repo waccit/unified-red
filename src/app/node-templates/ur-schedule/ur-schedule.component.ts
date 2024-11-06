@@ -51,7 +51,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         eventClick: this.handleEventClick.bind(this),
         eventChange: this.handleEventChange.bind(this),
         datesSet: this.renderDateRange.bind(this),
-        viewClassNames: this.saveCurrentViewType.bind(this)
+        viewClassNames: this.saveCurrentViewType.bind(this),
     };
 
     dirty = false;
@@ -75,7 +75,8 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupScheduleAccess();
-        this.calendarReady.asObservable()
+        this.calendarReady
+            .asObservable()
             .pipe(debounceTime(150), distinctUntilChanged())
             .subscribe(() => {
                 this.calendarLoadSchedules();
@@ -88,34 +89,34 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
     }
 
-    private saveCurrentViewType () {
+    private saveCurrentViewType() {
         if (this.calendarComponent) {
             let currentViewType = this.calendarComponent.getApi().currentData.currentViewType;
             localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
         }
     }
 
-    private setViewType () {
+    private setViewType() {
         // Get locally stored view type
-        let viewType = localStorage.getItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`)
-        
+        let viewType = localStorage.getItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`);
+
         // Default view if there's no stored view
         if (!viewType) {
             switch (this.data.defaultView) {
-                case "1":
-                    viewType = "dayGridMonth";
-                    break;
-                
-                case "2":
-                    viewType = "timeGridWeek";
+                case '1':
+                    viewType = 'dayGridMonth';
                     break;
 
-                case "3":
-                    viewType = "dayGridDay";
+                case '2':
+                    viewType = 'timeGridWeek';
+                    break;
+
+                case '3':
+                    viewType = 'dayGridDay';
                     break;
 
                 default:
-                    viewType = "dayGridMonth";
+                    viewType = 'dayGridMonth';
                     break;
             }
         }
@@ -165,7 +166,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             for (const weekdaySch of weekdaySchedules) {
                 try {
                     this.sortChronologically(weekdaySch);
-                    for (let j = 0; j < weekdaySch.length; j += 2) {
+                    for (let j = 0; j < weekdaySch.length; j += 1) {
                         try {
                             const start = weekdaySch[j];
                             const end = weekdaySch[j + 1];
@@ -220,7 +221,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 if (dateSchedules.hasOwnProperty(dateKey)) {
                     try {
                         this.sortChronologically(dateSchedules[dateKey]);
-                        for (let j = 0; j < dateSchedules[dateKey].length; j += 2) {
+                        for (let j = 0; j < dateSchedules[dateKey].length; j += 1) {
                             try {
                                 const start = dateSchedules[dateKey][j];
                                 const end = dateSchedules[dateKey][j + 1];
@@ -293,7 +294,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 if (holidaySchedules.hasOwnProperty(dateKey)) {
                     try {
                         this.sortChronologically(holidaySchedules[dateKey]);
-                        for (let j = 0; j < holidaySchedules[dateKey].length; j += 2) {
+                        for (let j = 0; j < holidaySchedules[dateKey].length; j += 1) {
                             try {
                                 const start = holidaySchedules[dateKey][j];
                                 const end = holidaySchedules[dateKey][j + 1];
@@ -342,7 +343,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                         weekday: data.date.getDay(),
                         value: this.data.values[0]?.name,
                         hour: data.date.getHours(),
-                        minute: data.date.getMinutes().toString(),
+                        minute: data.date.getMinutes().toString().padStart(2, '0'),
                     });
                     break;
                 case 'dayGridDay':
@@ -352,7 +353,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                         date: data.date.toString(),
                         value: this.data.values[0]?.name,
                         hour: data.date.getHours(),
-                        minute: data.date.getMinutes().toString(),
+                        minute: data.date.getMinutes().toString().padStart(2, '0'),
                     });
                     break;
             }
@@ -360,16 +361,18 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         // If the add button is pressed, set fields to default (current date)
         else {
             let now = new Date();
-            let nowDate = String(now.getMonth() + 1).concat("/").concat(String(now.getDate()));
+            let nowDate = String(now.getMonth() + 1)
+                .concat('/')
+                .concat(String(now.getDate()));
             dialogData.data.type = 'date';
             dialogData.data.events.push({
                 date: nowDate,
                 value: this.data.values[0]?.name,
                 hour: 0,
-                minute: '0'
+                minute: '00',
             });
         }
-        
+
         this.dialog
             .open(UrScheduleFormDialogComponent, { data: dialogData })
             .afterClosed()
@@ -393,10 +396,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     }
 
     private handleEventClick(data) {
-        // console.log('handleEventClick', data);
-        // console.log('this.data', this.data);
         const orig = data?.event?.extendedProps?.schedule;
-        // console.log('event extendedProps', orig);
 
         const dialogData = { type: orig.type, values: orig.values, events: [] };
         // collect all events for the selected weekday/date/holiday
@@ -429,7 +429,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             .open(UrScheduleFormDialogComponent, { data: { data: dialogData, action: 'edit' } })
             .afterClosed()
             .subscribe((result) => {
-                // console.log('edit response', result);
                 if (result) {
                     let updated = false;
 
@@ -663,16 +662,17 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         sch.hour = date.format('H');
         sch.minute = date.format('m');
         sch.pattern = date.format('0 m H * * d');
+        console.log('sch', sch);
         return sch;
     }
 
     private updateDateSchedule(sch, dateObj) {
-        console.log('dateObj', dateObj);
         console.log('sch', sch);
         const date = moment(dateObj);
         sch.date = date.format('MM/DD');
         sch.hour = date.format('H');
-        sch.minute = date.format('m');
+        sch.minute = date.format('mm');
+        // here
         sch.pattern = date.format('0 m H D M *');
         return sch;
     }
@@ -681,8 +681,8 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         const date = moment(dateObj);
         sch.hour = date.format('H');
         sch.minute = date.format('m');
-        sch._pattern = sch.pattern;
         sch.pattern = date.format('0 m H ') + sch.pattern.split(' ').slice(3).join(' ');
+        sch._pattern = '0 * * ' + sch.pattern.split(' ').slice(3).join(' ');
         return sch;
     }
 
@@ -789,9 +789,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 const interval = parser.parseExpression(test.cron, opt);
                 let nextEvent: any = interval.next();
                 let count = 0;
-                console.log(test.cron, test.desc);
                 while (nextEvent && count < 10) {
-                    console.log(nextEvent.value.toDate());
                     count++;
                     if (nextEvent.done || count >= 10) {
                         break;
