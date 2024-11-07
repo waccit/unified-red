@@ -3,68 +3,133 @@
         <div class="example-container">
             <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
             <div *ngFor="let field of data.options">
-            <mat-form-field class="example-full-width healthIndicator" appearance="outline"
-                *ngIf="field.type !== 'multiline' && field.type !== 'checkbox' && field.type !== 'select' && field.type !== 'switch'">
-                <span [title]="field.intopic" hidden></span> <!-- health -->
-                <mat-label>{{ field.label }}</mat-label>
-                <span matPrefix *ngIf="field.type === 'email'">
-                    <mat-icon class="mr-2">email</mat-icon>
-                </span>
-                <input matInput [type]="field.type" class="colorIndicator" 
-                    [value]="access.read ? precision(stripHTML(data.formValue[field.topic]), field.options.precision) : ''"
-                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
-                    (change)="valueChange(field.topic, $event.target.value, field.type)" />
-                <span matSuffix *ngIf="field.options.units">{{ field.options.units }}</span>
-            </mat-form-field>
-
-            <mat-form-field class="example-full-width healthIndicator" appearance="outline"
-                            *ngIf="field.type === 'multiline'">
-                <span [title]="field.intopic" hidden></span> <!-- health -->
-                <mat-label>{{ field.label }}</mat-label>
-                <textarea matInput #myTextarea [rows]="field.options.rows" class="colorIndicator" 
-                        [ngStyle]="this.styleService.getStyle(data)" [ngClass]="this.styleService.getClass(data)"
-                        [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
-                        (change)="valueChange(field.topic, $event.target.value, field.type)"></textarea>
-            </mat-form-field>
-            <div class="mat-form-field-flex" *ngIf="true">
-                <div class="mat-form-field-outline" [ngStyle]="dynamicStyles"></div>
-                <div class="mat-form-field-outline mat-form-field-outline-thick" [ngStyle]="dynamicStyles"></div>
-            </div>
-
-
-                <mat-form-field class="example-full-width healthIndicator" appearance="outline" *ngIf="field.type === 'select'">
-                    <span [title]="field.intopic" hidden></span> <!-- health -->
+                <mat-form-field
+                    class="example-full-width healthIndicator"
+                    appearance="outline"
+                    *ngIf="
+                        field.type !== 'multiline' &&
+                        field.type !== 'checkbox' &&
+                        field.type !== 'select' &&
+                        field.type !== 'switch'
+                    "
+                >
+                    <span [title]="field.intopic" hidden></span>
+                    <!-- health -->
                     <mat-label>{{ field.label }}</mat-label>
-                    <select matNativeControl class="colorIndicator"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
-                        (change)="valueChange(field.topic, $event.target.value, field.type)">
-                        <option *ngFor="let opt of field.options | keyvalue" [value]="opt.value || opt.key" 
-                            [selected]="access.read && (opt.value || opt.key) === stripHTML(data.formValue[field.topic])">
-                            {{ opt.key }}</option>
+                    <span matPrefix *ngIf="field.type === 'email'">
+                        <mat-icon class="mr-2">email</mat-icon>
+                    </span>
+                    <input
+                        matInput
+                        #defaultElement
+                        [type]="field.type"
+                        class="colorIndicator"
+                        [value]="
+                            access.read
+                                ? precision(stripHTML(data.formValue[field.topic]), field.options.precision)
+                                : ''
+                        "
+                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                        (change)="valueChange(field.topic, $event.target.value, field.type)"
+                    />
+                    <span matSuffix *ngIf="field.options.units">{{ field.options.units }}</span>
+                </mat-form-field>
+
+                <mat-form-field
+                    class="example-full-width healthIndicator"
+                    appearance="outline"
+                    *ngIf="field.type === 'multiline'"
+                >
+                    <span [title]="field.intopic" hidden></span>
+                    <!-- health -->
+                    <mat-label>{{ field.label }}</mat-label>
+                    <textarea
+                        matInput
+                        #multilineElement
+                        [rows]="field.options.rows"
+                        class="colorIndicator"
+                        [ngStyle]="this.styleService.getStyle(data)"
+                        [ngClass]="this.styleService.getClass(data)"
+                        [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
+                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                        (change)="valueChange(field.topic, $event.target.value, field.type)"
+                    ></textarea>
+                </mat-form-field>
+                <div class="mat-form-field-flex" *ngIf="true">
+                    <div class="mat-form-field-outline" [ngStyle]="dynamicStyles"></div>
+                    <div class="mat-form-field-outline mat-form-field-outline-thick" [ngStyle]="dynamicStyles"></div>
+                </div>
+
+                <mat-form-field
+                    class="example-full-width healthIndicator"
+                    appearance="outline"
+                    *ngIf="field.type === 'select'"
+                >
+                    <span [title]="field.intopic" hidden></span>
+                    <!-- health -->
+                    <mat-label>{{ field.label }}</mat-label>
+                    <select
+                        matNativeControl
+                        #selectElement
+                        class="colorIndicator"
+                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                        (change)="valueChange(field.topic, $event.target.value, field.type)"
+                    >
+                        <option
+                            *ngFor="let opt of field.options | keyvalue"
+                            [value]="opt.value || opt.key"
+                            [selected]="
+                                access.read && (opt.value || opt.key) === stripHTML(data.formValue[field.topic])
+                            "
+                        >
+                            {{ opt.key }}
+                        </option>
                     </select>
                 </mat-form-field>
 
-                <mat-checkbox *ngIf="field.type === 'checkbox'" class="colorIndicator"
+                <mat-checkbox
+                    *ngIf="field.type === 'checkbox'"
+                    class="colorIndicator"
                     [checked]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
-                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
-                    (change)="valueChange(field.topic, $event.checked)" class="example-margin mb-3"
-                    color="primary">{{ field.label }}</mat-checkbox>
+                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                    (change)="valueChange(field.topic, $event.checked)"
+                    class="example-margin mb-3"
+                    color="primary"
+                    >{{ field.label }}</mat-checkbox
+                >
 
-                <mat-slide-toggle *ngIf="field.type === 'switch'" class="colorIndicator"
+                <mat-slide-toggle
+                    *ngIf="field.type === 'switch'"
+                    class="colorIndicator"
                     [checked]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
-                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
-                    (change)="valueChange(field.topic, $event.checked)" class="example-margin mb-3"
-                    color="primary">{{ field.label }}</mat-slide-toggle>
+                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                    (change)="valueChange(field.topic, $event.checked)"
+                    class="example-margin mb-3"
+                    color="primary"
+                    >{{ field.label }}</mat-slide-toggle
+                >
             </div>
         </div>
         <div class="row">
             <div class="col-12">
                 <div class="example-button-row">
-                    <button mat-raised-button color="primary" (click)="submit()"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')">{{ data.submit }}</button>
-                    <button mat-raised-button color="warn" (click)="reset()" *ngIf="data.cancel"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')">{{ data.cancel }}</button>
+                    <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="submit()"
+                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                    >
+                        {{ data.submit }}
+                    </button>
+                    <button
+                        mat-raised-button
+                        color="warn"
+                        (click)="reset()"
+                        *ngIf="data.cancel"
+                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                    >
+                        {{ data.cancel }}
+                    </button>
                 </div>
             </div>
         </div>

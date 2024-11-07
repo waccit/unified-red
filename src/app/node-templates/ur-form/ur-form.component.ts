@@ -10,7 +10,6 @@ import {
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service';
-import { reduce } from 'rxjs/operators';
 @Component({
     selector: 'app-ur-form',
     templateUrl: './ur-form.component.html',
@@ -21,7 +20,13 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     private formLabels = {};
     public dynamicStyles: { [key: string]: string } = {};
 
-    @ViewChild('myTextarea') myTextarea!: ElementRef;
+    // private specialTypes = ['multiline', 'select', 'checkbox', 'switch'];
+    private specialTypes = ['multiline', 'select'];
+    private excludeTypes = ['checkbox', 'switch'];
+
+    @ViewChild('multilineElement') multilineElement!: ElementRef;
+    @ViewChild('selectElement') selectElement!: ElementRef;
+    @ViewChild('defaultElement') defaultElement!: ElementRef;
 
     constructor(
         protected renderer: Renderer2,
@@ -38,13 +43,13 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
+        this.cdRef.detectChanges();
         this.data.options.forEach((opt) => {
             this.formLabels[this.evalInstanceParameters(opt.topic)] = opt.label;
         });
         for (let field of this.data.options) {
             field.topic = this.evalInstanceParameters(field.topic);
         }
-        // this.applyStyles();
     }
 
     ngAfterContentCheck(): void {
@@ -68,13 +73,23 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                 }
             }
         }
-        const textarea = this.myTextarea.nativeElement;
+        this.updateStylesAndClasses(data);
+    }
+
+    updateStylesAndClasses(data: any) {
+        const formType = this.data.options[0].type;
+        if (this.excludeTypes.includes(formType)) {
+            return;
+        }
+        const targetElement = this.specialTypes.includes(formType)
+            ? this[`${formType}Element`].nativeElement
+            : this.defaultElement.nativeElement;
         if (data.msg.payload.health === 'down') {
-            this.styleService.applyHealthDown(textarea, this.renderer, this.cdRef);
+            this.styleService.applyHealthDown(targetElement, this.renderer, this.cdRef);
         } else if (data.msg.payload['class']) {
-            this.styleService.applyClass(textarea, data.msg.payload['class'], this.renderer, this.cdRef);
+            this.styleService.applyClass(targetElement, data.msg.payload['class'], this.renderer, this.cdRef);
         } else {
-            this.styleService.applyStyles(textarea, data, this.renderer, this.cdRef);
+            this.styleService.applyStyles(targetElement, data, this.renderer, this.cdRef);
         }
 
         if (data.msg.payload.health !== 'down') {
@@ -88,7 +103,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             value = parseFloat(value);
         }
         this.data.formValue[field] = value;
-        // this.applyStyles();
     }
 
     submit() {
