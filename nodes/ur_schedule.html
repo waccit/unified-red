@@ -260,11 +260,15 @@
                 node.weekdays = [];
                 weekdays.each(function (i) {
                     let container = $(this);
+                    const weekday = container.find('.node-input-weekday-weekday').val();
+                    const hour = container.find('.node-input-weekday-hour').val();
+                    const minute = container.find('.node-input-weekday-minute').val();
                     let event = {
-                        weekday: container.find('.node-input-weekday-weekday').val(),
+                        weekday: weekday,
                         value: container.find('.node-input-weekday-value option:selected').text(),
-                        hour: container.find('.node-input-weekday-hour').val(),
-                        minute: container.find('.node-input-weekday-minute').val(),
+                        hour: hour,
+                        minute: minute,
+                        pattern: `0 ${minute} ${hour} * * ${weekday}`,
                     };
                     node.weekdays.push(event);
                 });
@@ -274,11 +278,15 @@
                 node.dates = [];
                 dates.each(function (i) {
                     let container = $(this);
+                    const [month, date] = container.find('.node-input-date-date').val().split('/');
+                    const hour = container.find('.node-input-date-hour').val();
+                    const minute = container.find('.node-input-date-minute').val();
                     let event = {
                         date: container.find('.node-input-date-date').val(),
                         value: container.find('.node-input-date-value option:selected').text(),
-                        hour: container.find('.node-input-date-hour').val(),
-                        minute: container.find('.node-input-date-minute').val(),
+                        hour: hour,
+                        minute: minute,
+                        pattern: `0 ${minute} ${hour} ${date} ${month} *`,
                     };
                     node.dates.push(event);
                 });
@@ -428,19 +436,19 @@
     <p><b>Topic</b> is added to the message as <code>msg.topic</code>.</p>
     <p>
         <b>Payload</b> configures the node to output a single value (the current state) or
-        a time-of-day object consisting of <code>current_state</code>, <code>next_state</code>, 
+        a time-of-day object consisting of <code>current_state</code>, <code>next_state</code>,
         and <code>time_to_next_state</code> (in minutes).</p>
     <p><b>Default View</b> sets the user interface's default view to month, week, or day.</p>
     <p>
         <b>Values</b> is a list of possible commands that can be sent when a scheduled event is fired.
-        Each consisting of: 
+        Each consisting of:
         <ol>
             <li><b>Name</b>: Description of the value, e.g. <i>Off</i> or <i>On</i></li>
             <li><b>Value</b>: Text or numeric value to be sent, e.g. <i>0</i> or <i>1</i></li>
         </ol>
     </p>
     <p>
-        <b>Weekdays</b> is a list of weekly events and the time and value to be fired. Each consisting of: 
+        <b>Weekdays</b> is a list of weekly events and the time and value to be fired. Each consisting of:
         <ol>
             <li><b>Weekday</b>: Sunday through Saturday</li>
             <li><b>Value</b>: Value to be sent, e.g. <i>Off</i></li>
@@ -450,7 +458,7 @@
     </p>
     <p>
         <b>Dates</b> is a list of date events and the time and value to be fired overriding any weekday
-        schedules that occur on the same day. Each consisting of: 
+        schedules that occur on the same day. Each consisting of:
         <ol>
             <li><b>Date</b>: Day and month using mm/dd format, e.g. <i>06/01</i> for June 1st</li>
             <li><b>Value</b>: Value to be sent, e.g. <i>Off</i></li>
@@ -459,19 +467,19 @@
         </ol>
     </p>
     <p><b>Holidays</b> references a holiday configuration for holiday schedules to observe.</p>
- 
+
     <!-- TOPIC PATTERN 2021-02-07 - START -->
     <p>
         <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
         member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern
         may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
     </p>
     <!-- TOPIC PATTERN 2021-02-07 - END -->
 
     <!-- ACCESS 2021-01-17 - START -->
     <p>
-        <b>Access</b> controls the user's read/write access to this widget based on 
+        <b>Access</b> controls the user's read/write access to this widget based on
         <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
         When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
         other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
@@ -481,10 +489,9 @@
         <code>enable/disable</code> the text field.
     </p>
     <!-- ACCESS 2021-01-17 - END -->
-    
+
     <!-- <h3>References</h3>
     <ul>
         <li></li>
     </ul> -->
 </script>
-    
