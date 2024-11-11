@@ -177,11 +177,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                                 daysOfWeek: [weekday],
                                 groupId: 'weekday' + weekday, // assign each weekday to a group so changes
                                 // to a weekday are repeated every week
-                                startTime: `${start.hour.padStart(2, '0')}:${start.minute.padStart(2, '0')}:00`,
+                                startTime: `${start.hour}:${start.minute}:00`,
                                 // if no end event was defined, then set end to end of day
-                                endTime: end
-                                    ? `${end.hour.padStart(2, '0')}:${end.minute.padStart(2, '0')}:00`
-                                    : '23:59:59',
+                                endTime: end ? `${end.hour}:${end.minute}:00` : '23:59:59',
                                 classNames: ['ur-schedule-weekday-event'],
                                 schedule: { start, end, values: this.data.values, type: 'weekday' },
                             };
@@ -343,7 +341,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                         weekday: data.date.getDay(),
                         value: this.data.values[0]?.name,
                         hour: data.date.getHours(),
-                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                        minute: data.date.getMinutes().toString(),
                     });
                     break;
                 case 'dayGridDay':
@@ -353,7 +351,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                         date: data.date.toString(),
                         value: this.data.values[0]?.name,
                         hour: data.date.getHours(),
-                        minute: data.date.getMinutes().toString().padStart(2, '0'),
+                        minute: data.date.getMinutes().toString(),
                     });
                     break;
             }
@@ -534,6 +532,25 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     }
 
     deploy() {
+        function formatEvents(event: any) {
+            let tmp = event.pattern.split(' ');
+            tmp[0] = '0';
+            tmp[1] = Number(event.minute).toString();
+            tmp[2] = Number(event.hour).toString();
+            tmp[3] = isNaN(tmp[3]) ? tmp[3] : tmp[3].padStart(2, '0');
+            event.pattern = tmp.join(' ');
+            event.minute = Number(event.minute).toString();
+        }
+
+        this.data.weekdays.forEach((event) => {
+            formatEvents(event);
+        });
+        this.data.dates.forEach((event) => {
+            formatEvents(event);
+        });
+        this.data.holidays.forEach((event) => {
+            formatEvents(event);
+        });
         const baseNodeId = this.getBaseNodeId(this.data.id);
         const baseHolidayNodeId = this.getBaseNodeId(this.data.holidaysId);
         const nodesToReplace = [baseNodeId, baseHolidayNodeId];
@@ -662,12 +679,10 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         sch.hour = date.format('H');
         sch.minute = date.format('m');
         sch.pattern = date.format('0 m H * * d');
-        console.log('sch', sch);
         return sch;
     }
 
     private updateDateSchedule(sch, dateObj) {
-        console.log('sch', sch);
         const date = moment(dateObj);
         sch.date = date.format('MM/DD');
         sch.hour = date.format('H');
