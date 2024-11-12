@@ -139,6 +139,8 @@ module.exports = function (RED) {
                 }
             }
 
+            // TODO holiday of type weekly displays incorrectly in unified
+            console.log(node.cronJobs);
             for (let pattern in node.cronJobs) {
                 try {
                     // parse cron pattern
@@ -170,6 +172,9 @@ module.exports = function (RED) {
                 }
             }
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
+            sortedFireTimes.forEach((event) => {
+                console.log(new Date(event.timestamp));
+            });
 
             // determine the date which a fire will soonest occur
             let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
@@ -493,7 +498,7 @@ module.exports = function (RED) {
                     }
                 }
             }
-            
+
             // build map of all date events and index by date
             if (config.dates && config.dates.length) {
                 let dateSchedules = {};
@@ -507,76 +512,76 @@ module.exports = function (RED) {
                             dateSchedules[dateKey] = [];
                         }
                         dateSchedules[dateKey].push(dateSch);
-                        
+
                         // schedule job and "priority schedule" jobs
                         dateSch.pattern = ['1', dateSch.minute, dateSch.hour, d.getDate(), d.getMonth() + 1, '*'].join(
                             ' '
-                            );
-                            scheduleDateJob(dateSch);
-                            schedulePriorityScheduleJobs(dateSch, 'date');
-                        } catch (err) {
-                            node.error(err);
-                        }
+                        );
+                        scheduleDateJob(dateSch);
+                        schedulePriorityScheduleJobs(dateSch, 'date');
+                    } catch (err) {
+                        node.error(err);
                     }
                 }
-                
-                // build array of all weekday events and index by weekday
-                if (config.weekdays && config.weekdays.length) {
-                    let weekdaySchedules = [
-                        /* Sunday    */ [],
-                        /* Monday    */ [],
-                        /* Tuesday   */ [],
-                        /* Wednesday */ [],
-                        /* Thursday  */ [],
-                        /* Friday    */ [],
-                        /* Saturday  */ [],
-                    ];
-                    for (let weekdaySch of config.weekdays) {
-                        try {
-                            if (!isNaN(weekdaySch.weekday)) {
-                                // catalog weekday schedules to later find last (missed) event
-                                weekdaySchedules[parseInt(weekdaySch.weekday)].push(weekdaySch);
-                                
-                                // schedule job
-                                weekdaySch.pattern = [
-                                    '0',
-                                    weekdaySch.minute,
-                                    weekdaySch.hour,
-                                    '*',
-                                    '*',
-                                    weekdaySch.weekday,
-                                ].join(' ');
-                                scheduleWeekdayJob(weekdaySch);
-                            }
-                        } catch (err) {
-                            node.error(err);
+            }
+
+            // build array of all weekday events and index by weekday
+            if (config.weekdays && config.weekdays.length) {
+                let weekdaySchedules = [
+                    /* Sunday    */ [],
+                    /* Monday    */ [],
+                    /* Tuesday   */ [],
+                    /* Wednesday */ [],
+                    /* Thursday  */ [],
+                    /* Friday    */ [],
+                    /* Saturday  */ [],
+                ];
+                for (let weekdaySch of config.weekdays) {
+                    try {
+                        if (!isNaN(weekdaySch.weekday)) {
+                            // catalog weekday schedules to later find last (missed) event
+                            weekdaySchedules[parseInt(weekdaySch.weekday)].push(weekdaySch);
+
+                            // schedule job
+                            weekdaySch.pattern = [
+                                '0',
+                                weekdaySch.minute,
+                                weekdaySch.hour,
+                                '*',
+                                '*',
+                                weekdaySch.weekday,
+                            ].join(' ');
+                            scheduleWeekdayJob(weekdaySch);
                         }
+                    } catch (err) {
+                        node.error(err);
                     }
                 }
-                
-                // checks if schedule is empty or not
-                // avoids undefined errors
-                if (Object.keys(node.cronJobs).length !== 0) {
-                    let lastEvent = prevEvent();
-                    let soonestEvent = nextEvent();
-                    
-                    // update node status text
-                    node.status({
-                        text: `now: ${lastEvent.event.value} [${lastEvent.type}],  next: ${soonestEvent.event.value} [${
-                            soonestEvent.type
-                        }] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`,
-                    });
-                    
-                    // schedule recovery job: find last (missed event) and fire after 5 second delay
-                    if (lastEvent) {
-                        if (lastEvent.type === 'holiday') {
-                            scheduleHolidayJob(lastEvent.event, secondsFromNow(5));
-                            schedulePriorityScheduleJobs(lastEvent.event, 'holiday', secondsFromNow(2));
-                        } else if (lastEvent.type === 'date') {
-                            scheduleDateJob(lastEvent.event, secondsFromNow(5));
-                            schedulePriorityScheduleJobs(lastEvent.event, 'date', secondsFromNow(2));
-                        } else {
-                            fireEvent.bind({ event: lastEvent.event, type: lastEvent.type })();
+            }
+
+            // checks if schedule is empty or not
+            // avoids undefined errors
+            if (Object.keys(node.cronJobs).length !== 0) {
+                let lastEvent = prevEvent();
+                let soonestEvent = nextEvent();
+
+                // update node status text
+                node.status({
+                    text: `now: ${lastEvent.event.value} [${lastEvent.type}],  next: ${soonestEvent.event.value} [${
+                        soonestEvent.type
+                    }] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`,
+                });
+
+                // schedule recovery job: find last (missed event) and fire after 5 second delay
+                if (lastEvent) {
+                    if (lastEvent.type === 'holiday') {
+                        scheduleHolidayJob(lastEvent.event, secondsFromNow(5));
+                        schedulePriorityScheduleJobs(lastEvent.event, 'holiday', secondsFromNow(2));
+                    } else if (lastEvent.type === 'date') {
+                        scheduleDateJob(lastEvent.event, secondsFromNow(5));
+                        schedulePriorityScheduleJobs(lastEvent.event, 'date', secondsFromNow(2));
+                    } else {
+                        fireEvent.bind({ event: lastEvent.event, type: lastEvent.type })();
                     }
                 }
             }
