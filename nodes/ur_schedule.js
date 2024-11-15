@@ -13,7 +13,6 @@ module.exports = function (RED) {
         this.heartbeatTimer = null;
         this.valuePriority = { holiday: null, date: null, weekday: null };
         var node = this;
-        console.log('node', node);
 
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
@@ -122,6 +121,20 @@ module.exports = function (RED) {
             }
         };
 
+        let getEventsArray = function () {
+            let events = [];
+            Object.values(node.cronJobs).forEach((item) => {
+                if (item.event) {
+                    events.push({ ...item.event, type: item.type });
+                }
+            });
+            node.holidays.forEach((element) => {
+                element.type = 'holiday';
+            });
+            const holidays = node.holidays;
+            return events.concat(holidays);
+        };
+
         let nextEvent = function () {
             let highestPriorityToday = 4;
             let greatestPriority = 4;
@@ -132,6 +145,7 @@ module.exports = function (RED) {
             let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
             let next;
             let todayFires = todayEvents();
+            let events = getEventsArray();
 
             // determine the highest priority of any event which has or will occur today
             for (let event of todayFires) {
@@ -140,45 +154,41 @@ module.exports = function (RED) {
                 }
             }
 
-            console.log('node.cronJobs', node.cronJobs);
-            for (let pattern in node.cronJobs) {
-                // console.log('pattern', node.cronJobs[pattern].event._pattern, node.cronJobs[pattern].event._pattern);
+            for (let event of events) {
                 try {
+                    if (event.type === 'holiday') {
+                        event.pattern = correctForNthAndLastRules(event.pattern);
+                    }
                     // parse cron pattern
-                    let parsedFire = parser.parseExpression(pattern);
+                    let parsedFire = parser.parseExpression(event.pattern);
                     // iterate over next 10 fires of event
                     for (let index = 0; index < 10; index++) {
                         nextFire = parsedFire.next().toDate().getTime();
-                        // console.log('nextFire', nextFire);
                         if (nextFire > currentTime) {
-                            let cronJob = node.cronJobs[pattern];
-                            if (typeof typeNum[cronJob.type] !== 'undefined') {
+                            if (typeof typeNum[event.type] !== 'undefined') {
                                 // if fire occurs today and is not the highest priority of the day, ignore it
                                 if (
                                     isSameDay(today, new Date(nextFire)) &&
-                                    typeNum[cronJob.type] !== highestPriorityToday
+                                    typeNum[event.type] !== highestPriorityToday
                                 ) {
                                     continue;
                                 }
 
-                                // console.log(cronJob.event._pattern.split(' ')[5].indexOf('#') !== -1);
-
-                                if (cronJob.event._pattern && cronJob.event._pattern.split(' ')[5].indexOf('#') !== -1) {
-                                    if (isNthWeekday(cronJob.event._pattern.split(' ')[5], nextFire)) {
+                                if (event._pattern && event._pattern.split(' ')[5].indexOf('#') !== -1) {
+                                    if (isNthWeekday(event._pattern.split(' ')[5], nextFire)) {
                                         nextFires.push({
                                             timestamp: nextFire,
-                                            type: cronJob.type,
-                                            typeNum: typeNum[cronJob.type],
-                                            event: cronJob.event,
+                                            type: event.type,
+                                            typeNum: typeNum[event.type],
+                                            event: event,
                                         });
                                     }
-                                    // console.log(index, isNthWeekday(cronJob.event._pattern.split(' ')[5], nextFire), new Date(nextFire).toDateString());
                                 } else {
                                     nextFires.push({
                                         timestamp: nextFire,
-                                        type: cronJob.type,
-                                        typeNum: typeNum[cronJob.type],
-                                        event: cronJob.event,
+                                        type: event.type,
+                                        typeNum: typeNum[event.type],
+                                        event: event,
                                     });
                                 }
                             }
@@ -189,9 +199,6 @@ module.exports = function (RED) {
                 }
             }
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
-            // sortedFireTimes.forEach((event) => {
-            //     console.log(new Date(event.timestamp));
-            // });
 
             // determine the date which a fire will soonest occur
             let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
@@ -217,6 +224,7 @@ module.exports = function (RED) {
             let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
             let prev;
             let todayFires = todayEvents();
+            let events = getEventsArray();
 
             // determine the highest priority of any event which has or will occur today
             for (let event of todayFires) {
@@ -225,50 +233,43 @@ module.exports = function (RED) {
                 }
             }
 
-            for (let pattern in node.cronJobs) {
+            for (let event of events) {
                 try {
+                    if (event.type === 'holiday') {
+                        event.pattern = correctForNthAndLastRules(event.pattern);
+                    }
                     // parse cron pattern
-                    let parsedFire = parser.parseExpression(pattern);
+                    let parsedFire = parser.parseExpression(event.pattern);
                     // iterate over previous 10 fires of event
                     for (let index = 0; index < 10; index++) {
                         prevFire = parsedFire.prev().toDate().getTime();
                         if (prevFire < currentTime) {
-                            let cronJob = node.cronJobs[pattern];
-                            if (typeof typeNum[cronJob.type] !== 'undefined') {
+                            if (typeof typeNum[event.type] !== 'undefined') {
                                 // if fire occurs today and is not the highest priority of the day, ignore it
                                 if (
                                     isSameDay(today, new Date(prevFire)) &&
-                                    typeNum[cronJob.type] !== highestPriorityToday
+                                    typeNum[event.type] !== highestPriorityToday
                                 ) {
                                     continue;
                                 }
 
-                                if (cronJob.event._pattern && cronJob.event._pattern.split(' ')[5].indexOf('#') !== -1) {
-                                    if (isNthWeekday(cronJob.event._pattern.split(' ')[5], prevFire)) {
+                                if (event._pattern && event._pattern.split(' ')[5].indexOf('#') !== -1) {
+                                    if (isNthWeekday(event._pattern.split(' ')[5], prevFire)) {
                                         prevFires.push({
                                             timestamp: prevFire,
-                                            type: cronJob.type,
-                                            typeNum: typeNum[cronJob.type],
-                                            event: cronJob.event,
+                                            type: event.type,
+                                            typeNum: typeNum[event.type],
+                                            event: event,
                                         });
                                     }
-                                    // console.log(index, isNthWeekday(cronJob.event._pattern.split(' ')[5], nextFire), new Date(nextFire).toDateString());
                                 } else {
                                     prevFires.push({
                                         timestamp: prevFire,
-                                        type: cronJob.type,
-                                        typeNum: typeNum[cronJob.type],
-                                        event: cronJob.event,
+                                        type: event.type,
+                                        typeNum: typeNum[event.type],
+                                        event: event,
                                     });
                                 }
-
-                                
-                                // prevFires.push({
-                                //     timestamp: prevFire,
-                                //     type: cronJob.type,
-                                //     typeNum: typeNum[cronJob.type],
-                                //     event: cronJob.event,
-                                // });
                             }
                         }
                     }
@@ -298,6 +299,7 @@ module.exports = function (RED) {
             let currentTime = new Date();
             let todayFires = [];
             let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
+
             for (let pattern in node.cronJobs) {
                 try {
                     const addFire = (timestamp) => {
@@ -356,8 +358,6 @@ module.exports = function (RED) {
         };
 
         let isNthWeekday = function (weekdayExp, timestamp = Date.now()) {
-            console.log('timestamp', timestamp);
-            console.log('weekdayExp', weekdayExp);
             let [day, week] = weekdayExp.split('#');
             let weekdays = explodeRange(day).split(',');
             for (let weekday of weekdays) {
@@ -414,8 +414,10 @@ module.exports = function (RED) {
                         // if not the nth weekday, overwrite date field with today
                         pattern[5] = moment().day();
                         return pattern.join(' ');
+                    } else {
+                        pattern[5] = pattern[5].charAt(0);
                     }
-                    return null;
+                    // return null;
                 }
                 if (weekday.indexOf('L') !== -1) {
                     if (isLastWeekday(weekday)) {
