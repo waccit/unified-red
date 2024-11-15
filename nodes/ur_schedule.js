@@ -13,6 +13,7 @@ module.exports = function (RED) {
         this.heartbeatTimer = null;
         this.valuePriority = { holiday: null, date: null, weekday: null };
         var node = this;
+        console.log('node', node);
 
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
@@ -139,15 +140,16 @@ module.exports = function (RED) {
                 }
             }
 
-            // TODO holiday of type weekly displays incorrectly in unified
-            console.log(node.cronJobs);
+            console.log('node.cronJobs', node.cronJobs);
             for (let pattern in node.cronJobs) {
+                // console.log('pattern', node.cronJobs[pattern].event._pattern, node.cronJobs[pattern].event._pattern);
                 try {
                     // parse cron pattern
                     let parsedFire = parser.parseExpression(pattern);
                     // iterate over next 10 fires of event
                     for (let index = 0; index < 10; index++) {
                         nextFire = parsedFire.next().toDate().getTime();
+                        // console.log('nextFire', nextFire);
                         if (nextFire > currentTime) {
                             let cronJob = node.cronJobs[pattern];
                             if (typeof typeNum[cronJob.type] !== 'undefined') {
@@ -158,12 +160,27 @@ module.exports = function (RED) {
                                 ) {
                                     continue;
                                 }
-                                nextFires.push({
-                                    timestamp: nextFire,
-                                    type: cronJob.type,
-                                    typeNum: typeNum[cronJob.type],
-                                    event: cronJob.event,
-                                });
+
+                                // console.log(cronJob.event._pattern.split(' ')[5].indexOf('#') !== -1);
+
+                                if (cronJob.event._pattern && cronJob.event._pattern.split(' ')[5].indexOf('#') !== -1) {
+                                    if (isNthWeekday(cronJob.event._pattern.split(' ')[5], nextFire)) {
+                                        nextFires.push({
+                                            timestamp: nextFire,
+                                            type: cronJob.type,
+                                            typeNum: typeNum[cronJob.type],
+                                            event: cronJob.event,
+                                        });
+                                    }
+                                    // console.log(index, isNthWeekday(cronJob.event._pattern.split(' ')[5], nextFire), new Date(nextFire).toDateString());
+                                } else {
+                                    nextFires.push({
+                                        timestamp: nextFire,
+                                        type: cronJob.type,
+                                        typeNum: typeNum[cronJob.type],
+                                        event: cronJob.event,
+                                    });
+                                }
                             }
                         }
                     }
@@ -172,9 +189,9 @@ module.exports = function (RED) {
                 }
             }
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
-            sortedFireTimes.forEach((event) => {
-                console.log(new Date(event.timestamp));
-            });
+            // sortedFireTimes.forEach((event) => {
+            //     console.log(new Date(event.timestamp));
+            // });
 
             // determine the date which a fire will soonest occur
             let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
@@ -225,12 +242,33 @@ module.exports = function (RED) {
                                 ) {
                                     continue;
                                 }
-                                prevFires.push({
-                                    timestamp: prevFire,
-                                    type: cronJob.type,
-                                    typeNum: typeNum[cronJob.type],
-                                    event: cronJob.event,
-                                });
+
+                                if (cronJob.event._pattern && cronJob.event._pattern.split(' ')[5].indexOf('#') !== -1) {
+                                    if (isNthWeekday(cronJob.event._pattern.split(' ')[5], prevFire)) {
+                                        prevFires.push({
+                                            timestamp: prevFire,
+                                            type: cronJob.type,
+                                            typeNum: typeNum[cronJob.type],
+                                            event: cronJob.event,
+                                        });
+                                    }
+                                    // console.log(index, isNthWeekday(cronJob.event._pattern.split(' ')[5], nextFire), new Date(nextFire).toDateString());
+                                } else {
+                                    prevFires.push({
+                                        timestamp: prevFire,
+                                        type: cronJob.type,
+                                        typeNum: typeNum[cronJob.type],
+                                        event: cronJob.event,
+                                    });
+                                }
+
+                                
+                                // prevFires.push({
+                                //     timestamp: prevFire,
+                                //     type: cronJob.type,
+                                //     typeNum: typeNum[cronJob.type],
+                                //     event: cronJob.event,
+                                // });
                             }
                         }
                     }
@@ -317,16 +355,18 @@ module.exports = function (RED) {
             return range.join(',');
         };
 
-        let isNthWeekday = function (weekdayExp) {
+        let isNthWeekday = function (weekdayExp, timestamp = Date.now()) {
+            console.log('timestamp', timestamp);
+            console.log('weekdayExp', weekdayExp);
             let [day, week] = weekdayExp.split('#');
             let weekdays = explodeRange(day).split(',');
             for (let weekday of weekdays) {
                 weekday = parseInt(weekday);
-                let m = moment().date(week * 7 - 6); // go to nth week
+                let m = moment(timestamp).date(week * 7 - 6); // go to nth week
                 if (m.weekday() > weekday) {
                     m = m.add(7, 'days');
                 }
-                if (moment().diff(m.weekday(weekday), 'days') === 0) {
+                if (moment(timestamp).diff(m.weekday(weekday), 'days') === 0) {
                     return true;
                 }
             }

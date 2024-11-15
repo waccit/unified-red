@@ -79,6 +79,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             .asObservable()
             .pipe(debounceTime(150), distinctUntilChanged())
             .subscribe(() => {
+                console.log('bp 1');
                 this.calendarLoadSchedules();
                 this.setViewType();
             });
@@ -261,6 +262,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         if (this.data && this.data.holidays) {
             const holidaySchedules = {};
             for (const holidaySch of this.data.holidays) {
+                if (!this.dirty) {
+                    holidaySch.pattern = holidaySch._pattern;
+                }
                 try {
                     const interval = parser.parseExpression(holidaySch.pattern, {
                         currentDate: parserStartDate,
@@ -388,6 +392,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                             this.addHolidaySchedulesFromDialog(result);
                             break;
                     }
+                    console.log('bp 2');
                     this.calendarLoadSchedules();
                 }
             });
@@ -478,6 +483,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
                     if (updated) {
                         this.dirty = true;
+                        console.log('bp 3');
                         this.calendarLoadSchedules();
                     }
                 }
@@ -527,6 +533,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
         if (updated) {
             this.dirty = true;
+            console.log('bp 4');
             this.calendarLoadSchedules();
         }
     }
