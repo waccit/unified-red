@@ -4,6 +4,7 @@ import { PlatformLocation } from '@angular/common';
 import { WebSocketService } from './services/web-socket.service';
 import { AuthenticationService } from './services/';
 import { MenuService } from './services/menu.service';
+import { TranslateService } from '@ngx-translate/core'; //Added DI
 
 @Component({
     selector: 'app-root',
@@ -16,10 +17,13 @@ export class AppComponent {
     isLoggedIn = false;
 
     constructor(
+	    public translate: TranslateService, //Added DI
         public _router: Router,
         location: PlatformLocation,
         private authenticationService: AuthenticationService
     ) {
+	    translate.addLangs(['en','it']); //Added DI
+		translate.setDefaultLang('en'); //Added DI
         this.authenticationService.token.subscribe((token) => {
             this.isLoggedIn = !!token;
         });
@@ -37,4 +41,7 @@ export class AppComponent {
             window.scrollTo(0, 0);
         });
     }
+	switchLanguage(lang: string) { //Added DI
+	  this.translate.use(lang);
+	}
 }
