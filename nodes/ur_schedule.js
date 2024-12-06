@@ -570,7 +570,6 @@ module.exports = function (RED) {
                     // schedule recovery job: find last (missed event) and fire after 5 second delay
                     if (lastEvent) {
                         if (lastEvent.type === 'holiday') {
-                            console.log("HHIHII 2");
                             scheduleHolidayJob(lastEvent.event, secondsFromNow(5));
                             schedulePriorityScheduleJobs(lastEvent.event, 'holiday', secondsFromNow(2));
                         } else if (lastEvent.type === 'date') {
