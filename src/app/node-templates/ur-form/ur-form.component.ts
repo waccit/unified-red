@@ -6,6 +6,8 @@ import {
     ViewChild,
     ChangeDetectorRef,
     RendererStyleFlags2,
+    ViewChildren,
+    QueryList,
 } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
@@ -20,13 +22,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     private formLabels = {};
     public dynamicStyles: { [key: string]: string } = {};
 
-    // private specialTypes = ['multiline', 'select', 'checkbox', 'switch'];
-    private specialTypes = ['multiline', 'select'];
-    private excludeTypes = ['checkbox', 'switch'];
-
-    @ViewChild('multilineElement') multilineElement!: ElementRef;
-    @ViewChild('selectElement') selectElement!: ElementRef;
-    @ViewChild('defaultElement') defaultElement!: ElementRef;
+    @ViewChildren('defaultElement') defaultElements!: QueryList<ElementRef>;
 
     constructor(
         protected renderer: Renderer2,
@@ -69,7 +65,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                     }
                     this.data.formValue[field.topic] = this.formatFromData(data);
                     this.originalValues[data.msg.topic] = data.msg.payload.value;
-                    break;
                 }
             }
         }
@@ -77,25 +72,24 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     }
 
     updateStylesAndClasses(data: any) {
-        const formType = this.data.options[0].type;
-        if (this.excludeTypes.includes(formType)) {
-            return;
-        }
-        const targetElement = this.specialTypes.includes(formType)
-            ? this[`${formType}Element`].nativeElement
-            : this.defaultElement.nativeElement;
-        if (data.msg.payload.health === 'down') {
-            this.styleService.applyHealthDown(targetElement, this.renderer, this.cdRef);
-        } else if (data.msg.payload['class']) {
-            this.styleService.applyClass(targetElement, data.msg.payload['class'], this.renderer, this.cdRef);
-        } else {
-            this.styleService.applyStyles(targetElement, data, this.renderer, this.cdRef);
-        }
+        this.defaultElements.forEach((elementRef, index) => {
+            if (this.data.options[index].topic === data.msg.topic) {
+                const targetElement = elementRef.nativeElement;
 
-        if (data.msg.payload.health !== 'down') {
-            this.styleService.setStyle(data);
-        }
-        this.styleService.setClass(data);
+                if (data.msg.payload.health === 'down') {
+                    this.styleService.applyHealthDown(targetElement, this.renderer, this.cdRef);
+                } else if (data.msg.payload['class']) {
+                    this.styleService.applyClass(targetElement, data.msg.payload['class'], this.renderer, this.cdRef);
+                } else {
+                    this.styleService.applyStyles(targetElement, data, this.renderer, this.cdRef);
+                }
+
+                if (data.msg.payload.health !== 'down') {
+                    this.styleService.setStyle(data);
+                }
+                this.styleService.setClass(data);
+            }
+        });
     }
 
     valueChange(field: string, value: any, fieldType: string) {

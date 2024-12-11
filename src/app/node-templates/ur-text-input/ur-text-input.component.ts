@@ -54,7 +54,6 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                     this.formatAndSend(this.data.topic, this.label, this.valueSubject.value);
                 });
         }
-        // this.applyStyles();
     }
     ngAfterContentCheck(): void {
         this.cdRef.detectChanges();
@@ -88,7 +87,6 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
 
     change(value: string) {
         this.formatAndSend(this.data.topic, this.label, value);
-        // this.applyStyles();
     }
     valueChange(field: string, value: any, fieldType: string) {
         if (fieldType === 'number' && !isNaN(value)) {
@@ -97,6 +95,5 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
         this.data.formValue[field] = value;
 
         // Apply styles after the value changes
-        // this.applyStyles();
     }
 }
