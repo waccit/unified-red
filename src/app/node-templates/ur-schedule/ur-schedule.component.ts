@@ -79,7 +79,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             .asObservable()
             .pipe(debounceTime(150), distinctUntilChanged())
             .subscribe(() => {
-                console.log('bp 1');
                 this.calendarLoadSchedules();
                 this.setViewType();
             });
@@ -167,7 +166,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             for (const weekdaySch of weekdaySchedules) {
                 try {
                     this.sortChronologically(weekdaySch);
-                    for (let j = 0; j < weekdaySch.length; j += 1) {
+                    for (let j = 0; j < weekdaySch.length; j += 2) {
                         try {
                             const start = weekdaySch[j];
                             const end = weekdaySch[j + 1];
@@ -178,9 +177,11 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                                 daysOfWeek: [weekday],
                                 groupId: 'weekday' + weekday, // assign each weekday to a group so changes
                                 // to a weekday are repeated every week
-                                startTime: `${start.hour}:${start.minute}:00`,
+                                startTime: `${start.hour.padStart(2, '0')}:${start.minute.padStart(2, '0')}:00`,
                                 // if no end event was defined, then set end to end of day
-                                endTime: end ? `${end.hour}:${end.minute}:00` : '23:59:59',
+                                endTime: end
+                                    ? `${end.hour.padStart(2, '0')}:${end.minute.padStart(2, '0')}:00`
+                                    : '23:59:59',
                                 classNames: ['ur-schedule-weekday-event'],
                                 schedule: { start, end, values: this.data.values, type: 'weekday' },
                             };
@@ -220,7 +221,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 if (dateSchedules.hasOwnProperty(dateKey)) {
                     try {
                         this.sortChronologically(dateSchedules[dateKey]);
-                        for (let j = 0; j < dateSchedules[dateKey].length; j += 1) {
+                        for (let j = 0; j < dateSchedules[dateKey].length; j += 2) {
                             try {
                                 const start = dateSchedules[dateKey][j];
                                 const end = dateSchedules[dateKey][j + 1];
@@ -296,7 +297,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 if (holidaySchedules.hasOwnProperty(dateKey)) {
                     try {
                         this.sortChronologically(holidaySchedules[dateKey]);
-                        for (let j = 0; j < holidaySchedules[dateKey].length; j += 1) {
+                        for (let j = 0; j < holidaySchedules[dateKey].length; j += 2) {
                             try {
                                 const start = holidaySchedules[dateKey][j];
                                 const end = holidaySchedules[dateKey][j + 1];
@@ -392,7 +393,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                             this.addHolidaySchedulesFromDialog(result);
                             break;
                     }
-                    console.log('bp 2');
                     this.calendarLoadSchedules();
                 }
             });
@@ -483,7 +483,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
                     if (updated) {
                         this.dirty = true;
-                        console.log('bp 3');
                         this.calendarLoadSchedules();
                     }
                 }
@@ -533,7 +532,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
         if (updated) {
             this.dirty = true;
-            console.log('bp 4');
             this.calendarLoadSchedules();
         }
     }

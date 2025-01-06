@@ -195,7 +195,7 @@ module.exports = function (RED) {
                         }
                     }
                 } catch (err) {
-                    console.log('Error: ' + err.message);
+                    console.error('Error: ' + err.message);
                 }
             }
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
@@ -274,7 +274,7 @@ module.exports = function (RED) {
                         }
                     }
                 } catch (err) {
-                    console.log('Error: ' + err.message);
+                    console.error('Error: ' + err.message);
                 }
             }
 
@@ -321,7 +321,7 @@ module.exports = function (RED) {
                     addFire(next);
                     addFire(prev);
                 } catch (err) {
-                    console.log('Error: ' + err.message);
+                    console.error('Error: ' + err.message);
                 }
             }
             let sortedFireTimes = todayFires.sort((a, b) => b.timestamp - a.timestamp);
