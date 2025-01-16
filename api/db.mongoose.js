@@ -13,14 +13,21 @@ const connectionOptions = {
 };
 
 async function testConnection(conn) {
-    return await mongoose.connect(conn, { useNewUrlParser: true, useUnifiedTopology: true });
+    try {
+        return await mongoose.connect(conn, { useNewUrlParser: true, useUnifiedTopology: true });
+    } catch (err) {
+        console.error('Error connecting to MongoDB:', err);
+    }
 }
 
 module.exports = {
     testConnection,
     connect: function(dbConnection) {
         //'mongodb://localhost:27017/unified-red'
-        mongoose.connect(dbConnection, connectionOptions);
+        mongoose.connect(dbConnection, connectionOptions).catch((err) => {
+            console.error(err);
+        });
+
         mongoose.Promise = global.Promise;
 
         // setup associations/lookup models

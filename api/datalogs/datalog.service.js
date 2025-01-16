@@ -17,48 +17,68 @@ function maxLimit(l) {
 }
 
 async function list() {
-    return await db.distinct(Logger, 'topic');
+    try {
+        return await db.distinct(Logger, 'topic');
+    } catch (err) {
+        console.error('datalog.service.js / list():', err);
+    }
 }
 
 async function getLogger(topic) {
-    const logger = await db.findOne(Logger, { topic: topic }, 'topic units tags');
-    if (!logger) {
-        throw 'Logger not found';
+    try {
+        const logger = await db.findOne(Logger, { topic: topic }, 'topic units tags');
+        if (!logger) {
+            throw 'Logger not found';
+        }
+        return logger;
+    } catch (err) {
+        console.error('datalog.service.js / getLogger():', err);
     }
-    return logger;
 }
 
 async function createLogger(param) {
-    let logger = await db.findOne(Logger, { topic: param.topic });
-    if (logger) {
+    try {
+        let logger = await db.findOne(Logger, { topic: param.topic });
+        if (logger) {
+            return logger;
+        }
+        if (!param.maxDays || param.maxDays < 1) {
+            param.maxDays = 1;
+        }
+        logger = new Logger(param);
+        await logger.save();
         return logger;
+    } catch (err) {
+        console.error('datalog.service.js / createLogger():', err);
     }
-    if (!param.maxDays || param.maxDays < 1) {
-        param.maxDays = 1;
-    }
-    logger = new Logger(param);
-    await logger.save();
-    return logger;
 }
 
 async function configureLogger(param) {
-    const logger = await createLogger(param);
-    if (param.newTopic) {
-        param.topic = param.newTopic;
-        delete param.newTopic;
+    try {
+        const logger = await createLogger(param);
+        if (param.newTopic) {
+            param.topic = param.newTopic;
+            delete param.newTopic;
+        }
+        if (param.hasOwnProperty('maxDays') && param.maxDays < 1) {
+            param.maxDays = 1;
+        }
+        Object.assign(logger, param);
+        await logger.save();
+        return logger;
+    } catch (err) {
+        console.error('datalog.service.js / configureLogger():', err);
     }
-    if (param.hasOwnProperty('maxDays') && param.maxDays < 1) {
-        param.maxDays = 1;
-    }
-    Object.assign(logger, param);
-    await logger.save();
-    return logger;
 }
 
 async function deleteLogger(topic) {
-    const logger = await db.findOneAndDelete(Logger, { topic: topic });
-    if (logger) {
-        db.deleteMany(Datalog, { logger: logger._id });
+    try {
+        const logger = await db.findOneAndDelete(Logger, { topic: topic });
+        if (logger) {
+            db.deleteMany(Datalog, { logger: logger._id });
+        }
+    } catch (err) {
+        console.error('datalog.service.js / deleteLogger():', err);
     }
 }
 

@@ -7,39 +7,51 @@ module.exports = {
 };
 
 async function init() {
-    if (!(await db.findOne(Role))) {
-        let defaultRoles = [
-            { level: 1, name: 'Viewer' },
-            { level: 2, name: 'Limited Operator' },
-            { level: 3, name: 'Standard Operator' },
-            { level: 4, name: 'IT Operator' },
-            { level: 5, name: 'Security Operator' },
-            // { level: 6, name: 'Future / Reserved' },
-            // { level: 7, name: 'Future / Reserved' },
-            // { level: 8, name: 'Future / Reserved' },
-            { level: 9, name: 'Tech' },
-            { level: 10, name: 'Admin' },
-        ];
-        for (var roleParam of defaultRoles) {
-            await new Role(roleParam).save();
+    try {
+        if (!(await db.findOne(Role))) {
+            let defaultRoles = [
+                { level: 1, name: 'Viewer' },
+                { level: 2, name: 'Limited Operator' },
+                { level: 3, name: 'Standard Operator' },
+                { level: 4, name: 'IT Operator' },
+                { level: 5, name: 'Security Operator' },
+                // { level: 6, name: 'Future / Reserved' },
+                // { level: 7, name: 'Future / Reserved' },
+                // { level: 8, name: 'Future / Reserved' },
+                { level: 9, name: 'Tech' },
+                { level: 10, name: 'Admin' },
+            ];
+            for (var roleParam of defaultRoles) {
+                await new Role(roleParam).save();
+            }
         }
+    } catch (err) {
+        console.error('role.service.js / init():', err);
     }
 }
 init();
 
 async function getAll() {
-    return await db.find(Role);
+    try {
+        return await db.find(Role);
+    } catch (err) {
+        console.error('role.service.js / getAll():', err);
+    }
 }
 
 async function update(level, roleParam) {
-    const role = await db.findOne(Role, { level: level });
-    if (!role) {
-        throw 'Role not found';
+    try {
+        const role = await db.findOne(Role, { level: level });
+        if (!role) {
+            throw 'Role not found';
+        }
+        if (role.name !== roleParam.name && (await db.findOne(Role, { name: roleParam.name }))) {
+            throw 'Role "' + roleParam.name + '" is already taken';
+        }
+        role.name = roleParam.name;
+        await role.save();
+        return role;
+    } catch (err) {
+        console.error('role.service.js / update():', err);
     }
-    if (role.name !== roleParam.name && (await db.findOne(Role, { name: roleParam.name }))) {
-        throw 'Role "' + roleParam.name + '" is already taken';
-    }
-    role.name = roleParam.name;
-    await role.save();
-    return role;
 }
