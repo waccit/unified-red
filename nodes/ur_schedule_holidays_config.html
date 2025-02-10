@@ -103,12 +103,14 @@
             node.events = [];
             events.each(function (i) {
                 let container = $(this);
+                const minute = container.find(".node-config-input-event-minute").val();
+                const hour = container.find(".node-config-input-event-hour").val();
                 let event = {
                     name: container.find(".node-config-input-event-name").val(),
-                    pattern: "0 * * " + container.find(".node-config-input-event-pattern").val(),
                     value: container.find(".node-config-input-event-value option:selected").text(),
-                    hour: container.find(".node-config-input-event-hour").val(),
-                    minute: container.find(".node-config-input-event-minute").val()
+                    hour: hour,
+                    minute: minute,
+                    pattern: "0 * * " + container.find(".node-config-input-event-pattern").val(),
                 };
                 node.events.push(event);
             });
