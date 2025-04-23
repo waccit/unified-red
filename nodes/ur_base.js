@@ -140,6 +140,21 @@ module.exports = function (RED) {
         });
     });
 
+    RED.httpAdmin.get('/ur_base/js/*', function (req, res) {
+        var filename = path.join(__dirname, '../dist/assets/js', req.params[0]);
+        res.sendFile(filename, function (err) {
+            if (err) {
+                if (node) {
+                    node.warn(
+                        filename + ' not found. Maybe running in dev mode.'
+                    );
+                } else {
+                    console.log('ur_base - error:', err);
+                }
+            }
+        });
+    });
+
     let staticRoot = path.join(__dirname, '../static/');
     const storage = multer.diskStorage({
         destination: function (req, file, callback) {
