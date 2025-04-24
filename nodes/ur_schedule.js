@@ -470,7 +470,7 @@ module.exports = function (RED) {
                 sch.pattern,
                 time ? time.getHours() : 0,
                 time ? time.getMinutes() : 0,
-                time ? time.getSeconds() : 0
+                time ? time.getSeconds() : 1
             );
             let startJob = cron.schedule(
                 startPattern,

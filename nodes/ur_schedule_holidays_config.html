@@ -110,7 +110,7 @@
                     value: container.find(".node-config-input-event-value option:selected").text(),
                     hour: hour,
                     minute: minute,
-                    pattern: "0 * * " + container.find(".node-config-input-event-pattern").val(),
+                    pattern: `0 ${minute} ${hour} ` + container.find(".node-config-input-event-pattern").val(),
                 };
                 node.events.push(event);
             });
