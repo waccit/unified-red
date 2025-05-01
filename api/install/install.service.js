@@ -107,7 +107,7 @@ async function install(setup) {
             log.info('Self-installing Unified-RED static folder path on ' + settings.settingsFile);
             let defaultStaticPath = path.resolve(__dirname + '/../../static/').replace(/\\/g, '\\\\');
             let staticPath = setup.staticPath || defaultStaticPath;
-            data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2 //unified-red');
+            data = data.replace(/(\/\/[\s]*)?(httpStatic[\s]*\:.*\n)/i, 'httpStatic: "' + staticPath + '",\n// $2 //unified-red\n');
         }
         if (!settings.httpAdminRoot || settings.httpAdminRoot !== '/admin/') {
             log.info('Setting Node-RED httpAdminRoot path on ' + settings.settingsFile);
