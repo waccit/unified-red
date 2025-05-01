@@ -6,11 +6,12 @@ import {
     ViewChild,
     ChangeDetectorRef,
     RendererStyleFlags2,
+    ViewChildren,
+    QueryList,
 } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service';
-import { reduce } from 'rxjs/operators';
 @Component({
     selector: 'app-ur-form',
     templateUrl: './ur-form.component.html',
@@ -21,7 +22,7 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     private formLabels = {};
     public dynamicStyles: { [key: string]: string } = {};
 
-    @ViewChild('myTextarea') myTextarea!: ElementRef;
+    @ViewChildren('defaultElement') defaultElements!: QueryList<ElementRef>;
 
     constructor(
         protected renderer: Renderer2,
@@ -38,13 +39,13 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
+        this.cdRef.detectChanges();
         this.data.options.forEach((opt) => {
             this.formLabels[this.evalInstanceParameters(opt.topic)] = opt.label;
         });
         for (let field of this.data.options) {
             field.topic = this.evalInstanceParameters(field.topic);
         }
-        // this.applyStyles();
     }
 
     ngAfterContentCheck(): void {
@@ -64,23 +65,31 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
                     }
                     this.data.formValue[field.topic] = this.formatFromData(data);
                     this.originalValues[data.msg.topic] = data.msg.payload.value;
-                    break;
                 }
             }
         }
-        const textarea = this.myTextarea.nativeElement;
-        if (data.msg.payload.health === 'down') {
-            this.styleService.applyHealthDown(textarea, this.renderer, this.cdRef);
-        } else if (data.msg.payload['class']) {
-            this.styleService.applyClass(textarea, data.msg.payload['class'], this.renderer, this.cdRef);
-        } else {
-            this.styleService.applyStyles(textarea, data, this.renderer, this.cdRef);
-        }
+        this.updateStylesAndClasses(data);
+    }
 
-        if (data.msg.payload.health !== 'down') {
-            this.styleService.setStyle(data);
-        }
-        this.styleService.setClass(data);
+    updateStylesAndClasses(data: any) {
+        this.defaultElements.forEach((elementRef, index) => {
+            if (this.data.options[index].topic === data.msg.topic) {
+                const targetElement = elementRef.nativeElement;
+
+                if (data.msg.payload.health === 'down') {
+                    this.styleService.applyHealthDown(targetElement, this.renderer, this.cdRef);
+                } else if (data.msg.payload['class']) {
+                    this.styleService.applyClass(targetElement, data.msg.payload['class'], this.renderer, this.cdRef);
+                } else {
+                    this.styleService.applyStyles(targetElement, data, this.renderer, this.cdRef);
+                }
+
+                if (data.msg.payload.health !== 'down') {
+                    this.styleService.setStyle(data);
+                }
+                this.styleService.setClass(data);
+            }
+        });
     }
 
     valueChange(field: string, value: any, fieldType: string) {
@@ -88,7 +97,6 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
             value = parseFloat(value);
         }
         this.data.formValue[field] = value;
-        // this.applyStyles();
     }
 
     submit() {
