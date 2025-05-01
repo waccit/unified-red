@@ -407,7 +407,7 @@ module.exports = function (RED) {
                         pattern[3] = moment().date();
                         return pattern.join(' ');
                     }
-                    return null;
+                    return schPattern;
                 }
                 if (weekday.indexOf('#') !== -1) {
                     if (isNthWeekday(weekday)) {
@@ -417,7 +417,7 @@ module.exports = function (RED) {
                     } else {
                         pattern[5] = pattern[5].charAt(0);
                     }
-                    // return null;
+                    return schPattern;
                 }
                 if (weekday.indexOf('L') !== -1) {
                     if (isLastWeekday(weekday)) {
@@ -425,7 +425,7 @@ module.exports = function (RED) {
                         pattern[5] = moment().day();
                         return pattern.join(' ');
                     }
-                    return null;
+                    return schPattern;
                 }
             }
             return schPattern;
@@ -437,43 +437,70 @@ module.exports = function (RED) {
             if (!correctedPattern) {
                 return;
             }
-            sch.pattern = correctedPattern;
+            // sch.pattern = correctedPattern;
 
             if (RED.settings.verbose) {
                 node.log('scheduleHolidayJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
             if (time) {
-                sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
+                correctedPattern = setCronTime(correctedPattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'holiday' }), {
-                recoverMissedExecutions: true,
-            });
+            let job = cron.schedule(
+                correctedPattern,
+                fireEvent.bind({ event: { ...sch, pattern: correctedPattern }, type: 'holiday' }),
+                {
+                    recoverMissedExecutions: true,
+                }
+            );
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'holiday' };
         };
 
         let scheduleDateJob = function (sch, time) {
+            let temporary_pattern = sch.pattern;
+
             if (RED.settings.verbose) {
                 node.log('scheduleDateJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
+            // Separate pattern here? modifying the real pattern
             if (time) {
-                sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
+                temporary_pattern = setCronTime(
+                    temporary_pattern,
+                    time.getHours(),
+                    time.getMinutes(),
+                    time.getSeconds()
+                );
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'date' }), {
-                recoverMissedExecutions: true,
-            });
+            let job = cron.schedule(
+                temporary_pattern,
+                fireEvent.bind({ event: { ...sch, pattern: temporary_pattern }, type: 'date' }),
+                {
+                    recoverMissedExecutions: true,
+                }
+            );
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'date' };
         };
 
         let scheduleWeekdayJob = function (sch, time) {
+            let temporary_pattern = sch.pattern;
+
             if (RED.settings.verbose) {
                 node.log('scheduleWeekdayJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
             if (time) {
-                sch.pattern = setCronTime(sch.pattern, time.getHours(), time.getMinutes(), time.getSeconds());
+                temporary_pattern = setCronTime(
+                    temporary_pattern,
+                    time.getHours(),
+                    time.getMinutes(),
+                    time.getSeconds()
+                );
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'weekday' }), {
-                recoverMissedExecutions: true,
-            });
+            let job = cron.schedule(
+                temporary_pattern,
+                fireEvent.bind({ event: { ...sch, pattern: temporary_pattern }, type: 'weekday' }),
+                {
+                    recoverMissedExecutions: true,
+                }
+            );
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'weekday' };
         };
 
@@ -483,18 +510,22 @@ module.exports = function (RED) {
             if (!correctedPattern) {
                 return;
             }
-            sch.pattern = correctedPattern;
+            // sch.pattern = correctedPattern;
 
             // activate date or holiday schedule at beginning of day (unless time overridden)
             let startPattern = setCronTime(
                 sch.pattern,
                 time ? time.getHours() : 0,
                 time ? time.getMinutes() : 0,
-                time ? time.getSeconds() : 0
+                time ? time.getSeconds() : 1
             );
-            let startJob = cron.schedule(startPattern, setPrioritySchedule.bind({ event: sch, type: type }), {
-                recoverMissedExecutions: true,
-            });
+            let startJob = cron.schedule(
+                startPattern,
+                setPrioritySchedule.bind({ event: { ...sch, pattern: correctedPattern }, type: type }),
+                {
+                    recoverMissedExecutions: true,
+                }
+            );
             node.cronJobs[startPattern] = { job: startJob, event: sch, type: 'background' };
             // deactivate date or holiday schedule at end of day
             let endPattern = setCronTime(sch.pattern, 23, 59, 59);
@@ -556,7 +587,8 @@ module.exports = function (RED) {
                         dateSchedules[dateKey].push(dateSch);
 
                         // schedule job and "priority schedule" jobs
-                        dateSch.pattern = ['1', dateSch.minute, dateSch.hour, d.getDate(), d.getMonth() + 1, '*'].join(
+                        // TODO HERE
+                        dateSch.pattern = ['0', dateSch.minute, dateSch.hour, d.getDate(), d.getMonth() + 1, '*'].join(
                             ' '
                         );
                         scheduleDateJob(dateSch);
@@ -639,7 +671,9 @@ module.exports = function (RED) {
         buildSchedules();
         // rebuild schedules everyday at midnight
         if (!buildJob) {
-            buildJob = cron.schedule('0 0 0 * * *', buildSchedules, { recoverMissedExecutions: true });
+            buildJob = cron.schedule('0 0 0 * * *', buildSchedules, {
+                recoverMissedExecutions: true,
+            });
         }
 
         this.config = {

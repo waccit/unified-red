@@ -103,16 +103,14 @@
             node.events = [];
             events.each(function (i) {
                 let container = $(this);
-                const hour = container.find(".node-config-input-event-hour").val();
                 const minute = container.find(".node-config-input-event-minute").val();
-                const pattern = container.find(".node-config-input-event-pattern").val();
+                const hour = container.find(".node-config-input-event-hour").val();
                 let event = {
                     name: container.find(".node-config-input-event-name").val(),
                     value: container.find(".node-config-input-event-value option:selected").text(),
                     hour: hour,
                     minute: minute,
-                    pattern: `0 ${minute} ${hour} ${pattern}`,
-                    _pattern: `0 * * ${pattern}`,
+                    pattern: `0 ${minute} ${hour} ` + container.find(".node-config-input-event-pattern").val(),
                 };
                 node.events.push(event);
             });

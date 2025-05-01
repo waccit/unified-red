@@ -260,15 +260,15 @@
                 node.weekdays = [];
                 weekdays.each(function (i) {
                     let container = $(this);
-                    const weekday = container.find('.node-input-weekday-weekday').val();
                     const hour = container.find('.node-input-weekday-hour').val();
                     const minute = container.find('.node-input-weekday-minute').val();
+                    const weekday = container.find('.node-input-weekday-weekday').val();
                     let event = {
                         weekday: weekday,
                         value: container.find('.node-input-weekday-value option:selected').text(),
                         hour: hour,
                         minute: minute,
-                        pattern: `0 ${minute} ${hour} * * ${weekday}`,
+                        pattern: `0 ${minute} ${hour} * * ${container.find('.node-input-weekday-weekday').val()}`,
                     };
                     node.weekdays.push(event);
                 });
@@ -278,15 +278,15 @@
                 node.dates = [];
                 dates.each(function (i) {
                     let container = $(this);
-                    const [month, date] = container.find('.node-input-date-date').val().split('/');
                     const hour = container.find('.node-input-date-hour').val();
                     const minute = container.find('.node-input-date-minute').val();
+                    const date = container.find('.node-input-date-date').val();
                     let event = {
-                        date: container.find('.node-input-date-date').val(),
+                        date: date,
                         value: container.find('.node-input-date-value option:selected').text(),
                         hour: hour,
                         minute: minute,
-                        pattern: `0 ${minute} ${hour} ${date} ${month} *`,
+                        pattern: `0 ${minute} ${hour} ${Number(date.split("/")[1])} ${Number(date.split("/")[0])} *`,
                     };
                     node.dates.push(event);
                 });

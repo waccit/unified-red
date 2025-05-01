@@ -1,5 +1,4 @@
 import { Injectable, Renderer2 } from '@angular/core';
-import { render } from '@fullcalendar/common';
 import { ChangeDetectorRef } from '@angular/core';
 
 @Injectable({
@@ -9,10 +8,8 @@ export class StyleService {
     private style: object = {};
     private renderer: Renderer2;
     //Classes set here below
-    private classestoRemove = ['health-down', 'warning', 'info', 'disabled', 'success','danger']
-    constructor() {
-        cdRef: ChangeDetectorRef;
-    }
+    private classestoRemove = ['health-down', 'warning', 'info', 'disabled', 'success', 'danger'];
+    constructor() {}
 
     resetStyles() {
         this.style = {};
@@ -39,6 +36,12 @@ export class StyleService {
                     this.style[data.id][pointName] = {};
                 }
                 this.style[data.id][pointName]['css'] = data.msg.payload.css;
+            }
+            if (data.msg.topic) {
+                if (!(data.msg.topic in this.style[data.id])) {
+                    this.style[data.id][data.msg.topic] = {};
+                }
+                this.style[data.id][data.msg.topic]['css'] = data.msg.payload.css;
             } else {
                 this.style[data.id]['css'] = data.msg.payload.css;
             }
@@ -66,6 +69,13 @@ export class StyleService {
                     this.style[data.id][pointName] = {};
                 }
                 this.style[data.id][pointName]['class'] = 'health-down';
+            }
+
+            if (data.msg.topic) {
+                if (!(data.msg.topic in this.style[data.id])) {
+                    this.style[data.id][data.msg.topic] = {};
+                }
+                this.style[data.id][data.msg.topic]['class'] = 'health-down';
             } else {
                 this.style[data.id]['class'] = 'health-down';
             }
@@ -75,6 +85,13 @@ export class StyleService {
                     this.style[data.id][pointName] = {};
                 }
                 this.style[data.id][pointName]['class'] = data.msg.payload['class'];
+            }
+
+            if (data.msg.topic) {
+                if (!(data.msg.topic in this.style[data.id])) {
+                    this.style[data.id][data.msg.topic] = {};
+                }
+                this.style[data.id][data.msg.topic]['class'] = data.msg.payload['class'];
             } else {
                 this.style[data.id]['class'] = data.msg.payload['class'];
             }
