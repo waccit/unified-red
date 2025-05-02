@@ -7,7 +7,6 @@ import { ChangeDetectorRef } from '@angular/core';
 export class StyleService {
     private style: object = {};
     private renderer: Renderer2;
-    //Classes set here below
     private classestoRemove = ['health-down', 'warning', 'info', 'disabled', 'success', 'danger'];
     constructor() {}
 
@@ -16,86 +15,39 @@ export class StyleService {
     }
 
     getStyle(data: any, topic?: any) {
-        if (topic) {
-            return this.style?.[data.id]?.[topic]?.['css'];
-        } else {
-            return this.style?.[data.id]?.['css'];
-        }
+        return topic ? this.style?.[data.id]?.[topic]?.['css'] : this.style?.[data.id]?.['css'];
     }
 
     setStyle(data: any, pointName?: any) {
-        if (data.msg.payload.health !== 'down') {
-            if (this.style === null) {
-                this.style = {};
-            }
-            if (!(data.id in this.style)) {
-                this.style[data.id] = {};
-            }
-            if (pointName) {
-                if (!(pointName in this.style[data.id])) {
-                    this.style[data.id][pointName] = {};
-                }
-                this.style[data.id][pointName]['css'] = data.msg.payload.css;
-            }
-            if (data.msg.topic) {
-                if (!(data.msg.topic in this.style[data.id])) {
-                    this.style[data.id][data.msg.topic] = {};
-                }
-                this.style[data.id][data.msg.topic]['css'] = data.msg.payload.css;
-            } else {
-                this.style[data.id]['css'] = data.msg.payload.css;
-            }
+        if (data.msg.payload.health === 'down') return;
+        this.style[data.id] = this.style[data.id] || {};
+        if (pointName) {
+            this.style[data.id][pointName] = this.style[data.id][pointName] || {};
+            this.style[data.id][pointName]['css'] = data.msg.payload.css;
         }
+        if (data.msg.topic) {
+            this.style[data.id][data.msg.topic] = this.style[data.id][data.msg.topic] || {};
+            this.style[data.id][data.msg.topic]['css'] = data.msg.payload.css;
+        }
+        this.style[data.id]['css'] = data.msg.payload.css;
     }
 
     getClass(data: any, topic?: any) {
-        if (topic) {
-            return this.style?.[data.id]?.[topic]?.['class'];
-        } else {
-            return this.style?.[data.id]?.['class'];
-        }
+        return topic ? this.style?.[data.id]?.[topic]?.['class'] : this.style?.[data.id]?.['class'];
     }
 
     setClass(data: any, pointName?: any) {
-        if (this.style === null) {
-            this.style = {};
+        this.style[data.id] = this.style[data.id] || {};
+        const className = data.msg.payload.health === 'down' ? 'health-down' : data.msg.payload.class;
+        if (pointName) {
+            this.style[data.id][pointName] = this.style[data.id][pointName] || {};
+            this.style[data.id][pointName].class = className;
         }
-        if (!(data.id in this.style)) {
-            this.style[data.id] = {};
+        if (data.msg.topic) {
+            this.style[data.id][data.msg.topic] = this.style[data.id][data.msg.topic] || {};
+            this.style[data.id][data.msg.topic].class = className;
         }
-        if (data.msg.payload.health === 'down') {
-            if (pointName) {
-                if (!(pointName in this.style[data.id])) {
-                    this.style[data.id][pointName] = {};
-                }
-                this.style[data.id][pointName]['class'] = 'health-down';
-            }
-
-            if (data.msg.topic) {
-                if (!(data.msg.topic in this.style[data.id])) {
-                    this.style[data.id][data.msg.topic] = {};
-                }
-                this.style[data.id][data.msg.topic]['class'] = 'health-down';
-            } else {
-                this.style[data.id]['class'] = 'health-down';
-            }
-        } else {
-            if (pointName) {
-                if (!(pointName in this.style[data.id])) {
-                    this.style[data.id][pointName] = {};
-                }
-                this.style[data.id][pointName]['class'] = data.msg.payload['class'];
-            }
-
-            if (data.msg.topic) {
-                if (!(data.msg.topic in this.style[data.id])) {
-                    this.style[data.id][data.msg.topic] = {};
-                }
-                this.style[data.id][data.msg.topic]['class'] = data.msg.payload['class'];
-            } else {
-                this.style[data.id]['class'] = data.msg.payload['class'];
-            }
-        }
+        this.style[data.id].class = className;
     }
 
     applyStyles(element: HTMLElement, data: any, renderer: Renderer2, cdRef: ChangeDetectorRef) {
