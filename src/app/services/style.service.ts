@@ -29,7 +29,6 @@ export class StyleService {
             this.style[data.id][data.msg.topic].css = data.msg.payload.css;
         }
         this.style[data.id].default.css = data.msg.payload.css;
-        console.log('this.style', this.style);
     }
 
     getClass(data: any, topic?: any) {
@@ -48,7 +47,6 @@ export class StyleService {
             this.style[data.id][data.msg.topic].class = className;
         }
         this.style[data.id].default.class = className;
-        console.log('this.style', this.style);
     }
 
     applyStyles(element: HTMLElement, data: any, renderer: Renderer2, cdRef: ChangeDetectorRef) {
