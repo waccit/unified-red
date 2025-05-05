@@ -649,11 +649,11 @@ module.exports = function (RED) {
                 // schedule recovery job: find last (missed event) and fire after 5 second delay
                 if (lastEvent) {
                     if (lastEvent.type === 'holiday') {
-                        scheduleHolidayJob(lastEvent.event, secondsFromNow(5));
-                        schedulePriorityScheduleJobs(lastEvent.event, 'holiday', secondsFromNow(2));
+                        scheduleHolidayJob(lastEvent.event, secondsFromNow(1));
+                        schedulePriorityScheduleJobs(lastEvent.event, 'holiday', secondsFromNow(1));
                     } else if (lastEvent.type === 'date') {
-                        scheduleDateJob(lastEvent.event, secondsFromNow(5));
-                        schedulePriorityScheduleJobs(lastEvent.event, 'date', secondsFromNow(2));
+                        scheduleDateJob(lastEvent.event, secondsFromNow(1));
+                        schedulePriorityScheduleJobs(lastEvent.event, 'date', secondsFromNow(1));
                     } else {
                         fireEvent.bind({ event: lastEvent.event, type: lastEvent.type })();
                     }
