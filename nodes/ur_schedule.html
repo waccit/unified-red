@@ -286,7 +286,7 @@
                         value: container.find('.node-input-date-value option:selected').text(),
                         hour: hour,
                         minute: minute,
-                        pattern: `0 ${minute} ${hour} ${Number(date.split("/")[1])} ${Number(date.split("/")[0])} *`,
+                        pattern: `0 ${minute} ${hour} ${date.split("/")[1]} ${Number(date.split("/")[0])} *`,
                     };
                     node.dates.push(event);
                 });
