@@ -412,7 +412,7 @@ module.exports = function (RED) {
                 if (weekday.indexOf('#') !== -1) {
                     if (isNthWeekday(weekday)) {
                         // if not the nth weekday, overwrite date field with today
-                        // pattern[5] = moment().day();
+                        pattern[5] = moment().day();
                         return pattern.join(' ');
                     } else {
                         pattern[5] = pattern[5].charAt(0);
