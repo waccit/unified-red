@@ -23,8 +23,7 @@ export class StyleService {
         if (pointName) {
             this.style[data.id][pointName] = this.style[data.id][pointName] || {};
             this.style[data.id][pointName].css = data.msg.payload.css;
-        }
-        if (data.msg.topic) {
+        } else if (data.msg.topic) {
             this.style[data.id][data.msg.topic] = this.style[data.id][data.msg.topic] || {};
             this.style[data.id][data.msg.topic].css = data.msg.payload.css;
         }
@@ -41,8 +40,7 @@ export class StyleService {
         if (pointName) {
             this.style[data.id][pointName] = this.style[data.id][pointName] || {};
             this.style[data.id][pointName].class = className;
-        }
-        if (data.msg.topic) {
+        } else if (data.msg.topic) {
             this.style[data.id][data.msg.topic] = this.style[data.id][data.msg.topic] || {};
             this.style[data.id][data.msg.topic].class = className;
         }
