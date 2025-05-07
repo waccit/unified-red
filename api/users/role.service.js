@@ -26,32 +26,24 @@ async function init() {
             }
         }
     } catch (err) {
-        console.error('role.service.js / init():', err);
+        console.log('Error while initializing: ', err);
     }
 }
 init();
 
 async function getAll() {
-    try {
-        return await db.find(Role);
-    } catch (err) {
-        console.error('role.service.js / getAll():', err);
-    }
+    return await db.find(Role);
 }
 
 async function update(level, roleParam) {
-    try {
-        const role = await db.findOne(Role, { level: level });
-        if (!role) {
-            throw 'Role not found';
-        }
-        if (role.name !== roleParam.name && (await db.findOne(Role, { name: roleParam.name }))) {
-            throw 'Role "' + roleParam.name + '" is already taken';
-        }
-        role.name = roleParam.name;
-        await role.save();
-        return role;
-    } catch (err) {
-        console.error('role.service.js / update():', err);
+    const role = await db.findOne(Role, { level: level });
+    if (!role) {
+        throw 'Role not found';
     }
+    if (role.name !== roleParam.name && (await db.findOne(Role, { name: roleParam.name }))) {
+        throw 'Role "' + roleParam.name + '" is already taken';
+    }
+    role.name = roleParam.name;
+    await role.save();
+    return role;
 }

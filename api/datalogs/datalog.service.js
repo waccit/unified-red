@@ -17,68 +17,48 @@ function maxLimit(l) {
 }
 
 async function list() {
-    try {
-        return await db.distinct(Logger, 'topic');
-    } catch (err) {
-        console.error('datalog.service.js / list():', err);
-    }
+    return await db.distinct(Logger, 'topic');
 }
 
 async function getLogger(topic) {
-    try {
-        const logger = await db.findOne(Logger, { topic: topic }, 'topic units tags');
-        if (!logger) {
-            throw 'Logger not found';
-        }
-        return logger;
-    } catch (err) {
-        console.error('datalog.service.js / getLogger():', err);
+    const logger = await db.findOne(Logger, { topic: topic }, 'topic units tags');
+    if (!logger) {
+        throw 'Logger not found';
     }
+    return logger;
 }
 
 async function createLogger(param) {
-    try {
-        let logger = await db.findOne(Logger, { topic: param.topic });
-        if (logger) {
-            return logger;
-        }
-        if (!param.maxDays || param.maxDays < 1) {
-            param.maxDays = 1;
-        }
-        logger = new Logger(param);
-        await logger.save();
+    let logger = await db.findOne(Logger, { topic: param.topic });
+    if (logger) {
         return logger;
-    } catch (err) {
-        console.error('datalog.service.js / createLogger():', err);
     }
+    if (!param.maxDays || param.maxDays < 1) {
+        param.maxDays = 1;
+    }
+    logger = new Logger(param);
+    await logger.save();
+    return logger;
 }
 
 async function configureLogger(param) {
-    try {
-        const logger = await createLogger(param);
-        if (param.newTopic) {
-            param.topic = param.newTopic;
-            delete param.newTopic;
-        }
-        if (param.hasOwnProperty('maxDays') && param.maxDays < 1) {
-            param.maxDays = 1;
-        }
-        Object.assign(logger, param);
-        await logger.save();
-        return logger;
-    } catch (err) {
-        console.error('datalog.service.js / configureLogger():', err);
+    const logger = await createLogger(param);
+    if (param.newTopic) {
+        param.topic = param.newTopic;
+        delete param.newTopic;
     }
+    if (param.hasOwnProperty('maxDays') && param.maxDays < 1) {
+        param.maxDays = 1;
+    }
+    Object.assign(logger, param);
+    await logger.save();
+    return logger;
 }
 
 async function deleteLogger(topic) {
-    try {
-        const logger = await db.findOneAndDelete(Logger, { topic: topic });
-        if (logger) {
-            db.deleteMany(Datalog, { logger: logger._id });
-        }
-    } catch (err) {
-        console.error('datalog.service.js / deleteLogger():', err);
+    const logger = await db.findOneAndDelete(Logger, { topic: topic });
+    if (logger) {
+        db.deleteMany(Datalog, { logger: logger._id });
     }
 }
 
@@ -135,8 +115,8 @@ async function query(param) {
     let criteria = [];
     if (param.topic) {
         if (Array.isArray(param.topic)) {
-            const loggers = await db.find(Logger, { 'topic': { [db.chooseOperator("$in")]: param.topic } });
-            criteria.push({ logger: { [db.chooseOperator("$in")]: loggers.map((logger) => logger._id) } });
+            const loggers = await db.find(Logger, { 'topic': { [db.chooseOperator('$in')]: param.topic } });
+            criteria.push({ logger: { [db.chooseOperator('$in')]: loggers.map((logger) => logger._id) } });
         } else {
             const logger = await db.findOne(Logger, { 'topic': param.topic });
             criteria.push({ logger: logger._id });
@@ -144,20 +124,20 @@ async function query(param) {
     }
     if (param.startTimestamp) {
         let startDate = new Date(param.startTimestamp);
-        criteria.push({ timestamp: { [db.chooseOperator("$gte")]: startDate } });
+        criteria.push({ timestamp: { [db.chooseOperator('$gte')]: startDate } });
     }
     if (param.endTimestamp) {
         let endDate = new Date(param.endTimestamp);
-        criteria.push({ timestamp: { [db.chooseOperator("$lte")]: endDate } });
+        criteria.push({ timestamp: { [db.chooseOperator('$lte')]: endDate } });
     }
     if (param.value) {
         criteria.push({ value: param.value });
     } else {
         if (param.lowValue) {
-            criteria.push({ value: { [db.chooseOperator("$gte")]: param.lowValue } });
+            criteria.push({ value: { [db.chooseOperator('$gte')]: param.lowValue } });
         }
         if (param.highValue) {
-            criteria.push({ value: { [db.chooseOperator("$lte")]: param.highValue } });
+            criteria.push({ value: { [db.chooseOperator('$lte')]: param.highValue } });
         }
     }
     if (param.status) {
@@ -167,13 +147,13 @@ async function query(param) {
         if (!Array.isArray(param.tags)) {
             param.tags = [param.tags];
         }
-        criteria.push({ tags: { [db.chooseOperator("$in")]: param.tags } });
+        criteria.push({ tags: { [db.chooseOperator('$in')]: param.tags } });
     }
 
     if (criteria.length === 1) {
         criteria = criteria[0];
     } else if (criteria.length > 1) {
-        criteria = { [db.chooseOperator("$and")]: criteria };
+        criteria = { [db.chooseOperator('$and')]: criteria };
     } else {
         criteria = {};
     }

@@ -28,12 +28,7 @@ module.exports = {
 };
 
 async function authenticate({ username, password }) {
-    let user;
-    try {
-        user = await db.findOne(User, { username });
-    } catch (err) {
-        console.error('user.service.js / authenticate():', err);
-    }
+    let user = await db.findOne(User, { username });
     checkValidUser(user);
     if (user && bcrypt.compareSync(password, user.hash)) {
         let payload = { sub: user._id, role: user.role };
@@ -52,27 +47,15 @@ async function authenticate({ username, password }) {
 
 async function canRegister() {
     // allow registration when no users exist
-    try {
-        return !(await db.findOne(User));
-    } catch (err) {
-        console.error('user.service.js / canRegister():', err);
-    }
+    return !(await db.findOne(User));
 }
 
 async function getAll() {
-    try {
-        return await db.find(User);
-    } catch (err) {
-        console.error('user.service.js / getAll():', err);
-    }
+    return await db.find(User);
 }
 
 async function getById(id) {
-    try {
-        return await db.findById(User, id);
-    } catch (err) {
-        console.error('user.service.js / getById():', err);
-    }
+    return await db.findById(User, id);
 }
 
 async function register(userParam) {
@@ -84,128 +67,108 @@ async function register(userParam) {
 }
 
 async function create(userParam) {
-    try {
-        // validate
-        if (await db.findOne(User, { username: userParam.username })) {
-            throw 'Username "' + userParam.username + '" is already taken';
-        }
-        validateEmailAddress(userParam.email);
-
-        const user = new User(userParam);
-
-        // hash password
-        if (userParam.password) {
-            checkStrongPassword(userParam.password);
-            user.hash = bcrypt.hashSync(userParam.password, 10);
-        }
-
-        // save user
-        await user.save();
-        return user;
-    } catch (err) {
-        console.error('user.service.js / create():', err);
+    // validate
+    if (await db.findOne(User, { username: userParam.username })) {
+        throw 'Username "' + userParam.username + '" is already taken';
     }
+    validateEmailAddress(userParam.email);
+
+    const user = new User(userParam);
+
+    // hash password
+    if (userParam.password) {
+        checkStrongPassword(userParam.password);
+        user.hash = bcrypt.hashSync(userParam.password, 10);
+    }
+
+    // save user
+    await user.save();
+    return user;
 }
 
 async function update(id, userParam) {
-    try {
-        const user = await db.findById(User, id);
+    const user = await db.findById(User, id);
 
-        if (!user) {
-            throw 'User not found';
-        }
-        if (
-            userParam.username &&
-            user.username !== userParam.username &&
-            (await db.findOne(User, { username: userParam.username }))
-        ) {
-            throw 'Username "' + userParam.username + '" is already taken';
-        }
-        // validate email address if it was entered
-        if (userParam.email) {
-            validateEmailAddress(userParam.email);
-        }
-
-        // hash password if it was entered
-        if (userParam.password) {
-            checkStrongPassword(userParam.password);
-            userParam.hash = bcrypt.hashSync(userParam.password, 10);
-        }
-
-        // copy userParam properties to user
-        Object.assign(user, userParam);
-
-        await user.save();
-
-        socketio.connection().emit('ur-user-update', user);
-        return user;
-    } catch (err) {
-        console.error('user.service.js / update():', err);
+    if (!user) {
+        throw 'User not found';
     }
+    if (
+        userParam.username &&
+        user.username !== userParam.username &&
+        (await db.findOne(User, { username: userParam.username }))
+    ) {
+        throw 'Username "' + userParam.username + '" is already taken';
+    }
+    // validate email address if it was entered
+    if (userParam.email) {
+        validateEmailAddress(userParam.email);
+    }
+
+    // hash password if it was entered
+    if (userParam.password) {
+        checkStrongPassword(userParam.password);
+        userParam.hash = bcrypt.hashSync(userParam.password, 10);
+    }
+
+    // copy userParam properties to user
+    Object.assign(user, userParam);
+
+    await user.save();
+
+    socketio.connection().emit('ur-user-update', user);
+    return user;
 }
 
 async function _delete(id) {
-    try {
-        if ((await db.count(User)) === 1) {
-            throw 'Unable to delete last user';
-        }
-        const user = await db.findById(User, id);
-        if (!user) {
-            throw 'User not found';
-        }
-        await db.findByIdAndRemove(User, id);
-    } catch (err) {
-        console.error('user.service.js / _delete():', err);
+    if ((await db.count(User)) === 1) {
+        throw 'Unable to delete last user';
     }
+    const user = await db.findById(User, id);
+    if (!user) {
+        throw 'User not found';
+    }
+    await db.findByIdAndRemove(User, id);
 }
 
 async function generateResetToken(req, username) {
-    try {
-        // TODO: decouple from http (req)
-        const user = await db.findOne(User, { 'username': username });
-        checkValidUser(user);
+    // TODO: decouple from http (req)
+    const user = await db.findOne(User, { 'username': username });
+    checkValidUser(user);
 
-        // generate reset token and save in user
-        let token = uuidv4();
-        await update(user._id, { resetToken: token });
+    // generate reset token and save in user
+    let token = uuidv4();
+    await update(user._id, { resetToken: token });
 
-        // build email message
-        let rootPath = '/';
-        // let rootPath = '/ui';
-        if (
-            typeof settings().ui !== 'undefined' &&
-            typeof settings().ui.path !== 'undefined' &&
-            settings().ui.path !== '/'
-        ) {
-            rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
-        }
-        let resetLink = req.protocol + '://' + req.get('host') + rootPath + '#/authentication/reset-password/' + token;
-        let message =
-            "A password reset has been requested for username '" +
-            user.username +
-            "'. Please click this link to change your password: " +
-            resetLink;
-
-        await emailService.send(user.email, 'Password Reset for ' + user.username, message);
-        return token;
-    } catch (err) {
-        console.error('user.service.js / generateResetToken():', err);
+    // build email message
+    let rootPath = '/';
+    // let rootPath = '/ui';
+    if (
+        typeof settings().ui !== 'undefined' &&
+        typeof settings().ui.path !== 'undefined' &&
+        settings().ui.path !== '/'
+    ) {
+        rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
     }
+    let resetLink = req.protocol + '://' + req.get('host') + rootPath + '#/authentication/reset-password/' + token;
+    let message =
+        "A password reset has been requested for username '" +
+        user.username +
+        "'. Please click this link to change your password: " +
+        resetLink;
+
+    await emailService.send(user.email, 'Password Reset for ' + user.username, message);
+    return token;
 }
 
 async function resetPassword(token, { password }) {
-    try {
-        // TODO: need web page to handle new password input
-        // validate token and find user
-        if (!token) throw 'Invalid or expired reset token';
-        const user = await db.findOne(User, { 'resetToken': token });
-        if (!user) throw 'Invalid or expired reset token';
+    // TODO: need web page to handle new password input
+    // validate token and find user
+    if (!token) throw 'Invalid or expired reset token';
+    const user = await db.findOne(User, { 'resetToken': token });
+    if (!user) throw 'Invalid or expired reset token';
 
-        // update user password
-        return await update(user._id, { password: password, resetToken: null });
-    } catch (err) {
-        console.error('user.service.js / resetPassword():', err);
-    }
+    // update user password
+    return await update(user._id, { password: password, resetToken: null });
 }
 
 function checkValidUser(user) {
