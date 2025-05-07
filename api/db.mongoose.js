@@ -21,7 +21,10 @@ async function testConnection(conn) {
 }
 
 let connectionPromise = null;
+let reconnectInterval = null;
+
 let initialConnection = false;
+const RECONNECT_INTERVAL_MS = 5000;
 
 module.exports = {
     testConnection,
@@ -34,6 +37,13 @@ module.exports = {
                 mongoose.connection.on('connected', () => {
                     console.log('Mongoose connected to MongoDB');
                     initialConnection = true;
+
+                    // clear interval
+                    if (reconnectInterval) {
+                        clearInterval(reconnectInterval);
+                        reconnectInterval = null;
+                    }
+
                     resolve(mongoose.connection);
                 });
 
@@ -43,6 +53,9 @@ module.exports = {
                     console.error('Is MongoDB running? Try running: mongod');
                     if (!initialConnection) {
                         reject(err);
+
+                        // reconnect
+                        startReconnection();
                     }
                 });
 
@@ -51,6 +64,9 @@ module.exports = {
 
                     if (!initialConnection) {
                         reject(new Error('Disconnected from MongoDB before connection was established'));
+
+                        // reconnect
+                        startReconnection();
                     }
                 });
 
@@ -77,6 +93,16 @@ module.exports = {
             mongoose.connect(dbConnection, connectionOptions).catch((err) => {
                 console.error('Initial connection error:', err);
             });
+        }
+
+        // this method starts manual reconnection when the connection was not initially made
+        function startReconnection() {
+            if (!reconnectInterval) {
+                reconnectInterval = setInterval(() => {
+                    console.log('Attempting to reconnect...');
+                    initiateConnection();
+                }, RECONNECT_INTERVAL_MS);
+            }
         }
 
         // Helper function to ensure operations wait for connection
