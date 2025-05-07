@@ -20,23 +20,92 @@ async function testConnection(conn) {
     }
 }
 
+let connectionPromise = null;
+let initialConnection = false;
+
 module.exports = {
     testConnection,
-    connect: function(dbConnection) {
+    connect: function (dbConnection) {
         //'mongodb://localhost:27017/unified-red'
-        mongoose.connect(dbConnection, connectionOptions).catch((err) => {
-            console.error(err);
-        });
+
+        if (!connectionPromise) {
+            connectionPromise = new Promise((resolve, reject) => {
+                // Set up connection event handlers
+                mongoose.connection.on('connected', () => {
+                    console.log('Mongoose connected to MongoDB');
+                    initialConnection = true;
+                    resolve(mongoose.connection);
+                });
+
+                mongoose.connection.on('error', (err) => {
+                    console.error('Mongoose connection error:', err);
+                    console.error('Connection URL:', dbConnection);
+                    console.error('Is MongoDB running? Try running: mongod');
+                    if (!initialConnection) {
+                        reject(err);
+                    }
+                });
+
+                mongoose.connection.on('disconnected', () => {
+                    console.log('Mongoose disconnected from MongoDB');
+
+                    if (!initialConnection) {
+                        reject(new Error('Disconnected from MongoDB before connection was established'));
+                    }
+                });
+
+                // Attempt connection
+                mongoose.connect(dbConnection, connectionOptions).catch((err) => {
+                    console.error('Initial connection error:', err);
+                    reject(err);
+                });
+            });
+        }
 
         mongoose.Promise = global.Promise;
 
         // setup associations/lookup models
         const lookupModels = {
-            'Logger': { from: 'loggers', localField: 'logger', foreignField: '_id', as: 'refLogger' }
+            'Logger': { from: 'loggers', localField: 'logger', foreignField: '_id', as: 'refLogger' },
         };
 
         function status() {
             return mongoose.STATES[mongoose.connection.readyState];
+        }
+
+        function initiateConnection() {
+            mongoose.connect(dbConnection, connectionOptions).catch((err) => {
+                console.error('Initial connection error:', err);
+            });
+        }
+
+        // Helper function to ensure operations wait for connection
+        function ensureConnection(collection, args, operation) {
+            return async () => {
+                // 1 = connected
+                if (mongoose.connection.readyState !== 1) {
+                    try {
+                        await connectionPromise;
+                    } catch (err) {
+                        console.error(`Database operation ${operation} error:`, err);
+                        console.error(`Database not connected for operation ${operation}:`, err);
+                        return null;
+                    }
+                }
+
+                try {
+                    // Check if the operation exists on the collection
+                    if (typeof collection[operation] !== 'function') {
+                        console.error(`Operation '${operation}' is not a function on the collection`);
+                        console.error('Collection:', collection);
+                        return null;
+                    }
+                    return await collection[operation](...args);
+                } catch (err) {
+                    console.error(`Database operation ${operation} error:`, err);
+                    return null;
+                }
+            };
         }
 
         return {
@@ -48,30 +117,57 @@ module.exports = {
             Alarm: require('./models/mongoose/alarm.model'),
             Logger: require('./models/mongoose/logger.model'),
             Datalog: require('./models/mongoose/datalog.model'),
-            count: (collection) => collection.count(),
-            create: (collection, ...args) => collection.create(...args),
-            deleteMany: (collection, ...args) => collection.deleteMany(...args),
-            distinct: (collection, ...args) => collection.distinct(...args),
-            join: (collection, model, criteria, projection, options) => {
-                let project = { _id: 0 };
-                for (const p of projection) {
-                    let [ whole, prefix, field ] = new RegExp('^(' + model + '\.)?(.+)$').exec(p);
-                    project[field] = prefix ? '$ref' + whole : 1;
+            count: (collection, ...args) => ensureConnection(collection, args, 'count')(),
+            create: (collection, ...args) => ensureConnection(collection, args, 'create')(),
+            deleteMany: (collection, ...args) => ensureConnection(collection, args, 'deleteMany')(),
+            distinct: (collection, ...args) => ensureConnection(collection, args, 'distinct')(),
+            // count: (collection) => collection.count(),
+            // create: (collection, ...args) => collection.create(...args),
+            // deleteMany: (collection, ...args) => collection.deleteMany(...args),
+            // distinct: (collection, ...args) => collection.distinct(...args),
+            join: async (collection, model, criteria, projection, options) => {
+                // 1 = connected
+                if (mongoose.connection.readyState !== 1) {
+                    try {
+                        await connectionPromise;
+                    } catch (err) {
+                        console.error('Database not connected for join operation:', err);
+                        return [];
+                    }
                 }
-                return collection.aggregate([
-                    { $match: criteria },
-                    { $limit: options.limit || 10000 },
-                    { $lookup: lookupModels[model] },
-                    { $unwind: '$ref'+model },
-                    { $project: project },
-                ]);
+
+                try {
+                    await connectionPromise;
+
+                    let project = { _id: 0 };
+                    for (const p of projection) {
+                        let [whole, prefix, field] = new RegExp('^(' + model + '.)?(.+)$').exec(p);
+                        project[field] = prefix ? '$ref' + whole : 1;
+                    }
+                    return collection.aggregate([
+                        { $match: criteria },
+                        { $limit: options.limit || 10000 },
+                        { $lookup: lookupModels[model] },
+                        { $unwind: '$ref' + model },
+                        { $project: project },
+                    ]);
+                } catch (err) {
+                    console.error(`Database operation join error:`, err);
+                    return null;
+                }
             },
-            find: (collection, ...args) => collection.find(...args),
-            findById: (collection, ...args) => collection.findById(...args),
-            findByIdAndRemove: (collection, ...args) => collection.findByIdAndRemove(...args),
-            findOne: (collection, ...args) => collection.findOne(...args),
-            findOneAndDelete: (collection, ...args) => collection.findOneAndDelete(...args),
-            update: (collection, ...args) => collection.update(...args),
+            find: (collection, ...args) => ensureConnection(collection, args, 'find')(),
+            findById: (collection, ...args) => ensureConnection(collection, args, 'findById')(),
+            findByIdAndRemove: (collection, ...args) => ensureConnection(collection, args, 'findByIdAndRemove')(),
+            findOne: (collection, ...args) => ensureConnection(collection, args, 'findOne')(),
+            findOneAndDelete: (collection, ...args) => ensureConnection(collection, args, 'findOneAndDelete')(),
+            update: (collection, ...args) => ensureConnection(collection, args, 'update')(),
+            // find: (collection, ...args) => collection.find(...args),
+            // findById: (collection, ...args) => collection.findById(...args),
+            // findByIdAndRemove: (collection, ...args) => collection.findByIdAndRemove(...args),
+            // findOne: (collection, ...args) => collection.findOne(...args),
+            // findOneAndDelete: (collection, ...args) => collection.findOneAndDelete(...args),
+            // update: (collection, ...args) => collection.update(...args),
         };
-    }
+    },
 };
