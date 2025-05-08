@@ -172,6 +172,9 @@ async function resetPassword(token, { password }) {
 }
 
 function checkValidUser(user) {
+    if (user === undefined) {
+        throw 'Connection Error';
+    }
     if (!user) {
         throw 'User not found';
     }

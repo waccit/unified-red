@@ -27,6 +27,7 @@ async function init() {
         }
     } catch (err) {
         console.log('Error while initializing: ', err);
+        return err;
     }
 }
 init();

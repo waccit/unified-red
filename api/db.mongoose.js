@@ -4,6 +4,7 @@ Source: https://github.com/cornflourblue/node-mongo-registration-login-api
 */
 
 const mongoose = require('mongoose');
+const logger = require('./logger');
 
 const connectionOptions = {
     useCreateIndex: true,
@@ -16,14 +17,12 @@ async function testConnection(conn) {
     try {
         return await mongoose.connect(conn, { useNewUrlParser: true, useUnifiedTopology: true });
     } catch (err) {
-        console.error('Error connecting to MongoDB:', err);
+        logger.error('Error connecting to MongoDB:', err);
     }
 }
 
 let connectionPromise = null;
 let reconnectInterval = null;
-
-let initialConnection = false;
 const RECONNECT_INTERVAL_MS = 5000;
 
 module.exports = {
@@ -35,8 +34,7 @@ module.exports = {
             connectionPromise = new Promise((resolve, reject) => {
                 // Set up connection event handlers
                 mongoose.connection.on('connected', () => {
-                    console.log('Mongoose connected to MongoDB');
-                    initialConnection = true;
+                    logger.info('Mongoose connected to MongoDB');
 
                     // clear interval
                     if (reconnectInterval) {
@@ -48,33 +46,27 @@ module.exports = {
                 });
 
                 mongoose.connection.on('error', (err) => {
-                    console.error('Mongoose connection error:', err);
-                    console.error('Connection URL:', dbConnection);
-                    console.error('Is MongoDB running? Try running: mongod');
-                    if (!initialConnection) {
-                        reject(err);
-
-                        // reconnect
-                        startReconnection();
-                    }
+                    logger.error('Is MongoDB running? Try running: mongod');
+                    connectionPromise = null;
+                    reject(new Error('Mongoose connection error:', err));
+                    // reconnect
+                    startReconnection();
                 });
 
                 mongoose.connection.on('disconnected', () => {
-                    console.log('Mongoose disconnected from MongoDB');
-
-                    if (!initialConnection) {
-                        reject(new Error('Disconnected from MongoDB before connection was established'));
-
-                        // reconnect
-                        startReconnection();
-                    }
+                    connectionPromise = null;
+                    reject(new Error('Mongoose disconnected from MongoDB'));
+                    // reconnect
+                    startReconnection();
                 });
 
                 // Attempt connection
                 mongoose.connect(dbConnection, connectionOptions).catch((err) => {
-                    console.error('Initial connection error:', err);
-                    reject(err);
+                    connectionPromise = null;
+                    reject(new Error('Initial connection error:', err));
                 });
+            }).catch((err) => {
+                logger.error(err);
             });
         }
 
@@ -91,7 +83,7 @@ module.exports = {
 
         function initiateConnection() {
             mongoose.connect(dbConnection, connectionOptions).catch((err) => {
-                console.error('Initial connection error:', err);
+                logger.error(err);
             });
         }
 
@@ -99,39 +91,26 @@ module.exports = {
         function startReconnection() {
             if (!reconnectInterval) {
                 reconnectInterval = setInterval(() => {
-                    console.log('Attempting to reconnect...');
+                    logger.info('Attempting to reconnect...');
                     initiateConnection();
                 }, RECONNECT_INTERVAL_MS);
             }
         }
 
-        // Helper function to ensure operations wait for connection
-        function ensureConnection(collection, args, operation) {
-            return async () => {
-                // 1 = connected
-                if (mongoose.connection.readyState !== 1) {
-                    try {
-                        await connectionPromise;
-                    } catch (err) {
-                        console.error(`Database operation ${operation} error:`, err);
-                        console.error(`Database not connected for operation ${operation}:`, err);
-                        return null;
-                    }
-                }
-
+        async function ensureConnection() {
+            if (mongoose.connection.readyState === 1) {
+                return true;
+            }
+            // Don't return early, always ensure a connection exists or is established
+            else if (mongoose.connection.readyState !== 1) {
                 try {
-                    // Check if the operation exists on the collection
-                    if (typeof collection[operation] !== 'function') {
-                        console.error(`Operation '${operation}' is not a function on the collection`);
-                        console.error('Collection:', collection);
-                        return null;
-                    }
-                    return await collection[operation](...args);
+                    logger.info('Waiting for connection...');
+                    await connectionPromise;
                 } catch (err) {
-                    console.error(`Database operation ${operation} error:`, err);
-                    return null;
+                    logger.error(`Failed to establish database connection: ${err.message}`);
+                    return err;
                 }
-            };
+            }
         }
 
         return {
@@ -143,57 +122,105 @@ module.exports = {
             Alarm: require('./models/mongoose/alarm.model'),
             Logger: require('./models/mongoose/logger.model'),
             Datalog: require('./models/mongoose/datalog.model'),
-            count: (collection, ...args) => ensureConnection(collection, args, 'count')(),
-            create: (collection, ...args) => ensureConnection(collection, args, 'create')(),
-            deleteMany: (collection, ...args) => ensureConnection(collection, args, 'deleteMany')(),
-            distinct: (collection, ...args) => ensureConnection(collection, args, 'distinct')(),
-            // count: (collection) => collection.count(),
-            // create: (collection, ...args) => collection.create(...args),
-            // deleteMany: (collection, ...args) => collection.deleteMany(...args),
-            // distinct: (collection, ...args) => collection.distinct(...args),
-            join: async (collection, model, criteria, projection, options) => {
-                // 1 = connected
-                if (mongoose.connection.readyState !== 1) {
-                    try {
-                        await connectionPromise;
-                    } catch (err) {
-                        console.error('Database not connected for join operation:', err);
-                        return [];
-                    }
+            count: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.count();
+                } else {
+                    logger.error(`Database not connected for count()`);
                 }
-
-                try {
-                    await connectionPromise;
-
+            },
+            create: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.create(...args);
+                } else {
+                    logger.error(`Database not connected for create()`);
+                }
+            },
+            deleteMany: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.deleteMany(...args);
+                } else {
+                    logger.error(`Database not connected for deleteMany()`);
+                }
+            },
+            distinct: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.distinct(...args);
+                } else {
+                    logger.error(`Database not connected for distinct()`);
+                }
+            },
+            join: async (collection, model, criteria, projection, options) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
                     let project = { _id: 0 };
                     for (const p of projection) {
                         let [whole, prefix, field] = new RegExp('^(' + model + '.)?(.+)$').exec(p);
                         project[field] = prefix ? '$ref' + whole : 1;
                     }
-                    return collection.aggregate([
+                    return await collection.aggregate([
                         { $match: criteria },
                         { $limit: options.limit || 10000 },
                         { $lookup: lookupModels[model] },
                         { $unwind: '$ref' + model },
                         { $project: project },
                     ]);
-                } catch (err) {
-                    console.error(`Database operation join error:`, err);
-                    return null;
+                } else {
+                    logger.error(`Database not connected for join()`);
                 }
             },
-            find: (collection, ...args) => ensureConnection(collection, args, 'find')(),
-            findById: (collection, ...args) => ensureConnection(collection, args, 'findById')(),
-            findByIdAndRemove: (collection, ...args) => ensureConnection(collection, args, 'findByIdAndRemove')(),
-            findOne: (collection, ...args) => ensureConnection(collection, args, 'findOne')(),
-            findOneAndDelete: (collection, ...args) => ensureConnection(collection, args, 'findOneAndDelete')(),
-            update: (collection, ...args) => ensureConnection(collection, args, 'update')(),
-            // find: (collection, ...args) => collection.find(...args),
-            // findById: (collection, ...args) => collection.findById(...args),
-            // findByIdAndRemove: (collection, ...args) => collection.findByIdAndRemove(...args),
-            // findOne: (collection, ...args) => collection.findOne(...args),
-            // findOneAndDelete: (collection, ...args) => collection.findOneAndDelete(...args),
-            // update: (collection, ...args) => collection.update(...args),
+            find: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.find(...args);
+                } else {
+                    logger.error(`Database not connected for find()`);
+                }
+            },
+            findById: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.findById(...args);
+                } else {
+                    logger.error(`Database not connected for findById()`);
+                }
+            },
+            findByIdAndRemove: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.findByIdAndRemove(...args);
+                } else {
+                    logger.error(`Database not connected for findByIdAndRemove()`);
+                }
+            },
+            findOne: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.findOne(...args);
+                } else {
+                    logger.error(`Database not connected for findOne()`);
+                }
+            },
+            findOneAndDelete: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.findOneAndDelete(...args);
+                } else {
+                    logger.error(`Database not connected for findOneAndDelete()`);
+                }
+            },
+            update: async (collection, ...args) => {
+                const connection = await ensureConnection();
+                if (connection === true) {
+                    return await collection.update(...args);
+                } else {
+                    logger.error(`Database not connected for update()`);
+                }
+            },
         };
     },
 };
