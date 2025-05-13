@@ -63,7 +63,10 @@ module.exports = function (RED) {
                     }
                     if (value) {
                         let next = nextEvent();
+                        console.log('next', next);
                         let nextState = getValueFromName(next.event.value).value;
+                        console.log('next 1', next);
+                        console.log(new Date(next.timestamp).toLocaleString());
                         let nextTimestamp = next.timestamp;
                         let payload = value;
                         if (config.payloadType && config.payloadType === 'tod') {
@@ -198,6 +201,7 @@ module.exports = function (RED) {
                     console.error('Error: ' + err.message);
                 }
             }
+            console.log('nextFires 2', nextFires);
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
 
             // determine the date which a fire will soonest occur
@@ -279,6 +283,7 @@ module.exports = function (RED) {
             }
 
             let sortedFireTimes = prevFires.sort((a, b) => b.timestamp - a.timestamp);
+            console.log('sortedFireTimes 3', sortedFireTimes);
 
             // determine the date which a fire most recently occurred
             let mostRecentFireDate = new Date(sortedFireTimes[0].timestamp);
@@ -324,6 +329,7 @@ module.exports = function (RED) {
                     console.error('Error: ' + err.message);
                 }
             }
+            console.log('todayFires 4', todayFires);
             let sortedFireTimes = todayFires.sort((a, b) => b.timestamp - a.timestamp);
             return sortedFireTimes;
         };
@@ -407,17 +413,15 @@ module.exports = function (RED) {
                         pattern[3] = moment().date();
                         return pattern.join(' ');
                     }
-                    return schPattern;
+                    return null;
                 }
                 if (weekday.indexOf('#') !== -1) {
                     if (isNthWeekday(weekday)) {
                         // if not the nth weekday, overwrite date field with today
                         pattern[5] = moment().day();
                         return pattern.join(' ');
-                    } else {
-                        pattern[5] = pattern[5].charAt(0);
                     }
-                    return schPattern;
+                    return null;
                 }
                 if (weekday.indexOf('L') !== -1) {
                     if (isLastWeekday(weekday)) {
@@ -425,7 +429,7 @@ module.exports = function (RED) {
                         pattern[5] = moment().day();
                         return pattern.join(' ');
                     }
-                    return schPattern;
+                    return null;
                 }
             }
             return schPattern;
@@ -437,21 +441,17 @@ module.exports = function (RED) {
             if (!correctedPattern) {
                 return;
             }
-            // sch.pattern = correctedPattern;
+            sch.pattern = correctedPattern;
 
             if (RED.settings.verbose) {
                 node.log('scheduleHolidayJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
             if (time) {
-                correctedPattern = setCronTime(correctedPattern, time.getHours(), time.getMinutes(), time.getSeconds());
+                sch.pattern = setCronTime(correctedPattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(
-                correctedPattern,
-                fireEvent.bind({ event: { ...sch, pattern: correctedPattern }, type: 'holiday' }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
+            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'holiday' }), {
+                recoverMissedExecutions: true,
+            });
             node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'holiday' };
         };
 
@@ -510,7 +510,7 @@ module.exports = function (RED) {
             if (!correctedPattern) {
                 return;
             }
-            // sch.pattern = correctedPattern;
+            sch.pattern = correctedPattern;
 
             // activate date or holiday schedule at beginning of day (unless time overridden)
             let startPattern = setCronTime(
@@ -561,8 +561,23 @@ module.exports = function (RED) {
             if (node.holidays && node.holidays.length) {
                 for (let holidaySch of node.holidays) {
                     try {
+                        // account for no ._pattern key
+                        if (!('_pattern' in holidaySch)) {
+                            holidaySch._pattern = holidaySch.pattern;
+                        }
+
+                        // contingency for old _pattern format
+                        let split_pattern = holidaySch.pattern.split(' ');
+                        let _split_pattern = holidaySch._pattern.split(' ');
+                        _split_pattern[1] = split_pattern[1];
+                        _split_pattern[2] = split_pattern[2];
+                        holidaySch.pattern = split_pattern.join(' ');
+                        holidaySch._pattern = _split_pattern.join(' ');
+
+                        // clean .pattern for the new schedule build
+                        holidaySch.pattern = holidaySch._pattern;
+
                         // schedule job and "priority schedule" jobs
-                        holidaySch._pattern = holidaySch.pattern;
                         holidaySch.pattern = setCronTime(holidaySch.pattern, holidaySch.hour, holidaySch.minute, '1');
                         scheduleHolidayJob(holidaySch);
                         schedulePriorityScheduleJobs(holidaySch, 'holiday');
@@ -587,7 +602,6 @@ module.exports = function (RED) {
                         dateSchedules[dateKey].push(dateSch);
 
                         // schedule job and "priority schedule" jobs
-                        // TODO HERE
                         dateSch.pattern = ['0', dateSch.minute, dateSch.hour, d.getDate(), d.getMonth() + 1, '*'].join(
                             ' '
                         );
@@ -638,6 +652,7 @@ module.exports = function (RED) {
             if (Object.keys(node.cronJobs).length !== 0) {
                 let lastEvent = prevEvent();
                 let soonestEvent = nextEvent();
+                console.log('soonestEvent 5', soonestEvent);
 
                 // update node status text
                 node.status({

@@ -702,7 +702,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         sch.hour = date.format('H');
         sch.minute = date.format('m');
         sch.pattern = date.format('0 m H ') + sch.pattern.split(' ').slice(3).join(' ');
-        sch._pattern = '0 * * ' + sch.pattern.split(' ').slice(3).join(' ');
+        sch._pattern = date.format('0 m H ') + sch.pattern.split(' ').slice(3).join(' ');
         return sch;
     }
 
