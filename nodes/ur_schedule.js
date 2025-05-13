@@ -63,10 +63,7 @@ module.exports = function (RED) {
                     }
                     if (value) {
                         let next = nextEvent();
-                        console.log('next', next);
                         let nextState = getValueFromName(next.event.value).value;
-                        console.log('next 1', next);
-                        console.log(new Date(next.timestamp).toLocaleString());
                         let nextTimestamp = next.timestamp;
                         let payload = value;
                         if (config.payloadType && config.payloadType === 'tod') {
@@ -162,6 +159,9 @@ module.exports = function (RED) {
                     if (event.type === 'holiday') {
                         event.pattern = correctForNthAndLastRules(event.pattern);
                     }
+                    if (!event.pattern) {
+                        continue;
+                    }
                     // parse cron pattern
                     let parsedFire = parser.parseExpression(event.pattern);
                     // iterate over next 10 fires of event
@@ -201,8 +201,12 @@ module.exports = function (RED) {
                     console.error('Error: ' + err.message);
                 }
             }
-            console.log('nextFires 2', nextFires);
             let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
+
+            // Check if there are any nextFires before proceeding
+            if (sortedFireTimes.length === 0) {
+                return undefined;
+            }
 
             // determine the date which a fire will soonest occur
             let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
@@ -241,6 +245,9 @@ module.exports = function (RED) {
                 try {
                     if (event.type === 'holiday') {
                         event.pattern = correctForNthAndLastRules(event.pattern);
+                    }
+                    if (!event.pattern) {
+                        continue;
                     }
                     // parse cron pattern
                     let parsedFire = parser.parseExpression(event.pattern);
@@ -283,7 +290,11 @@ module.exports = function (RED) {
             }
 
             let sortedFireTimes = prevFires.sort((a, b) => b.timestamp - a.timestamp);
-            console.log('sortedFireTimes 3', sortedFireTimes);
+
+            // Check if there are any prevFires before proceeding
+            if (sortedFireTimes.length === 0) {
+                return undefined;
+            }
 
             // determine the date which a fire most recently occurred
             let mostRecentFireDate = new Date(sortedFireTimes[0].timestamp);
@@ -329,7 +340,6 @@ module.exports = function (RED) {
                     console.error('Error: ' + err.message);
                 }
             }
-            console.log('todayFires 4', todayFires);
             let sortedFireTimes = todayFires.sort((a, b) => b.timestamp - a.timestamp);
             return sortedFireTimes;
         };
@@ -652,7 +662,6 @@ module.exports = function (RED) {
             if (Object.keys(node.cronJobs).length !== 0) {
                 let lastEvent = prevEvent();
                 let soonestEvent = nextEvent();
-                console.log('soonestEvent 5', soonestEvent);
 
                 // update node status text
                 node.status({
