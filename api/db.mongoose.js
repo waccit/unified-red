@@ -128,6 +128,7 @@ module.exports = {
                     return await collection.count();
                 } else {
                     logger.error(`Database not connected for count()`);
+                    return new Error('Database not connected for count()');
                 }
             },
             create: async (collection, ...args) => {
@@ -136,6 +137,7 @@ module.exports = {
                     return await collection.create(...args);
                 } else {
                     logger.error(`Database not connected for create()`);
+                    return new Error('Database not connected for create()');
                 }
             },
             deleteMany: async (collection, ...args) => {
@@ -144,6 +146,7 @@ module.exports = {
                     return await collection.deleteMany(...args);
                 } else {
                     logger.error(`Database not connected for deleteMany()`);
+                    return new Error('Database not connected for deleteMany()');
                 }
             },
             distinct: async (collection, ...args) => {
@@ -152,6 +155,7 @@ module.exports = {
                     return await collection.distinct(...args);
                 } else {
                     logger.error(`Database not connected for distinct()`);
+                    return new Error('Database not connected for distinct()');
                 }
             },
             join: async (collection, model, criteria, projection, options) => {
@@ -171,6 +175,7 @@ module.exports = {
                     ]);
                 } else {
                     logger.error(`Database not connected for join()`);
+                    return new Error('Database not connected for join()');
                 }
             },
             find: async (collection, ...args) => {
@@ -179,6 +184,7 @@ module.exports = {
                     return await collection.find(...args);
                 } else {
                     logger.error(`Database not connected for find()`);
+                    return new Error('Database not connected for find()');
                 }
             },
             findById: async (collection, ...args) => {
@@ -187,6 +193,7 @@ module.exports = {
                     return await collection.findById(...args);
                 } else {
                     logger.error(`Database not connected for findById()`);
+                    return new Error('Database not connected for findById()');
                 }
             },
             findByIdAndRemove: async (collection, ...args) => {
@@ -195,6 +202,7 @@ module.exports = {
                     return await collection.findByIdAndRemove(...args);
                 } else {
                     logger.error(`Database not connected for findByIdAndRemove()`);
+                    return new Error('Database not connected for findByIdAndRemove()');
                 }
             },
             findOne: async (collection, ...args) => {
@@ -203,6 +211,7 @@ module.exports = {
                     return await collection.findOne(...args);
                 } else {
                     logger.error(`Database not connected for findOne()`);
+                    return new Error('Database not connected for findOne()');
                 }
             },
             findOneAndDelete: async (collection, ...args) => {
@@ -211,6 +220,7 @@ module.exports = {
                     return await collection.findOneAndDelete(...args);
                 } else {
                     logger.error(`Database not connected for findOneAndDelete()`);
+                    return new Error('Database not connected for findOneAndDelete()');
                 }
             },
             update: async (collection, ...args) => {
@@ -219,6 +229,7 @@ module.exports = {
                     return await collection.update(...args);
                 } else {
                     logger.error(`Database not connected for update()`);
+                    return new Error('Database not connected for update()');
                 }
             },
         };
