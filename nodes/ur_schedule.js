@@ -577,16 +577,14 @@ module.exports = function (RED) {
                         }
 
                         // contingency for old _pattern format
-                        let split_pattern = holidaySch.pattern.split(' ');
                         let _split_pattern = holidaySch._pattern.split(' ');
-                        _split_pattern[1] = split_pattern[1];
-                        _split_pattern[2] = split_pattern[2];
-                        holidaySch.pattern = split_pattern.join(' ');
+                        _split_pattern[1] = holidaySch.minute;
+                        _split_pattern[2] = holidaySch.hour;
                         holidaySch._pattern = _split_pattern.join(' ');
 
                         // clean .pattern for the new schedule build
                         holidaySch.pattern = holidaySch._pattern;
-
+                        
                         // schedule job and "priority schedule" jobs
                         holidaySch.pattern = setCronTime(holidaySch.pattern, holidaySch.hour, holidaySch.minute, '1');
                         scheduleHolidayJob(holidaySch);
