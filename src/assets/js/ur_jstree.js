@@ -84,6 +84,7 @@
         );
 
         editButton.on('click', function (evt) {
+            console.log('evt', evt);
             if (selectedTab) {
                 let tabNode = RED.nodes.node(selectedTab.id); // Assuming RED.nodes.node() gets the tab node by id
                 if (tabNode) {
@@ -98,7 +99,12 @@
     }
 
     function scrollToNode(nodeId) {
-        let treeInstance = $('#jstree').jstree(true);
+        let treeInstance = $.jstree.reference('#jstree');
+        if (!treeInstance) {
+            console.error("jsTree instance not available for scrollToNode");
+            return;
+        }
+        
         let node = treeInstance.get_node(nodeId, true);
 
         if (node && node.length) {
@@ -106,14 +112,23 @@
             treeInstance._open_to(nodeId);
             setTimeout(() => {
                 node[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 200); // Addedd a delay to ensure the node is fully loaded and visible
+            }, 200); // Added a delay to ensure the node is fully loaded and visible
         }
     }
 
     function getPathToNode(nodeId) {
-        let treeInstance = $('#jstree').jstree(true);
+        let treeInstance = $.jstree.reference('#jstree');
+        if (!treeInstance) {
+            console.error("jsTree instance not available for getPathToNode");
+            return "None";
+        }
+        
         let pathArray = [];
         let currentNode = treeInstance.get_node(nodeId);
+        
+        if (!currentNode) {
+            return "None";
+        }
         
         while (currentNode && currentNode.id !== '#') {
             pathArray.unshift(currentNode.text);
@@ -123,9 +138,21 @@
         return pathArray.join('][');
     }
     
-    function initializeJsTree(tabId, onTabSelected) {
+    function initializeJsTree(tabId) {
+        // Check if jstree container exists
+        if ($('#jstree').length === 0) {
+            console.error("Element with ID 'jstree' not found in the DOM");
+            return;
+        }
+
         var rootFolders = extractRootFolders();
         var foldersTreeData = rootFolders.map(folder => extractFolderChildren(folder));
+        
+        // Check if jsTree is already initialized
+        if ($.jstree.reference('#jstree')) {
+            // Destroy the existing instance before recreating
+            $('#jstree').jstree('destroy');
+        }
 
         // Initial jsTree setup
         $('#jstree').jstree({
@@ -162,10 +189,12 @@
                 $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
             } else {
                 // Prevents deselecting the current tab when clicking on non-tab nodes
-                var instance = $('#jstree').jstree(true);
-                instance.deselect_node(data.node);
-                if (selectedTab) {
-                    instance.select_node(selectedTab.id);
+                var instance = $.jstree.reference('#jstree');
+                if (instance) {
+                    instance.deselect_node(data.node);
+                    if (selectedTab) {
+                        instance.select_node(selectedTab.id);
+                    }
                 }
             }
             console.log("Selected node: ", data.node);
@@ -180,16 +209,25 @@
             if (to) { clearTimeout(to); }
             to = setTimeout(function () {
                 var v = $('#treeSearch').val();
-                $('#jstree').jstree(true).search(v);
+                var instance = $.jstree.reference('#jstree');
+                if (instance) {
+                    instance.search(v);
+                }
             }, 250);
         });
 
         console.log("Retrieved tab ID: ", tabId);
         // Restore selected tab when the node is reopened, or select the first tab if none is selected
         $('#jstree').on('ready.jstree', function () {
+            var instance = $.jstree.reference('#jstree');
+            if (!instance) {
+                console.error("jsTree instance not available");
+                return;
+            }
+
             if (tabId) {
-                $('#jstree').jstree(true).select_node(tabId);
-                var selectedNode = $('#jstree').jstree(true).get_node(tabId);
+                instance.select_node(tabId);
+                var selectedNode = instance.get_node(tabId);
                 console.log("Selected node:", selectedNode);
                 if (selectedNode) {
                     let path = getPathToNode(selectedNode.id);
@@ -202,34 +240,42 @@
                 }
             } else {
                 // If no tab is selected, default to the first available tab
-                var firstTab = $('#jstree').jstree(true).get_node('#').children_d.find(id => {
-                    var node = $('#jstree').jstree(true).get_node(id);
-                    return node && node.type === 'tab';
-                });
-                if (firstTab) {
-                    $('#jstree').jstree(true).select_node(firstTab);
-                    let path = getPathToNode(firstTab);
-                    $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
-                    setTimeout(() => {
-                        scrollToNode(firstTab); // Auto-scroll to the first available tab with delay
-                    }, 200);                        
-                } else {
-                    $('#selectedTabDisplay').text('Selected Tab: None');
+                var rootNode = instance.get_node('#');
+                if (rootNode && rootNode.children_d) {
+                    var firstTab = rootNode.children_d.find(id => {
+                        var node = instance.get_node(id);
+                        return node && node.type === 'tab';
+                    });
+                    if (firstTab) {
+                        instance.select_node(firstTab);
+                        let path = getPathToNode(firstTab);
+                        $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
+                        setTimeout(() => {
+                            scrollToNode(firstTab); // Auto-scroll to the first available tab with delay
+                        }, 200);                        
+                    } else {
+                        $('#selectedTabDisplay').text('Selected Tab: None');
+                    }
                 }
             }
         }.bind(this)); // Ensures info is saved
 
+        // Update the selected tab display outside of the ready event
         if (tabId) {
-            var storedNode = $('#jstree').jstree(true).get_node(tabId);
-            if (storedNode) {
-                let path = getPathToNode(storedNode.id);
-                $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
-            } else {
-                $('#selectedTabDisplay').text('Selected Tab: None');
+            var instance = $.jstree.reference('#jstree');
+            if (instance) {
+                var storedNode = instance.get_node(tabId);
+                if (storedNode) {
+                    let path = getPathToNode(storedNode.id);
+                    $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
+                } else {
+                    $('#selectedTabDisplay').text('Selected Tab: None');
+                }
             }
         } else {
             $('#selectedTabDisplay').text('Selected Tab: None');
         }
+
         // Add the 'Open' button next to the 'Selected Tab' display
         $('#editButtonContainer').append(createEditButton());
     }
