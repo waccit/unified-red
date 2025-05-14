@@ -15,8 +15,6 @@
                 #myInputarea
                 [type]="data.mode"
                 [value]="access.read ? stripHTML(valueIn) : ''"
-                [ngStyle]="this.styleService.getStyle(data)"
-                [ngClass]="this.styleService.getClass(data)"
                 [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
                 (keyup)="delay > 0 && keyup($event.target.value)"
                 (change)="delay === 0 && change($event.target.value)"
@@ -38,8 +36,6 @@
                 placeholder="EX: (435) 345-3454"
                 mask="(000) 000-0000"
                 [value]="access.read ? stripHTML(valueIn) : ''"
-                [ngStyle]="this.styleService.getStyle(data)"
-                [ngClass]="this.styleService.getClass(data)"
                 [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
                 (keyup)="delay > 0 && keyup($event.target.value)"
                 (change)="delay === 0 && change($event.target.value)"

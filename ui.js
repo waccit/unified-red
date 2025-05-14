@@ -497,7 +497,15 @@ function add(opt) {
             }
 
             if (opt.storeFrontEndInputAsState === true) {
-                //fwd to all UI clients
+                // reapply the css, health, and class from the replayMessage
+                const replayMessage = replayMessages?.[msg.id]?.[msg.msg.topic]?.msg?.payload;
+                const payload = msg?.msg?.payload;
+                if (replayMessage && payload) {
+                    if (replayMessage.css) payload.css = replayMessage.css;
+                    if (replayMessage.health) payload.health = replayMessage.health;
+                    if (replayMessage.class) payload.class = replayMessage.class;
+                }
+                // fwd to all UI clients
                 io.emit(updateValueEventName, msg);
             }
         }
