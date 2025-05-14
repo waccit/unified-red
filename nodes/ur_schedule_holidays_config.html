@@ -112,6 +112,7 @@
                     minute: minute,
                     pattern: `0 ${minute} ${hour} ` + container.find(".node-config-input-event-pattern").val(),
                     _pattern: `0 ${minute} ${hour} ` + container.find(".node-config-input-event-pattern").val(),
+                    type: 'holiday'
                 };
                 node.events.push(event);
             });
