@@ -95,3 +95,11 @@ module.exports.chooseOperator = function(genericOperator) {
             throw new Error('Unknown operator: ' + genericOperator);
     }
 }
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (reason, exception) => {
+    console.error('Uncaught Exception at:', exception, 'reason:', reason);
+});

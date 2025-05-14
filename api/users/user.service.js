@@ -28,7 +28,7 @@ module.exports = {
 };
 
 async function authenticate({ username, password }) {
-    const user = await db.findOne(User, { username });
+    let user = await db.findOne(User, { username });
     checkValidUser(user);
     if (user && bcrypt.compareSync(password, user.hash)) {
         let payload = { sub: user._id, role: user.role };
@@ -92,7 +92,11 @@ async function update(id, userParam) {
     if (!user) {
         throw 'User not found';
     }
-    if (userParam.username && user.username !== userParam.username && (await db.findOne(User, { username: userParam.username }))) {
+    if (
+        userParam.username &&
+        user.username !== userParam.username &&
+        (await db.findOne(User, { username: userParam.username }))
+    ) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
     // validate email address if it was entered
@@ -116,7 +120,7 @@ async function update(id, userParam) {
 }
 
 async function _delete(id) {
-    if (await db.count(User) === 1) {
+    if ((await db.count(User)) === 1) {
         throw 'Unable to delete last user';
     }
     const user = await db.findById(User, id);
@@ -138,7 +142,11 @@ async function generateResetToken(req, username) {
     // build email message
     let rootPath = '/';
     // let rootPath = '/ui';
-    if (typeof settings().ui !== 'undefined' && typeof settings().ui.path !== 'undefined' && settings().ui.path !== '/') {
+    if (
+        typeof settings().ui !== 'undefined' &&
+        typeof settings().ui.path !== 'undefined' &&
+        settings().ui.path !== '/'
+    ) {
         rootPath = settings().ui.path.length ? '/' + settings().ui.path : '';
     }
     let resetLink = req.protocol + '://' + req.get('host') + rootPath + '#/authentication/reset-password/' + token;
@@ -164,6 +172,12 @@ async function resetPassword(token, { password }) {
 }
 
 function checkValidUser(user) {
+    if (user instanceof Error) {
+        throw user.message;
+    }
+    if (user === undefined) {
+        throw 'Connection Error';
+    }
     if (!user) {
         throw 'User not found';
     }
@@ -177,7 +191,12 @@ function checkValidUser(user) {
 
 function validateEmailAddress(email) {
     // Email Regex from the WHATWG HTML specification: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
-    if (!email || !/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email)) {
+    if (
+        !email ||
+        !/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+            email
+        )
+    ) {
         throw 'Invalid email address';
     }
 }
