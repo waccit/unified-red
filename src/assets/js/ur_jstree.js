@@ -1,3 +1,41 @@
+var defaultMenuEntities = {
+    'ur_folder': {
+        type: 'ur_folder',
+        users: [],
+        icon: 'dashboard',
+        name: 'Folder',
+    },
+    'ur_page': {
+        type: 'ur_page',
+        users: [],
+        icon: 'folder',
+        name: 'Page',
+        width: 6,
+        disp: true,
+    },
+    'ur_group': {
+        type: 'ur_group',
+        users: [],
+        name: 'Group',
+        widthLg: 6,
+        widthMd: 6,
+        widthSm: 12,
+        disp: true,
+    },
+    'ur_tab': {
+        type: 'ur_tab',
+        users: [],
+        name: 'Tab',
+    },
+    'ur_link': {
+        type: 'ur_link',
+        users: [],
+        icon: 'new-window',
+        name: 'Link',
+        target: 'newtab',
+    },
+};
+
 (function () {
     // Inject CSS for jsTree styling
     function injectJsTreeStyles() {
@@ -219,47 +257,51 @@
         });
 
         $('#jstree').on('hover_node.jstree', function (e, data) {
-            console.log('data', data.node.type);
             $('.jstree-hover-button').remove();
-
             let buttons = [];
+            let node_config = {};
+
+            const addButton = (type, parentField) => {
+                let btn = $(
+                    `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i>${type}</a>`
+                );
+                btn.on('click', function () {
+                    node_config = { ...defaultMenuEntities[`ur_${type}`] };
+                    node_config._def = RED.nodes.getType(node_config.type);
+                    node_config.id = RED.nodes.id();
+                    node_config.order = data.node.children.length + 1;
+                    node_config.name += ` ${data.node.children.length + 1}`;
+                    node_config[parentField] = data.node.id;
+                    RED.nodes.add(node_config);
+                    RED.history.push({
+                        t: 'add',
+                        nodes: [node_config.id],
+                        dirty: RED.nodes.dirty(),
+                    });
+                    RED.nodes.dirty(true);
+                    initializeJsTree(selectedTab);
+                });
+                return btn;
+            };
 
             switch (data.node.type) {
                 case 'folder':
+                    buttons.push(addButton('page', 'folder'), addButton('folder', 'folder'));
                     break;
                 case 'page':
+                    buttons.push(addButton('group', 'page'));
                     break;
                 case 'group':
-                    const node_config = {
-                        'id': RED.util.generateId(),
-                        'type': 'ur_tab',
-                        'name': 'Tab 1',
-                        'order': 1,
-                        'group': data.node.id,
-                        'disabled': false,
-                        'hidden': false,
-                        'access': '',
-                    };
-
-                    let addGroupButton = $(
-                        `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i>tab</a>`
-                    );
-                    addGroupButton.on('click', function (evt) {
-                        let tabNode = RED.nodes.node(data.node.id);
-                        if (tabNode) {
-                            RED.createNode(node_config);
-                        }
-                    });
-                    buttons.push(addGroupButton);
-
+                    buttons.push(addButton('tab', 'group'));
                     break;
                 case 'tab':
                     break;
             }
+
             let editButton = $(
                 `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> </a>`
             );
-            editButton.on('click', function (evt) {
+            editButton.on('click', function () {
                 let tabNode = RED.nodes.node(data.node.id);
                 if (tabNode) {
                     RED.editor.editConfig('', tabNode.type, tabNode.id);
