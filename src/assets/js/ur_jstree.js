@@ -96,49 +96,42 @@ var defaultMenuEntities = {
     }
 
     function extractFolderChildren(folderNode) {
-        var folderWithChildren = {
+        const folder = {
             text: folderNode.name,
             id: folderNode.id,
             type: 'folder',
             children: [],
         };
 
-        var pages = extractNodesFromConfig('ur_page', 'folder', folderNode);
-        pages.forEach(function (page) {
-            var pageWithChildren = {
+        extractNodesFromConfig('ur_page', 'folder', folderNode).forEach((page) => {
+            const pageNode = {
                 text: page.name,
                 id: page.id,
                 type: 'page',
                 children: [],
             };
-            var groups = extractNodesFromConfig('ur_group', 'page', page);
-            groups.forEach(function (group) {
-                var groupWithChildren = {
+
+            extractNodesFromConfig('ur_group', 'page', page).forEach((group) => {
+                const groupNode = {
                     text: group.name,
                     id: group.id,
                     type: 'group',
-                    children: [],
-                };
-                var tabs = extractNodesFromConfig('ur_tab', 'group', group);
-                tabs.forEach(function (tab) {
-                    groupWithChildren.children.push({
+                    children: extractNodesFromConfig('ur_tab', 'group', group).map((tab) => ({
                         text: tab.name,
                         id: tab.id,
                         type: 'tab',
-                    });
-                });
-                pageWithChildren.children.push(groupWithChildren);
+                    })),
+                };
+                pageNode.children.push(groupNode);
             });
-            folderWithChildren.children.push(pageWithChildren);
+            folder.children.push(pageNode);
         });
 
-        var childFolders = extractNodesFromConfig('ur_folder', 'folder', folderNode);
-        childFolders.forEach(function (childFolder) {
-            var childFolderWithChildren = extractFolderChildren(childFolder);
-            folderWithChildren.children.push(childFolderWithChildren);
+        extractNodesFromConfig('ur_folder', 'folder', folderNode).forEach((childFolder) => {
+            folder.children.push(extractFolderChildren(childFolder));
         });
 
-        return folderWithChildren;
+        return folder;
     }
 
     function extractRootFolders() {
@@ -182,7 +175,6 @@ var defaultMenuEntities = {
         }
 
         let pathArray = [];
-        console.log('currentNode.icon', currentNode.icon);
         while (currentNode && currentNode.id !== '#') {
             let nodeType = currentNode.type || 'default';
             let badge = `<span class="badge badge-${nodeType === 'tab' ? 'selected' : 'standard'}"><i class="${
@@ -195,6 +187,18 @@ var defaultMenuEntities = {
         return `<i class="fa fa-columns"></i> Selected Tab: ${pathArray.join(
             ' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> '
         )}`;
+    }
+
+    function refreshJsTreeFromNodes() {
+        var rootFolders = extractRootFolders();
+        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
+        var instance = $.jstree.reference('#jstree');
+        if (instance) {
+            instance.settings.core.data = foldersTreeData;
+            instance.refresh({ skip_loading: false });
+        } else {
+            console.error('jsTree instance not available for updateJsTreeData');
+        }
     }
 
     function initializeJsTree(tabId) {
@@ -210,7 +214,6 @@ var defaultMenuEntities = {
         if ($.jstree.reference('#jstree')) {
             $('#jstree').jstree('destroy');
         }
-
 
         // Initial jsTree setup
         $('#jstree').jstree({
@@ -298,7 +301,7 @@ var defaultMenuEntities = {
                         dirty: RED.nodes.dirty(),
                     });
                     RED.nodes.dirty(true);
-                    initializeJsTree(selectedTab);
+                    refreshJsTreeFromNodes();
                 });
                 return btn;
             };
