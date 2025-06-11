@@ -42,13 +42,37 @@ var defaultMenuEntities = {
         if (document.getElementById('ur-jstree-styles')) {
             return; // Styles already injected
         }
-
         const style = document.createElement('style');
         style.id = 'ur-jstree-styles';
         style.textContent = `
-            /* Remove left margin from jstree container ul */
             ul.jstree-container-ul.jstree-children.jstree-wholerow-ul.jstree-no-dots {
                 margin-left: 0 !important;
+            }
+            .badge {
+                display: inline-block;
+                padding: 0.25em 0.6em;
+                font-size: 0.8em;
+                font-weight: 500;
+                line-height: 1;
+                text-align: center;
+                white-space: nowrap;
+                vertical-align: baseline;
+                border-radius: 0.375rem;
+                margin-right: 0.25rem;
+                margin-top: 0.5rem;
+                border: 1px solid #aaa;
+            }
+            .badge-standard {
+                color: #444;
+                background-color: #f4f4f4;
+            }
+            .badge-selected {
+                color: #444;
+                background-color: #dffadb;
+            }
+            .badge-none {
+                color: #444;
+                background-color: #f9c9c9;
             }
         `;
         document.head.appendChild(style);
@@ -69,17 +93,6 @@ var defaultMenuEntities = {
             }
         });
         return nodesArray;
-    }
-
-    function extractFoldersFromConfig() {
-        var foldersWithChildrenArray = [];
-        RED.nodes.eachConfig(function (folderNode) {
-            if (folderNode.type === 'ur_folder' && !folderNode.folder) {
-                var folderWithChildren = extractFolderChildren(folderNode);
-                foldersWithChildrenArray.push(folderWithChildren);
-            }
-        });
-        return foldersWithChildrenArray;
     }
 
     function extractFolderChildren(folderNode) {
@@ -160,22 +173,28 @@ var defaultMenuEntities = {
         let treeInstance = $.jstree.reference('#jstree');
         if (!treeInstance) {
             console.error('jsTree instance not available for getPathToNode');
-            return 'None';
+            return '<span class="badge badge-none">None</span>';
+        }
+
+        let currentNode = treeInstance.get_node(nodeId);
+        if (!currentNode) {
+            return `<i class="fa fa-columns"></i> Selected Tab: <span class="badge badge-none">None</span>`;
         }
 
         let pathArray = [];
-        let currentNode = treeInstance.get_node(nodeId);
-
-        if (!currentNode) {
-            return 'None';
-        }
-
+        console.log('currentNode.icon', currentNode.icon);
         while (currentNode && currentNode.id !== '#') {
-            pathArray.unshift(currentNode.text);
+            let nodeType = currentNode.type || 'default';
+            let badge = `<span class="badge badge-${nodeType === 'tab' ? 'selected' : 'standard'}"><i class="${
+                currentNode.icon
+            }"></i> ${currentNode.text}</span>`;
+            pathArray.unshift(badge);
             currentNode = treeInstance.get_node(currentNode.parent);
         }
 
-        return pathArray.join('][');
+        return `<i class="fa fa-columns"></i> Selected Tab: ${pathArray.join(
+            ' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> '
+        )}`;
     }
 
     function initializeJsTree(tabId) {
@@ -191,6 +210,7 @@ var defaultMenuEntities = {
         if ($.jstree.reference('#jstree')) {
             $('#jstree').jstree('destroy');
         }
+
 
         // Initial jsTree setup
         $('#jstree').jstree({
@@ -226,8 +246,7 @@ var defaultMenuEntities = {
         $('#jstree').on('select_node.jstree', function (e, data) {
             if (data.node.type === 'tab') {
                 selectedTab = data.node;
-                let path = getPathToNode(selectedTab.id);
-                $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
+                $('#selectedTabDisplay').html(getPathToNode(selectedTab.id));
             } else {
                 var instance = $.jstree.reference('#jstree');
                 if (instance.is_open(data.node)) {
@@ -263,7 +282,7 @@ var defaultMenuEntities = {
 
             const addButton = (type, parentField) => {
                 let btn = $(
-                    `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i>${type}</a>`
+                    `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ${type}</a>`
                 );
                 btn.on('click', function () {
                     node_config = { ...defaultMenuEntities[`ur_${type}`] };
@@ -333,19 +352,18 @@ var defaultMenuEntities = {
                     instance.select_node(tabId);
                     var selectedNode = instance.get_node(tabId);
                     if (selectedNode) {
-                        let path = getPathToNode(selectedNode.id);
-                        $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
+                        $('#selectedTabDisplay').html(getPathToNode(selectedNode.id));
                         setTimeout(() => {
                             scrollToNode(tabId);
                         }, 200);
                     } else {
-                        $('#selectedTabDisplay').text('Selected Tab: None');
+                        $('#selectedTabDisplay').html(getPathToNode(null));
                     }
                 } else {
                     // If no tab is selected, default to the first available tab
                     var rootNode = instance.get_node('#');
                     if (rootNode && rootNode.children_d) {
-                        $('#selectedTabDisplay').text('Selected Tab: None');
+                        $('#selectedTabDisplay').html(getPathToNode(null));
                     }
                 }
             }.bind(this)
@@ -357,14 +375,13 @@ var defaultMenuEntities = {
             if (instance) {
                 var storedNode = instance.get_node(tabId);
                 if (storedNode) {
-                    let path = getPathToNode(storedNode.id);
-                    $('#selectedTabDisplay').text(`Selected Tab: [${path}]`);
+                    $('#selectedTabDisplay').html(getPathToNode(storedNode.id));
                 } else {
-                    $('#selectedTabDisplay').text('Selected Tab: None');
+                    $('#selectedTabDisplay').html(getPathToNode(null));
                 }
             }
         } else {
-            $('#selectedTabDisplay').text('Selected Tab: None');
+            $('#selectedTabDisplay').html(getPathToNode(null));
         }
     }
 
