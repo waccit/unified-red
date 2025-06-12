@@ -37,7 +37,6 @@ var defaultMenuEntities = {
 };
 
 (function () {
-    // Inject CSS for jsTree styling
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
             return; // Styles already injected
@@ -290,11 +289,14 @@ var defaultMenuEntities = {
             $('.jstree-hover-button').remove();
             let buttons = [];
             let node_config = {};
+            const getButtonHTML = (icon) => {
+                return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> ${
+                    icon !== 'pencil' ? '<i class="fa fa-plus"></i>' : ''
+                } ${icon ? '<i class="fa fa-' + icon + '"></i>' : ''}</a>`;
+            }
 
             const addButton = (icon, type, parentField) => {
-                let btn = $(
-                    `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i></a>`
-                );
+                let btn = $(getButtonHTML(icon));
                 btn.on('click', function () {
                     node_config = { ...defaultMenuEntities[`ur_${type}`] };
                     node_config._def = RED.nodes.getType(node_config.type);
@@ -313,6 +315,15 @@ var defaultMenuEntities = {
                 });
                 return btn;
             };
+            
+            let editButton = $(getButtonHTML('pencil'));
+            editButton.on('click', function () {
+                let tabNode = RED.nodes.node(data.node.id);
+                if (tabNode) {
+                    RED.editor.editConfig('', tabNode.type, tabNode.id);
+                }
+            });
+            buttons.push(editButton);
 
             switch (data.node.type) {
                 case 'folder':
@@ -328,20 +339,8 @@ var defaultMenuEntities = {
                     break;
             }
 
-            let editButton = $(
-                `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-pencil"></i> </a>`
-            );
-            editButton.on('click', function () {
-                let tabNode = RED.nodes.node(data.node.id);
-                if (tabNode) {
-                    RED.editor.editConfig('', tabNode.type, tabNode.id);
-                }
-            });
-            buttons.push(editButton);
-
             var $node = $('#' + data.node.id);
-            var $anchor = $node.children('.jstree-anchor');
-            $anchor.css('position', 'relative');
+            var $anchor = $node.children('.jstree-wholerow');
             $anchor.append(buttons);
         });
 
