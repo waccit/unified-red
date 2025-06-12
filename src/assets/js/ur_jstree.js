@@ -74,6 +74,14 @@ var defaultMenuEntities = {
                 color: #444;
                 background-color: #f9c9c9;
             }
+            ul.jstree-children {
+                margin-left: 10px !important;
+                padding-left: 0 !important;
+            }
+            li.jstree-node {
+                margin-left: 0 !important;
+                padding-left: 10px !important;
+            }
         `;
         document.head.appendChild(style);
     }
