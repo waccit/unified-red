@@ -68,7 +68,7 @@ var defaultMenuEntities = {
             }
             .badge-selected {
                 color: #444;
-                background-color: #dffadb;
+                background-color: #ccecff;
             }
             .badge-none {
                 color: #444;
@@ -241,7 +241,7 @@ var defaultMenuEntities = {
                 },
             },
             'search': {
-                // 'show_only_matches': true
+                'show_only_matches': true,
             },
         });
 
@@ -283,9 +283,9 @@ var defaultMenuEntities = {
             let buttons = [];
             let node_config = {};
 
-            const addButton = (type, parentField) => {
+            const addButton = (icon, type, parentField) => {
                 let btn = $(
-                    `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ${type}</a>`
+                    `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i></a>`
                 );
                 btn.on('click', function () {
                     node_config = { ...defaultMenuEntities[`ur_${type}`] };
@@ -308,13 +308,13 @@ var defaultMenuEntities = {
 
             switch (data.node.type) {
                 case 'folder':
-                    buttons.push(addButton('page', 'folder'), addButton('folder', 'folder'));
+                    buttons.push(addButton('file-o', 'page', 'folder'), addButton('folder-o', 'folder', 'folder'));
                     break;
                 case 'page':
-                    buttons.push(addButton('group', 'page'));
+                    buttons.push(addButton('window-maximize', 'group', 'page'));
                     break;
                 case 'group':
-                    buttons.push(addButton('tab', 'group'));
+                    buttons.push(addButton('columns', 'tab', 'group'));
                     break;
                 case 'tab':
                     break;
