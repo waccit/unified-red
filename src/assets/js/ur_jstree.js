@@ -30,7 +30,7 @@ var defaultMenuEntities = {
     'ur_link': {
         type: 'ur_link',
         users: [],
-        icon: 'new-window',
+        icon: 'link',
         name: 'Link',
         target: 'newtab',
     },
@@ -95,7 +95,7 @@ var defaultMenuEntities = {
     function extractNodesFromConfig(nodeType, parentType, parentNode) {
         var nodesArray = [];
         RED.nodes.eachConfig(function (node) {
-            if (node.type === nodeType && node[parentType] === parentNode.id) {
+            if (node.type === nodeType && (!parentType || node[parentType] === parentNode?.id)) {
                 nodesArray.push(node);
             }
         });
@@ -106,10 +106,9 @@ var defaultMenuEntities = {
         const folder = {
             text: folderNode.name,
             id: folderNode.id,
-            type: 'folder',
+            type: folderNode.type === 'ur_folder' ? 'folder' : 'link',
             children: [],
         };
-
         extractNodesFromConfig('ur_page', 'folder', folderNode).forEach((page) => {
             const pageNode = {
                 text: page.name,
@@ -117,7 +116,6 @@ var defaultMenuEntities = {
                 type: 'page',
                 children: [],
             };
-
             extractNodesFromConfig('ur_group', 'page', page).forEach((group) => {
                 const groupNode = {
                     text: group.name,
@@ -134,6 +132,14 @@ var defaultMenuEntities = {
             folder.children.push(pageNode);
         });
 
+        extractNodesFromConfig('ur_link', 'folder', folderNode).forEach((link) => {
+            folder.children.push({
+                text: link.name,
+                id: link.id,
+                type: 'link',
+            });
+        });
+
         extractNodesFromConfig('ur_folder', 'folder', folderNode).forEach((childFolder) => {
             folder.children.push(extractFolderChildren(childFolder));
         });
@@ -143,12 +149,18 @@ var defaultMenuEntities = {
 
     function extractRootFolders() {
         var rootFoldersArray = [];
-        RED.nodes.eachConfig(function (folderNode) {
-            if (folderNode.type === 'ur_folder' && !folderNode.folder) {
-                rootFoldersArray.push(folderNode);
+        var rootLinksArray = [];
+
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder) {
+                rootFoldersArray.push(node);
+            }
+            if (node.type === 'ur_link' && !node.folder) {
+                rootLinksArray.push(node);
             }
         });
-        return rootFoldersArray;
+
+        return [...rootFoldersArray, ...rootLinksArray];
     }
 
     function scrollToNode(nodeId) {
@@ -246,6 +258,9 @@ var defaultMenuEntities = {
                 'tab': {
                     'icon': 'fa fa-columns',
                 },
+                'link': {
+                    'icon': 'fa fa-link',
+                },
             },
             'search': {
                 'show_only_matches': true,
@@ -293,7 +308,7 @@ var defaultMenuEntities = {
                 return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> ${
                     icon !== 'pencil' ? '<i class="fa fa-plus"></i>' : ''
                 } ${icon ? '<i class="fa fa-' + icon + '"></i>' : ''}</a>`;
-            }
+            };
 
             const addButton = (icon, type, parentField) => {
                 let btn = $(getButtonHTML(icon));
@@ -315,7 +330,7 @@ var defaultMenuEntities = {
                 });
                 return btn;
             };
-            
+
             let editButton = $(getButtonHTML('pencil'));
             editButton.on('click', function () {
                 let tabNode = RED.nodes.node(data.node.id);
@@ -327,7 +342,11 @@ var defaultMenuEntities = {
 
             switch (data.node.type) {
                 case 'folder':
-                    buttons.push(addButton('file-o', 'page', 'folder'), addButton('folder-o', 'folder', 'folder'));
+                    buttons.push(
+                        addButton('file-o', 'page', 'folder'),
+                        addButton('folder-o', 'folder', 'folder'),
+                        addButton('link', 'link', 'folder')
+                    );
                     break;
                 case 'page':
                     buttons.push(addButton('window-maximize', 'group', 'page'));
