@@ -72,7 +72,7 @@ var injectedStyles = `
     }
     li.jstree-node {
         margin-left: 0 !important;
-        padding-left: 10px !important;
+        padding-left: 7px !important;
     }
 `;
 
@@ -221,6 +221,40 @@ var injectedStyles = `
         }
     }
 
+    function fuzzyMatch(text, searchString) {
+        text = text.toLowerCase();
+        searchString = searchString.toLowerCase();
+
+        if (!searchString) return true;
+        if (!text) return false;
+
+        let searchIndex = 0;
+        let score = 0;
+        let consecutiveMatches = 0;
+
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === searchString[searchIndex]) {
+                // Add points for matching character
+                score += 1;
+                // Bonus points for consecutive matches
+                consecutiveMatches++;
+                score += consecutiveMatches * 0.5;
+                // Bonus points for matches at start of words
+                if (i === 0 || text[i - 1] === ' ') {
+                    score += 2;
+                }
+                searchIndex++;
+                if (searchIndex === searchString.length) {
+                    // Normalize score based on text length to favor shorter matches
+                    return score / text.length > 0.3;
+                }
+            } else {
+                consecutiveMatches = 0;
+            }
+        }
+        return false;
+    }
+
     function initializeJsTree(tabId) {
         if ($('#jstree').length === 0) {
             console.error("Element with ID 'jstree' not found in the DOM");
@@ -262,6 +296,9 @@ var injectedStyles = `
             },
             'search': {
                 'show_only_matches': true,
+                'search_callback': function (searchString, node) {
+                    return fuzzyMatch(node.text, searchString);
+                },
             },
         });
 
@@ -269,6 +306,7 @@ var injectedStyles = `
             if (data.node.type === 'tab') {
                 selectedTab = data.node;
                 $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
+                $('#jstree').removeClass('input-error');
             } else {
                 var instance = $.jstree.reference('#jstree');
                 if (instance.is_open(data.node)) {
@@ -399,6 +437,7 @@ var injectedStyles = `
             }
         } else {
             $('#selectedTabDisplay').html(generatePathBadges(null));
+            $('#jstree').addClass('input-error');
         }
     }
 
