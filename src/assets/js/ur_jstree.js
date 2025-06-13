@@ -36,6 +36,46 @@ var defaultMenuEntities = {
     },
 };
 
+var injectedStyles = `
+    ul.jstree-container-ul.jstree-children.jstree-wholerow-ul.jstree-no-dots {
+        margin-left: 0 !important;
+    }
+    .badge {
+        display: inline-block;
+        padding: 0.25em 0.6em;
+        font-size: 0.8em;
+        font-weight: 500;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: 0.375rem;
+        margin-right: 0.25rem;
+        margin-top: 0.5rem;
+        border: 1px solid #aaa;
+    }
+    .badge-standard {
+        color: #444;
+        background-color: #f4f4f4;
+    }
+    .badge-selected {
+        color: #444;
+        background-color: #ccecff;
+    }
+    .badge-none {
+        color: #444;
+        background-color: #f9c9c9;
+    }
+    ul.jstree-children {
+        margin-left: 10px !important;
+        padding-left: 0 !important;
+    }
+    li.jstree-node {
+        margin-left: 0 !important;
+        padding-left: 10px !important;
+    }
+`;
+
 (function () {
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
@@ -43,45 +83,7 @@ var defaultMenuEntities = {
         }
         const style = document.createElement('style');
         style.id = 'ur-jstree-styles';
-        style.textContent = `
-            ul.jstree-container-ul.jstree-children.jstree-wholerow-ul.jstree-no-dots {
-                margin-left: 0 !important;
-            }
-            .badge {
-                display: inline-block;
-                padding: 0.25em 0.6em;
-                font-size: 0.8em;
-                font-weight: 500;
-                line-height: 1;
-                text-align: center;
-                white-space: nowrap;
-                vertical-align: baseline;
-                border-radius: 0.375rem;
-                margin-right: 0.25rem;
-                margin-top: 0.5rem;
-                border: 1px solid #aaa;
-            }
-            .badge-standard {
-                color: #444;
-                background-color: #f4f4f4;
-            }
-            .badge-selected {
-                color: #444;
-                background-color: #ccecff;
-            }
-            .badge-none {
-                color: #444;
-                background-color: #f9c9c9;
-            }
-            ul.jstree-children {
-                margin-left: 10px !important;
-                padding-left: 0 !important;
-            }
-            li.jstree-node {
-                margin-left: 0 !important;
-                padding-left: 10px !important;
-            }
-        `;
+        style.textContent = injectedStyles;
         document.head.appendChild(style);
     }
 
@@ -173,18 +175,17 @@ var defaultMenuEntities = {
         let node = treeInstance.get_node(nodeId, true);
 
         if (node && node.length) {
-            // Ensure the node is visible and scroll to it
             treeInstance._open_to(nodeId);
             setTimeout(() => {
                 node[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 200); // Added a delay to ensure the node is fully loaded and visible
+            }, 200);
         }
     }
 
-    function getPathToNode(nodeId) {
+    function generatePathBadges(nodeId) {
         let treeInstance = $.jstree.reference('#jstree');
         if (!treeInstance) {
-            console.error('jsTree instance not available for getPathToNode');
+            console.error('jsTree instance not available for generatePathBadges');
             return '<span class="badge badge-none">None</span>';
         }
 
@@ -208,7 +209,7 @@ var defaultMenuEntities = {
         )}`;
     }
 
-    function refreshJsTreeFromNodes() {
+    function refreshJSTree() {
         var rootFolders = extractRootFolders();
         var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
         var instance = $.jstree.reference('#jstree');
@@ -226,15 +227,14 @@ var defaultMenuEntities = {
             return;
         }
         selectedTab = tabId;
-
         var rootFolders = extractRootFolders();
         var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
+        var debounce = false;
 
         if ($.jstree.reference('#jstree')) {
             $('#jstree').jstree('destroy');
         }
 
-        // Initial jsTree setup
         $('#jstree').jstree({
             'core': {
                 'data': foldersTreeData,
@@ -243,9 +243,7 @@ var defaultMenuEntities = {
             'multiple': false,
             'plugins': ['types', 'search', 'wholerow'],
             'types': {
-                'default': {
-                    // 'icon': 'fa fa-folder-o',
-                },
+                'default': {},
                 'folder': {
                     'icon': 'fa fa-folder-o',
                 },
@@ -267,11 +265,10 @@ var defaultMenuEntities = {
             },
         });
 
-        // handle click on a node (tab or non-tab)
         $('#jstree').on('select_node.jstree', function (e, data) {
             if (data.node.type === 'tab') {
                 selectedTab = data.node;
-                $('#selectedTabDisplay').html(getPathToNode(selectedTab.id));
+                $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
             } else {
                 var instance = $.jstree.reference('#jstree');
                 if (instance.is_open(data.node)) {
@@ -286,12 +283,11 @@ var defaultMenuEntities = {
             }
         });
 
-        var to = false;
         $('#treeSearch').keyup(function () {
-            if (to) {
-                clearTimeout(to);
+            if (debounce) {
+                clearTimeout(debounce);
             }
-            to = setTimeout(function () {
+            debounce = setTimeout(function () {
                 var v = $('#treeSearch').val();
                 var instance = $.jstree.reference('#jstree');
                 if (instance) {
@@ -326,7 +322,7 @@ var defaultMenuEntities = {
                         dirty: RED.nodes.dirty(),
                     });
                     RED.nodes.dirty(true);
-                    refreshJsTreeFromNodes();
+                    refreshJSTree();
                 });
                 return btn;
             };
@@ -367,7 +363,6 @@ var defaultMenuEntities = {
             $('.jstree-hover-button').remove();
         });
 
-        // Restore selected tab when the node is reopened, or select the first tab if none is selected
         $('#jstree').on(
             'ready.jstree',
             function () {
@@ -381,36 +376,29 @@ var defaultMenuEntities = {
                     instance.select_node(tabId);
                     var selectedNode = instance.get_node(tabId);
                     if (selectedNode) {
-                        $('#selectedTabDisplay').html(getPathToNode(selectedNode.id));
+                        $('#selectedTabDisplay').html(generatePathBadges(selectedNode.id));
                         setTimeout(() => {
                             scrollToNode(tabId);
                         }, 200);
                     } else {
-                        $('#selectedTabDisplay').html(getPathToNode(null));
-                    }
-                } else {
-                    // If no tab is selected, default to the first available tab
-                    var rootNode = instance.get_node('#');
-                    if (rootNode && rootNode.children_d) {
-                        $('#selectedTabDisplay').html(getPathToNode(null));
+                        $('#selectedTabDisplay').html(generatePathBadges(null));
                     }
                 }
             }.bind(this)
         );
 
-        // Update the selected tab display outside of the ready event
         if (tabId) {
             var instance = $.jstree.reference('#jstree');
             if (instance) {
                 var storedNode = instance.get_node(tabId);
                 if (storedNode) {
-                    $('#selectedTabDisplay').html(getPathToNode(storedNode.id));
+                    $('#selectedTabDisplay').html(generatePathBadges(storedNode.id));
                 } else {
-                    $('#selectedTabDisplay').html(getPathToNode(null));
+                    $('#selectedTabDisplay').html(generatePathBadges(null));
                 }
             }
         } else {
-            $('#selectedTabDisplay').html(getPathToNode(null));
+            $('#selectedTabDisplay').html(generatePathBadges(null));
         }
     }
 
