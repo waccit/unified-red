@@ -74,15 +74,6 @@ var injectedStyles = `
         margin-left: 0 !important;
         padding-left: 7px !important;
     }
-    .jstree-wholerow-clicked {
-        outline: none !important;
-    }
-    .jstree-wholerow-clicked:focus {
-        outline: none !important;
-    }
-    .jstree-wholerow-clicked:focus-visible {
-        outline: none !important;
-    }
 `;
 
 (function () {
