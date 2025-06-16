@@ -74,6 +74,15 @@ var injectedStyles = `
         margin-left: 0 !important;
         padding-left: 7px !important;
     }
+    .jstree-wholerow-clicked {
+        outline: none !important;
+    }
+    .jstree-wholerow-clicked:focus {
+        outline: none !important;
+    }
+    .jstree-wholerow-clicked:focus-visible {
+        outline: none !important;
+    }
 `;
 
 (function () {
@@ -338,14 +347,15 @@ var injectedStyles = `
             $('.jstree-hover-button').remove();
             let buttons = [];
             let node_config = {};
-            const getButtonHTML = (icon) => {
-                return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> ${
-                    icon !== 'pencil' ? '<i class="fa fa-plus"></i>' : ''
-                } ${icon ? '<i class="fa fa-' + icon + '"></i>' : ''}</a>`;
+            const addButtonHTML = (icon) => {
+                return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
+            };
+            const actionButtonHTML = (icon) => {
+                return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"><i class="fa fa-${icon}"></i> </a>`;
             };
 
             const addButton = (icon, type, parentField) => {
-                let btn = $(getButtonHTML(icon));
+                let btn = $(addButtonHTML(icon));
                 btn.on('click', function () {
                     node_config = { ...defaultMenuEntities[`ur_${type}`] };
                     node_config._def = RED.nodes.getType(node_config.type);
@@ -365,7 +375,7 @@ var injectedStyles = `
                 return btn;
             };
 
-            let editButton = $(getButtonHTML('pencil'));
+            let editButton = $(actionButtonHTML('pencil'));
             editButton.on('click', function () {
                 let tabNode = RED.nodes.node(data.node.id);
                 if (tabNode) {
@@ -373,6 +383,24 @@ var injectedStyles = `
                 }
             });
             buttons.push(editButton);
+
+            let pasteButton = $(actionButtonHTML('paste'));
+            pasteButton.on('click', function () {
+                let tabNode = RED.nodes.node(data.node.id);
+                if (tabNode) {
+                    RED.editor.editConfig('', tabNode.type, tabNode.id);
+                }
+            });
+            buttons.push(pasteButton);
+
+            let copyButton = $(actionButtonHTML('copy'));
+            copyButton.on('click', function () {
+                let tabNode = RED.nodes.node(data.node.id);
+                if (tabNode) {
+                    RED.editor.editConfig('', tabNode.type, tabNode.id);
+                }
+            });
+            buttons.push(copyButton);
 
             switch (data.node.type) {
                 case 'folder':
