@@ -78,6 +78,8 @@ var injectedStyles = `
 
 var clipboard = '';
 
+var ignoreVisibilityChange = true;
+
 (function () {
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
@@ -355,6 +357,35 @@ var clipboard = '';
             console.error("Element with ID 'jstree' not found in the DOM");
             return;
         }
+        const jstreeElement = document.getElementById('jstree');
+        const editPane = jstreeElement.closest('.red-ui-editor');
+        let lastVisibilityState = null;
+        const checkVisibility = () => {
+            const rect = jstreeElement.getBoundingClientRect();
+            const isVisible = rect.width > 0 && 
+                            rect.height > 0 && 
+                            window.getComputedStyle(jstreeElement).display !== 'none' &&
+                            window.getComputedStyle(jstreeElement).visibility !== 'hidden';
+
+            if (isVisible !== lastVisibilityState) {
+                lastVisibilityState = isVisible;
+                if (isVisible && !ignoreVisibilityChange) {
+                    refreshJSTree();
+                } else {
+                    ignoreVisibilityChange = false;
+                }
+            }
+        };
+        const observer = new MutationObserver(() => {
+            clearTimeout(window.visibilityCheckTimeout);
+            window.visibilityCheckTimeout = setTimeout(checkVisibility, 100);
+        });
+        observer.observe(editPane, {
+            attributes: true, 
+            childList: true,
+            subtree: true,
+        });
+
         selectedTab = tabId;
         var rootFolders = extractRootFolders();
         var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
