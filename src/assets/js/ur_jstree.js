@@ -409,8 +409,8 @@ var clipboard = '';
                 } else {
                     instance.open_node(data.node);
                 }
+                instance.deselect_node(data.node);
                 if (selectedTab) {
-                    instance.deselect_node(data.node);
                     instance.select_node(selectedTab.id);
                 }
             }
