@@ -76,6 +76,8 @@ var injectedStyles = `
     }
 `;
 
+var clipboard = '';
+
 (function () {
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
@@ -255,6 +257,99 @@ var injectedStyles = `
         return false;
     }
 
+    function pasteFromClipboard(node) {
+        var tree = $('#jstree').jstree(true);
+        const shakeButtons = () =>
+            $('.jstree-hover-button').each(function (i) {
+                $(this)
+                    .css('position', 'relative')
+                    .animate({ left: '-3px' }, 50)
+                    .animate({ left: '3px' }, 100)
+                    .animate({ left: '-3px' }, 100)
+                    .animate({ left: '3px' }, 100)
+                    .animate({ left: '0px' }, 50);
+            });
+        const recursiveAdd = (parentNode, currentNode, index, nodeREDID) => {
+            const newNodeId = createNodeCopyPaste(
+                nodeREDID,
+                parentNode.type,
+                index,
+                currentNode.text,
+                currentNode.type
+            );
+            if (currentNode.children && currentNode.children.length > 0) {
+                currentNode.children.forEach((childId, childIndex) => {
+                    const childNode = tree.get_node(childId);
+                    if (childNode) {
+                        recursiveAdd(currentNode, childNode, childIndex, newNodeId);
+                    }
+                });
+            }
+        };
+        if (!clipboard) {
+            shakeButtons();
+            return;
+        }
+        switch (node.type) {
+            case 'folder':
+                if (!['link', 'folder', 'page'].includes(clipboard.type)) {
+                    shakeButtons();
+                    return;
+                }
+                break;
+            case 'page':
+                if (!['group'].includes(clipboard.type)) {
+                    shakeButtons();
+                    return;
+                }
+                break;
+            case 'group':
+                if (!['tab'].includes(clipboard.type)) {
+                    shakeButtons();
+                    return;
+                }
+                break;
+            default:
+                shakeButtons();
+                return;
+        }
+        recursiveAdd(node, clipboard, node.children.length, node.id);
+        refreshJSTree();
+    }
+
+    function createNodeCopyPaste(parentID, parentType, index, name, type) {
+        let node_config = { ...defaultMenuEntities[`ur_${type}`] };
+        node_config._def = RED.nodes.getType(node_config.type);
+        node_config.id = RED.nodes.id();
+        node_config.order = index;
+        node_config.name = name;
+        node_config[parentType] = parentID;
+        RED.nodes.add(node_config);
+        RED.history.push({
+            t: 'add',
+            nodes: [node_config.id],
+            dirty: RED.nodes.dirty(),
+        });
+        RED.nodes.dirty(true);
+        return node_config.id;
+    }
+
+    function createNodeUsingJSTree(node, type) {
+        let node_config = { ...defaultMenuEntities[`ur_${type}`] };
+        node_config._def = RED.nodes.getType(node_config.type);
+        node_config.id = RED.nodes.id();
+        node_config.order = node.children.length + 1;
+        node_config.name += ` ${node.children.length + 1}`;
+        node_config[node.type] = node.id;
+        RED.nodes.add(node_config);
+        RED.history.push({
+            t: 'add',
+            nodes: [node_config.id],
+            dirty: RED.nodes.dirty(),
+        });
+        RED.nodes.dirty(true);
+    }
+
     function initializeJsTree(tabId) {
         if ($('#jstree').length === 0) {
             console.error("Element with ID 'jstree' not found in the DOM");
@@ -337,7 +432,6 @@ var injectedStyles = `
         $('#jstree').on('hover_node.jstree', function (e, data) {
             $('.jstree-hover-button').remove();
             let buttons = [];
-            let node_config = {};
             const addButtonHTML = (icon) => {
                 return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
             };
@@ -345,29 +439,21 @@ var injectedStyles = `
                 return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"><i class="fa fa-${icon}"></i> </a>`;
             };
 
-            const addButton = (icon, type, parentField) => {
+            const addButton = (icon, type) => {
                 let btn = $(addButtonHTML(icon));
-                btn.on('click', function () {
-                    node_config = { ...defaultMenuEntities[`ur_${type}`] };
-                    node_config._def = RED.nodes.getType(node_config.type);
-                    node_config.id = RED.nodes.id();
-                    node_config.order = data.node.children.length + 1;
-                    node_config.name += ` ${data.node.children.length + 1}`;
-                    node_config[parentField] = data.node.id;
-                    RED.nodes.add(node_config);
-                    RED.history.push({
-                        t: 'add',
-                        nodes: [node_config.id],
-                        dirty: RED.nodes.dirty(),
-                    });
-                    RED.nodes.dirty(true);
+                btn.on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    createNodeUsingJSTree(data.node, type);
                     refreshJSTree();
                 });
                 return btn;
             };
 
             let editButton = $(actionButtonHTML('pencil'));
-            editButton.on('click', function () {
+            editButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
                 let tabNode = RED.nodes.node(data.node.id);
                 if (tabNode) {
                     RED.editor.editConfig('', tabNode.type, tabNode.id);
@@ -375,37 +461,37 @@ var injectedStyles = `
             });
             buttons.push(editButton);
 
-            let pasteButton = $(actionButtonHTML('paste'));
-            pasteButton.on('click', function () {
-                let tabNode = RED.nodes.node(data.node.id);
-                if (tabNode) {
-                    RED.editor.editConfig('', tabNode.type, tabNode.id);
-                }
-            });
-            buttons.push(pasteButton);
+            if (['folder', 'page', 'group'].includes(data.node.type)) {
+                let pasteButton = $(actionButtonHTML('paste'));
+                pasteButton.on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    pasteFromClipboard(data.node);
+                });
+                buttons.push(pasteButton);
+            }
 
             let copyButton = $(actionButtonHTML('copy'));
-            copyButton.on('click', function () {
-                let tabNode = RED.nodes.node(data.node.id);
-                if (tabNode) {
-                    RED.editor.editConfig('', tabNode.type, tabNode.id);
-                }
+            copyButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                clipboard = data.node;
             });
             buttons.push(copyButton);
 
             switch (data.node.type) {
                 case 'folder':
                     buttons.push(
-                        addButton('file-o', 'page', 'folder'),
-                        addButton('folder-o', 'folder', 'folder'),
-                        addButton('link', 'link', 'folder')
+                        addButton('file-o', 'page'),
+                        addButton('folder-o', 'folder'),
+                        addButton('link', 'link')
                     );
                     break;
                 case 'page':
-                    buttons.push(addButton('window-maximize', 'group', 'page'));
+                    buttons.push(addButton('window-maximize', 'group'));
                     break;
                 case 'group':
-                    buttons.push(addButton('columns', 'tab', 'group'));
+                    buttons.push(addButton('columns', 'tab'));
                     break;
                 case 'tab':
                     break;
