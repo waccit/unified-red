@@ -105,7 +105,7 @@ var ignoreVisibilityChange = true;
                 nodesArray.push(node);
             }
         });
-        return nodesArray;
+        return nodesArray.sort((a, b) => a.order - b.order);
     }
 
     function extractFolderChildren(folderNode) {
@@ -166,7 +166,7 @@ var ignoreVisibilityChange = true;
             }
         });
 
-        return [...rootFoldersArray, ...rootLinksArray];
+        return [...rootFoldersArray, ...rootLinksArray].sort((a, b) => a.order - b.order);
     }
 
     function scrollToNode(nodeId) {
@@ -362,10 +362,11 @@ var ignoreVisibilityChange = true;
         let lastVisibilityState = null;
         const checkVisibility = () => {
             const rect = jstreeElement.getBoundingClientRect();
-            const isVisible = rect.width > 0 && 
-                            rect.height > 0 && 
-                            window.getComputedStyle(jstreeElement).display !== 'none' &&
-                            window.getComputedStyle(jstreeElement).visibility !== 'hidden';
+            const isVisible =
+                rect.width > 0 &&
+                rect.height > 0 &&
+                window.getComputedStyle(jstreeElement).display !== 'none' &&
+                window.getComputedStyle(jstreeElement).visibility !== 'hidden';
 
             if (isVisible !== lastVisibilityState) {
                 lastVisibilityState = isVisible;
@@ -381,7 +382,7 @@ var ignoreVisibilityChange = true;
             window.visibilityCheckTimeout = setTimeout(checkVisibility, 100);
         });
         observer.observe(editPane, {
-            attributes: true, 
+            attributes: true,
             childList: true,
             subtree: true,
         });
@@ -399,9 +400,28 @@ var ignoreVisibilityChange = true;
             'core': {
                 'data': foldersTreeData,
                 'dblclick_toggle': false,
+                'check_callback': function (operation, node, parent, position, more) {
+                    if (operation === 'move_node') {
+                        // Only allow moving nodes within the same parent (reordering)
+                        if (parent && parent.id === node.parent) {
+                            return true;
+                        }
+                        // Prevent moving nodes to different parents
+                        return false;
+                    }
+                    return true;
+                },
             },
             'multiple': false,
-            'plugins': ['types', 'search', 'wholerow'],
+            'plugins': ['types', 'search', 'wholerow', 'dnd'],
+            'dnd': {
+                'copy': false,
+                'large_drop_target': true,
+                'large_drag_target': true,
+                'is_draggable': function (nodes) {
+                    return true;
+                },
+            },
             'types': {
                 'default': {},
                 'folder': {
@@ -426,6 +446,28 @@ var ignoreVisibilityChange = true;
                     return fuzzyMatch(node.text, searchString);
                 },
             },
+        });
+
+        $('#jstree').on('move_node.jstree', function (e, data) {
+            // Get all siblings including the moved node
+            let siblings = data.instance.get_node(data.parent).children;
+
+            // Update the order in the backend
+            siblings.forEach((nodeId) => {
+                let node = RED.nodes.node(nodeId);
+                node.order = siblings.indexOf(nodeId) + 1;
+                RED.nodes.dirty(true);
+                RED.history.push({
+                    t: 'edit',
+                    node: node,
+                    changed: true,
+                    dirty: node.dirty,
+                    changes: {
+                        order: node.order,
+                    },
+                });
+                RED.view.redraw();
+            });
         });
 
         $('#jstree').on('select_node.jstree', function (e, data) {
