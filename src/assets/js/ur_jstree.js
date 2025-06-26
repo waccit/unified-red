@@ -74,6 +74,23 @@ var injectedStyles = `
         margin-left: 0 !important;
         padding-left: 7px !important;
     }
+    #vakata-dnd {
+        font-family: 'Arial', sans-serif !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        color: #333 !important;
+    }
+    
+    /* Replace jstree-er icon in drag preview with Font Awesome fa-columns */
+    #vakata-dnd .jstree-icon.jstree-er {
+        font-family: 'FontAwesome' !important;
+        font-size: 14px !important;
+    }
+    
+    #vakata-dnd .jstree-icon.jstree-er:before {
+        content: "\f0db" !important; /* Font Awesome fa-columns icon */
+        font-family: 'FontAwesome' !important;
+    }
 `;
 
 var clipboard = '';
@@ -402,12 +419,28 @@ var ignoreVisibilityChange = true;
                 'dblclick_toggle': false,
                 'check_callback': function (operation, node, parent, position, more) {
                     if (operation === 'move_node') {
-                        // Only allow moving nodes within the same parent (reordering)
-                        if (parent && parent.id === node.parent) {
-                            return true;
+                        switch (parent?.type) {
+                            case 'folder':
+                                if (node.type === 'folder' || node.type === 'page' || node.type === 'link') {
+                                    return true;
+                                }
+                                return false;
+                            case 'page':
+                                if (node.type === 'group') {
+                                    return true;
+                                }
+                                return false;
+                            case 'group':
+                                if (node.type === 'tab') {
+                                    return true;
+                                }
+                                return false;
+                            case 'tab':
+                            case 'link':
+                                return false;
+                            default:
+                                return false;
                         }
-                        // Prevent moving nodes to different parents
-                        return false;
                     }
                     return true;
                 },
@@ -421,6 +454,8 @@ var ignoreVisibilityChange = true;
                 'is_draggable': function (nodes) {
                     return true;
                 },
+                'auto_expand': false,
+                'open_timeout': 0,
             },
             'types': {
                 'default': {},
@@ -449,13 +484,9 @@ var ignoreVisibilityChange = true;
         });
 
         $('#jstree').on('move_node.jstree', function (e, data) {
-            // Get all siblings including the moved node
-            let siblings = data.instance.get_node(data.parent).children;
-
-            // Update the order in the backend
-            siblings.forEach((nodeId) => {
+            const reorderNode = (nodeId) => {
                 let node = RED.nodes.node(nodeId);
-                node.order = siblings.indexOf(nodeId) + 1;
+                node.order = newSiblings.indexOf(nodeId) + 1;
                 RED.nodes.dirty(true);
                 RED.history.push({
                     t: 'edit',
@@ -467,7 +498,21 @@ var ignoreVisibilityChange = true;
                     },
                 });
                 RED.view.redraw();
+            };
+
+            let newParent = data.instance.get_node(data.parent);
+            let newSiblings = newParent.children;
+            newSiblings.forEach((nodeId) => {
+                reorderNode(nodeId);
             });
+            if (data.old_parent !== data.parent) {
+                let oldSiblings = data.instance.get_node(data.old_parent).children;
+                oldSiblings.forEach((nodeId) => {
+                    reorderNode(nodeId);
+                });
+                let node = RED.nodes.node(data.node.id);
+                node[newParent.type] = newParent.id;
+            }
         });
 
         $('#jstree').on('select_node.jstree', function (e, data) {
@@ -482,6 +527,7 @@ var ignoreVisibilityChange = true;
                 } else {
                     instance.open_node(data.node);
                 }
+
                 instance.deselect_node(data.node);
                 if (selectedTab) {
                     instance.select_node(selectedTab.id);
