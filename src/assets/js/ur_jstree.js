@@ -79,6 +79,10 @@ var injectedStyles = `
         font-size: 14px !important;
         font-weight: normal !important;
         color: #333 !important;
+        background-color: #fff !important;
+        border: 2px solid #ccecff !important;
+        border-radius: 5px !important;
+        padding-right: 5px !important;
     }
     
     /* Replace jstree-er icon in drag preview with Font Awesome fa-columns */
@@ -86,14 +90,21 @@ var injectedStyles = `
         font-family: 'FontAwesome' !important;
         font-size: 14px !important;
     }
-    
+        
     #vakata-dnd .jstree-icon.jstree-er:before {
         content: "\f0db" !important; /* Font Awesome fa-columns icon */
         font-family: 'FontAwesome' !important;
     }
+    #jstree-marker {
+        z-index: 5555;
+    }
+    .jstree-disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
 `;
 
-var clipboard = '';
+var clipboard = null;
 
 var ignoreVisibilityChange = true;
 
@@ -231,42 +242,34 @@ var ignoreVisibilityChange = true;
     }
 
     function refreshJSTree() {
-        var rootFolders = extractRootFolders();
-        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
         var instance = $.jstree.reference('#jstree');
-        if (instance) {
-            instance.settings.core.data = foldersTreeData;
-            instance.refresh({ skip_loading: false });
-        } else {
+        if (!instance) {
             console.error('jsTree instance not available for updateJsTreeData');
         }
+        var rootFolders = extractRootFolders();
+        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
+        instance.settings.core.data = foldersTreeData;
+        instance.refresh({ skip_loading: false });
     }
 
     function fuzzyMatch(text, searchString) {
         text = text.toLowerCase();
         searchString = searchString.toLowerCase();
-
         if (!searchString) return true;
         if (!text) return false;
-
         let searchIndex = 0;
         let score = 0;
         let consecutiveMatches = 0;
-
         for (let i = 0; i < text.length; i++) {
             if (text[i] === searchString[searchIndex]) {
-                // Add points for matching character
                 score += 1;
-                // Bonus points for consecutive matches
                 consecutiveMatches++;
                 score += consecutiveMatches * 0.5;
-                // Bonus points for matches at start of words
                 if (i === 0 || text[i - 1] === ' ') {
                     score += 2;
                 }
                 searchIndex++;
                 if (searchIndex === searchString.length) {
-                    // Normalize score based on text length to favor shorter matches
                     return score / text.length > 0.3;
                 }
             } else {
@@ -276,18 +279,34 @@ var ignoreVisibilityChange = true;
         return false;
     }
 
+    function shakeButtons() {
+        $('.jstree-hover-button').each(function (i) {
+            $(this)
+                .css('position', 'relative')
+                .animate({ left: '-3px' }, 50)
+                .animate({ left: '3px' }, 100)
+                .animate({ left: '-3px' }, 100)
+                .animate({ left: '3px' }, 100)
+                .animate({ left: '0px' }, 50);
+        });
+    }
+
+    function cutNode(node) {
+        var instance = $.jstree.reference('#jstree');
+        if (selectedTab && selectedTab.id === node.id) {
+            shakeButtons();
+            return;
+        }
+        if (clipboard && clipboard.state.disabled) {
+            instance.enable_node(clipboard);
+        }
+        instance.disable_node(node);
+        clipboard = node;
+    }
+
     function pasteFromClipboard(node) {
         var tree = $('#jstree').jstree(true);
-        const shakeButtons = () =>
-            $('.jstree-hover-button').each(function (i) {
-                $(this)
-                    .css('position', 'relative')
-                    .animate({ left: '-3px' }, 50)
-                    .animate({ left: '3px' }, 100)
-                    .animate({ left: '-3px' }, 100)
-                    .animate({ left: '3px' }, 100)
-                    .animate({ left: '0px' }, 50);
-            });
+
         const recursiveAdd = (parentNode, currentNode, index, nodeREDID) => {
             const newNodeId = createNodeCopyPaste(
                 nodeREDID,
@@ -305,6 +324,21 @@ var ignoreVisibilityChange = true;
                 });
             }
         };
+
+        const recursiveDelete = (node) => {
+            if (node.children && node.children.length > 0) {
+                node.children.forEach((childId) => {
+                    recursiveDelete(tree.get_node(childId));
+                });
+            }
+            RED.nodes.remove(node.id);
+            RED.history.push({
+                t: 'remove',
+                nodes: [node.id],
+                dirty: RED.nodes.dirty(),
+            });
+        };
+
         if (!clipboard) {
             shakeButtons();
             return;
@@ -333,6 +367,13 @@ var ignoreVisibilityChange = true;
                 return;
         }
         recursiveAdd(node, clipboard, node.children.length, node.id);
+        if (clipboard && clipboard.state.disabled) {
+            recursiveDelete(clipboard);
+            clipboard = null;
+        }
+        if (!tree.is_open(node)) {
+            tree.open_node(node);
+        }
         refreshJSTree();
     }
 
@@ -417,7 +458,7 @@ var ignoreVisibilityChange = true;
             'core': {
                 'data': foldersTreeData,
                 'dblclick_toggle': false,
-                'check_callback': function (operation, node, parent, position, more) {
+                'check_callback': function (operation, node, parent) {
                     if (operation === 'move_node') {
                         switch (parent?.type) {
                             case 'folder':
@@ -439,10 +480,17 @@ var ignoreVisibilityChange = true;
                             case 'link':
                                 return false;
                             default:
+                                if (
+                                    parent &&
+                                    parent.id === '#' &&
+                                    (node.type === 'folder' || node.type === 'link')
+                                ) {
+                                    return true;
+                                }
                                 return false;
                         }
                     }
-                    return true;
+                    return false;
                 },
             },
             'multiple': false,
@@ -483,6 +531,12 @@ var ignoreVisibilityChange = true;
             },
         });
 
+        $('#jstree').on('refresh.jstree', function () {
+            if (clipboard && clipboard.state.disabled) {
+                $('#jstree').jstree('disable_node', clipboard);
+            }
+        });
+
         $('#jstree').on('move_node.jstree', function (e, data) {
             const reorderNode = (nodeId) => {
                 let node = RED.nodes.node(nodeId);
@@ -513,6 +567,7 @@ var ignoreVisibilityChange = true;
                 let node = RED.nodes.node(data.node.id);
                 node[newParent.type] = newParent.id;
             }
+            $('#selectedTabDisplay').html(generatePathBadges(data.node.id));
         });
 
         $('#jstree').on('select_node.jstree', function (e, data) {
@@ -564,6 +619,9 @@ var ignoreVisibilityChange = true;
                     e.preventDefault();
                     e.stopPropagation();
                     createNodeUsingJSTree(data.node, type);
+                    if (!instance.is_open(data.node)) {
+                        instance.open_node(data.node);
+                    }
                     refreshJSTree();
                 });
                 return btn;
@@ -597,6 +655,14 @@ var ignoreVisibilityChange = true;
                 clipboard = data.node;
             });
             buttons.push(copyButton);
+
+            let cutButton = $(actionButtonHTML('cut'));
+            cutButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                cutNode(data.node);
+            });
+            buttons.push(cutButton);
 
             switch (data.node.type) {
                 case 'folder':
