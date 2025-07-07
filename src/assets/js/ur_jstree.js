@@ -292,6 +292,10 @@ var ignoreVisibilityChange = true;
     }
 
     function cutNode(node) {
+        if (selectedTab.parents.includes(node.id)) {
+            shakeButtons();
+            return;
+        }
         var instance = $.jstree.reference('#jstree');
         if (selectedTab && selectedTab.id === node.id) {
             shakeButtons();
@@ -301,7 +305,9 @@ var ignoreVisibilityChange = true;
             instance.enable_node(clipboard);
         }
         instance.disable_node(node);
+        instance.close_node(node);
         clipboard = node;
+        onHoverNode(node);
     }
 
     function pasteFromClipboard(node) {
@@ -410,6 +416,102 @@ var ignoreVisibilityChange = true;
         RED.nodes.dirty(true);
     }
 
+    function onHoverNode(node) {
+        var instance = $.jstree.reference('#jstree');
+        let buttons = [];
+        const addButtonHTML = (icon) => {
+            return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
+        };
+        const actionButtonHTML = (icon) => {
+            return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"><i class="fa fa-${icon}"></i> </a>`;
+        };
+        $('.jstree-hover-button').remove();
+        if (!instance.get_node(node.id).state.disabled) {
+            const addButton = (icon, type) => {
+                let btn = $(addButtonHTML(icon));
+                btn.on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    createNodeUsingJSTree(node, type);
+                    if (!instance.is_open(node)) {
+                        instance.open_node(node);
+                    }
+                    refreshJSTree();
+                });
+                return btn;
+            };
+
+            let editButton = $(actionButtonHTML('pencil'));
+            editButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                let tabNode = RED.nodes.node(node.id);
+                if (tabNode) {
+                    RED.editor.editConfig('', tabNode.type, tabNode.id);
+                }
+            });
+            buttons.push(editButton);
+
+            if (['folder', 'page', 'group'].includes(node.type)) {
+                let pasteButton = $(actionButtonHTML('paste'));
+                pasteButton.on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    pasteFromClipboard(node);
+                });
+                buttons.push(pasteButton);
+            }
+
+            let copyButton = $(actionButtonHTML('copy'));
+            copyButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                clipboard = node;
+            });
+            buttons.push(copyButton);
+
+            let cutButton = $(actionButtonHTML('cut'));
+            cutButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                cutNode(node);
+            });
+            buttons.push(cutButton);
+
+            switch (node.type) {
+                case 'folder':
+                    buttons.push(
+                        addButton('file-o', 'page'),
+                        addButton('folder-o', 'folder'),
+                        addButton('link', 'link')
+                    );
+                    break;
+                case 'page':
+                    buttons.push(addButton('window-maximize', 'group'));
+                    break;
+                case 'group':
+                    buttons.push(addButton('columns', 'tab'));
+                    break;
+                case 'tab':
+                    break;
+            }
+        } else {
+            let undoButton = $(actionButtonHTML('undo'));
+            undoButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                clipboard = null;
+                instance.enable_node(node);
+                onHoverNode(node);
+            });
+            buttons.push(undoButton);
+        }
+
+        var $node = $('#' + node.id);
+        var $anchor = $node.children('.jstree-wholerow');
+        $anchor.append(buttons);
+    }
+
     function initializeJsTree(tabId) {
         if ($('#jstree').length === 0) {
             console.error("Element with ID 'jstree' not found in the DOM");
@@ -480,11 +582,7 @@ var ignoreVisibilityChange = true;
                             case 'link':
                                 return false;
                             default:
-                                if (
-                                    parent &&
-                                    parent.id === '#' &&
-                                    (node.type === 'folder' || node.type === 'link')
-                                ) {
+                                if (parent && parent.id === '#' && (node.type === 'folder' || node.type === 'link')) {
                                     return true;
                                 }
                                 return false;
@@ -604,87 +702,7 @@ var ignoreVisibilityChange = true;
         });
 
         $('#jstree').on('hover_node.jstree', function (e, data) {
-            $('.jstree-hover-button').remove();
-            let buttons = [];
-            const addButtonHTML = (icon) => {
-                return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
-            };
-            const actionButtonHTML = (icon) => {
-                return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"><i class="fa fa-${icon}"></i> </a>`;
-            };
-
-            const addButton = (icon, type) => {
-                let btn = $(addButtonHTML(icon));
-                btn.on('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    createNodeUsingJSTree(data.node, type);
-                    if (!instance.is_open(data.node)) {
-                        instance.open_node(data.node);
-                    }
-                    refreshJSTree();
-                });
-                return btn;
-            };
-
-            let editButton = $(actionButtonHTML('pencil'));
-            editButton.on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                let tabNode = RED.nodes.node(data.node.id);
-                if (tabNode) {
-                    RED.editor.editConfig('', tabNode.type, tabNode.id);
-                }
-            });
-            buttons.push(editButton);
-
-            if (['folder', 'page', 'group'].includes(data.node.type)) {
-                let pasteButton = $(actionButtonHTML('paste'));
-                pasteButton.on('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    pasteFromClipboard(data.node);
-                });
-                buttons.push(pasteButton);
-            }
-
-            let copyButton = $(actionButtonHTML('copy'));
-            copyButton.on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                clipboard = data.node;
-            });
-            buttons.push(copyButton);
-
-            let cutButton = $(actionButtonHTML('cut'));
-            cutButton.on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                cutNode(data.node);
-            });
-            buttons.push(cutButton);
-
-            switch (data.node.type) {
-                case 'folder':
-                    buttons.push(
-                        addButton('file-o', 'page'),
-                        addButton('folder-o', 'folder'),
-                        addButton('link', 'link')
-                    );
-                    break;
-                case 'page':
-                    buttons.push(addButton('window-maximize', 'group'));
-                    break;
-                case 'group':
-                    buttons.push(addButton('columns', 'tab'));
-                    break;
-                case 'tab':
-                    break;
-            }
-
-            var $node = $('#' + data.node.id);
-            var $anchor = $node.children('.jstree-wholerow');
-            $anchor.append(buttons);
+            onHoverNode(data.node);
         });
 
         $('#jstree').on('dehover_node.jstree', function () {
