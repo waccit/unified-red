@@ -304,7 +304,18 @@ var ignoreVisibilityChange = true;
         if (clipboard && clipboard.state.disabled) {
             instance.enable_node(clipboard);
         }
-        instance.disable_node(node);
+
+        const disableNodeAndChildren = (currentNode) => {
+            instance.disable_node(currentNode);
+            if (currentNode.children && currentNode.children.length > 0) {
+                currentNode.children.forEach(childId => {
+                    const childNode = instance.get_node(childId);
+                    disableNodeAndChildren(childNode);
+                });
+            }
+        };
+
+        disableNodeAndChildren(node);
         instance.close_node(node);
         clipboard = node;
         onHoverNode(node);
@@ -496,12 +507,24 @@ var ignoreVisibilityChange = true;
                     break;
             }
         } else {
+            if (clipboard && clipboard.id !== node.id) {
+                return;
+            }
             let undoButton = $(actionButtonHTML('undo'));
             undoButton.on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 clipboard = null;
-                instance.enable_node(node);
+                const enableNodeAndChildren = (currentNode) => {
+                    instance.enable_node(currentNode);
+                    if (currentNode.children && currentNode.children.length > 0) {
+                        currentNode.children.forEach(childId => {
+                            const childNode = instance.get_node(childId);
+                            enableNodeAndChildren(childNode);
+                        });
+                    }
+                };
+                enableNodeAndChildren(node);
                 onHoverNode(node);
             });
             buttons.push(undoButton);
@@ -598,7 +621,7 @@ var ignoreVisibilityChange = true;
                 'large_drop_target': true,
                 'large_drag_target': true,
                 'is_draggable': function (nodes) {
-                    return true;
+                    return !nodes[0].state.disabled;
                 },
                 'auto_expand': false,
                 'open_timeout': 0,
