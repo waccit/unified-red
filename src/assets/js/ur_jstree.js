@@ -259,9 +259,37 @@ var ignoreVisibilityChange = true;
     }
 
     function applyCutClasses() {
+        // Clean up orphaned cut nodes (when clipboard is cleared externally)
+        if (!clipboard && cutNodes.size > 0) {
+            cutNodes.forEach((nodeId) => {
+                $('#' + nodeId).removeClass('jstree-cut');
+            });
+            cutNodes.clear();
+            return;
+        }
+        
         cutNodes.forEach((nodeId) => {
             $('#' + nodeId).addClass('jstree-cut');
         });
+    }
+
+    // Helper function to clear both clipboard and cut nodes together
+    function clearClipboard() {
+        if (clipboard && cutNodes.has(clipboard.id)) {
+            const instance = $.jstree.reference('#jstree');
+            const removeCutFromChildren = (currentNode) => {
+                cutNodes.delete(currentNode.id);
+                $('#' + currentNode.id).removeClass('jstree-cut');
+                if (currentNode.children && currentNode.children.length > 0) {
+                    currentNode.children.forEach((childId) => {
+                        const childNode = instance.get_node(childId);
+                        if (childNode) removeCutFromChildren(childNode);
+                    });
+                }
+            };
+            removeCutFromChildren(clipboard);
+        }
+        clipboard = null;
     }
 
     function fuzzyMatch(text, searchString) {
@@ -455,6 +483,15 @@ var ignoreVisibilityChange = true;
     function onHoverNode(node) {
         var instance = $.jstree.reference('#jstree');
         let buttons = [];
+        
+        // Clean up orphaned cut nodes if clipboard is cleared externally
+        if (!clipboard && cutNodes.size > 0) {
+            cutNodes.forEach((nodeId) => {
+                $('#' + nodeId).removeClass('jstree-cut');
+            });
+            cutNodes.clear();
+        }
+        
         const addButtonHTML = (icon) => {
             return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
         };
@@ -535,24 +572,13 @@ var ignoreVisibilityChange = true;
             if (clipboard && clipboard.id !== node.id) {
                 return;
             }
-            let undoButton = $(actionButtonHTML('undo'));
-            undoButton.on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                clipboard = null;
-                const removeCutFromChildren = (currentNode) => {
-                    cutNodes.delete(currentNode.id);
-                    $('#' + currentNode.id).removeClass('jstree-cut');
-                    if (currentNode.children && currentNode.children.length > 0) {
-                        currentNode.children.forEach((childId) => {
-                            const childNode = instance.get_node(childId);
-                            removeCutFromChildren(childNode);
-                        });
-                    }
-                };
-                removeCutFromChildren(node);
-                onHoverNode(node);
-            });
+                         let undoButton = $(actionButtonHTML('undo'));
+             undoButton.on('click', function (e) {
+                 e.preventDefault();
+                 e.stopPropagation();
+                 clearClipboard();
+                 onHoverNode(node);
+             });
             buttons.push(undoButton);
         }
 
@@ -825,4 +851,5 @@ var ignoreVisibilityChange = true;
     // Exposes functions to global scope for use in HTML scripts
     window.initializeJsTree = initializeJsTree;
     window.getSelectedTab = getSelectedTab;
+    window.clearClipboard = clearClipboard;
 })();
