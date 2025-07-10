@@ -137,7 +137,7 @@ $node.find("button").click(function() {
         },
         oneditsave: function () {
             let node = this;
-            node.tab = $('#jstree').jstree('get_selected')[0];
+            node.tab = getSelectedTab();
 
             var annot = this.editor.getSession().getAnnotations();
             this.noerr = 0;

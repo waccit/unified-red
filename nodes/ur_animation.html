@@ -248,7 +248,7 @@
                 node.rules.push(rule);
             });
 
-            node.tab = $('#jstree').jstree('get_selected')[0];
+            node.tab = getSelectedTab();
 
             // store template from code editor
             let annot = this.editor.getSession().getAnnotations();

@@ -256,7 +256,7 @@
                     node.values.push(value);
                 });
 
-                node.tab = $('#jstree').jstree('get_selected')[0];
+                node.tab = getSelectedTab();
 
                 // store weekdays from editable list
                 let weekdays = $('#node-input-weekday-container').editableList('items');

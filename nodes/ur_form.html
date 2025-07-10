@@ -251,7 +251,7 @@
         oneditsave: function () {
             var options = $('#node-input-option-container').children();
             var node = this;
-            node.tab = $('#jstree').jstree('get_selected')[0];
+            node.tab = getSelectedTab();
             node.options = [];
             node.formValue = {};
             options.each(function (i) {

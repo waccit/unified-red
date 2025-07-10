@@ -102,16 +102,20 @@ var injectedStyles = `
         opacity: 0.5;
         pointer-events: none;
     }
+    .jstree-cut {
+        opacity: 0.5;
+    }
 `;
 
 var clipboard = null;
+var cutNodes = new Set();
 
 var ignoreVisibilityChange = true;
 
 (function () {
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
-            return; // Styles already injected
+            return;
         }
         const style = document.createElement('style');
         style.id = 'ur-jstree-styles';
@@ -119,7 +123,6 @@ var ignoreVisibilityChange = true;
         document.head.appendChild(style);
     }
 
-    // Inject styles when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', injectJsTreeStyles);
     } else {
@@ -250,6 +253,15 @@ var ignoreVisibilityChange = true;
         var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
         instance.settings.core.data = foldersTreeData;
         instance.refresh({ skip_loading: false });
+        setTimeout(() => {
+            applyCutClasses();
+        }, 100);
+    }
+
+    function applyCutClasses() {
+        cutNodes.forEach((nodeId) => {
+            $('#' + nodeId).addClass('jstree-cut');
+        });
     }
 
     function fuzzyMatch(text, searchString) {
@@ -301,21 +313,33 @@ var ignoreVisibilityChange = true;
             shakeButtons();
             return;
         }
-        if (clipboard && clipboard.state.disabled) {
-            instance.enable_node(clipboard);
+
+        if (clipboard && cutNodes.has(clipboard.id)) {
+            const removeCutFromChildren = (currentNode) => {
+                cutNodes.delete(currentNode.id);
+                $('#' + currentNode.id).removeClass('jstree-cut');
+                if (currentNode.children && currentNode.children.length > 0) {
+                    currentNode.children.forEach((childId) => {
+                        const childNode = instance.get_node(childId);
+                        removeCutFromChildren(childNode);
+                    });
+                }
+            };
+            removeCutFromChildren(clipboard);
         }
 
-        const disableNodeAndChildren = (currentNode) => {
-            instance.disable_node(currentNode);
+        const addCutToNodeAndChildren = (currentNode) => {
+            cutNodes.add(currentNode.id);
+            $('#' + currentNode.id).addClass('jstree-cut');
             if (currentNode.children && currentNode.children.length > 0) {
-                currentNode.children.forEach(childId => {
+                currentNode.children.forEach((childId) => {
                     const childNode = instance.get_node(childId);
-                    disableNodeAndChildren(childNode);
+                    addCutToNodeAndChildren(childNode);
                 });
             }
         };
 
-        disableNodeAndChildren(node);
+        addCutToNodeAndChildren(node);
         instance.close_node(node);
         clipboard = node;
         onHoverNode(node);
@@ -384,8 +408,9 @@ var ignoreVisibilityChange = true;
                 return;
         }
         recursiveAdd(node, clipboard, node.children.length, node.id);
-        if (clipboard && clipboard.state.disabled) {
+        if (clipboard && cutNodes.has(clipboard.id)) {
             recursiveDelete(clipboard);
+            cutNodes.clear();
             clipboard = null;
         }
         if (!tree.is_open(node)) {
@@ -437,7 +462,7 @@ var ignoreVisibilityChange = true;
             return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"><i class="fa fa-${icon}"></i> </a>`;
         };
         $('.jstree-hover-button').remove();
-        if (!instance.get_node(node.id).state.disabled) {
+        if (!cutNodes.has(node.id)) {
             const addButton = (icon, type) => {
                 let btn = $(addButtonHTML(icon));
                 btn.on('click', function (e) {
@@ -515,16 +540,17 @@ var ignoreVisibilityChange = true;
                 e.preventDefault();
                 e.stopPropagation();
                 clipboard = null;
-                const enableNodeAndChildren = (currentNode) => {
-                    instance.enable_node(currentNode);
+                const removeCutFromChildren = (currentNode) => {
+                    cutNodes.delete(currentNode.id);
+                    $('#' + currentNode.id).removeClass('jstree-cut');
                     if (currentNode.children && currentNode.children.length > 0) {
-                        currentNode.children.forEach(childId => {
+                        currentNode.children.forEach((childId) => {
                             const childNode = instance.get_node(childId);
-                            enableNodeAndChildren(childNode);
+                            removeCutFromChildren(childNode);
                         });
                     }
                 };
-                enableNodeAndChildren(node);
+                removeCutFromChildren(node);
                 onHoverNode(node);
             });
             buttons.push(undoButton);
@@ -621,7 +647,7 @@ var ignoreVisibilityChange = true;
                 'large_drop_target': true,
                 'large_drag_target': true,
                 'is_draggable': function (nodes) {
-                    return !nodes[0].state.disabled;
+                    return !$('#' + nodes[0].id).hasClass('jstree-cut');
                 },
                 'auto_expand': false,
                 'open_timeout': 0,
@@ -653,9 +679,19 @@ var ignoreVisibilityChange = true;
         });
 
         $('#jstree').on('refresh.jstree', function () {
-            if (clipboard && clipboard.state.disabled) {
-                $('#jstree').jstree('disable_node', clipboard);
-            }
+            applyCutClasses();
+        });
+
+        $('#jstree').on('open_node.jstree', function () {
+            applyCutClasses();
+        });
+
+        $('#jstree').on('close_node.jstree', function () {
+            applyCutClasses();
+        });
+
+        $('#jstree').on('create_node.jstree', function () {
+            applyCutClasses();
         });
 
         $('#jstree').on('move_node.jstree', function (e, data) {
@@ -688,11 +724,11 @@ var ignoreVisibilityChange = true;
                 let node = RED.nodes.node(data.node.id);
                 node[newParent.type] = newParent.id;
             }
-            $('#selectedTabDisplay').html(generatePathBadges(data.node.id));
+            $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
         });
 
         $('#jstree').on('select_node.jstree', function (e, data) {
-            if (data.node.type === 'tab') {
+            if (data.node.type === 'tab' && !cutNodes.has(data.node.id)) {
                 selectedTab = data.node;
                 $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
                 $('#jstree').removeClass('input-error');
@@ -705,9 +741,19 @@ var ignoreVisibilityChange = true;
                 }
 
                 instance.deselect_node(data.node);
-                if (selectedTab) {
+                if (
+                    selectedTab &&
+                    Object.keys($('#' + selectedTab.id)).length !== 0 &&
+                    !data.node.children_d.includes(selectedTab.id)
+                ) {
                     instance.select_node(selectedTab.id);
                 }
+                setTimeout(() => {
+                    instance.deselect_node(data.node);
+                    if (selectedTab && Object.keys($('#' + selectedTab.id)).length !== 0) {
+                        instance.select_node(selectedTab.id);
+                    }
+                }, 220);
             }
         });
 
@@ -772,6 +818,11 @@ var ignoreVisibilityChange = true;
         }
     }
 
+    function getSelectedTab() {
+        return selectedTab ? selectedTab.id : null;
+    }
+
     // Exposes functions to global scope for use in HTML scripts
     window.initializeJsTree = initializeJsTree;
+    window.getSelectedTab = getSelectedTab;
 })();

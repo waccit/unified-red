@@ -203,7 +203,7 @@
                 };
                 node.fields.push(c);
             });
-            node.tab = $('#jstree').jstree('get_selected')[0];
+            node.tab = getSelectedTab();
             //check for pivot
             $('#node-input-cts').is(':checked') ? (this.pivot = 1) : (this.pivot = 0);
         },

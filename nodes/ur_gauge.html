@@ -170,7 +170,7 @@
         },
         oneditsave: function () {
             let node = this;
-            node.tab = $('#jstree').jstree('get_selected')[0];
+            node.tab = getSelectedTab();
 
             node.topics = [];
             $('#node-input-topic-container')
