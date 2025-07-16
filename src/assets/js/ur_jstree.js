@@ -39,6 +39,14 @@ var defaultMenuEntities = {
 var injectedStyles = `
     ul.jstree-container-ul.jstree-children.jstree-wholerow-ul.jstree-no-dots {
         margin-left: 0 !important;
+        max-width: 70% !important;
+    }
+    .jstree-anchor {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: calc(100% - 50px) !important;
+        display: inline-block !important;
     }
     .badge {
         display: inline-block;
@@ -232,9 +240,10 @@ var ignoreVisibilityChange = true;
         let pathArray = [];
         while (currentNode && currentNode.id !== '#') {
             let nodeType = currentNode.type || 'default';
+            const badgeText = currentNode.text.length > 25 ? currentNode.text.slice(0, 25) + '...' : currentNode.text;
             let badge = `<span class="badge badge-${nodeType === 'tab' ? 'selected' : 'standard'}"><i class="${
                 currentNode.icon
-            }"></i> ${currentNode.text}</span>`;
+            }"></i> ${badgeText}</span>`;
             pathArray.unshift(badge);
             currentNode = treeInstance.get_node(currentNode.parent);
         }
@@ -267,7 +276,7 @@ var ignoreVisibilityChange = true;
             cutNodes.clear();
             return;
         }
-        
+
         cutNodes.forEach((nodeId) => {
             $('#' + nodeId).addClass('jstree-cut');
         });
@@ -483,7 +492,7 @@ var ignoreVisibilityChange = true;
     function onHoverNode(node) {
         var instance = $.jstree.reference('#jstree');
         let buttons = [];
-        
+
         // Clean up orphaned cut nodes if clipboard is cleared externally
         if (!clipboard && cutNodes.size > 0) {
             cutNodes.forEach((nodeId) => {
@@ -491,7 +500,7 @@ var ignoreVisibilityChange = true;
             });
             cutNodes.clear();
         }
-        
+
         const addButtonHTML = (icon) => {
             return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="position: relative; float: right; z-index: 1000; margin-top: 2px; background: rgba(255,255,255,0.9); border-radius: 3px; padding: 2px 4px;"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
         };
@@ -572,13 +581,13 @@ var ignoreVisibilityChange = true;
             if (clipboard && clipboard.id !== node.id) {
                 return;
             }
-                         let undoButton = $(actionButtonHTML('undo'));
-             undoButton.on('click', function (e) {
-                 e.preventDefault();
-                 e.stopPropagation();
-                 clearClipboard();
-                 onHoverNode(node);
-             });
+            let undoButton = $(actionButtonHTML('undo'));
+            undoButton.on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                clearClipboard();
+                onHoverNode(node);
+            });
             buttons.push(undoButton);
         }
 
@@ -800,8 +809,10 @@ var ignoreVisibilityChange = true;
             onHoverNode(data.node);
         });
 
-        $('#jstree').on('dehover_node.jstree', function () {
-            $('.jstree-hover-button').remove();
+        $('#jstree').on('dehover_node.jstree', function (e, data) {
+            if (!$(':hover').hasClass('jstree-hover-button')) {
+                $('.jstree-hover-button').remove();
+            }
         });
 
         $('#jstree').on(
