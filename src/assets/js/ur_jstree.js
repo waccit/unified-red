@@ -341,6 +341,17 @@ var ignoreVisibilityChange = true;
     }
 
     function cutNode(node) {
+        const addCutToNodeAndChildren = (currentNode) => {
+            cutNodes.add(currentNode.id);
+            $('#' + currentNode.id).addClass('jstree-cut');
+            if (currentNode.children && currentNode.children.length > 0) {
+                currentNode.children.forEach((childId) => {
+                    const childNode = instance.get_node(childId);
+                    addCutToNodeAndChildren(childNode);
+                });
+            }
+        };
+
         if (selectedTab.parents.includes(node.id)) {
             shakeButtons();
             return;
@@ -365,20 +376,11 @@ var ignoreVisibilityChange = true;
             removeCutFromChildren(clipboard);
         }
 
-        const addCutToNodeAndChildren = (currentNode) => {
-            cutNodes.add(currentNode.id);
-            $('#' + currentNode.id).addClass('jstree-cut');
-            if (currentNode.children && currentNode.children.length > 0) {
-                currentNode.children.forEach((childId) => {
-                    const childNode = instance.get_node(childId);
-                    addCutToNodeAndChildren(childNode);
-                });
-            }
-        };
+        clipboard = node;
 
         addCutToNodeAndChildren(node);
         instance.close_node(node);
-        clipboard = node;
+
         onHoverNode(node);
     }
 
@@ -760,6 +762,7 @@ var ignoreVisibilityChange = true;
                 node[newParent.type] = newParent.id;
             }
             $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
+            applyCutClasses();
         });
 
         $('#jstree').on('select_node.jstree', function (e, data) {
@@ -802,6 +805,7 @@ var ignoreVisibilityChange = true;
                 if (instance) {
                     instance.search(v);
                 }
+                applyCutClasses();
             }, 250);
         });
 
