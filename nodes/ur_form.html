@@ -47,6 +47,8 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            let node = this;
+            initializeJsTree(node.tab);
             if ($('#node-input-submit').val() === null) {
                 $('#node-input-submit').val('submit');
             }
@@ -236,12 +238,11 @@
                 cursor: 'move',
             });
 
-            $('#node-input-singleMsg').change(function() {
-                let value = $(this).val() === "true";
+            $('#node-input-singleMsg').change(function () {
+                let value = $(this).val() === 'true';
                 if (value) {
                     $('#node-input-singleMsgTopic').show();
-                }
-                else {
+                } else {
                     $('#node-input-singleMsgTopic').hide();
                 }
             });
@@ -250,6 +251,7 @@
         oneditsave: function () {
             var options = $('#node-input-option-container').children();
             var node = this;
+            node.tab = getSelectedTab();
             node.options = [];
             node.formValue = {};
             options.each(function (i) {
@@ -263,12 +265,13 @@
                 };
                 if (o.type === 'text' || o.type === 'number' || o.type === 'multiline' || o.type === 'select') {
                     o.options = o.options.trim();
-                    o.options = o.options.length ? o.options.split(/\s*,\s*/g)
-                        .reduce((a, b) => {
-                            var v = b.split(/\s*[:=]\s*/);
-                            a[v[0]] = v[1] || '';
-                            return a;
-                        }, {}) : {};
+                    o.options = o.options.length
+                        ? o.options.split(/\s*,\s*/g).reduce((a, b) => {
+                              var v = b.split(/\s*[:=]\s*/);
+                              a[v[0]] = v[1] || '';
+                              return a;
+                          }, {})
+                        : {};
                 }
                 node.formValue[o.topic] = o.type == 'checkbox' || o.type == 'switch' ? false : '';
                 node.options.push(o);
@@ -337,9 +340,15 @@
         }
     </style>
 
-    <div class="form-row">
-        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
-        <input type="text" id="node-input-tab" />
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Tab: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="jstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> Size</label>
@@ -361,7 +370,10 @@
     <div class="form-row node-input-option-container-row" style="margin-bottom:0px; width:100%; min-width:520px">
         <label style="vertical-align:top;"><i class="fa fa-list-alt"></i> Form elements</label>
         <div style="display:inline-block; width:78%; border:1px solid #ccc; border-radius:5px; box-sizing:border-box;">
-            <div class="red-ui-tray-header" style="width:100%; display: inline-block; padding-top:7px; padding-bottom:3px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;">
+            <div
+                class="red-ui-tray-header"
+                style="width:100%; display: inline-block; padding-top:7px; padding-bottom:3px; border-top:0px solid; border-radius:5px 5px 0 0; border-bottom:1px solid #ccc;"
+            >
                 <div style="width:94%; display:inline-block; margin-left:27px">
                     <div style="width:20%; text-align:center; float:left;">Label</div>
                     <div style="width:38%; text-align:center; float:left; margin-left:9px">Topic Filter</div>
@@ -388,7 +400,7 @@
             <option value="false">individual messages</option>
             <option value="true">single message</option>
         </select>
-        <input type="text" id="node-input-singleMsgTopic" placeholder="single message topic"  style="width: 50%" />
+        <input type="text" id="node-input-singleMsgTopic" placeholder="single message topic" style="width: 50%" />
     </div>
     <div class="form-row">
         <label for="node-input-submit"><i class="fa fa-square"></i> Buttons</label>
@@ -425,6 +437,10 @@
     </div>
 </script>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
+
 <script type="text/html" data-help-name="ur_form">
     <p>Adds a submission form to the user interface.</p>
     <h3>Inputs</h3>
@@ -449,15 +465,18 @@
     <p>Each element contains following components:</p>
     <ul>
         <li><b>Label</b> : Value that will be the label of the element in the user interface</li>
-        <li><b>Topic Filter</b> : Represents the topic or substring of the topic associated with <code>msg.payload</code></li>
+        <li>
+            <b>Topic Filter</b> : Represents the topic or substring of the topic associated with
+            <code>msg.payload</code>
+        </li>
         <li><b>Type</b> : Drop drown option to select the type of input element</li>
         <li>
-            <b>Options</b> : For text and number inputs, <code>units</code> of measurement and <code>precision</code> can be 
-            set. For multiline inputs, the number of <code>rows</code>. For select inputs, list of options as comma-separated
-            values or label:value pairs.
+            <b>Options</b> : For text and number inputs, <code>units</code> of measurement and
+            <code>precision</code> can be set. For multiline inputs, the number of <code>rows</code>. For select inputs,
+            list of options as comma-separated values or label:value pairs.
         </li>
         <li>
-            <b>Output</b> : Overrides the <code>msg.topic</code> property when sending individual messages or used as a 
+            <b>Output</b> : Overrides the <code>msg.topic</code> property when sending individual messages or used as a
             <code>msg.payload</code> property when sending as a single message.
         </li>
     </ul>
@@ -482,26 +501,34 @@
         used to evaluate the value displayed in the text field.
     </p>
     <p>
-        <b>Send as</b> configures the node to send each field as an individual message or combined into a single message.
-        <b>Single Message Topic</b> used as the <code>msg.topic</code> property when sending as a single message.
+        <b>Send as</b> configures the node to send each field as an individual message or combined into a single
+        message. <b>Single Message Topic</b> used as the <code>msg.topic</code> property when sending as a single
+        message.
     </p>
-    <p><b>Submit/Cancel Buttons</b> are form button text. The Cancel button can be hidden by setting it's value to be blank "".</p>
+    <p>
+        <b>Submit/Cancel Buttons</b> are form button text. The Cancel button can be hidden by setting it's value to be
+        blank "".
+    </p>
 
     <!-- TOPIC PATTERN 2021-02-07 - START -->
     <p>
         <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
-        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
-        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+        member of a
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the
+        pattern may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example,
+        <code>*/nvoSpaceTemp{x}/*</code>.
     </p>
     <!-- TOPIC PATTERN 2021-02-07 - END -->
 
     <!-- ACCESS 2021-01-17 - START -->
     <p>
-        <b>Access</b> controls the user's read/write access to this widget based on 
-        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
-        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
-        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+        <b>Access</b> controls the user's read/write access to this widget based on
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank"
+            >Unified-RED User Roles</a
+        >. When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is
+        set to anything other than <code>Default</code> then the user must be assigned to the same or higher role than
+        selected to be granted access.
     </p>
     <p>
         When the user is denied access, the user interface can degrade to <code>show/hide</code> or

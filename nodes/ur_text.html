@@ -27,6 +27,8 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            let node = this;
+            initializeJsTree(node.tab);
             $('#node-input-size').elementSizer({
                 width: '#node-input-width',
             });
@@ -48,13 +50,23 @@
                 });
             });
         },
+        oneditsave: function () {
+            let node = this;
+            node.tab = getSelectedTab();
+        },
     });
 </script>
 
 <script type="text/html" data-template-name="ur_text">
-    <div class="form-row">
-        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
-        <input type="text" id="node-input-tab" />
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Tab: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="jstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> Size</label>
@@ -232,6 +244,9 @@
         border-color: #333;
     }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
 <script type="text/html" data-help-name="ur_text">
     <p>Displays a non-editable text field on the user interface.</p>
     <h3>Inputs</h3>
@@ -268,18 +283,22 @@
     <!-- TOPIC PATTERN 2021-02-07 - START -->
     <p>
         <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
-        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
-        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+        member of a
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the
+        pattern may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example,
+        <code>*/nvoSpaceTemp{x}/*</code>.
     </p>
     <!-- TOPIC PATTERN 2021-02-07 - END -->
 
     <!-- ACCESS 2021-01-17 - START -->
     <p>
-        <b>Access</b> controls the user's read/write access to this widget based on 
-        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
-        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
-        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+        <b>Access</b> controls the user's read/write access to this widget based on
+        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank"
+            >Unified-RED User Roles</a
+        >. When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is
+        set to anything other than <code>Default</code> then the user must be assigned to the same or higher role than
+        selected to be granted access.
     </p>
     <p>
         When the user is denied access, the user interface can degrade to <code>show/hide</code> or

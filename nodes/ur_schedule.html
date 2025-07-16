@@ -37,6 +37,7 @@
             },
             oneditprepare: function () {
                 let node = this;
+                initializeJsTree(node.tab);
                 if (this.values == null) {
                     this.values = [
                         { name: 'On', value: 1 },
@@ -255,6 +256,8 @@
                     node.values.push(value);
                 });
 
+                node.tab = getSelectedTab();
+
                 // store weekdays from editable list
                 let weekdays = $('#node-input-weekday-container').editableList('items');
                 node.weekdays = [];
@@ -296,12 +299,17 @@
 </script>
 
 <script type="text/html" data-template-name="ur_schedule">
-    <div class="form-row">
-        <label for="node-input-tab"
-            ><i class="fa fa-columns"></i> <span data-i18n="ur_schedule.label.tab"></span
-        ></label>
-        <input type="text" id="node-input-tab" />
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Tab: None</div>
     </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="jstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
+    </div>
+
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> <span data-i18n="ur_schedule.label.size"></span></label>
         <input type="hidden" id="node-input-width" />
@@ -393,6 +401,10 @@
         </select>
     </div>
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
 
 <script type="text/html" data-help-name="ur_schedule">
     <p>Time-of-day event schedule</p>
