@@ -493,10 +493,10 @@ var ignoreVisibilityChange = true;
         }
         
         const addButtonHTML = (icon) => {
-            return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
+            return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="position: relative; float: right; z-index: 1000; margin-top: 2px; background: rgba(255,255,255,0.9); border-radius: 3px; padding: 2px 4px;"> <i class="fa fa-plus"></i> <i class="fa fa-${icon}"></i> </a>`;
         };
         const actionButtonHTML = (icon) => {
-            return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="float: right; z-index: 1000; margin-top:2px"><i class="fa fa-${icon}"></i> </a>`;
+            return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="position: relative; float: right; z-index: 1000; margin-top: 2px; background: rgba(255,255,255,0.9); border-radius: 3px; padding: 2px 4px;"><i class="fa fa-${icon}"></i> </a>`;
         };
         $('.jstree-hover-button').remove();
         if (!cutNodes.has(node.id)) {
