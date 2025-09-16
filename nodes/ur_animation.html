@@ -42,6 +42,8 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            let node = this;
+            initializeJsTree(node.tab);
             if (RED.editor.hasOwnProperty('editText') && typeof RED.editor.editText === 'function') {
                 $('#node-template-expand-editor').show();
             } else {
@@ -246,6 +248,8 @@
                 node.rules.push(rule);
             });
 
+            node.tab = getSelectedTab();
+
             // store template from code editor
             let annot = this.editor.getSession().getAnnotations();
             this.noerr = 0;
@@ -349,12 +353,15 @@
             background-color: #f8f9fa;
         }
     </style>
-
-    <div class="form-row" id="template-row-tab">
-        <label for="node-input-tab"
-            ><i class="fa fa-columns"></i> <span data-i18n="ur_animation.label.tab"></span
-        ></label>
-        <input type="text" id="node-input-tab" />
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Tab: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="jstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row" id="template-row-size">
         <label><i class="fa fa-object-group"></i> <span data-i18n="ur_animation.label.size"></span></label>
@@ -441,6 +448,10 @@
         </select>
     </div>
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
 
 <script type="text/html" data-help-name="ur_animation">
         <p>Creates an animated image element via user-defined HTML.</p>

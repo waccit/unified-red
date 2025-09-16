@@ -41,6 +41,8 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            let node = this;
+            initializeJsTree(node.tab);
             if (RED.nodes.getType('ur_tab')) {
                 $('.form-tips').hide();
             } else {
@@ -88,14 +90,15 @@
                         //format type
                         let formatTypeSelect = $('<select/>', {
                             class: 'node-input-field-formatType',
-                            style: 'margin-left: 5px; width: 65px;'
+                            style: 'margin-left: 5px; width: 65px;',
                         })
                             .append(
                                 $('<option>', { value: 'text' }).text('Text'),
-                                $('<option>', { value: 'link' }).text('Link') )
+                                $('<option>', { value: 'link' }).text('Link')
+                            )
                             .appendTo(row);
 
-                        let textFormatSection = $('<div>', { 
+                        let textFormatSection = $('<div>', {
                             style: 'width: 36.5%; display: inline-flex',
                         }).appendTo(row);
 
@@ -104,7 +107,7 @@
                             class: 'node-input-field-format-text',
                             type: 'text',
                             style: 'margin-left: 5px; width: 63%;',
-                            placeholder: '{{msg.payload.value}}'
+                            placeholder: '{{msg.payload.value}}',
                         })
                             .appendTo(textFormatSection)
                             .val(field.format)
@@ -134,17 +137,18 @@
                         }).appendTo(row);
                         getUrPages(formatLinkSelect, field.format);
 
-                        formatTypeSelect.on('change', () => {
-                            if (formatTypeSelect.val() === 'link') {
-                                textFormatSection.hide();
-                                formatLinkSelect.show();
-                            }
-                            else {
-                                formatLinkSelect.hide();
-                                textFormatSection.show();
-                            }
-                        })
-                            .val(field.formatType || 'text').change();
+                        formatTypeSelect
+                            .on('change', () => {
+                                if (formatTypeSelect.val() === 'link') {
+                                    textFormatSection.hide();
+                                    formatLinkSelect.show();
+                                } else {
+                                    formatLinkSelect.hide();
+                                    textFormatSection.show();
+                                }
+                            })
+                            .val(field.formatType || 'text')
+                            .change();
 
                         //Regex Select
                         var optionSSIoT = { value: 'webApp', label: 'SmartServer IoT', hasValue: false };
@@ -199,6 +203,7 @@
                 };
                 node.fields.push(c);
             });
+            node.tab = getSelectedTab();
             //check for pivot
             $('#node-input-cts').is(':checked') ? (this.pivot = 1) : (this.pivot = 0);
         },
@@ -225,15 +230,15 @@
         }
 
         var configNodes = [];
-        RED.nodes.eachConfig(function(config) {
+        RED.nodes.eachConfig(function (config) {
             if (config.type == 'ur_page' && (!config.z || config.z === activeWorkspace.id)) {
-                var label = RED.utils.getNodeLabel(config,config.id);
-                config.__label__ = label+(config.d?" ["+RED._("workspace.disabled")+"]":"");
+                var label = RED.utils.getNodeLabel(config, config.id);
+                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
                 configNodes.push(config);
             }
         });
         try {
-            configNodes.sort(function(A,B) {
+            configNodes.sort(function (A, B) {
                 if (A.__label__ < B.__label__) {
                     return -1;
                 } else if (A.__label__ > B.__label__) {
@@ -241,30 +246,40 @@
                 }
                 return 0;
             });
-        } catch(ignore) {}
-        configNodes.forEach(function(cn) {
-            $('<option value="'+cn.id+'"'+(value==cn.id?" selected":"")+'></option>').text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__)).appendTo(select);
+        } catch (ignore) {}
+        configNodes.forEach(function (cn) {
+            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
+                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
+                .appendTo(select);
             delete cn.__label__;
         });
-        window.setTimeout(function() { select.trigger("change");},50);
+        window.setTimeout(function () {
+            select.trigger('change');
+        }, 50);
     }
 </script>
 
 <script type="text/html" data-template-name="ur_table">
-    <div class='form-row' id='table-row-tab'>
-        <label for='node-input-tab'>
-            <i class='fa fa-columns'></i> Tab</span>
-        </label>
-        <input type='text' id='node-input-tab'>
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Tab: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="jstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row" id="table-row-size">
         <label><i class="fa fa-object-group"></i> Size</label>
-        <input type="hidden" id="node-input-width">
+        <input type="hidden" id="node-input-width" />
         <button class="editor-button" id="node-input-size"></button>
     </div>
-    <div class='form-row'>
-        <label for='node-input-name'><i class='fa fa-tag'></i> <span data-i18n='node-red:common.label.name'></span></label>
-        <input type='text' id='node-input-name' data-i18n='[placeholder]node-red:common.label.name'>
+    <div class="form-row">
+        <label for="node-input-name"
+            ><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span
+        ></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name" />
     </div>
     <div class="form-row">
         <label for="node-input-label"><i class="fa fa-i-cursor"></i> Label</label>
@@ -273,7 +288,8 @@
     <div class="form-row node-input-field-container-row">
         <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Fields</label>
         <span style="float:right">
-            <span data-i18n='table.label.send'>Pivot Table </span><input type="checkbox" id="node-input-cts" style="display:inline-block; width:auto; vertical-align:top;">
+            <span data-i18n="table.label.send">Pivot Table </span
+            ><input type="checkbox" id="node-input-cts" style="display:inline-block; width:auto; vertical-align:top;" />
         </span>
 
         <div class="form-row node-input-field-container-row">
@@ -301,102 +317,106 @@
             <option value="8">Level 8 (reserved)</option>
             <option value="9">Level 9 Tech</option>
             <option value="10">Level 10 Admin</option>
-         </select>
-         <select id="node-input-accessBehavior" style="width: 35%">
+        </select>
+        <select id="node-input-accessBehavior" style="width: 35%">
             <option value="hide">Show/Hide</option>
             <option value="disable">Enable/Disable</option>
-         </select>
+        </select>
     </div>
 </script>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
+
 <script type="text/html" data-help-name="ur_table">
-    <p>Adds a table to the user interface.</p>
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>payload<span class="property-type">any</span></dt>
-        <dd>updates a table cell value</dd>
-        <dt>topic <span class="property-type">string</span></dt>
-        <dd>message topic associated with a table cell</dd>
-    </dl>
-    <h3>Details</h3>
-    <p>Display the payloads of multiple messages with different topics in a table format.</p>
+        <p>Adds a table to the user interface.</p>
+        <h3>Inputs</h3>
+        <dl class="message-properties">
+            <dt>payload<span class="property-type">any</span></dt>
+            <dd>updates a table cell value</dd>
+            <dt>topic <span class="property-type">string</span></dt>
+            <dd>message topic associated with a table cell</dd>
+        </dl>
+        <h3>Details</h3>
+        <p>Display the payloads of multiple messages with different topics in a table format.</p>
 
-    <!-- TAB / SIZE 2020-12-30 - START -->
-    <p>
-        <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
-        interface layout.
-    </p>
-    <p>
-        <b>Size</b> controls the widget width using
-        <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
-    </p>
-    <!-- TAB / SIZE 2020-12-30 - END -->
+        <!-- TAB / SIZE 2020-12-30 - START -->
+        <p>
+            <b>Tab</b> allows you to group user interface elements and controls where the widget appears in the user
+            interface layout.
+        </p>
+        <p>
+            <b>Size</b> controls the widget width using
+            <a href="https://getbootstrap.com/docs/4.0/layout/grid/" target="_blank">Bootstrap's grid</a> column sizing.
+        </p>
+        <!-- TAB / SIZE 2020-12-30 - END -->
 
-    <p><b>Name</b> is the name of a node in the workspace.</p>
-    <p><b>Label</b> is the table title text.</p>
-    <p><b>Fields</b> define the data columns to display. Selecting <b>Pivot Table</b> allows fields to be displayed as rows.</p>
-    <p>Each field contains following components:</p>
-    <ul>
-        <li><b>Label</b> : Field header label.</li>
-        <li><b>Value Type</b> : The type of value to be displayed - <b>Text</b> or <b>Link</b></li>
-        <li>
-            <b>Text Format</b> : Formats the text value to be displayed. Units of measurement can be automatically appended to the value 
-            if they are included in <code>msg.payload.units</code> or can be manually set.</li>
-        </li>
-        <li><b>Link</b> : Navigates the user to the selected page when the hyperlink is clicked.</li>
-        <li>
-            <b>Device Filter</b> : Used to generate rows (or columns when pivoted) based on the messages received. Setting to 
-            <code>SmartServer IoT</code> will detect devices using the SmartServer IoT IAP topic schema. <code>Custom</code> allows you 
-            to provide a regular expresison that will be applied to incoming messages. When providing a custom regular expression, two 
-            <i>capture groups</i> should be provided. Group 1 should be a unique segment of the message topic that represents the device
-            name or instance. Similarly, group 2 should indicate the data point segment within the topic.
-            Group 2 is used by <b>Parameter Filter</b>.
-        </li>
-        <li><b>Parameter Filter</b> : The data point name (or a portion of it) used to map the data point to a cell.</li>
-    </ul>
+        <p><b>Name</b> is the name of a node in the workspace.</p>
+        <p><b>Label</b> is the table title text.</p>
+        <p><b>Fields</b> define the data columns to display. Selecting <b>Pivot Table</b> allows fields to be displayed as rows.</p>
+        <p>Each field contains following components:</p>
+        <ul>
+            <li><b>Label</b> : Field header label.</li>
+            <li><b>Value Type</b> : The type of value to be displayed - <b>Text</b> or <b>Link</b></li>
+            <li>
+                <b>Text Format</b> : Formats the text value to be displayed. Units of measurement can be automatically appended to the value
+                if they are included in <code>msg.payload.units</code> or can be manually set.</li>
+            </li>
+            <li><b>Link</b> : Navigates the user to the selected page when the hyperlink is clicked.</li>
+            <li>
+                <b>Device Filter</b> : Used to generate rows (or columns when pivoted) based on the messages received. Setting to
+                <code>SmartServer IoT</code> will detect devices using the SmartServer IoT IAP topic schema. <code>Custom</code> allows you
+                to provide a regular expresison that will be applied to incoming messages. When providing a custom regular expression, two
+                <i>capture groups</i> should be provided. Group 1 should be a unique segment of the message topic that represents the device
+                name or instance. Similarly, group 2 should indicate the data point segment within the topic.
+                Group 2 is used by <b>Parameter Filter</b>.
+            </li>
+            <li><b>Parameter Filter</b> : The data point name (or a portion of it) used to map the data point to a cell.</li>
+        </ul>
 
-    <p>
-        <b>Text Format</b> is a 
-        <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a> used to evaluate the value displayed.
-        Additionally, JavaScript can be used to perform operations on the value, for example using 
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#binary_logical_operators" target="_blank">boolean</a>
-        (||, &&) and
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#arithmetic_operators" target="_blank">arithmetic</a>
-        operators (+, -, *, /) as well as standard built-in objects
-        (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math" target="_blank">Math</a> functions,
-        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a> functions,
-        etc):
-        <pre style="font-size:smaller;">1 + {{msg.payload.value}} / 100
-Math.floor({{msg.payload.value}} * 100)
-interpolate({{msg.payload.value}},0,100,1,10)</pre>
-        Values can also be mapped to text enumerations by providing a JSON object, for example:
-        <pre style="font-size:smaller;">{{msg.payload.value | enum: '0:Off, 1:Cooling, 2:Fan Only, 3:Heating'}}</pre>
-    </p>
+        <p>
+            <b>Text Format</b> is a
+            <a href="https://mustache.github.io/mustache.5.html" target="_blank">Mustache template</a> used to evaluate the value displayed.
+            Additionally, JavaScript can be used to perform operations on the value, for example using
+            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#binary_logical_operators" target="_blank">boolean</a>
+            (||, &&) and
+            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators#arithmetic_operators" target="_blank">arithmetic</a>
+            operators (+, -, *, /) as well as standard built-in objects
+            (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math" target="_blank">Math</a> functions,
+            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String" target="_blank">String</a> functions,
+            etc):
+            <pre style="font-size:smaller;">1 + {{msg.payload.value}} / 100
+    Math.floor({{msg.payload.value}} * 100)
+    interpolate({{msg.payload.value}},0,100,1,10)</pre>
+            Values can also be mapped to text enumerations by providing a JSON object, for example:
+            <pre style="font-size:smaller;">{{msg.payload.value | enum: '0:Off, 1:Cooling, 2:Fan Only, 3:Heating'}}</pre>
+        </p>
 
-    <!-- TOPIC PATTERN 2021-02-07 - START -->
-    <p>
-        <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
-        member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
-        may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
-    </p>
-    <!-- TOPIC PATTERN 2021-02-07 - END -->
+        <!-- TOPIC PATTERN 2021-02-07 - START -->
+        <p>
+            <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
+            member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
+            The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern
+            may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
+        </p>
+        <!-- TOPIC PATTERN 2021-02-07 - END -->
 
-    <!-- ACCESS 2021-01-17 - START -->
-    <p>
-        <b>Access</b> controls the user's read/write access to this widget based on 
-        <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
-        When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
-        other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
-    </p>
-    <p>
-        When the user is denied access, the user interface can degrade to <code>show/hide</code> or
-        <code>enable/disable</code> the text field.
-    </p>
-    <!-- ACCESS 2021-01-17 - END -->
+        <!-- ACCESS 2021-01-17 - START -->
+        <p>
+            <b>Access</b> controls the user's read/write access to this widget based on
+            <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
+            When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
+            other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
+        </p>
+        <p>
+            When the user is denied access, the user interface can degrade to <code>show/hide</code> or
+            <code>enable/disable</code> the text field.
+        </p>
+        <!-- ACCESS 2021-01-17 - END -->
 
-    <!-- <h3>References</h3>
-    <ul>
-        <li></li>
-    </ul> -->
+        <!-- <h3>References</h3>
+        <ul>
+            <li></li>
+        </ul> -->
 </script>

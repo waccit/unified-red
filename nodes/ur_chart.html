@@ -18,7 +18,7 @@
         width: 67% !important;
     }
 
-    #line-chart-options input[type=checkbox] {
+    #line-chart-options input[type='checkbox'] {
         width: auto;
         vertical-align: baseline;
         margin-left: 10px;
@@ -70,9 +70,19 @@
             },
             colors: {
                 value: [
-                    '#5899DA', '#E8743B', '#19A979', '#ED4A7B', '#945ECF', '#13A4B4',
-                    '#525DF4', '#BF399E', '#6C8893', '#EE6868', '#2F6497', '#5AA454'
-                ]
+                    '#5899DA',
+                    '#E8743B',
+                    '#19A979',
+                    '#ED4A7B',
+                    '#945ECF',
+                    '#13A4B4',
+                    '#525DF4',
+                    '#BF399E',
+                    '#6C8893',
+                    '#EE6868',
+                    '#2F6497',
+                    '#5AA454',
+                ],
             },
             referenceLines: { value: [] },
             showRefLines: { value: false },
@@ -93,13 +103,15 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            let node = this;
+            initializeJsTree(node.tab);
             if (!$('#node-input-chartType').val()) {
                 $('#node-input-chartType').val('line');
             }
             $('#node-input-size').elementSizer({
                 width: '#node-input-width',
                 height: '#node-input-height',
-                group: '#node-input-tab'
+                group: '#node-input-tab',
             });
             $('#node-input-chartType').on('change', function () {
                 if ($(this).val() === 'line') {
@@ -109,23 +121,25 @@
                 }
             });
 
-            $('#node-input-xrangeunits').on('change', function() {
-              console.log($(this).val())
-              if ($(this).val() === 'fixed_date_range') {
-                $('#date-ranges').show();
-              } else {
-                $('#date-ranges').hide();
-              }
-
-              if ($(this).val() === 'seconds' 
-                || $(this).val() === 'minutes'
-                || $(this).val() === 'hours'
-                || $(this).val() === 'days'
-                || $(this).val() === 'months'
-                || $(this).val() === 'years') {
-                  $('#node-input-xrange').show();
+            $('#node-input-xrangeunits').on('change', function () {
+                console.log($(this).val());
+                if ($(this).val() === 'fixed_date_range') {
+                    $('#date-ranges').show();
                 } else {
-                  $('#node-input-xrange').hide();
+                    $('#date-ranges').hide();
+                }
+
+                if (
+                    $(this).val() === 'seconds' ||
+                    $(this).val() === 'minutes' ||
+                    $(this).val() === 'hours' ||
+                    $(this).val() === 'days' ||
+                    $(this).val() === 'months' ||
+                    $(this).val() === 'years'
+                ) {
+                    $('#node-input-xrange').show();
+                } else {
+                    $('#node-input-xrange').hide();
                 }
             });
 
@@ -164,31 +178,43 @@
 
             function hexToRgb(hex) {
                 var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-                return result ? {
-                    r: parseInt(result[1], 16),
-                    g: parseInt(result[2], 16),
-                    b: parseInt(result[3], 16)
-                } : null;
+                return result
+                    ? {
+                          r: parseInt(result[1], 16),
+                          g: parseInt(result[2], 16),
+                          b: parseInt(result[3], 16),
+                      }
+                    : null;
             }
             var setColour = function (id, value) {
                 $(id).val(value);
-                $(id).css("background-color", value);
+                $(id).css('background-color', value);
                 var rgb = hexToRgb(value);
-                var level = ((rgb.r * 299) + (rgb.g * 587) + (rgb.b * 114)) / 1000;
-                var textColor = (level >= 128) ? '#111111' : '#eeeeee';
-                $(id).css("color", textColor);
-            }
-            $(".series-color").on("change", function () {
-                setColour("#" + $(this).attr("id"), $(this).val());
+                var level = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+                var textColor = level >= 128 ? '#111111' : '#eeeeee';
+                $(id).css('color', textColor);
+            };
+            $('.series-color').on('change', function () {
+                setColour('#' + $(this).attr('id'), $(this).val());
             });
             if (!this.colors) {
                 this.colors = [
-                    '#5899DA', '#E8743B', '#19A979', '#ED4A7B', '#945ECF', '#13A4B4',
-                    '#525DF4', '#BF399E', '#6C8893', '#EE6868', '#2F6497', '#5AA454'
+                    '#5899DA',
+                    '#E8743B',
+                    '#19A979',
+                    '#ED4A7B',
+                    '#945ECF',
+                    '#13A4B4',
+                    '#525DF4',
+                    '#BF399E',
+                    '#6C8893',
+                    '#EE6868',
+                    '#2F6497',
+                    '#5AA454',
                 ];
             }
             for (let i = 0; i < this.colors.length; i++) {
-                setColour("#node-input-color" + (i + 1), this.colors[i]);
+                setColour('#node-input-color' + (i + 1), this.colors[i]);
             }
 
             $('#node-input-referenceLines-container')
@@ -223,27 +249,41 @@
         },
         oneditsave: function () {
             let node = this;
-
+            node.tab = getSelectedTab();
             node.topics = [];
-            $('#node-input-topic-container').editableList('items').each(function (i) {
-                node.topics.push({
-                    label: $(this).find('.node-input-topic-label').val(),
-                    topic: $(this).find('.node-input-topic-topic').val(),
+            $('#node-input-topic-container')
+                .editableList('items')
+                .each(function (i) {
+                    node.topics.push({
+                        label: $(this).find('.node-input-topic-label').val(),
+                        topic: $(this).find('.node-input-topic-topic').val(),
+                    });
                 });
-            });
 
-            this.colors = [$("#node-input-color1").val(), $("#node-input-color2").val(), $("#node-input-color3").val(),
-            $("#node-input-color4").val(), $("#node-input-color5").val(), $("#node-input-color6").val(),
-            $("#node-input-color7").val(), $("#node-input-color8").val(), $("#node-input-color9").val(),
-            $("#node-input-color10").val(), $("#node-input-color11").val(), $("#node-input-color12").val()];
+            this.colors = [
+                $('#node-input-color1').val(),
+                $('#node-input-color2').val(),
+                $('#node-input-color3').val(),
+                $('#node-input-color4').val(),
+                $('#node-input-color5').val(),
+                $('#node-input-color6').val(),
+                $('#node-input-color7').val(),
+                $('#node-input-color8').val(),
+                $('#node-input-color9').val(),
+                $('#node-input-color10').val(),
+                $('#node-input-color11').val(),
+                $('#node-input-color12').val(),
+            ];
 
             node.referenceLines = [];
-            $('#node-input-referenceLines-container').editableList('items').each(function (i) {
-                node.referenceLines.push({
-                    name: $(this).find('.node-input-referenceLine-name').val(),
-                    value: $(this).find('.node-input-referenceLine-value').val(),
+            $('#node-input-referenceLines-container')
+                .editableList('items')
+                .each(function (i) {
+                    node.referenceLines.push({
+                        name: $(this).find('.node-input-referenceLine-name').val(),
+                        value: $(this).find('.node-input-referenceLine-value').val(),
+                    });
                 });
-            });
         },
         oneditresize: function (size) {
             var rows = $('#dialog-form>div:not(.node-input-topic-container-row)');
@@ -260,9 +300,15 @@
 </script>
 
 <script type="text/html" data-template-name="ur_chart">
-    <div class="form-row">
-        <label for="node-input-tab"><i class="fa fa-columns"></i> Tab</label>
-        <input type="text" id="node-input-tab" />
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Tab: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="jstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> Size</label>
@@ -291,7 +337,11 @@
             <option value="table">Table</option>
         </select>
         <span>
-            <input type="checkbox" id="node-input-live" style="width: auto; vertical-align: baseline; margin-left: 10px;">
+            <input
+                type="checkbox"
+                id="node-input-live"
+                style="width: auto; vertical-align: baseline; margin-left: 10px;"
+            />
             <label for="node-input-live" style="width: auto">Live</label>
         </span>
     </div>
@@ -319,10 +369,10 @@
     <span id="date-ranges">
         <div class="form-row">
             <label for="node-input-xrangeStartDate">Start Date</label>
-            <input type='datetime-local' id='node-input-xrangeStartDate'>
+            <input type="datetime-local" id="node-input-xrangeStartDate" />
 
             <label for="node-input-xrangeEndDate">End Date</label>
-            <input type='datetime-local' id='node-input-xrangeEndDate'>
+            <input type="datetime-local" id="node-input-xrangeEndDate" />
         </div>
     </span>
     <span id="line-chart-options">
@@ -345,29 +395,29 @@
                 <option value="curveStepBefore">Step Before</option>
             </select>
             <span>
-                <input type="checkbox" id="node-input-legend">
+                <input type="checkbox" id="node-input-legend" />
                 <label for="node-input-legend" style="width: auto">Legend</label>
-                <input type="checkbox" id="node-input-timeline">
+                <input type="checkbox" id="node-input-timeline" />
                 <label for="node-input-timeline" style="width: auto">Timeline</label>
             </span>
         </div>
         <div class="form-row">
             <label for="node-input-color1">Colors</label>
-            <input type="color" id="node-input-color1" class="series-color"/>
-            <input type="color" id="node-input-color2" class="series-color"/>
-            <input type="color" id="node-input-color3" class="series-color"/>
-            <input type="color" id="node-input-color4" class="series-color"/>
+            <input type="color" id="node-input-color1" class="series-color" />
+            <input type="color" id="node-input-color2" class="series-color" />
+            <input type="color" id="node-input-color3" class="series-color" />
+            <input type="color" id="node-input-color4" class="series-color" />
             <div style="margin-top:5px; margin-left:104px;">
-                <input type="color" id="node-input-color5" class="series-color"/>
-                <input type="color" id="node-input-color6" class="series-color"/>
-                <input type="color" id="node-input-color7" class="series-color"/>
-                <input type="color" id="node-input-color8" class="series-color"/>
+                <input type="color" id="node-input-color5" class="series-color" />
+                <input type="color" id="node-input-color6" class="series-color" />
+                <input type="color" id="node-input-color7" class="series-color" />
+                <input type="color" id="node-input-color8" class="series-color" />
             </div>
             <div style="margin-top:5px; margin-left:104px;">
-                <input type="color" id="node-input-color9" class="series-color"/>
-                <input type="color" id="node-input-color10" class="series-color"/>
-                <input type="color" id="node-input-color11" class="series-color"/>
-                <input type="color" id="node-input-color12" class="series-color"/>
+                <input type="color" id="node-input-color9" class="series-color" />
+                <input type="color" id="node-input-color10" class="series-color" />
+                <input type="color" id="node-input-color11" class="series-color" />
+                <input type="color" id="node-input-color12" class="series-color" />
             </div>
         </div>
         <div class="form-row node-input-referenceLines-container-row">
@@ -375,8 +425,8 @@
                 <i class="fa fa-list-alt"></i> Reference Lines
             </label>
             <span style="float:right">
-                <input type="checkbox" id="node-input-showRefLines">
-                <label for="node-input-showRefLines" style="width: auto">Show</label>    
+                <input type="checkbox" id="node-input-showRefLines" />
+                <label for="node-input-showRefLines" style="width: auto">Show</label>
             </span>
             <div class="form-row node-input-referenceLines-container-row">
                 <ol id="node-input-referenceLines-container"></ol>
@@ -411,6 +461,10 @@
     </div>
 </script>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
+
 <script type="text/html" data-help-name="ur_chart">
     <p>Plots datalog values on a time-based line chart or table.</p>
     <h3>Details</h3>
@@ -432,7 +486,7 @@
     <p><b>Name</b> is the name of a node in the workspace.</p>
     <p><b>Label</b> is the chart title text.</p>
     <p>
-        <b>Topics</b> are message topics to be retrieved from the datalog and includes a <b>Label</b> field for each topic used as 
+        <b>Topics</b> are message topics to be retrieved from the datalog and includes a <b>Label</b> field for each topic used as
         the data series name. Topics can include instance parameter variables when used with Multi Pages.
     </p>
     <p><b>Type</b> defines the chart as a <i>line chart</i> or as a <i>table</i>.</p>
@@ -455,17 +509,17 @@
                 <b>Natural</b>: Produces a natural cubic spline with the second derivative of the spline set to zero at the endpoints.
             </li>
             <li>
-                <b>Basis</b>: Produces a cubic basis spline using the specified data points. The first and last points are triplicated 
-                such that the spline starts at the first point and ends at the last point, and is tangent to the line between the 
+                <b>Basis</b>: Produces a cubic basis spline using the specified data points. The first and last points are triplicated
+                such that the spline starts at the first point and ends at the last point, and is tangent to the line between the
                 first and second points, and to the line between the penultimate and last points.
             </li>
             <li>
-                <b>Monotone</b>: Produces a smooth curve with continuous first-order derivatives that passes through any given set of data 
+                <b>Monotone</b>: Produces a smooth curve with continuous first-order derivatives that passes through any given set of data
                 points without spurious oscillations. Local extrema can occur only at grid points where they are given by the data, but not
                 in between two adjacent grid points.
             </li>
             <li>
-                <b>Step</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes at 
+                <b>Step</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes at
                 the midpoint of each pair of adjacent x-values.
             </li>
             <li>
@@ -473,7 +527,7 @@
                 after the x-value.
             </li>
             <li>
-                <b>Step Before</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes 
+                <b>Step Before</b>: Produces a step function consisting of alternating horizontal and vertical lines. The y-value changes
                 before the x-value.
             </li>
         </ul>
@@ -483,14 +537,14 @@
     <p>
         <b>Topic Pattern</b> is used to filter incoming messages based on the topic and is required if this node is a
         member of a <a href="https://github.com/waccit/unified-red/blob/master/docs/multi-pages.md" target="_blank">Multi Page</a>.
-        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern 
+        The pattern must include at least one Instance Parameter in braces, e.g. <code>{x}</code>. Optionally, the pattern
         may include <code>*</code> as wildcards to represent 0 or more characters in the topic. For example, <code>*/nvoSpaceTemp{x}/*</code>.
     </p>
     <!-- TOPIC PATTERN 2021-02-07 - END -->
 
     <!-- ACCESS 2021-01-17 - START -->
     <p>
-        <b>Access</b> controls the user's read/write access to this widget based on 
+        <b>Access</b> controls the user's read/write access to this widget based on
         <a href="https://github.com/waccit/unified-red/blob/master/docs/user-roles.md" target="_blank">Unified-RED User Roles</a>.
         When set to <code>Default</code>, Unified-RED's standard role-based permissions will be used. If access is set to anything
         other than <code>Default</code> then the user must be assigned to the same or higher role than selected to be granted access.
@@ -505,5 +559,4 @@
     <ul>
         <li></li>
     </ul> -->
-
 </script>
