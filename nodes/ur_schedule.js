@@ -135,80 +135,93 @@ module.exports = function (RED) {
             return events.concat(holidays);
         };
 
-        let nextEvent = function () {
-            let highestPriorityToday = 4;
-            let greatestPriority = 4;
-            let nextFire = 0;
-            let today = new Date();
-            let currentTime = Date.now();
-            let nextFires = [];
-            let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
-            let next;
-            let todayFires = todayEvents();
-            let events = getEventsArray();
+        let applyPriorityFilter = function (events, today) {
+            if (events.length === 0) return events;
 
-            // determine the highest priority of any event which has or will occur today
-            for (let event of todayFires) {
-                if (event.typeNum < highestPriorityToday) {
-                    highestPriorityToday = event.typeNum;
+            const eventsByDate = {};
+            for (const event of events) {
+                const eventDate = new Date(event.timestamp);
+                const dateKey = eventDate.toDateString();
+                if (!eventsByDate[dateKey]) {
+                    eventsByDate[dateKey] = [];
                 }
+                eventsByDate[dateKey].push(event);
             }
 
-            for (let event of events) {
+            // For each date, only keep events with the highest priority
+            const filteredEvents = [];
+            for (const dateKey in eventsByDate) {
+                const dateEvents = eventsByDate[dateKey];
+                const highestPriority = Math.min(...dateEvents.map((e) => e.typeNum));
+                const highestPriorityEvents = dateEvents.filter((e) => e.typeNum === highestPriority);
+                filteredEvents.push(...highestPriorityEvents);
+            }
+
+            return filteredEvents;
+        };
+
+        let nextEvent = function () {
+            let greatestPriority = 4;
+            let nextFire = 0;
+            const today = new Date();
+            const currentTime = Date.now();
+            const nextFires = [];
+            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
+            let next;
+
+            const events = getEventsArray();
+
+            for (const event of events) {
                 try {
-                    if (event.type === 'holiday') {
-                        event.pattern = correctForNthAndLastRules(event.pattern);
-                    }
-                    if (!event.pattern) {
+                    // For holidays, use the original _pattern for event calculations
+                    // correctForNthAndLastRules should only be used for cron job scheduling
+                    const patternToUse = (event.type === 'holiday' && event._pattern) ? event._pattern : event.pattern;
+                    if (!patternToUse) {
                         continue;
                     }
-                    // parse cron pattern
-                    let parsedFire = parser.parseExpression(event.pattern);
-                    // iterate over next 10 fires of event
-                    for (let index = 0; index < 10; index++) {
-                        nextFire = parsedFire.next().toDate().getTime();
-                        if (nextFire > currentTime) {
-                            if (typeof typeNum[event.type] !== 'undefined') {
-                                // if fire occurs today and is not the highest priority of the day, ignore it
-                                if (
-                                    isSameDay(today, new Date(nextFire)) &&
-                                    typeNum[event.type] !== highestPriorityToday
-                                ) {
-                                    continue;
-                                }
 
-                                if (event._pattern && event._pattern.split(' ')[5].indexOf('#') !== -1) {
-                                    if (isNthWeekday(event._pattern.split(' ')[5], nextFire)) {
-                                        nextFires.push({
-                                            timestamp: nextFire,
-                                            type: event.type,
-                                            typeNum: typeNum[event.type],
-                                            event: event,
-                                        });
-                                    }
-                                } else {
-                                    nextFires.push({
-                                        timestamp: nextFire,
-                                        type: event.type,
-                                        typeNum: typeNum[event.type],
-                                        event: event,
-                                    });
-                                }
+                    const eventTypeNum = typeNum[event.type];
+                    if (typeof eventTypeNum === 'undefined') {
+                        continue;
+                    }
+
+                    const parsedFire = parser.parseExpression(patternToUse);
+                    nextFire = parsedFire.next().toDate().getTime();
+
+                    if (nextFire > currentTime) {
+                        const hasNthPattern = event._pattern && event._pattern.includes('#');
+                        if (hasNthPattern) {
+                            const weekdayPattern = event._pattern.split(' ')[5];
+                            if (isNthWeekday(weekdayPattern, nextFire)) {
+                                nextFires.push({
+                                    timestamp: nextFire,
+                                    type: event.type,
+                                    typeNum: eventTypeNum,
+                                    event: event,
+                                });
                             }
+                        } else {
+                            nextFires.push({
+                                timestamp: nextFire,
+                                type: event.type,
+                                typeNum: eventTypeNum,
+                                event: event,
+                            });
                         }
                     }
                 } catch (err) {
                     console.error('Error: ' + err.message);
                 }
             }
-            let sortedFireTimes = nextFires.sort((a, b) => a.timestamp - b.timestamp);
 
-            // Check if there are any nextFires before proceeding
+            const filteredFires = applyPriorityFilter(nextFires, today);
+
+            let sortedFireTimes = filteredFires.sort((a, b) => a.timestamp - b.timestamp);
+
             if (sortedFireTimes.length === 0) {
                 return undefined;
             }
 
-            // determine the date which a fire will soonest occur
             let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
 
             // set next event based on event type priority
@@ -223,65 +236,55 @@ module.exports = function (RED) {
         };
 
         let prevEvent = function () {
-            let highestPriorityToday = 4;
             let greatestPriority = 4;
             let prevFire = 0;
-            let today = new Date();
-            let currentTime = Date.now();
-            let prevFires = [];
-            let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
+            const today = new Date();
+            const currentTime = Date.now();
+            const prevFires = [];
+            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
             let prev;
-            let todayFires = todayEvents();
-            let events = getEventsArray();
 
-            // determine the highest priority of any event which has or will occur today
-            for (let event of todayFires) {
-                if (event.typeNum < highestPriorityToday) {
-                    highestPriorityToday = event.typeNum;
-                }
-            }
+            const events = getEventsArray();
 
-            for (let event of events) {
+            for (const event of events) {
                 try {
-                    if (event.type === 'holiday') {
-                        event.pattern = correctForNthAndLastRules(event.pattern);
-                    }
-                    if (!event.pattern) {
+                    // For holidays, use the original _pattern for event calculations
+                    // correctForNthAndLastRules should only be used for cron job scheduling
+                    const patternToUse = (event.type === 'holiday' && event._pattern) ? event._pattern : event.pattern;
+                    if (!patternToUse) {
                         continue;
                     }
-                    // parse cron pattern
-                    let parsedFire = parser.parseExpression(event.pattern);
-                    // iterate over previous 10 fires of event
-                    for (let index = 0; index < 10; index++) {
-                        prevFire = parsedFire.prev().toDate().getTime();
-                        if (prevFire < currentTime) {
-                            if (typeof typeNum[event.type] !== 'undefined') {
-                                // if fire occurs today and is not the highest priority of the day, ignore it
-                                if (
-                                    isSameDay(today, new Date(prevFire)) &&
-                                    typeNum[event.type] !== highestPriorityToday
-                                ) {
-                                    continue;
-                                }
 
-                                if (event._pattern && event._pattern.split(' ')[5].indexOf('#') !== -1) {
-                                    if (isNthWeekday(event._pattern.split(' ')[5], prevFire)) {
-                                        prevFires.push({
-                                            timestamp: prevFire,
-                                            type: event.type,
-                                            typeNum: typeNum[event.type],
-                                            event: event,
-                                        });
-                                    }
-                                } else {
-                                    prevFires.push({
-                                        timestamp: prevFire,
-                                        type: event.type,
-                                        typeNum: typeNum[event.type],
-                                        event: event,
-                                    });
-                                }
+                    // Early type validation
+                    const eventTypeNum = typeNum[event.type];
+                    if (typeof eventTypeNum === 'undefined') {
+                        continue;
+                    }
+
+                    // parse cron pattern and get just the previous occurrence
+                    const parsedFire = parser.parseExpression(patternToUse);
+                    prevFire = parsedFire.prev().toDate().getTime();
+
+                    if (prevFire < currentTime) {
+                        // Cache pattern analysis to avoid repeated string operations
+                        const hasNthPattern = event._pattern && event._pattern.includes('#');
+                        if (hasNthPattern) {
+                            const weekdayPattern = event._pattern.split(' ')[5];
+                            if (isNthWeekday(weekdayPattern, prevFire)) {
+                                prevFires.push({
+                                    timestamp: prevFire,
+                                    type: event.type,
+                                    typeNum: eventTypeNum,
+                                    event: event,
+                                });
                             }
+                        } else {
+                            prevFires.push({
+                                timestamp: prevFire,
+                                type: event.type,
+                                typeNum: eventTypeNum,
+                                event: event,
+                            });
                         }
                     }
                 } catch (err) {
@@ -289,14 +292,14 @@ module.exports = function (RED) {
                 }
             }
 
-            let sortedFireTimes = prevFires.sort((a, b) => b.timestamp - a.timestamp);
+            const filteredFires = applyPriorityFilter(prevFires, today);
 
-            // Check if there are any prevFires before proceeding
+            let sortedFireTimes = filteredFires.sort((a, b) => b.timestamp - a.timestamp);
+
             if (sortedFireTimes.length === 0) {
                 return undefined;
             }
 
-            // determine the date which a fire most recently occurred
             let mostRecentFireDate = new Date(sortedFireTimes[0].timestamp);
 
             // set prev event based on event type priority
@@ -310,41 +313,6 @@ module.exports = function (RED) {
             return prev;
         };
 
-        // add all events which have or will take place today to an array
-        let todayEvents = function () {
-            let currentTime = new Date();
-            let todayFires = [];
-            let typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
-
-            for (let pattern in node.cronJobs) {
-                try {
-                    const addFire = (timestamp) => {
-                        if (isSameDay(new Date(timestamp), currentTime)) {
-                            let cronJob = node.cronJobs[pattern];
-                            if (typeof typeNum[cronJob.type] !== 'undefined') {
-                                todayFires.push({
-                                    timestamp,
-                                    type: cronJob.type,
-                                    typeNum: typeNum[cronJob.type],
-                                    event: cronJob.event,
-                                });
-                            }
-                        }
-                    };
-                    let next = parser.parseExpression(pattern).next().toDate().getTime();
-                    let prev = parser.parseExpression(pattern).prev().toDate().getTime();
-
-                    addFire(next);
-                    addFire(prev);
-                } catch (err) {
-                    console.error('Error: ' + err.message);
-                }
-            }
-            let sortedFireTimes = todayFires.sort((a, b) => b.timestamp - a.timestamp);
-            return sortedFireTimes;
-        };
-
-        // determine wether two given date objects are in the same day
         let isSameDay = function (dateA, dateB) {
             return (
                 dateA.getDate() == dateB.getDate() &&
@@ -354,7 +322,7 @@ module.exports = function (RED) {
         };
 
         let secondsFromNow = function (x) {
-            return new Date(new Date().getTime() + x * 1000); // in X seconds
+            return new Date(new Date().getTime() + x * 1000);
         };
 
         let explodeRange = function (exp) {
@@ -378,7 +346,7 @@ module.exports = function (RED) {
             let weekdays = explodeRange(day).split(',');
             for (let weekday of weekdays) {
                 weekday = parseInt(weekday);
-                let m = moment(timestamp).date(week * 7 - 6); // go to nth week
+                let m = moment(timestamp).date(week * 7 - 6);
                 if (m.weekday() > weekday) {
                     m = m.add(7, 'days');
                 }
@@ -471,7 +439,6 @@ module.exports = function (RED) {
             if (RED.settings.verbose) {
                 node.log('scheduleDateJob ' + JSON.stringify(sch) + ' ' + (time ? time.toLocaleString() : ''));
             }
-            // Separate pattern here? modifying the real pattern
             if (time) {
                 temporary_pattern = setCronTime(
                     temporary_pattern,
@@ -584,7 +551,7 @@ module.exports = function (RED) {
 
                         // clean .pattern for the new schedule build
                         holidaySch.pattern = holidaySch._pattern;
-                        
+
                         // schedule job and "priority schedule" jobs
                         holidaySch.pattern = setCronTime(holidaySch.pattern, holidaySch.hour, holidaySch.minute, '1');
                         scheduleHolidayJob(holidaySch);
@@ -659,6 +626,7 @@ module.exports = function (RED) {
             // avoids undefined errors
             if (Object.keys(node.cronJobs).length !== 0) {
                 let lastEvent = prevEvent();
+
                 let soonestEvent = nextEvent();
 
                 // update node status text
