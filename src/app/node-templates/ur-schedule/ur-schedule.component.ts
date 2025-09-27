@@ -82,6 +82,11 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                 this.calendarLoadSchedules();
                 this.setViewType();
             });
+
+        // Trigger calendar initialization after view is ready
+        setTimeout(() => {
+            this.calendarReady.next(true);
+        }, 0);
     }
     updateValue(data: any) {
         super.updateValue(data);
@@ -589,10 +594,24 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     private renderInactiveEvents() {
         setTimeout(() => {
-            // clear any previous inactive flags
-            $('.ur-schedule-weekday-event.inactive, .ur-schedule-date-event.inactive').removeClass('inactive');
+            const calendarApi = this.calendarComponent?.getApi();
+            if (!calendarApi) {
+                return;
+            }
+            const calendarElement = calendarApi.el;
+            if (!calendarElement) {
+                return;
+            }
 
-            const events = $('.fc-timegrid-col, .fc-daygrid-day');
+            // now scoped to this component instance 
+            const componentElement = $(calendarElement);
+            
+            // clear any previous inactive flags
+            componentElement
+                .find('.ur-schedule-weekday-event.inactive, .ur-schedule-date-event.inactive')
+                .removeClass('inactive');
+
+            const events = componentElement.find('.fc-timegrid-col, .fc-daygrid-day');
             // within week or month/day view, check for any events with weekday and
             // date/holiday schedules and flag weekday events as inactive
             events

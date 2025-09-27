@@ -1,6 +1,6 @@
 <ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
     <span #container [id]="data.id" class="ur-schedule-container">
-        <full-calendar class="calendarPosition" #calendar [options]="calendarOptions" [activated]="calendarReady.next(true)"></full-calendar>
+        <full-calendar class="calendarPosition" #calendar [options]="calendarOptions"></full-calendar>
     
         <button 
             mat-fab 
@@ -10,7 +10,7 @@
                 this.isMobile() && dirty ? 'add-button-mobile-deploy' : ''
             ]" 
             color="primary" (click)="handleDateClick(null)">
-            <mat-icon id="add">add</mat-icon>
+            <mat-icon>add</mat-icon>
         </button>
 
         <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
