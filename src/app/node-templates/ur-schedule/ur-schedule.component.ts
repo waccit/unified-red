@@ -732,7 +732,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             { value: '3', text: '3rd' },
             { value: '4', text: '4th' },
             { value: '5', text: '5th' },
-            // { value: 'L', text: 'Last' },
+            { value: 'L', text: 'Last' },
         ];
         const arr = (a) => {
             return Array.isArray(a) ? a : [a];
