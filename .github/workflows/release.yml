@@ -1,9 +1,7 @@
 # prettier-ignore
-name: Build and Deploy
+name: Build and Deploy (Test)
 on:
-  push:
-     branches:
-        - master
+  workflow_dispatch: # allows manual testing from Actions tab
 
 permissions:
   id-token: write
@@ -30,8 +28,9 @@ jobs:
         with:
           name: dist
           path: dist
+
   deploy:
-    name: Deploy
+    name: Deploy (Dry Run)
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -42,7 +41,7 @@ jobs:
         with:
           name: dist
           path: dist
-      - name: Release
+      - name: Release (Dry Run)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release@22
+        run: npx semantic-release@22 --dry-run
