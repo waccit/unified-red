@@ -47,6 +47,16 @@ var injectedStyles = `
         text-overflow: ellipsis !important;
         max-width: calc(100% - 50px) !important;
         display: inline-block !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .jstree-anchor:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .jstree-clicked {
+        outline: none !important;
+        box-shadow: none !important;
     }
     .badge {
         display: inline-block;
@@ -113,12 +123,166 @@ var injectedStyles = `
     .jstree-cut {
         opacity: 0.5;
     }
+    
+    /* Hover button styles with visual feedback */
+    .jstree-hover-button {
+        transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+    }
+    
+    .jstree-hover-button:hover {
+        background-color: rgba(0, 0, 0, 0.1) !important;
+        opacity: 1 !important;
+    }
+    
+    .jstree-hover-button:active {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+        transform: scale(0.98);
+    }
 `;
 
 var clipboard = null;
 var cutNodes = new Set();
 
 var ignoreVisibilityChange = true;
+
+/**
+ * Creates a new node of the specified type with proper numbering.
+ * Counts existing nodes from RED.nodes to ensure unique sequential names.
+ * This function is exposed globally for use by ur_base.html and other scripts.
+ * 
+ * @param {string} type - Node type without 'ur_' prefix (folder, link, page, group, tab)
+ * @param {string|null} parentId - ID of the parent node (null for root-level items)
+ * @param {string|null} parentType - Type of the parent without 'ur_' prefix (folder, page, group)
+ * @returns {Object} The created node configuration
+ */
+function createMenuNode(type, parentId, parentType) {
+    let node_config = { ...defaultMenuEntities[`ur_${type}`] };
+    node_config._def = RED.nodes.getType(node_config.type);
+    node_config.id = RED.nodes.id();
+    
+    // Count existing nodes for proper ordering and naming
+    // - existingTypeCount: count of same-type nodes (for naming: "Folder 1", "Folder 2")
+    // - existingSiblingCount: count of ALL sibling nodes (for order: sequential position)
+    let existingTypeCount = 0;
+    let existingSiblingCount = 0;
+    
+    RED.nodes.eachConfig(function(node) {
+        if (type === 'folder' || type === 'link') {
+            if (parentId) {
+                // Nested in a folder - count items in that folder
+                if (node.folder === parentId) {
+                    existingSiblingCount++;
+                    if (node.type === `ur_${type}`) {
+                        existingTypeCount++;
+                    }
+                }
+            } else {
+                // Root level - count ALL root-level folders and links for order
+                if ((node.type === 'ur_folder' || node.type === 'ur_link') && !node.folder) {
+                    existingSiblingCount++;
+                    if (node.type === `ur_${type}`) {
+                        existingTypeCount++;
+                    }
+                }
+            }
+        } else if (type === 'page') {
+            // Pages inside a folder - also count child folders and links as siblings
+            if (node.folder === parentId) {
+                existingSiblingCount++;
+                if (node.type === 'ur_page') {
+                    existingTypeCount++;
+                }
+            }
+        } else if (type === 'group') {
+            if (node.page === parentId) {
+                existingSiblingCount++;
+                if (node.type === 'ur_group') {
+                    existingTypeCount++;
+                }
+            }
+        } else if (type === 'tab') {
+            if (node.group === parentId) {
+                existingSiblingCount++;
+                if (node.type === 'ur_tab') {
+                    existingTypeCount++;
+                }
+            }
+        }
+    });
+    
+    // Order is sequential across all siblings to maintain insertion order
+    node_config.order = existingSiblingCount + 1;
+    // Name is numbered by type (Folder 1, Folder 2, Link 1, etc.)
+    node_config.name += ` ${existingTypeCount + 1}`;
+    
+    // Set the parent reference
+    if (parentId && parentType) {
+        node_config[parentType] = parentId;
+    }
+    
+    RED.nodes.add(node_config);
+    RED.history.push({
+        t: 'add',
+        nodes: [node_config.id],
+        dirty: RED.nodes.dirty(),
+    });
+    RED.nodes.dirty(true);
+    
+    return node_config;
+}
+
+/**
+ * Add a new folder. Can be root-level or nested inside another folder.
+ * @param {string|null} parentFolderId - Parent folder ID, or null/undefined for root-level
+ * @returns {Object} The created node configuration
+ */
+function addFolder(parentFolderId) {
+    return createMenuNode('folder', parentFolderId || null, parentFolderId ? 'folder' : null);
+}
+
+/**
+ * Add a new link. Can be root-level or nested inside a folder.
+ * @param {string|null} parentFolderId - Parent folder ID, or null/undefined for root-level
+ * @returns {Object} The created node configuration
+ */
+function addLink(parentFolderId) {
+    return createMenuNode('link', parentFolderId || null, parentFolderId ? 'folder' : null);
+}
+
+/**
+ * Add a new page inside a folder.
+ * @param {string} folderId - Parent folder ID (required)
+ * @returns {Object} The created node configuration
+ */
+function addPage(folderId) {
+    return createMenuNode('page', folderId, 'folder');
+}
+
+/**
+ * Add a new group inside a page.
+ * @param {string} pageId - Parent page ID (required)
+ * @returns {Object} The created node configuration
+ */
+function addGroup(pageId) {
+    return createMenuNode('group', pageId, 'page');
+}
+
+/**
+ * Add a new tab inside a group.
+ * @param {string} groupId - Parent group ID (required)
+ * @returns {Object} The created node configuration
+ */
+function addTab(groupId) {
+    return createMenuNode('tab', groupId, 'group');
+}
+
+// Expose node creation functions globally for use by ur_base.html
+window.addFolder = addFolder;
+window.addLink = addLink;
+window.addPage = addPage;
+window.addGroup = addGroup;
+window.addTab = addTab;
+window.createMenuNode = createMenuNode;
 
 (function () {
     function injectJsTreeStyles() {
@@ -147,7 +311,11 @@ var ignoreVisibilityChange = true;
         return nodesArray.sort((a, b) => a.order - b.order);
     }
 
-    function extractFolderChildren(folderNode) {
+    function getWidgetNodeDisplayText(node) {
+        return node.label || node.name || node.type;
+    }
+
+    function extractFolderChildren(folderNode, includeWidgets) {
         const folder = {
             text: folderNode.name,
             id: folderNode.id,
@@ -166,11 +334,29 @@ var ignoreVisibilityChange = true;
                     text: group.name,
                     id: group.id,
                     type: 'group',
-                    children: extractNodesFromConfig('ur_tab', 'group', group).map((tab) => ({
-                        text: tab.name,
-                        id: tab.id,
-                        type: 'tab',
-                    })),
+                    children: extractNodesFromConfig('ur_tab', 'group', group).map((tab) => {
+                        const tabNode = {
+                            text: tab.name,
+                            id: tab.id,
+                            type: 'tab',
+                            children: [],
+                        };
+                        
+                        // Only add widgets if explicitly requested (for base tree)
+                        if (includeWidgets) {
+                            RED.nodes.eachNode(function (node) {
+                                if (/^ur_/.test(node.type) && node.tab === tab.id) {
+                                    tabNode.children.push({
+                                        text: getWidgetNodeDisplayText(node),
+                                        id: node.id,
+                                        type: 'widget',
+                                    });
+                                }
+                            });
+                        }
+                        
+                        return tabNode;
+                    }),
                 };
                 pageNode.children.push(groupNode);
             });
@@ -186,7 +372,7 @@ var ignoreVisibilityChange = true;
         });
 
         extractNodesFromConfig('ur_folder', 'folder', folderNode).forEach((childFolder) => {
-            folder.children.push(extractFolderChildren(childFolder));
+            folder.children.push(extractFolderChildren(childFolder, includeWidgets));
         });
 
         return folder;
@@ -209,7 +395,7 @@ var ignoreVisibilityChange = true;
     }
 
     function scrollToNode(nodeId) {
-        let treeInstance = $.jstree.reference('#jstree');
+        let treeInstance = $.jstree.reference('#nodeeditjstree');
         if (!treeInstance) {
             console.error('jsTree instance not available for scrollToNode');
             return;
@@ -226,7 +412,7 @@ var ignoreVisibilityChange = true;
     }
 
     function generatePathBadges(nodeId) {
-        let treeInstance = $.jstree.reference('#jstree');
+        let treeInstance = $.jstree.reference('#nodeeditjstree');
         if (!treeInstance) {
             console.error('jsTree instance not available for generatePathBadges');
             return '<span class="badge badge-none">None</span>';
@@ -254,17 +440,20 @@ var ignoreVisibilityChange = true;
     }
 
     function refreshJSTree() {
-        var instance = $.jstree.reference('#jstree');
+        var $nodeeditjstree = $('#nodeeditjstree');
+        var instance = $.jstree.reference($nodeeditjstree);
         if (!instance) {
             console.error('jsTree instance not available for updateJsTreeData');
+            return;
         }
+        
+        // Get fresh data
         var rootFolders = extractRootFolders();
-        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
+        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, false));
+        
+        // Update the data source and refresh in-place (preserves open state)
         instance.settings.core.data = foldersTreeData;
-        instance.refresh({ skip_loading: false });
-        setTimeout(() => {
-            applyCutClasses();
-        }, 100);
+        instance.refresh(true); // true = skip loading indicator
     }
 
     function applyCutClasses() {
@@ -285,7 +474,7 @@ var ignoreVisibilityChange = true;
     // Helper function to clear both clipboard and cut nodes together
     function clearClipboard() {
         if (clipboard && cutNodes.has(clipboard.id)) {
-            const instance = $.jstree.reference('#jstree');
+            const instance = $.jstree.reference('#nodeeditjstree');
             const removeCutFromChildren = (currentNode) => {
                 cutNodes.delete(currentNode.id);
                 $('#' + currentNode.id).removeClass('jstree-cut');
@@ -341,7 +530,7 @@ var ignoreVisibilityChange = true;
     }
 
     function cutNode(node) {
-        var instance = $.jstree.reference('#jstree');
+        var instance = $.jstree.reference('#nodeeditjstree');
         const addCutToNodeAndChildren = (currentNode) => {
             cutNodes.add(currentNode.id);
             $('#' + currentNode.id).addClass('jstree-cut');
@@ -379,11 +568,11 @@ var ignoreVisibilityChange = true;
         clipboard = node;
         addCutToNodeAndChildren(node);
         instance.close_node(node);
-        onHoverNode(node);
+        onHoverNode(node, '#nodeeditjstree');
     }
 
     function pasteFromClipboard(node) {
-        var tree = $('#jstree').jstree(true);
+        var tree = $('#nodeeditjstree').jstree(true);
 
         const recursiveAdd = (parentNode, currentNode, index, nodeREDID) => {
             const newNodeId = createNodeCopyPaste(
@@ -473,24 +662,25 @@ var ignoreVisibilityChange = true;
         return node_config.id;
     }
 
-    function createNodeUsingJSTree(node, type) {
-        let node_config = { ...defaultMenuEntities[`ur_${type}`] };
-        node_config._def = RED.nodes.getType(node_config.type);
-        node_config.id = RED.nodes.id();
-        node_config.order = node.children.length + 1;
-        node_config.name += ` ${node.children.length + 1}`;
-        node_config[node.type] = node.id;
-        RED.nodes.add(node_config);
-        RED.history.push({
-            t: 'add',
-            nodes: [node_config.id],
-            dirty: RED.nodes.dirty(),
-        });
-        RED.nodes.dirty(true);
+    function createNodeUsingJSTree(parentNode, type, instance) {
+        // Use the shared createMenuNode function for consistent numbering
+        let node_config = createMenuNode(type, parentNode.id, parentNode.type);
+        
+        // Add the new node directly to the tree instead of refreshing
+        var newNodeData = {
+            id: node_config.id,
+            text: node_config.name,
+            type: type,
+            children: []
+        };
+        instance.create_node(parentNode.id, newNodeData, 'last');
+        
+        return node_config;
     }
 
-    function onHoverNode(node) {
-        var instance = $.jstree.reference('#jstree');
+    function onHoverNode(node, treeSelector) {
+        treeSelector = treeSelector || '#nodeeditjstree';
+        var instance = $.jstree.reference(treeSelector);
         let buttons = [];
 
         // Clean up orphaned cut nodes if clipboard is cleared externally
@@ -508,17 +698,17 @@ var ignoreVisibilityChange = true;
             return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="position: relative; float: right; z-index: 1000; margin-top: 2px; background: rgba(255,255,255, 1); border-radius: 3px; padding: 2px 4px;"><i class="fa fa-${icon}"></i> </a>`;
         };
         $('.jstree-hover-button').remove();
+        
         if (!cutNodes.has(node.id)) {
             const addButton = (icon, type) => {
                 let btn = $(addButtonHTML(icon));
                 btn.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    createNodeUsingJSTree(node, type);
-                    if (!instance.is_open(node)) {
-                        instance.open_node(node);
-                    }
-                    refreshJSTree();
+                    createNodeUsingJSTree(node, type, instance);
+                    applyCutClasses();
+                    // Re-render hover buttons after tree modification to fix positioning
+                    onHoverNode(node, treeSelector);
                 });
                 return btn;
             };
@@ -527,56 +717,64 @@ var ignoreVisibilityChange = true;
             editButton.on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                let tabNode = RED.nodes.node(node.id);
-                if (tabNode) {
-                    RED.editor.editConfig('', tabNode.type, tabNode.id);
+                let nodeData = RED.nodes.node(node.id);
+                if (nodeData) {
+                    // Widgets are regular nodes, use standard editor
+                    if (node.type === 'widget') {
+                        RED.editor.edit(nodeData);
+                    } else {
+                        // Config nodes (folder, page, group, tab, link) use config editor
+                        RED.editor.editConfig('', nodeData.type, nodeData.id);
+                    }
                 }
             });
             buttons.push(editButton);
 
-            if (['folder', 'page', 'group'].includes(node.type)) {
-                let pasteButton = $(actionButtonHTML('paste'));
-                pasteButton.on('click', function (e) {
+            // Only show copy/cut/paste/add buttons for organizational nodes (folder, page, group, tab)
+            if (['folder', 'page', 'group', 'tab'].includes(node.type)) {
+                if (['folder', 'page', 'group'].includes(node.type)) {
+                    let pasteButton = $(actionButtonHTML('paste'));
+                    pasteButton.on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        pasteFromClipboard(node);
+                    });
+                    buttons.push(pasteButton);
+                }
+
+                let copyButton = $(actionButtonHTML('copy'));
+                copyButton.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    pasteFromClipboard(node);
+                    clipboard = node;
                 });
-                buttons.push(pasteButton);
+                buttons.push(copyButton);
+
+                let cutButton = $(actionButtonHTML('cut'));
+                cutButton.on('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cutNode(node);
+                });
+                buttons.push(cutButton);
+
+                switch (node.type) {
+                    case 'folder':
+                        buttons.push(
+                            addButton('file-o', 'page'),
+                            addButton('folder-o', 'folder'),
+                            addButton('link', 'link')
+                        );
+                        break;
+                    case 'page':
+                        buttons.push(addButton('window-maximize', 'group'));
+                        break;
+                    case 'group':
+                        buttons.push(addButton('columns', 'tab'));
+                        break;
+                }
             }
-
-            let copyButton = $(actionButtonHTML('copy'));
-            copyButton.on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                clipboard = node;
-            });
-            buttons.push(copyButton);
-
-            let cutButton = $(actionButtonHTML('cut'));
-            cutButton.on('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                cutNode(node);
-            });
-            buttons.push(cutButton);
-
-            switch (node.type) {
-                case 'folder':
-                    buttons.push(
-                        addButton('file-o', 'page'),
-                        addButton('folder-o', 'folder'),
-                        addButton('link', 'link')
-                    );
-                    break;
-                case 'page':
-                    buttons.push(addButton('window-maximize', 'group'));
-                    break;
-                case 'group':
-                    buttons.push(addButton('columns', 'tab'));
-                    break;
-                case 'tab':
-                    break;
-            }
+            // For link, widget, and other node types: only edit button is shown (already added above)
         } else {
             if (clipboard && clipboard.id !== node.id) {
                 return;
@@ -586,22 +784,43 @@ var ignoreVisibilityChange = true;
                 e.preventDefault();
                 e.stopPropagation();
                 clearClipboard();
-                onHoverNode(node);
+                onHoverNode(node, treeSelector);
             });
             buttons.push(undoButton);
         }
 
-        var $node = $('#' + node.id);
+        // Scope the search to within the jstree container to avoid conflicts with flow editor SVG elements
+        var $node = $(treeSelector).find('#' + node.id);
+        
+        if ($node.length === 0) {
+            console.error('Could not find jsTree node with ID:', node.id);
+            return;
+        }
+        
         var $anchor = $node.children('.jstree-wholerow');
-        $anchor.append(buttons);
+        if ($anchor.length === 0) {
+            $anchor = $node.children('a.jstree-anchor');
+        }
+        if ($anchor.length === 0) {
+            $anchor = $node.find('.jstree-wholerow').first();
+        }
+        if ($anchor.length === 0) {
+            $anchor = $node.find('a.jstree-anchor').first();
+        }
+        
+        if ($anchor.length > 0) {
+            $anchor.append(buttons);
+        } else {
+            console.error('Could not find anchor element to append buttons to for node:', node.id);
+        }
     }
 
     function initializeJsTree(tabId) {
-        if ($('#jstree').length === 0) {
-            console.error("Element with ID 'jstree' not found in the DOM");
+        if ($('#nodeeditjstree').length === 0) {
+            console.error("Element with ID 'nodeeditjstree' not found in the DOM");
             return;
         }
-        const jstreeElement = document.getElementById('jstree');
+        const jstreeElement = document.getElementById('nodeeditjstree');
         const editPane = jstreeElement.closest('.red-ui-editor');
         let lastVisibilityState = null;
         const checkVisibility = () => {
@@ -633,19 +852,19 @@ var ignoreVisibilityChange = true;
 
         selectedTab = tabId;
         var rootFolders = extractRootFolders();
-        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder));
+        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, false));
         var debounce = false;
 
-        if ($.jstree.reference('#jstree')) {
-            $('#jstree').jstree('destroy');
+        if ($.jstree.reference('#nodeeditjstree')) {
+            $('#nodeeditjstree').jstree('destroy');
         }
 
-        $('#jstree').jstree({
+        $('#nodeeditjstree').jstree({
             'core': {
                 'data': foldersTreeData,
                 'dblclick_toggle': false,
                 'check_callback': function (operation, node, parent) {
-                    if (operation === 'move_node') {
+                    if (operation === 'move_node' || operation === 'create_node') {
                         switch (parent?.type) {
                             case 'folder':
                                 if (node.type === 'folder' || node.type === 'page' || node.type === 'link') {
@@ -713,23 +932,23 @@ var ignoreVisibilityChange = true;
             },
         });
 
-        $('#jstree').on('refresh.jstree', function () {
+        $('#nodeeditjstree').on('refresh.jstree', function () {
             applyCutClasses();
         });
 
-        $('#jstree').on('open_node.jstree', function () {
+        $('#nodeeditjstree').on('open_node.jstree', function () {
             applyCutClasses();
         });
 
-        $('#jstree').on('close_node.jstree', function () {
+        $('#nodeeditjstree').on('close_node.jstree', function () {
             applyCutClasses();
         });
 
-        $('#jstree').on('create_node.jstree', function () {
+        $('#nodeeditjstree').on('create_node.jstree', function () {
             applyCutClasses();
         });
 
-        $('#jstree').on('move_node.jstree', function (e, data) {
+        $('#nodeeditjstree').on('move_node.jstree', function (e, data) {
             const reorderNode = (nodeId) => {
                 let node = RED.nodes.node(nodeId);
                 node.order = newSiblings.indexOf(nodeId) + 1;
@@ -763,13 +982,13 @@ var ignoreVisibilityChange = true;
             applyCutClasses();
         });
 
-        $('#jstree').on('select_node.jstree', function (e, data) {
+        $('#nodeeditjstree').on('select_node.jstree', function (e, data) {
             if (data.node.type === 'tab' && !cutNodes.has(data.node.id)) {
                 selectedTab = data.node;
                 $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
-                $('#jstree').removeClass('input-error');
+                $('#nodeeditjstree').removeClass('input-error');
             } else {
-                var instance = $.jstree.reference('#jstree');
+                var instance = $.jstree.reference('#nodeeditjstree');
                 if (instance.is_open(data.node)) {
                     instance.close_node(data.node);
                 } else {
@@ -799,7 +1018,7 @@ var ignoreVisibilityChange = true;
             }
             debounce = setTimeout(function () {
                 var v = $('#treeSearch').val();
-                var instance = $.jstree.reference('#jstree');
+                var instance = $.jstree.reference('#nodeeditjstree');
                 if (instance) {
                     instance.search(v);
                 }
@@ -807,20 +1026,20 @@ var ignoreVisibilityChange = true;
             }, 250);
         });
 
-        $('#jstree').on('hover_node.jstree', function (e, data) {
-            onHoverNode(data.node);
+        $('#nodeeditjstree').on('hover_node.jstree', function (e, data) {
+            onHoverNode(data.node, '#nodeeditjstree');
         });
 
-        $('#jstree').on('dehover_node.jstree', function (e, data) {
+        $('#nodeeditjstree').on('dehover_node.jstree', function (e, data) {
             if (!$('.jstree-hover-button:hover').length) {
                 $('.jstree-hover-button').remove();
             }
         });
 
-        $('#jstree').on(
+        $('#nodeeditjstree').on(
             'ready.jstree',
             function () {
-                var instance = $.jstree.reference('#jstree');
+                var instance = $.jstree.reference('#nodeeditjstree');
                 if (!instance) {
                     console.error('jsTree instance not available');
                     return;
@@ -842,7 +1061,7 @@ var ignoreVisibilityChange = true;
         );
 
         if (tabId) {
-            var instance = $.jstree.reference('#jstree');
+            var instance = $.jstree.reference('#nodeeditjstree');
             if (instance) {
                 var storedNode = instance.get_node(tabId);
                 if (storedNode) {
@@ -853,8 +1072,223 @@ var ignoreVisibilityChange = true;
             }
         } else {
             $('#selectedTabDisplay').html(generatePathBadges(null));
-            $('#jstree').addClass('input-error');
+            $('#nodeeditjstree').addClass('input-error');
         }
+    }
+
+    function initializeJsTreeBase() {
+        if ($('#jstree').length === 0) {
+            console.error("Element with ID 'jstree' not found in the DOM");
+            return;
+        }
+
+        var rootFolders = extractRootFolders();
+        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, true));
+        var debounce = false;
+
+        if ($.jstree.reference('#jstree')) {
+            $('#jstree').jstree('destroy');
+        }
+
+        $('#jstree').jstree({
+            'core': {
+                'data': foldersTreeData,
+                'dblclick_toggle': false,
+                'check_callback': function (operation, node, parent) {
+                    if (operation === 'move_node' || operation === 'create_node') {
+                        switch (parent?.type) {
+                            case 'folder':
+                                if (node.type === 'folder' || node.type === 'page' || node.type === 'link') {
+                                    return true;
+                                }
+                                return false;
+                            case 'page':
+                                if (node.type === 'group') {
+                                    return true;
+                                }
+                                return false;
+                            case 'group':
+                                if (node.type === 'tab') {
+                                    return true;
+                                }
+                                return false;
+                            case 'tab':
+                                // Allow tabs to have children (widgets and other nodes)
+                                if (node.type === 'widget') {
+                                    return true;
+                                }
+                                return false;
+                            case 'link':
+                                return false;
+                            default:
+                                if (parent && parent.id === '#' && (node.type === 'folder' || node.type === 'link')) {
+                                    return true;
+                                }
+                                return false;
+                        }
+                    }
+                    return false;
+                },
+            },
+            'multiple': false,
+            'plugins': ['types', 'search', 'wholerow', 'dnd'],
+            'dnd': {
+                'copy': false,
+                'large_drop_target': true,
+                'large_drag_target': true,
+                'is_draggable': function (nodes) {
+                    return !$('#' + nodes[0].id).hasClass('jstree-cut');
+                },
+                'auto_expand': false,
+                'open_timeout': 0,
+            },
+            'types': {
+                'default': {},
+                'folder': {
+                    'icon': 'fa fa-folder-o',
+                },
+                'page': {
+                    'icon': 'fa fa-file-o',
+                },
+                'group': {
+                    'icon': 'fa fa-window-maximize',
+                },
+                'tab': {
+                    'icon': 'fa fa-columns',
+                },
+                'link': {
+                    'icon': 'fa fa-link',
+                },
+                'widget': {
+                    'icon': 'fa fa-picture-o',
+                },
+            },
+            'search': {
+                'show_only_matches': true,
+                'search_callback': function (searchString, node) {
+                    return fuzzyMatch(node.text, searchString);
+                },
+            },
+        });
+
+        $('#jstree').on('refresh.jstree', function () {
+            applyCutClasses();
+        });
+
+        $('#jstree').on('open_node.jstree', function () {
+            applyCutClasses();
+        });
+
+        $('#jstree').on('close_node.jstree', function () {
+            applyCutClasses();
+        });
+
+        $('#jstree').on('create_node.jstree', function () {
+            applyCutClasses();
+        });
+
+        $('#jstree').on('move_node.jstree', function (e, data) {
+            const reorderNode = (nodeId) => {
+                let node = RED.nodes.node(nodeId);
+                if (node) {
+                    node.order = newSiblings.indexOf(nodeId) + 1;
+                    RED.nodes.dirty(true);
+                    RED.history.push({
+                        t: 'edit',
+                        node: node,
+                        changed: true,
+                        dirty: node.dirty,
+                        changes: {
+                            order: node.order,
+                        },
+                    });
+                    RED.view.redraw();
+                }
+            };
+
+            let newParent = data.instance.get_node(data.parent);
+            let newSiblings = newParent.children;
+            newSiblings.forEach((nodeId) => {
+                reorderNode(nodeId);
+            });
+            if (data.old_parent !== data.parent) {
+                let oldSiblings = data.instance.get_node(data.old_parent).children;
+                oldSiblings.forEach((nodeId) => {
+                    reorderNode(nodeId);
+                });
+                let node = RED.nodes.node(data.node.id);
+                if (node && newParent.type) {
+                    node[newParent.type] = newParent.id;
+                }
+            }
+            applyCutClasses();
+        });
+
+        $('#jstree').on('select_node.jstree', function (e, data) {
+            var instance = $.jstree.reference('#jstree');
+            if (instance.is_open(data.node)) {
+                instance.close_node(data.node);
+            } else {
+                instance.open_node(data.node);
+            }
+            instance.deselect_node(data.node);
+        });
+
+        $('#baseTreeSearch').keyup(function () {
+            if (debounce) {
+                clearTimeout(debounce);
+            }
+            debounce = setTimeout(function () {
+                var v = $('#baseTreeSearch').val();
+                var instance = $.jstree.reference('#jstree');
+                if (instance) {
+                    instance.search(v);
+                }
+                applyCutClasses();
+            }, 250);
+        });
+
+        $('#jstree').on('hover_node.jstree', function (e, data) {
+            onHoverNode(data.node, '#jstree');
+        });
+
+        $('#jstree').on('dehover_node.jstree', function (e, data) {
+            if (!$('.jstree-hover-button:hover').length) {
+                $('.jstree-hover-button').remove();
+            }
+        });
+
+        $('#jstree').on('ready.jstree', function () {
+            applyCutClasses();
+        });
+    }
+
+    function refreshJSTreeBase() {
+        if (typeof $.jstree === 'undefined' || !$.jstree) {
+            console.warn('jsTree library not loaded, skipping refresh');
+            return;
+        }
+        
+        var $jstree = $('#jstree');
+        if ($jstree.length === 0) {
+            console.warn('jsTree element not found in DOM');
+            return;
+        }
+        
+        var instance = $.jstree.reference($jstree);
+        if (!instance) {
+            // No existing tree, initialize fresh
+            initializeJsTreeBase();
+            return;
+        }
+        
+        // Get fresh data
+        var rootFolders = extractRootFolders();
+        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, true));
+        
+        // Update the data source and refresh in-place (preserves open state)
+        instance.settings.core.data = foldersTreeData;
+        instance.refresh(true); // true = skip loading indicator
     }
 
     function getSelectedTab() {
@@ -863,6 +1297,9 @@ var ignoreVisibilityChange = true;
 
     // Exposes functions to global scope for use in HTML scripts
     window.initializeJsTree = initializeJsTree;
+    window.initializeJsTreeBase = initializeJsTreeBase;
+    window.refreshJSTree = refreshJSTree;
+    window.refreshJSTreeBase = refreshJSTreeBase;
     window.getSelectedTab = getSelectedTab;
     window.clearClipboard = clearClipboard;
 })();

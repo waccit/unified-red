@@ -349,6 +349,10 @@
     }
 </style>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
+<script src="./ur_base/js/ur_jstree.js"></script>
+
 <script type="text/javascript">
     (function ($) {
         var editSaveEventHandler;
@@ -994,39 +998,29 @@
 
                 var buttonGroup = $('<div>', { class: 'nr-db-sb-list-button-group' }).appendTo(divTabs);
 
-                // Expand/Collapse Buttons
+                // Add jsTree container for navigation menu
+                var jstreeContainer = $('<div>', { id: 'jstree-container', class: 'form-row' }).appendTo(divTabs);
+                $('<input type="text" id="baseTreeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />')
+                    .appendTo(jstreeContainer);
+                $('<div id="jstree">')
+                    .css({
+                        'height': '400px',
+                        'overflow-y': 'auto',
+                        'border': '1px solid #ccc',
+                        'padding': '5px',
+                        'border-radius': '4px'
+                    })
+                    .appendTo(jstreeContainer);
+
+                // Expand/Collapse Buttons for jsTree
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-angle-double-up"></i></a>'
                 )
                     .click(function (evt) {
-                        folderContainer
-                            .find('.nr-db-sb-widget-list-container')
-                            .slideUp()
-                            .addClass('nr-db-sb-collapsed');
-                        folderContainer.find('.nr-db-sb-tab-list-container').slideUp().addClass('nr-db-sb-collapsed');
-                        folderContainer.find('.nr-db-sb-group-list-container').slideUp().addClass('nr-db-sb-collapsed');
-                        folderContainer
-                            .find('.nr-db-sb-folder-content-container')
-                            .slideUp()
-                            .addClass('nr-db-sb-collapsed');
-
-                        folderContainer
-                            .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': 'rotate(-90deg)' });
-                        folderContainer
-                            .find('.nr-db-sb-folder-content-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': 'rotate(-90deg)' });
-                        folderContainer
-                            .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': 'rotate(-90deg)' });
-                        folderContainer
-                            .find('.nr-db-sb-tab-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': 'rotate(-90deg)' });
-
-                        for (id in listStates) {
-                            listStates[id] = false;
+                        var instance = $.jstree.reference('#jstree');
+                        if (instance) {
+                            instance.close_all();
                         }
-
                         evt.preventDefault();
                     })
                     .appendTo(buttonGroup);
@@ -1034,40 +1028,10 @@
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-angle-double-down"></i></a>'
                 )
                     .click(function (evt) {
-                        folderContainer
-                            .find('.nr-db-sb-folder-content-container')
-                            .slideDown()
-                            .removeClass('nr-db-sb-collapsed');
-                        folderContainer
-                            .find('.nr-db-sb-group-list-container')
-                            .slideDown()
-                            .removeClass('nr-db-sb-collapsed');
-                        folderContainer
-                            .find('.nr-db-sb-tab-list-container')
-                            .slideDown()
-                            .removeClass('nr-db-sb-collapsed');
-                        folderContainer
-                            .find('.nr-db-sb-widget-list-container')
-                            .slideDown()
-                            .removeClass('nr-db-sb-collapsed');
-
-                        folderContainer
-                            .find('.nr-db-sb-folder-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': '' });
-                        folderContainer
-                            .find('.nr-db-sb-folder-content-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': '' });
-                        folderContainer
-                            .find('.nr-db-sb-group-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': '' });
-                        folderContainer
-                            .find('.nr-db-sb-tab-list-header>.nr-db-sb-list-chevron')
-                            .css({ 'transform': '' });
-
-                        for (id in listStates) {
-                            listStates[id] = true;
+                        var instance = $.jstree.reference('#jstree');
+                        if (instance) {
+                            instance.open_all();
                         }
-
                         evt.preventDefault();
                     })
                     .appendTo(buttonGroup);
@@ -1161,37 +1125,53 @@
 
                 /**
                  * Helper function for checking if node needs to be created.
+                 * Uses window.createMenuNode from ur_jstree.js for consistent numbering.
                  * @return {Object} node
                  */
                 var makeNode = function (container, i, item) {
                     if (!item.node) {
-                        item.node = { ...defaultMenuEntities[item.type] };
-                        item.node._def = RED.nodes.getType(item.type);
-                        item.node.id = RED.nodes.id();
-                        item.node.order = i + 1;
-                        item.node.name += ' ' + item.node.order;
+                        // Determine the type (without 'ur_' prefix) and parent info
+                        var type = item.type.replace('ur_', '');
+                        var parentId = null;
+                        var parentType = null;
+                        
+                        if (item.folder) {
+                            parentId = item.folder;
+                            parentType = 'folder';
+                        } else if (item.page) {
+                            parentId = item.page;
+                            parentType = 'page';
+                        } else if (item.group) {
+                            parentId = item.group;
+                            parentType = 'group';
+                        }
+                        
+                        // Use the global createMenuNode function for consistent numbering
+                        // This function counts existing nodes from RED.nodes to avoid duplicates
+                        if (typeof window.createMenuNode === 'function') {
+                            item.node = window.createMenuNode(type, parentId, parentType);
+                        } else {
+                            // Fallback if ur_jstree.js hasn't loaded yet
+                            item.node = { ...defaultMenuEntities[item.type] };
+                            item.node._def = RED.nodes.getType(item.type);
+                            item.node.id = RED.nodes.id();
+                            item.node.order = i + 1;
+                            item.node.name += ' ' + item.node.order;
+                            
+                            if (parentId && parentType) {
+                                item.node[parentType] = parentId;
+                            }
+
+                            RED.nodes.add(item.node);
+                            RED.history.push({
+                                t: 'add',
+                                nodes: [item.node.id],
+                                dirty: RED.nodes.dirty(),
+                            });
+                            RED.nodes.dirty(true);
+                        }
 
                         listElements[item.node.id] = container;
-
-                        if (item.folder) {
-                            item.node.folder = item.folder;
-                        }
-
-                        if (item.page) {
-                            item.node.page = item.page;
-                        }
-
-                        if (item.group) {
-                            item.node.group = item.group;
-                        }
-
-                        RED.nodes.add(item.node);
-                        RED.history.push({
-                            t: 'add',
-                            nodes: [item.node.id],
-                            dirty: RED.nodes.dirty(),
-                        });
-                        RED.nodes.dirty(true);
                     } else if (item.type === undefined) {
                         item.type = item.node.type;
                     }
@@ -2655,7 +2635,36 @@
                     },
                 });
 
+                // Initialize jsTree for navigation menu after sidebar is created
+                // Wait for both jsTree library and ur_jstree.js script to load with retry logic
+                var initJsTreeRetryCount = 0;
+                var maxRetries = 50; // 50 * 100ms = 5 seconds max wait
+                function tryInitJsTree() {
+                    if (typeof $.jstree !== 'undefined' && typeof window.initializeJsTreeBase === 'function') {
+                        window.initializeJsTreeBase();
+                    } else {
+                        initJsTreeRetryCount++;
+                        if (initJsTreeRetryCount < maxRetries) {
+                            setTimeout(tryInitJsTree, 100);
+                        } else {
+                            console.error('jsTree library or initializeJsTreeBase function not available after ' + (maxRetries * 100) + 'ms');
+                            console.error('$.jstree:', typeof $.jstree);
+                            console.error('window.initializeJsTreeBase:', typeof window.initializeJsTreeBase);
+                        }
+                    }
+                }
+                setTimeout(tryInitJsTree, 100);
+
                 editSaveEventHandler = function (node) {
+                    // Refresh base jsTree for ANY ur_ node save (including widget tab changes)
+                    if (/^ur_/.test(node.type)) {
+                        setTimeout(function() {
+                            if (typeof window.refreshJSTreeBase === 'function') {
+                                window.refreshJSTreeBase();
+                            }
+                        }, 300);
+                    }
+                    
                     if (/^ur_/.test(node.type)) {
                         if (
                             node.type === 'ur_link' ||
@@ -3039,6 +3048,13 @@
                         clearTimeout(pendingAddTimer);
                         pendingAddTimer = setTimeout(handlePendingAdds, 100);
                     }
+                    
+                    // Refresh base jsTree when nodes are added
+                    setTimeout(function() {
+                        if (typeof window.refreshJSTreeBase === 'function') {
+                            window.refreshJSTreeBase();
+                        }
+                    }, 300);
                 };
                 RED.events.on('nodes:add', nodesAddEventHandler);
 
@@ -3080,6 +3096,13 @@
                         // refreshOrphanedWidgets();
                         delete listElements[node.id];
                     }
+                    
+                    // Refresh base jsTree when nodes are removed
+                    setTimeout(function() {
+                        if (typeof window.refreshJSTreeBase === 'function') {
+                            window.refreshJSTreeBase();
+                        }
+                    }, 50);
                 };
                 RED.events.on('nodes:remove', nodesRemoveEventHandler);
             },
