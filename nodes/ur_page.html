@@ -484,6 +484,35 @@
                 });
             }
         },
+        oneditdelete: function () {
+            var pageId = this.id;
+            var groupsToDelete = [];
+            var tabsToDelete = [];
+
+            // groups
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_group' && node.page === pageId) {
+                    groupsToDelete.push(node);
+                }
+            });
+
+            // tabs
+            groupsToDelete.forEach(function (group) {
+                RED.nodes.eachConfig(function (tabNode) {
+                    if (tabNode.type === 'ur_tab' && tabNode.group === group.id) {
+                        tabsToDelete.push(tabNode);
+                    }
+                });
+            });
+
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.remove(tab.id);
+            });
+
+            groupsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+        },
     });
 
     function explodeRange(exp) {

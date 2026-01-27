@@ -323,10 +323,17 @@ window.createMenuNode = createMenuNode;
             children: [],
         };
         extractNodesFromConfig('ur_page', 'folder', folderNode).forEach((page) => {
+            // Determine page type for icon (check inherited first since inherited pages can also have isMulti)
+            let pageType = 'page';
+            if (page.pageType === 'inherited') {
+                pageType = 'page-inherited';
+            } else if (page.pageType === 'multi' || page.isMulti) {
+                pageType = 'page-multi';
+            }
             const pageNode = {
                 text: page.name,
                 id: page.id,
-                type: 'page',
+                type: pageType,
                 children: [],
             };
             extractNodesFromConfig('ur_group', 'page', page).forEach((group) => {
@@ -914,6 +921,12 @@ window.createMenuNode = createMenuNode;
                 'page': {
                     'icon': 'fa fa-file-o',
                 },
+                'page-multi': {
+                    'icon': 'fa fa-copy',
+                },
+                'page-inherited': {
+                    'icon': 'fa fa-paste',
+                },
                 'group': {
                     'icon': 'fa fa-window-maximize',
                 },
@@ -1149,6 +1162,12 @@ window.createMenuNode = createMenuNode;
                 },
                 'page': {
                     'icon': 'fa fa-file-o',
+                },
+                'page-multi': {
+                    'icon': 'fa fa-copy',
+                },
+                'page-inherited': {
+                    'icon': 'fa fa-paste',
                 },
                 'group': {
                     'icon': 'fa fa-window-maximize',

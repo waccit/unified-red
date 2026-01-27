@@ -77,6 +77,83 @@
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
         },
+        oneditdelete: function () {
+            var folderId = this.id;
+            var foldersToDelete = [];
+            var linksToDelete = [];
+            var pagesToDelete = [];
+            var groupsToDelete = [];
+            var tabsToDelete = [];
+
+            // folders
+            function collectChildFolders(parentFolderId) {
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_folder' && node.folder === parentFolderId) {
+                        foldersToDelete.push(node);
+                        collectChildFolders(node.id);
+                    }
+                });
+            }
+            collectChildFolders(folderId);
+
+            var allFolderIds = [folderId].concat(
+                foldersToDelete.map(function (f) {
+                    return f.id;
+                })
+            );
+
+            // links
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_link' && allFolderIds.indexOf(node.folder) !== -1) {
+                    linksToDelete.push(node);
+                }
+            });
+
+            // pages
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_page' && allFolderIds.indexOf(node.folder) !== -1) {
+                    pagesToDelete.push(node);
+                }
+            });
+
+            // groups
+            pagesToDelete.forEach(function (page) {
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_group' && node.page === page.id) {
+                        groupsToDelete.push(node);
+                    }
+                });
+            });
+
+            // tabs
+            groupsToDelete.forEach(function (group) {
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_tab' && node.group === group.id) {
+                        tabsToDelete.push(node);
+                    }
+                });
+            });
+
+            tabsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            groupsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            pagesToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            linksToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            foldersToDelete.reverse().forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+        },
     });
 </script>
 
