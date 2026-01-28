@@ -323,17 +323,19 @@ window.createMenuNode = createMenuNode;
             children: [],
         };
         extractNodesFromConfig('ur_page', 'folder', folderNode).forEach((page) => {
-            // Determine page type for icon (check inherited first since inherited pages can also have isMulti)
-            let pageType = 'page';
+            // Determine icon based on page type (inherited/multi get different icons)
+            // All pages use type: 'page' for consistent behavior
+            let pageIcon = 'fa fa-file-o'; // default single page icon
             if (page.pageType === 'inherited') {
-                pageType = 'page-inherited';
+                pageIcon = 'fa fa-paste';
             } else if (page.pageType === 'multi' || page.isMulti) {
-                pageType = 'page-multi';
+                pageIcon = 'fa fa-copy';
             }
             const pageNode = {
                 text: page.name,
                 id: page.id,
-                type: pageType,
+                type: 'page',
+                icon: pageIcon,
                 children: [],
             };
             extractNodesFromConfig('ur_group', 'page', page).forEach((group) => {
@@ -467,27 +469,31 @@ window.createMenuNode = createMenuNode;
         // Clean up orphaned cut nodes (when clipboard is cleared externally)
         if (!clipboard && cutNodes.size > 0) {
             cutNodes.forEach((nodeId) => {
-                $('#' + nodeId).removeClass('jstree-cut');
+                // Scope to jstree containers to avoid affecting Node-RED flow editor
+                $('#nodeeditjstree, #jstree').find('#' + nodeId).removeClass('jstree-cut');
             });
             cutNodes.clear();
             return;
         }
 
         cutNodes.forEach((nodeId) => {
-            $('#' + nodeId).addClass('jstree-cut');
+            // Scope to jstree containers to avoid affecting Node-RED flow editor
+            $('#nodeeditjstree, #jstree').find('#' + nodeId).addClass('jstree-cut');
         });
     }
 
     // Helper function to clear both clipboard and cut nodes together
     function clearClipboard() {
         if (clipboard && cutNodes.has(clipboard.id)) {
-            const instance = $.jstree.reference('#nodeeditjstree');
+            // Try to get instance from either tree
+            var instance = $.jstree.reference('#nodeeditjstree') || $.jstree.reference('#jstree');
             const removeCutFromChildren = (currentNode) => {
                 cutNodes.delete(currentNode.id);
-                $('#' + currentNode.id).removeClass('jstree-cut');
+                // Scope to jstree containers to avoid affecting Node-RED flow editor
+                $('#nodeeditjstree, #jstree').find('#' + currentNode.id).removeClass('jstree-cut');
                 if (currentNode.children && currentNode.children.length > 0) {
                     currentNode.children.forEach((childId) => {
-                        const childNode = instance.get_node(childId);
+                        const childNode = instance ? instance.get_node(childId) : null;
                         if (childNode) removeCutFromChildren(childNode);
                     });
                 }
@@ -536,36 +542,53 @@ window.createMenuNode = createMenuNode;
         });
     }
 
-    function cutNode(node) {
-        var instance = $.jstree.reference('#nodeeditjstree');
+    function cutNode(node, treeSelector) {
+        treeSelector = treeSelector || '#nodeeditjstree';
+        var instance = $.jstree.reference(treeSelector);
+        if (!instance) {
+            console.error('jsTree instance not available for cutNode');
+            return;
+        }
+        
         const addCutToNodeAndChildren = (currentNode) => {
             cutNodes.add(currentNode.id);
-            $('#' + currentNode.id).addClass('jstree-cut');
+            // Scope to jstree containers to avoid affecting Node-RED flow editor
+            $('#nodeeditjstree, #jstree').find('#' + currentNode.id).addClass('jstree-cut');
             if (currentNode.children && currentNode.children.length > 0) {
                 currentNode.children.forEach((childId) => {
                     const childNode = instance.get_node(childId);
-                    addCutToNodeAndChildren(childNode);
+                    if (childNode) {
+                        addCutToNodeAndChildren(childNode);
+                    }
                 });
             }
         };
 
-        if (selectedTab.parents.includes(node.id)) {
-            shakeButtons();
-            return;
-        }
-        if (selectedTab && selectedTab.id === node.id) {
-            shakeButtons();
-            return;
+        // Only check selectedTab restrictions when in nodeeditjstree context and selectedTab exists
+        // This prevents cutting nodes that are parents of or equal to the currently selected tab
+        if (typeof selectedTab !== 'undefined' && selectedTab && treeSelector === '#nodeeditjstree') {
+            if (selectedTab.parents && selectedTab.parents.includes(node.id)) {
+                shakeButtons();
+                return;
+            }
+            if (selectedTab.id === node.id) {
+                shakeButtons();
+                return;
+            }
         }
 
+        // Clear previous cut state if there was one
         if (clipboard && cutNodes.has(clipboard.id)) {
             const removeCutFromChildren = (currentNode) => {
                 cutNodes.delete(currentNode.id);
-                $('#' + currentNode.id).removeClass('jstree-cut');
+                // Scope to jstree containers to avoid affecting Node-RED flow editor
+                $('#nodeeditjstree, #jstree').find('#' + currentNode.id).removeClass('jstree-cut');
                 if (currentNode.children && currentNode.children.length > 0) {
                     currentNode.children.forEach((childId) => {
                         const childNode = instance.get_node(childId);
-                        removeCutFromChildren(childNode);
+                        if (childNode) {
+                            removeCutFromChildren(childNode);
+                        }
                     });
                 }
             };
@@ -575,63 +598,130 @@ window.createMenuNode = createMenuNode;
         clipboard = node;
         addCutToNodeAndChildren(node);
         instance.close_node(node);
-        onHoverNode(node, '#nodeeditjstree');
+        onHoverNode(node, treeSelector);
     }
 
-    function pasteFromClipboard(node) {
-        var tree = $('#nodeeditjstree').jstree(true);
+    function pasteFromClipboard(node, treeSelector) {
+        // Check for undefined clipboard first
+        if (!clipboard) {
+            shakeButtons();
+            return;
+        }
+        
+        // Use the provided tree selector, defaulting to nodeeditjstree for backward compatibility
+        treeSelector = treeSelector || '#nodeeditjstree';
+        var tree = $(treeSelector).jstree(true);
+        
+        // Try to get clipboard node from available trees (might be copied from different tree)
+        var sourceTree = tree;
+        var clipboardNode = tree ? tree.get_node(clipboard.id) : null;
+        if (!clipboardNode) {
+            // Try the base tree
+            var baseTree = $.jstree.reference('#jstree');
+            if (baseTree) {
+                clipboardNode = baseTree.get_node(clipboard.id);
+                if (clipboardNode) {
+                    sourceTree = baseTree;
+                }
+            }
+        }
+        // Fall back to the stored clipboard reference if not found in trees
+        if (!clipboardNode) {
+            clipboardNode = clipboard;
+        }
+        
+        // Determine if this is a CUT (move) operation
+        var isCutOperation = clipboard && cutNodes.has(clipboard.id);
 
+        // For COPY operations: create new nodes recursively
         const recursiveAdd = (parentNode, currentNode, index, nodeREDID) => {
             const newNodeId = createNodeCopyPaste(
                 nodeREDID,
                 parentNode.type,
                 index,
                 currentNode.text,
-                currentNode.type
+                currentNode.type,
+                currentNode.id  // Pass original node ID to copy properties from
             );
             if (currentNode.children && currentNode.children.length > 0) {
                 currentNode.children.forEach((childId, childIndex) => {
-                    const childNode = tree.get_node(childId);
-                    if (childNode) {
+                    // Get child from the source tree where clipboard came from
+                    const childNode = sourceTree ? sourceTree.get_node(childId) : null;
+                    // Skip widget nodes - they cannot be copied via jstree copy/paste
+                    // Widgets are actual flow nodes and should be copied via Node-RED's native clipboard
+                    if (childNode && childNode.type !== 'widget') {
                         recursiveAdd(currentNode, childNode, childIndex, newNodeId);
                     }
                 });
             }
         };
-
-        const recursiveDelete = (node) => {
-            if (node.children && node.children.length > 0) {
-                node.children.forEach((childId) => {
-                    recursiveDelete(tree.get_node(childId));
-                });
+        
+        // For CUT operations: move existing nodes by updating parent references
+        const recursiveMove = (newParentId, newParentType, currentNode, index) => {
+            const redNode = RED.nodes.node(currentNode.id);
+            if (!redNode) return;
+            
+            // Store old values for history
+            const oldParentType = getParentTypeForNodeType(currentNode.type);
+            const oldParentId = oldParentType ? redNode[oldParentType] : null;
+            const oldOrder = redNode.order;
+            
+            // Update parent reference
+            if (oldParentType && redNode[oldParentType] !== undefined) {
+                // Clear old parent reference if different from new parent type
+                if (oldParentType !== newParentType) {
+                    delete redNode[oldParentType];
+                }
             }
-            RED.nodes.remove(node.id);
+            redNode[newParentType] = newParentId;
+            redNode.order = index + 1;
+            
+            // Record the change in history
             RED.history.push({
-                t: 'remove',
-                nodes: [node.id],
-                dirty: RED.nodes.dirty(),
+                t: 'edit',
+                node: redNode,
+                changed: true,
+                dirty: redNode.dirty,
+                changes: {
+                    [oldParentType]: oldParentId,
+                    [newParentType]: oldParentId, // for undo
+                    order: oldOrder,
+                },
             });
+            RED.nodes.dirty(true);
+        };
+        
+        // Helper to get the parent property name for a node type
+        const getParentTypeForNodeType = (nodeType) => {
+            switch (nodeType) {
+                case 'folder':
+                case 'link':
+                case 'page':
+                    return 'folder';
+                case 'group':
+                    return 'page';
+                case 'tab':
+                    return 'group';
+                default:
+                    return null;
+            }
         };
 
-        if (!clipboard) {
-            shakeButtons();
-            return;
-        }
         switch (node.type) {
             case 'folder':
-                if (!['link', 'folder', 'page'].includes(clipboard.type)) {
+                if (!['link', 'folder', 'page'].includes(clipboardNode.type)) {
                     shakeButtons();
                     return;
                 }
                 break;
             case 'page':
-                if (!['group'].includes(clipboard.type)) {
+                if (!['group'].includes(clipboardNode.type)) {
                     shakeButtons();
                     return;
                 }
                 break;
             case 'group':
-                if (!['tab'].includes(clipboard.type)) {
+                if (!['tab'].includes(clipboardNode.type)) {
                     shakeButtons();
                     return;
                 }
@@ -640,25 +730,73 @@ window.createMenuNode = createMenuNode;
                 shakeButtons();
                 return;
         }
-        recursiveAdd(node, clipboard, node.children.length, node.id);
-        if (clipboard && cutNodes.has(clipboard.id)) {
-            recursiveDelete(clipboard);
+        
+        if (isCutOperation) {
+            // MOVE operation: update parent reference on existing node
+            recursiveMove(node.id, node.type, clipboardNode, node.children.length);
             cutNodes.clear();
             clipboard = null;
+            // Redraw Node-RED view to update widget visual state
+            RED.view.redraw();
+        } else {
+            // COPY operation: create new nodes
+            recursiveAdd(node, clipboardNode, node.children.length, node.id);
         }
-        if (!tree.is_open(node)) {
+        
+        // tree is now correctly initialized based on treeSelector parameter
+        if (tree && typeof tree.is_open === 'function' && !tree.is_open(node)) {
             tree.open_node(node);
         }
-        refreshJSTree();
+        // Refresh the appropriate tree(s) based on what exists
+        // Only refresh nodeeditjstree if it exists and has a jstree instance
+        if ($('#nodeeditjstree').length > 0 && $.jstree.reference('#nodeeditjstree')) {
+            refreshJSTree();
+        }
+        // Only refresh base tree if it exists and has a jstree instance
+        if ($('#jstree').length > 0 && $.jstree.reference('#jstree')) {
+            refreshJSTreeBase();
+        }
     }
 
-    function createNodeCopyPaste(parentID, parentType, index, name, type) {
+    function createNodeCopyPaste(parentID, parentType, index, name, type, originalNodeId) {
         let node_config = { ...defaultMenuEntities[`ur_${type}`] };
         node_config._def = RED.nodes.getType(node_config.type);
         node_config.id = RED.nodes.id();
         node_config.order = index;
         node_config.name = name;
         node_config[parentType] = parentID;
+        
+        // Copy properties from original node if available
+        if (originalNodeId) {
+            const originalNode = RED.nodes.node(originalNodeId);
+            if (originalNode) {
+                // Copy page-specific properties for multi/inherited pages
+                if (type === 'page' && originalNode.type === 'ur_page') {
+                    // Copy common page properties
+                    node_config.disp = originalNode.disp !== false;
+                    node_config.width = originalNode.width || 6;
+                    node_config.collapse = originalNode.collapse || false;
+                    node_config.disabled = originalNode.disabled || false;
+                    node_config.hidden = originalNode.hidden || false;
+                    node_config.access = originalNode.access || '';
+                    node_config.accessBehavior = originalNode.accessBehavior || '';
+                    
+                    // Copy page type properties
+                    node_config.pageType = originalNode.pageType || 'single';
+                    node_config.isMulti = originalNode.isMulti || false;
+                    node_config.isSingle = originalNode.isSingle !== false;
+                    node_config.inheritInst = originalNode.inheritInst || false;
+                    node_config.expression = originalNode.expression || '';
+                    node_config.instances = originalNode.instances ? JSON.parse(JSON.stringify(originalNode.instances)) : [];
+                    
+                    // For inherited pages, copy refPage reference
+                    if (originalNode.pageType === 'inherited') {
+                        node_config.refPage = originalNode.refPage || 'none';
+                    }
+                }
+            }
+        }
+        
         RED.nodes.add(node_config);
         RED.history.push({
             t: 'add',
@@ -693,7 +831,8 @@ window.createMenuNode = createMenuNode;
         // Clean up orphaned cut nodes if clipboard is cleared externally
         if (!clipboard && cutNodes.size > 0) {
             cutNodes.forEach((nodeId) => {
-                $('#' + nodeId).removeClass('jstree-cut');
+                // Scope to jstree containers to avoid affecting Node-RED flow editor
+                $('#nodeeditjstree, #jstree').find('#' + nodeId).removeClass('jstree-cut');
             });
             cutNodes.clear();
         }
@@ -744,7 +883,7 @@ window.createMenuNode = createMenuNode;
                     pasteButton.on('click', function (e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        pasteFromClipboard(node);
+                        pasteFromClipboard(node, treeSelector);
                     });
                     buttons.push(pasteButton);
                 }
@@ -761,7 +900,7 @@ window.createMenuNode = createMenuNode;
                 cutButton.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    cutNode(node);
+                    cutNode(node, treeSelector);
                 });
                 buttons.push(cutButton);
 
@@ -908,7 +1047,7 @@ window.createMenuNode = createMenuNode;
                 'large_drop_target': true,
                 'large_drag_target': true,
                 'is_draggable': function (nodes) {
-                    return !$('#' + nodes[0].id).hasClass('jstree-cut');
+                    return !$('#nodeeditjstree').find('#' + nodes[0].id).hasClass('jstree-cut');
                 },
                 'auto_expand': false,
                 'open_timeout': 0,
@@ -1150,7 +1289,7 @@ window.createMenuNode = createMenuNode;
                 'large_drop_target': true,
                 'large_drag_target': true,
                 'is_draggable': function (nodes) {
-                    return !$('#' + nodes[0].id).hasClass('jstree-cut');
+                    return !$('#jstree').find('#' + nodes[0].id).hasClass('jstree-cut');
                 },
                 'auto_expand': false,
                 'open_timeout': 0,
