@@ -127,15 +127,16 @@ var injectedStyles = `
     /* Hover button styles with visual feedback */
     .jstree-hover-button {
         transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
+        background-color: #fff !important;
     }
     
     .jstree-hover-button:hover {
-        background-color: rgba(0, 0, 0, 0.1) !important;
+        background-color: #e6e6e6 !important;
         opacity: 1 !important;
     }
     
     .jstree-hover-button:active {
-        background-color: rgba(0, 0, 0, 0.05) !important;
+        background-color: #f2f2f2 !important;
         transform: scale(0.98);
     }
 `;
@@ -762,6 +763,7 @@ window.createMenuNode = createMenuNode;
         let node_config = { ...defaultMenuEntities[`ur_${type}`] };
         node_config._def = RED.nodes.getType(node_config.type);
         node_config.id = RED.nodes.id();
+        console.log('node_config.id', node_config.id);
         node_config.order = index;
         node_config.name = name;
         node_config[parentType] = parentID;
@@ -892,6 +894,10 @@ window.createMenuNode = createMenuNode;
                 copyButton.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    if (clipboard && cutNodes.has(clipboard.id)) {
+                        shakeButtons();
+                        return;
+                    }
                     clipboard = node;
                 });
                 buttons.push(copyButton);

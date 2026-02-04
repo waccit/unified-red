@@ -95,6 +95,19 @@
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
         },
+        oneditdelete: function () {
+            var tabId = this.id;
+            RED.nodes.eachNode(function (node) {
+                if (node.tab === tabId) {
+                    delete node.tab;
+                    node.dirty = true;
+                    node.changed = true;
+                    RED.editor.validateNode(node);
+                }
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
+        },
     });
 </script>
 

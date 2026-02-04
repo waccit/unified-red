@@ -505,6 +505,18 @@
                 });
             });
 
+            var affectedNodes = [];
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.eachNode(function (node) {
+                    if (node.tab === tab.id) {
+                        delete node.tab;
+                        node.dirty = true;
+                        node.changed = true;
+                        affectedNodes.push(node);
+                    }
+                });
+            });
+
             tabsToDelete.forEach(function (tab) {
                 RED.nodes.remove(tab.id);
             });
@@ -512,6 +524,12 @@
             groupsToDelete.forEach(function (node) {
                 RED.nodes.remove(node.id);
             });
+            
+            affectedNodes.forEach(function (node) {
+                RED.editor.validateNode(node);
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
         },
     });
 
