@@ -150,7 +150,7 @@ var ignoreVisibilityChange = true;
  * Creates a new node of the specified type with proper numbering.
  * Counts existing nodes from RED.nodes to ensure unique sequential names.
  * This function is exposed globally for use by ur_base.html and other scripts.
- * 
+ *
  * @param {string} type - Node type without 'ur_' prefix (folder, link, page, group, tab)
  * @param {string|null} parentId - ID of the parent node (null for root-level items)
  * @param {string|null} parentType - Type of the parent without 'ur_' prefix (folder, page, group)
@@ -160,14 +160,14 @@ function createMenuNode(type, parentId, parentType) {
     let node_config = { ...defaultMenuEntities[`ur_${type}`] };
     node_config._def = RED.nodes.getType(node_config.type);
     node_config.id = RED.nodes.id();
-    
+
     // Count existing nodes for proper ordering and naming
     // - existingTypeCount: count of same-type nodes (for naming: "Folder 1", "Folder 2")
     // - existingSiblingCount: count of ALL sibling nodes (for order: sequential position)
     let existingTypeCount = 0;
     let existingSiblingCount = 0;
-    
-    RED.nodes.eachConfig(function(node) {
+
+    RED.nodes.eachConfig(function (node) {
         if (type === 'folder' || type === 'link') {
             if (parentId) {
                 // Nested in a folder - count items in that folder
@@ -210,17 +210,17 @@ function createMenuNode(type, parentId, parentType) {
             }
         }
     });
-    
+
     // Order is sequential across all siblings to maintain insertion order
     node_config.order = existingSiblingCount + 1;
     // Name is numbered by type (Folder 1, Folder 2, Link 1, etc.)
     node_config.name += ` ${existingTypeCount + 1}`;
-    
+
     // Set the parent reference
     if (parentId && parentType) {
         node_config[parentType] = parentId;
     }
-    
+
     RED.nodes.add(node_config);
     RED.history.push({
         t: 'add',
@@ -228,7 +228,7 @@ function createMenuNode(type, parentId, parentType) {
         dirty: RED.nodes.dirty(),
     });
     RED.nodes.dirty(true);
-    
+
     return node_config;
 }
 
@@ -351,7 +351,7 @@ window.createMenuNode = createMenuNode;
                             type: 'tab',
                             children: [],
                         };
-                        
+
                         // Only add widgets if explicitly requested (for base tree)
                         if (includeWidgets) {
                             RED.nodes.eachNode(function (node) {
@@ -359,12 +359,14 @@ window.createMenuNode = createMenuNode;
                                     tabNode.children.push({
                                         text: getWidgetNodeDisplayText(node),
                                         id: node.id,
+                                        order: node.order,
                                         type: 'widget',
                                     });
                                 }
                             });
                         }
-                        
+                        tabNode.children.sort((a, b) => a.order - b.order);
+
                         return tabNode;
                     }),
                 };
@@ -456,11 +458,11 @@ window.createMenuNode = createMenuNode;
             console.error('jsTree instance not available for updateJsTreeData');
             return;
         }
-        
+
         // Get fresh data
         var rootFolders = extractRootFolders();
         var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, false));
-        
+
         // Update the data source and refresh in-place (preserves open state)
         instance.settings.core.data = foldersTreeData;
         instance.refresh(true); // true = skip loading indicator
@@ -471,7 +473,9 @@ window.createMenuNode = createMenuNode;
         if (!clipboard && cutNodes.size > 0) {
             cutNodes.forEach((nodeId) => {
                 // Scope to jstree containers to avoid affecting Node-RED flow editor
-                $('#nodeeditjstree, #jstree').find('#' + nodeId).removeClass('jstree-cut');
+                $('#nodeeditjstree, #jstree')
+                    .find('#' + nodeId.replace(/\./g, '\\.'))
+                    .removeClass('jstree-cut');
             });
             cutNodes.clear();
             return;
@@ -479,7 +483,9 @@ window.createMenuNode = createMenuNode;
 
         cutNodes.forEach((nodeId) => {
             // Scope to jstree containers to avoid affecting Node-RED flow editor
-            $('#nodeeditjstree, #jstree').find('#' + nodeId).addClass('jstree-cut');
+            $('#nodeeditjstree, #jstree')
+                .find('#' + nodeId.replace(/\./g, '\\.'))
+                .addClass('jstree-cut');
         });
     }
 
@@ -491,7 +497,10 @@ window.createMenuNode = createMenuNode;
             const removeCutFromChildren = (currentNode) => {
                 cutNodes.delete(currentNode.id);
                 // Scope to jstree containers to avoid affecting Node-RED flow editor
-                $('#nodeeditjstree, #jstree').find('#' + currentNode.id).removeClass('jstree-cut');
+
+                $('#nodeeditjstree, #jstree')
+                    .find('#' + currentNode.id.replace(/\./g, '\\.'))
+                    .removeClass('jstree-cut');
                 if (currentNode.children && currentNode.children.length > 0) {
                     currentNode.children.forEach((childId) => {
                         const childNode = instance ? instance.get_node(childId) : null;
@@ -550,11 +559,13 @@ window.createMenuNode = createMenuNode;
             console.error('jsTree instance not available for cutNode');
             return;
         }
-        
+
         const addCutToNodeAndChildren = (currentNode) => {
             cutNodes.add(currentNode.id);
             // Scope to jstree containers to avoid affecting Node-RED flow editor
-            $('#nodeeditjstree, #jstree').find('#' + currentNode.id).addClass('jstree-cut');
+            $('#nodeeditjstree, #jstree')
+                .find('#' + currentNode.id.replace(/\./g, '\\.'))
+                .addClass('jstree-cut');
             if (currentNode.children && currentNode.children.length > 0) {
                 currentNode.children.forEach((childId) => {
                     const childNode = instance.get_node(childId);
@@ -583,7 +594,9 @@ window.createMenuNode = createMenuNode;
             const removeCutFromChildren = (currentNode) => {
                 cutNodes.delete(currentNode.id);
                 // Scope to jstree containers to avoid affecting Node-RED flow editor
-                $('#nodeeditjstree, #jstree').find('#' + currentNode.id).removeClass('jstree-cut');
+                $('#nodeeditjstree, #jstree')
+                    .find('#' + currentNode.id.replace(/\./g, '\\.'))
+                    .removeClass('jstree-cut');
                 if (currentNode.children && currentNode.children.length > 0) {
                     currentNode.children.forEach((childId) => {
                         const childNode = instance.get_node(childId);
@@ -608,11 +621,11 @@ window.createMenuNode = createMenuNode;
             shakeButtons();
             return;
         }
-        
+
         // Use the provided tree selector, defaulting to nodeeditjstree for backward compatibility
         treeSelector = treeSelector || '#nodeeditjstree';
         var tree = $(treeSelector).jstree(true);
-        
+
         // Try to get clipboard node from available trees (might be copied from different tree)
         var sourceTree = tree;
         var clipboardNode = tree ? tree.get_node(clipboard.id) : null;
@@ -630,7 +643,7 @@ window.createMenuNode = createMenuNode;
         if (!clipboardNode) {
             clipboardNode = clipboard;
         }
-        
+
         // Determine if this is a CUT (move) operation
         var isCutOperation = clipboard && cutNodes.has(clipboard.id);
 
@@ -642,7 +655,7 @@ window.createMenuNode = createMenuNode;
                 index,
                 currentNode.text,
                 currentNode.type,
-                currentNode.id  // Pass original node ID to copy properties from
+                currentNode.id // Pass original node ID to copy properties from
             );
             if (currentNode.children && currentNode.children.length > 0) {
                 currentNode.children.forEach((childId, childIndex) => {
@@ -656,17 +669,17 @@ window.createMenuNode = createMenuNode;
                 });
             }
         };
-        
+
         // For CUT operations: move existing nodes by updating parent references
         const recursiveMove = (newParentId, newParentType, currentNode, index) => {
             const redNode = RED.nodes.node(currentNode.id);
             if (!redNode) return;
-            
+
             // Store old values for history
             const oldParentType = getParentTypeForNodeType(currentNode.type);
             const oldParentId = oldParentType ? redNode[oldParentType] : null;
             const oldOrder = redNode.order;
-            
+
             // Update parent reference
             if (oldParentType && redNode[oldParentType] !== undefined) {
                 // Clear old parent reference if different from new parent type
@@ -676,7 +689,7 @@ window.createMenuNode = createMenuNode;
             }
             redNode[newParentType] = newParentId;
             redNode.order = index + 1;
-            
+
             // Record the change in history
             RED.history.push({
                 t: 'edit',
@@ -691,7 +704,7 @@ window.createMenuNode = createMenuNode;
             });
             RED.nodes.dirty(true);
         };
-        
+
         // Helper to get the parent property name for a node type
         const getParentTypeForNodeType = (nodeType) => {
             switch (nodeType) {
@@ -731,7 +744,7 @@ window.createMenuNode = createMenuNode;
                 shakeButtons();
                 return;
         }
-        
+
         if (isCutOperation) {
             // MOVE operation: update parent reference on existing node
             recursiveMove(node.id, node.type, clipboardNode, node.children.length);
@@ -743,7 +756,7 @@ window.createMenuNode = createMenuNode;
             // COPY operation: create new nodes
             recursiveAdd(node, clipboardNode, node.children.length, node.id);
         }
-        
+
         // tree is now correctly initialized based on treeSelector parameter
         if (tree && typeof tree.is_open === 'function' && !tree.is_open(node)) {
             tree.open_node(node);
@@ -763,11 +776,10 @@ window.createMenuNode = createMenuNode;
         let node_config = { ...defaultMenuEntities[`ur_${type}`] };
         node_config._def = RED.nodes.getType(node_config.type);
         node_config.id = RED.nodes.id();
-        console.log('node_config.id', node_config.id);
         node_config.order = index;
         node_config.name = name;
         node_config[parentType] = parentID;
-        
+
         // Copy properties from original node if available
         if (originalNodeId) {
             const originalNode = RED.nodes.node(originalNodeId);
@@ -782,15 +794,17 @@ window.createMenuNode = createMenuNode;
                     node_config.hidden = originalNode.hidden || false;
                     node_config.access = originalNode.access || '';
                     node_config.accessBehavior = originalNode.accessBehavior || '';
-                    
+
                     // Copy page type properties
                     node_config.pageType = originalNode.pageType || 'single';
                     node_config.isMulti = originalNode.isMulti || false;
                     node_config.isSingle = originalNode.isSingle !== false;
                     node_config.inheritInst = originalNode.inheritInst || false;
                     node_config.expression = originalNode.expression || '';
-                    node_config.instances = originalNode.instances ? JSON.parse(JSON.stringify(originalNode.instances)) : [];
-                    
+                    node_config.instances = originalNode.instances
+                        ? JSON.parse(JSON.stringify(originalNode.instances))
+                        : [];
+
                     // For inherited pages, copy refPage reference
                     if (originalNode.pageType === 'inherited') {
                         node_config.refPage = originalNode.refPage || 'none';
@@ -798,7 +812,7 @@ window.createMenuNode = createMenuNode;
                 }
             }
         }
-        
+
         RED.nodes.add(node_config);
         RED.history.push({
             t: 'add',
@@ -812,16 +826,16 @@ window.createMenuNode = createMenuNode;
     function createNodeUsingJSTree(parentNode, type, instance) {
         // Use the shared createMenuNode function for consistent numbering
         let node_config = createMenuNode(type, parentNode.id, parentNode.type);
-        
+
         // Add the new node directly to the tree instead of refreshing
         var newNodeData = {
             id: node_config.id,
             text: node_config.name,
             type: type,
-            children: []
+            children: [],
         };
         instance.create_node(parentNode.id, newNodeData, 'last');
-        
+
         return node_config;
     }
 
@@ -834,7 +848,9 @@ window.createMenuNode = createMenuNode;
         if (!clipboard && cutNodes.size > 0) {
             cutNodes.forEach((nodeId) => {
                 // Scope to jstree containers to avoid affecting Node-RED flow editor
-                $('#nodeeditjstree, #jstree').find('#' + nodeId).removeClass('jstree-cut');
+                $('#nodeeditjstree, #jstree')
+                    .find('#' + nodeId.replace(/\./g, '\\.'))
+                    .removeClass('jstree-cut');
             });
             cutNodes.clear();
         }
@@ -846,7 +862,7 @@ window.createMenuNode = createMenuNode;
             return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="position: relative; float: right; z-index: 1000; margin-top: 2px; background: rgba(255,255,255, 1); border-radius: 3px; padding: 2px 4px;"><i class="fa fa-${icon}"></i> </a>`;
         };
         $('.jstree-hover-button').remove();
-        
+
         if (!cutNodes.has(node.id)) {
             const addButton = (icon, type) => {
                 let btn = $(addButtonHTML(icon));
@@ -942,13 +958,13 @@ window.createMenuNode = createMenuNode;
         }
 
         // Scope the search to within the jstree container to avoid conflicts with flow editor SVG elements
-        var $node = $(treeSelector).find('#' + node.id);
-        
+        var $node = $(treeSelector).find('#' + node.id.replace(/\./g, '\\.'));
+
         if ($node.length === 0) {
             console.error('Could not find jsTree node with ID:', node.id);
             return;
         }
-        
+
         var $anchor = $node.children('.jstree-wholerow');
         if ($anchor.length === 0) {
             $anchor = $node.children('a.jstree-anchor');
@@ -959,7 +975,7 @@ window.createMenuNode = createMenuNode;
         if ($anchor.length === 0) {
             $anchor = $node.find('a.jstree-anchor').first();
         }
-        
+
         if ($anchor.length > 0) {
             $anchor.append(buttons);
         } else {
@@ -1053,7 +1069,9 @@ window.createMenuNode = createMenuNode;
                 'large_drop_target': true,
                 'large_drag_target': true,
                 'is_draggable': function (nodes) {
-                    return !$('#nodeeditjstree').find('#' + nodes[0].id).hasClass('jstree-cut');
+                    return !$('#nodeeditjstree')
+                        .find('#' + nodes[0].id.replace(/\./g, '\\.'))
+                        .hasClass('jstree-cut');
                 },
                 'auto_expand': false,
                 'open_timeout': 0,
@@ -1295,7 +1313,9 @@ window.createMenuNode = createMenuNode;
                 'large_drop_target': true,
                 'large_drag_target': true,
                 'is_draggable': function (nodes) {
-                    return !$('#jstree').find('#' + nodes[0].id).hasClass('jstree-cut');
+                    return !$('#jstree')
+                        .find('#' + nodes[0].id.replace(/\./g, '\\.'))
+                        .hasClass('jstree-cut');
                 },
                 'auto_expand': false,
                 'open_timeout': 0,
@@ -1432,24 +1452,24 @@ window.createMenuNode = createMenuNode;
             console.warn('jsTree library not loaded, skipping refresh');
             return;
         }
-        
+
         var $jstree = $('#jstree');
         if ($jstree.length === 0) {
             console.warn('jsTree element not found in DOM');
             return;
         }
-        
+
         var instance = $.jstree.reference($jstree);
         if (!instance) {
             // No existing tree, initialize fresh
             initializeJsTreeBase();
             return;
         }
-        
+
         // Get fresh data
         var rootFolders = extractRootFolders();
         var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, true));
-        
+
         // Update the data source and refresh in-place (preserves open state)
         instance.settings.core.data = foldersTreeData;
         instance.refresh(true); // true = skip loading indicator

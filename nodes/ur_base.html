@@ -106,8 +106,8 @@
         cursor: move;
     }
 
-    .nr-db-sb-list-header:hover > .nr-db-sb-list-handle,
-    .nr-db-sb-list-header:hover > .nr-db-sb-list-header-button-group {
+    .nr-db-sb-list-header:hover>.nr-db-sb-list-handle,
+    .nr-db-sb-list-header:hover>.nr-db-sb-list-header-button-group {
         opacity: 1;
     }
 
@@ -120,12 +120,12 @@
         padding: 5px;
     }
 
-    .nr-db-sb-folder-list-header > .nr-db-sb-list-chevron {
+    .nr-db-sb-folder-list-header>.nr-db-sb-list-chevron {
         /* margin-left: 0px; */
         transition: transform 0.2s ease-in-out;
     }
 
-    .nr-db-sb-group-list-header > .nr-db-sb-list-chevron {
+    .nr-db-sb-group-list-header>.nr-db-sb-list-chevron {
         /* margin-left: 20px; */
         transition: transform 0.2s ease-in-out;
     }
@@ -138,19 +138,19 @@
         border-bottom-color: var(--nr-db-light-text);
     }
 
-    .nr-db-sb-group-list > li.ui-sortable-helper {
+    .nr-db-sb-group-list>li.ui-sortable-helper {
         border-top: 1px solid var(--nr-db-light-text);
     }
 
-    .nr-db-sb-group-list > li:last-child {
+    .nr-db-sb-group-list>li:last-child {
         border-bottom: none;
     }
 
-    .nr-db-sb-widget-list > li {
+    .nr-db-sb-widget-list>li {
         border: none !important;
     }
 
-    .nr-db-sb-group-list > li > .red-ui-editableList-item-handle {
+    .nr-db-sb-group-list>li>.red-ui-editableList-item-handle {
         left: 10px;
     }
 
@@ -550,18 +550,18 @@
                 // var angular_label = c_('label.angular');
                 var liLayoutTab = $(
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Layout"><span>' +
-                        layout_label +
-                        '</span></a></li>'
+                    layout_label +
+                    '</span></a></li>'
                 ).appendTo(ulDashboardTabs);
                 var liSiteTab = $(
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Site" style="width:60px;"><span>' +
-                        site_label +
-                        '</span></a></li>'
+                    site_label +
+                    '</span></a></li>'
                 ).appendTo(ulDashboardTabs);
                 var liFilesTab = $(
                     '<li class="red-ui-tab" style="width:70px;"><a class="red-ui-tab-label" title="Files" style="width:80px;"><span>' +
-                        files_label +
-                        '</span></a></li>'
+                    files_label +
+                    '</span></a></li>'
                 )
                     .appendTo(ulDashboardTabs)
                     .click(function () {
@@ -885,8 +885,8 @@
                 // Add Folder button
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                        c_('layout.folder') +
-                        '</a>'
+                    c_('layout.folder') +
+                    '</a>'
                 )
                     .click(function (evt) {
                         if (typeof window.addFolder === 'function') {
@@ -899,8 +899,8 @@
                 // Add Link button
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
-                        c_('layout.link') +
-                        '</a>'
+                    c_('layout.link') +
+                    '</a>'
                 )
                     .click(function (evt) {
                         if (typeof window.addLink === 'function') {
@@ -946,8 +946,8 @@
                         } else {
                             console.error(
                                 'jsTree library or initializeJsTreeBase function not available after ' +
-                                    maxRetries * 100 +
-                                    'ms'
+                                maxRetries * 100 +
+                                'ms'
                             );
                             console.error('$.jstree:', typeof $.jstree);
                             console.error('window.initializeJsTreeBase:', typeof window.initializeJsTreeBase);
@@ -968,14 +968,22 @@
                 };
                 RED.events.on('editor:save', editSaveEventHandler);
 
+                let refreshTimeout = null;
+
                 nodesAddEventHandler = function (node) {
-                    // Refresh base jsTree when nodes are added
-                    setTimeout(function () {
+                    if (refreshTimeout) {
+                        clearTimeout(refreshTimeout);
+                    }
+
+                    refreshTimeout = setTimeout(function () {
+                        refreshTimeout = null;
+
                         if (typeof window.refreshJSTreeBase === 'function') {
                             window.refreshJSTreeBase();
                         }
                     }, 300);
                 };
+
                 RED.events.on('nodes:add', nodesAddEventHandler);
 
                 nodesRemoveEventHandler = function (node) {
@@ -1250,8 +1258,8 @@
                             cell.on('mouseup', function () {
                                 that.element.text(
                                     $(this).data('w') +
-                                        1 +
-                                        (that.options.hasOwnProperty('height') ? ' x ' + ($(this).data('h') + 1) : '')
+                                    1 +
+                                    (that.options.hasOwnProperty('height') ? ' x ' + ($(this).data('h') + 1) : '')
                                 );
                                 $(that.options.width)
                                     .val($(this).data('w') + 1)
@@ -1275,30 +1283,30 @@
                                                 x === 0 && y <= h
                                                     ? cellBorderHighlight
                                                     : x === 0
-                                                    ? y <= height - 1
-                                                        ? cellBorderExisting
-                                                        : cellBorder
-                                                    : '',
+                                                        ? y <= height - 1
+                                                            ? cellBorderExisting
+                                                            : cellBorder
+                                                        : '',
                                             borderTop:
                                                 y === 0 && x <= w
                                                     ? cellBorderHighlight
                                                     : y === 0
-                                                    ? x <= width - 1
-                                                        ? cellBorderExisting
-                                                        : cellBorder
-                                                    : '',
+                                                        ? x <= width - 1
+                                                            ? cellBorderExisting
+                                                            : cellBorder
+                                                        : '',
                                             borderRight:
                                                 x === w && y <= h
                                                     ? cellBorderHighlight
                                                     : x === width - 1 && y <= height - 1
-                                                    ? cellBorderExisting
-                                                    : cellBorder,
+                                                        ? cellBorderExisting
+                                                        : cellBorder,
                                             borderBottom:
                                                 y === h && x <= w
                                                     ? cellBorderHighlight
                                                     : y === height - 1 && x <= width - 1
-                                                    ? cellBorderExisting
-                                                    : cellBorder,
+                                                        ? cellBorderExisting
+                                                        : cellBorder,
                                         });
                                     }
                                 }
@@ -1751,7 +1759,7 @@
                 }
                 return true;
             }
-        } catch (e) {}
+        } catch (e) { }
         return false;
     }
     refreshFileSystem('/');
