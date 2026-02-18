@@ -286,6 +286,9 @@ window.addTab = addTab;
 window.createMenuNode = createMenuNode;
 
 (function () {
+    var selectedTab = null;
+    var nodeEditJSTreeOptions = null; // { mode: 'tab'|'parent', parentType?: 'folder'|'page'|'group', allowRoot?: boolean }
+
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
             return;
@@ -398,12 +401,262 @@ window.createMenuNode = createMenuNode;
             if (node.type === 'ur_folder' && !node.folder) {
                 rootFoldersArray.push(node);
             }
-            if (node.type === 'ur_link' && !node.folder) {
+            if (node.type === 'ur_link' && (!node.folder || node.folder === 'root')) {
                 rootLinksArray.push(node);
             }
         });
 
         return [...rootFoldersArray, ...rootLinksArray].sort((a, b) => a.order - b.order);
+    }
+
+    /**
+     * Build tree data for parent selector: only folders (nested), no pages/links/groups/tabs.
+     * @param {boolean} allowRoot - If true, prepend a selectable ROOT node
+     * @param {string|null} excludeNodeId - Folder id to exclude (e.g. the folder being edited)
+     * @returns {Array} jstree data
+     */
+    function extractTreeForParentFolder(allowRoot, excludeNodeId) {
+        var rootFolders = [];
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder && node.id !== excludeNodeId) {
+                rootFolders.push(node);
+            }
+        });
+        rootFolders.sort((a, b) => a.order - b.order);
+
+        function folderOnlyChildren(folderNode) {
+            var childFolders = extractNodesFromConfig('ur_folder', 'folder', folderNode).filter(function (n) {
+                return n.id !== excludeNodeId;
+            });
+            return {
+                text: folderNode.name,
+                id: folderNode.id,
+                type: 'folder',
+                icon: 'fa fa-folder-o',
+                children: childFolders.map(folderOnlyChildren),
+            };
+        }
+
+        var data = [];
+        if (allowRoot) {
+            data.push({ id: 'root', text: 'ROOT', type: 'root', icon: 'fa fa-home', children: [] });
+        }
+        rootFolders.forEach(function (f) {
+            data.push(folderOnlyChildren(f));
+        });
+        return data;
+    }
+
+    /**
+     * Build tree data for parent selector: folders with pages only (no groups/tabs).
+     * Selectable = folder (when choosing parent for page) or page (when choosing parent for group).
+     * @param {string|null} excludeNodeId - Page id to exclude when editing a group (the group's current page)
+     * @returns {Array} jstree data
+     */
+    function extractTreeForParentPage(excludeNodeId) {
+        excludeNodeId = excludeNodeId || null;
+        var rootFolders = [];
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder) {
+                rootFolders.push(node);
+            }
+        });
+        rootFolders.sort((a, b) => a.order - b.order);
+
+        function folderWithPagesOnly(folderNode) {
+            var pages = extractNodesFromConfig('ur_page', 'folder', folderNode).filter(function (p) {
+                return p.id !== excludeNodeId;
+            });
+            return {
+                text: folderNode.name,
+                id: folderNode.id,
+                type: 'folder',
+                icon: 'fa fa-folder-o',
+                children: pages.map(function (page) {
+                    return {
+                        text: page.name,
+                        id: page.id,
+                        type: 'page',
+                        icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
+                        children: [],
+                    };
+                }),
+            };
+        }
+
+        return rootFolders.map(folderWithPagesOnly);
+    }
+
+    /**
+     * Build tree data for parent selector: nested folders, each folder has its pages as children.
+     * Use when editing a group (select a page) so the full folder hierarchy is visible.
+     * @param {string|null} excludeNodeId - Page id to exclude when editing a group (the group's current page)
+     * @returns {Array} jstree data
+     */
+    function extractTreeForParentPageNested(excludeNodeId) {
+        excludeNodeId = excludeNodeId || null;
+        var rootFolders = [];
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder) {
+                rootFolders.push(node);
+            }
+        });
+        rootFolders.sort((a, b) => a.order - b.order);
+
+        function folderWithPagesAndNestedFolders(folderNode) {
+            var pages = extractNodesFromConfig('ur_page', 'folder', folderNode).filter(function (p) {
+                return p.id !== excludeNodeId;
+            });
+            var childFolders = extractNodesFromConfig('ur_folder', 'folder', folderNode);
+            var pageNodes = pages.map(function (page) {
+                return {
+                    text: page.name,
+                    id: page.id,
+                    type: 'page',
+                    icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
+                    children: [],
+                };
+            });
+            var folderNodes = childFolders.map(folderWithPagesAndNestedFolders);
+            return {
+                text: folderNode.name,
+                id: folderNode.id,
+                type: 'folder',
+                icon: 'fa fa-folder-o',
+                children: pageNodes.concat(folderNodes),
+            };
+        }
+
+        return rootFolders.map(folderWithPagesAndNestedFolders);
+    }
+
+    /**
+     * Build tree data for parent selector: folders → pages → groups (no tabs).
+     * Selectable = group (parent of a tab).
+     * @param {string|null} excludeNodeId - Group id to exclude (e.g. the tab's current group when editing a tab)
+     * @returns {Array} jstree data
+     */
+    function extractTreeForParentGroup(excludeNodeId) {
+        excludeNodeId = excludeNodeId || null;
+        var rootFolders = [];
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder) {
+                rootFolders.push(node);
+            }
+        });
+        rootFolders.sort((a, b) => a.order - b.order);
+
+        function folderWithPagesAndGroups(folderNode) {
+            var pages = extractNodesFromConfig('ur_page', 'folder', folderNode);
+            return {
+                text: folderNode.name,
+                id: folderNode.id,
+                type: 'folder',
+                icon: 'fa fa-folder-o',
+                children: pages.map(function (page) {
+                    var groups = extractNodesFromConfig('ur_group', 'page', page).filter(function (g) {
+                        return g.id !== excludeNodeId;
+                    });
+                    return {
+                        text: page.name,
+                        id: page.id,
+                        type: 'page',
+                        icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
+                        children: groups.map(function (group) {
+                            return {
+                                text: group.name,
+                                id: group.id,
+                                type: 'group',
+                                icon: 'fa fa-window-maximize',
+                                children: [],
+                            };
+                        }),
+                    };
+                }),
+            };
+        }
+
+        return rootFolders.map(folderWithPagesAndGroups);
+    }
+
+    /**
+     * Build tree data for parent selector: nested folders, each folder has pages (with groups).
+     * Use when editing a tab (select a group) so the full folder hierarchy is visible.
+     * @param {string|null} excludeNodeId - Group id to exclude (the tab's current group)
+     * @returns {Array} jstree data
+     */
+    function extractTreeForParentGroupNested(excludeNodeId) {
+        excludeNodeId = excludeNodeId || null;
+        var rootFolders = [];
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder) {
+                rootFolders.push(node);
+            }
+        });
+        rootFolders.sort((a, b) => a.order - b.order);
+
+        function folderWithPagesAndGroupsNested(folderNode) {
+            var pages = extractNodesFromConfig('ur_page', 'folder', folderNode);
+            var childFolders = extractNodesFromConfig('ur_folder', 'folder', folderNode);
+            var pageNodes = pages.map(function (page) {
+                var pageId = page.id;
+                var groups = [];
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_group' && node.page == pageId) {
+                        groups.push(node);
+                    }
+                });
+                groups = groups.sort(function (a, b) { return a.order - b.order; });
+                return {
+                    text: page.name,
+                    id: pageId,
+                    type: 'page',
+                    icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
+                    children: groups.map(function (group) {
+                        return {
+                            text: group.name,
+                            id: group.id,
+                            type: 'group',
+                            icon: 'fa fa-window-maximize',
+                            children: [],
+                        };
+                    }),
+                };
+            });
+            var folderNodes = childFolders.map(folderWithPagesAndGroupsNested);
+            return {
+                text: folderNode.name,
+                id: folderNode.id,
+                type: 'folder',
+                icon: 'fa fa-folder-o',
+                children: pageNodes.concat(folderNodes),
+            };
+        }
+
+        return rootFolders.map(folderWithPagesAndGroupsNested);
+    }
+
+    /**
+     * Build tree data for parent selector. Shows only nodes up to parent level.
+     * @param {string} parentType - 'folder' | 'page' | 'group' (type of the parent entity to select)
+     * @param {boolean} allowRoot - For parentType 'folder' only: include selectable ROOT node
+     * @param {string|null} excludeNodeId - For folder only: folder id to exclude from options
+     * @returns {Array} jstree data
+     */
+    function extractTreeForParentSelection(parentType, allowRoot, excludeNodeId) {
+        if (parentType === 'folder') {
+            return extractTreeForParentFolder(allowRoot === true, excludeNodeId || null);
+        }
+        if (parentType === 'page') {
+            return extractTreeForParentFolder(false, null);
+        }
+        if (parentType === 'group') {
+            return extractTreeForParentPageNested(excludeNodeId || null);
+        }
+        if (parentType === 'tab') {
+            return extractTreeForParentGroupNested(excludeNodeId || null);
+        }
+        return [];
     }
 
     function scrollToNode(nodeId) {
@@ -423,6 +676,18 @@ window.createMenuNode = createMenuNode;
         }
     }
 
+    function getParentSelectorLabel() {
+        if (!nodeEditJSTreeOptions || nodeEditJSTreeOptions.mode !== 'parent') {
+            return 'Selected Tab';
+        }
+        var t = nodeEditJSTreeOptions.parentType;
+        if (t === 'folder') return 'Selected Parent';
+        if (t === 'page') return 'Selected Folder';
+        if (t === 'group') return 'Selected Page';
+        if (t === 'tab') return 'Selected Group';
+        return 'Selected Parent';
+    }
+
     function generatePathBadges(nodeId) {
         let treeInstance = $.jstree.reference('#nodeeditjstree');
         if (!treeInstance) {
@@ -430,23 +695,23 @@ window.createMenuNode = createMenuNode;
             return '<span class="badge badge-none">None</span>';
         }
 
-        let currentNode = treeInstance.get_node(nodeId);
+        let currentNode = nodeId ? treeInstance.get_node(nodeId) : null;
+        var label = getParentSelectorLabel();
         if (!currentNode) {
-            return `<i class="fa fa-columns"></i> Selected Tab: <span class="badge badge-none">None</span>`;
+            return `<i class="fa fa-columns"></i> ${label}: <span class="badge badge-none">None</span>`;
         }
 
         let pathArray = [];
         while (currentNode && currentNode.id !== '#') {
             let nodeType = currentNode.type || 'default';
             const badgeText = currentNode.text.length > 25 ? currentNode.text.slice(0, 25) + '...' : currentNode.text;
-            let badge = `<span class="badge badge-${nodeType === 'tab' ? 'selected' : 'standard'}"><i class="${
-                currentNode.icon
-            }"></i> ${badgeText}</span>`;
+            var badgeClass = (nodeType === 'tab' || nodeType === nodeEditJSTreeOptions?.parentType || nodeType === 'root') ? 'selected' : 'standard';
+            let badge = `<span class="badge badge-${badgeClass}"><i class="${currentNode.icon || ''}"></i> ${badgeText}</span>`;
             pathArray.unshift(badge);
             currentNode = treeInstance.get_node(currentNode.parent);
         }
 
-        return `<i class="fa fa-columns"></i> Selected Tab: ${pathArray.join(
+        return `<i class="fa fa-columns"></i> ${label}: ${pathArray.join(
             ' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> '
         )}`;
     }
@@ -682,12 +947,15 @@ window.createMenuNode = createMenuNode;
 
             // Update parent reference
             if (oldParentType && redNode[oldParentType] !== undefined) {
-                // Clear old parent reference if different from new parent type
                 if (oldParentType !== newParentType) {
                     delete redNode[oldParentType];
                 }
             }
-            redNode[newParentType] = newParentId;
+            if (newParentId === 'root' && newParentType === 'folder') {
+                delete redNode.folder;
+            } else {
+                redNode[newParentType] = newParentId;
+            }
             redNode.order = index + 1;
 
             // Record the change in history
@@ -727,6 +995,20 @@ window.createMenuNode = createMenuNode;
                     shakeButtons();
                     return;
                 }
+                break;
+            case 'link':
+                // Paste onto link = paste into the link's parent folder (same folder as the link)
+                var linkParent = tree.get_node(node.parent);
+                if (!linkParent || (linkParent.type !== 'folder' && linkParent.id !== 'root')) {
+                    shakeButtons();
+                    return;
+                }
+                if (!['link', 'folder', 'page'].includes(clipboardNode.type)) {
+                    shakeButtons();
+                    return;
+                }
+                // Use parent as target; when parent is root, use type 'folder' so move/add clear folder
+                node = linkParent.id === 'root' ? { id: 'root', type: 'folder', children: linkParent.children || [] } : linkParent;
                 break;
             case 'page':
                 if (!['group'].includes(clipboardNode.type)) {
@@ -778,7 +1060,11 @@ window.createMenuNode = createMenuNode;
         node_config.id = RED.nodes.id();
         node_config.order = index;
         node_config.name = name;
-        node_config[parentType] = parentID;
+        if (parentID === 'root' && parentType === 'folder') {
+            delete node_config.folder;
+        } else {
+            node_config[parentType] = parentID;
+        }
 
         // Copy properties from original node if available
         if (originalNodeId) {
@@ -881,6 +1167,10 @@ window.createMenuNode = createMenuNode;
             editButton.on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+                if (node.type === 'root') return; // root is virtual, not editable
+                if (treeSelector === '#jstree') {
+                    $('.jstree-hover-button').remove();
+                }
                 let nodeData = RED.nodes.node(node.id);
                 if (nodeData) {
                     // Widgets are regular nodes, use standard editor
@@ -892,11 +1182,14 @@ window.createMenuNode = createMenuNode;
                     }
                 }
             });
-            buttons.push(editButton);
+            if (node.type !== 'root') {
+                buttons.push(editButton);
+            }
 
-            // Only show copy/cut/paste/add buttons for organizational nodes (folder, page, group, tab)
-            if (['folder', 'page', 'group', 'tab'].includes(node.type)) {
-                if (['folder', 'page', 'group'].includes(node.type)) {
+            // Only restrict to edit button when in the node-edit dialog's tree (#nodeeditjstree) in parent mode
+            var isParentMode = treeSelector === '#nodeeditjstree' && nodeEditJSTreeOptions && nodeEditJSTreeOptions.mode === 'parent';
+            if (!isParentMode && ['folder', 'page', 'group', 'tab', 'link'].includes(node.type)) {
+                if (['folder', 'page', 'group', 'link'].includes(node.type)) {
                     let pasteButton = $(actionButtonHTML('paste'));
                     pasteButton.on('click', function (e) {
                         e.preventDefault();
@@ -983,7 +1276,13 @@ window.createMenuNode = createMenuNode;
         }
     }
 
-    function initializeJsTree(tabId) {
+    function initializeJsTree(selectedId, options) {
+        options = options || { mode: 'tab' };
+        nodeEditJSTreeOptions = options;
+        var isParentMode = options.mode === 'parent';
+        var parentType = options.parentType;
+        var allowRoot = options.allowRoot === true;
+
         if ($('#nodeeditjstree').length === 0) {
             console.error("Element with ID 'nodeeditjstree' not found in the DOM");
             return;
@@ -1001,7 +1300,7 @@ window.createMenuNode = createMenuNode;
 
             if (isVisible !== lastVisibilityState) {
                 lastVisibilityState = isVisible;
-                if (isVisible && !ignoreVisibilityChange) {
+                if (isVisible && !ignoreVisibilityChange && !isParentMode) {
                     refreshJSTree();
                 } else {
                     ignoreVisibilityChange = false;
@@ -1018,9 +1317,15 @@ window.createMenuNode = createMenuNode;
             subtree: true,
         });
 
-        selectedTab = tabId;
-        var rootFolders = extractRootFolders();
-        var foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, false));
+        selectedTab = selectedId;
+        var excludeNodeId = options.excludeNodeId || null;
+        var foldersTreeData;
+        if (isParentMode) {
+            foldersTreeData = extractTreeForParentSelection(parentType, allowRoot, excludeNodeId);
+        } else {
+            var rootFolders = extractRootFolders();
+            foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, false));
+        }
         var debounce = false;
 
         if ($.jstree.reference('#nodeeditjstree')) {
@@ -1032,6 +1337,9 @@ window.createMenuNode = createMenuNode;
                 'data': foldersTreeData,
                 'dblclick_toggle': false,
                 'check_callback': function (operation, node, parent) {
+                    if (isParentMode) {
+                        return false; // no move/create in parent selector mode
+                    }
                     if (operation === 'move_node' || operation === 'create_node') {
                         switch (parent?.type) {
                             case 'folder':
@@ -1063,8 +1371,8 @@ window.createMenuNode = createMenuNode;
                 },
             },
             'multiple': false,
-            'plugins': ['types', 'search', 'wholerow', 'dnd'],
-            'dnd': {
+            'plugins': isParentMode ? ['types', 'search', 'wholerow'] : ['types', 'search', 'wholerow', 'dnd'],
+            'dnd': isParentMode ? undefined : {
                 'copy': false,
                 'large_drop_target': true,
                 'large_drag_target': true,
@@ -1078,6 +1386,9 @@ window.createMenuNode = createMenuNode;
             },
             'types': {
                 'default': {},
+                'root': {
+                    'icon': 'fa fa-home',
+                },
                 'folder': {
                     'icon': 'fa fa-folder-o',
                 },
@@ -1152,19 +1463,58 @@ window.createMenuNode = createMenuNode;
                     reorderNode(nodeId);
                 });
                 let node = RED.nodes.node(data.node.id);
-                node[newParent.type] = newParent.id;
+                if (node && newParent.type) {
+                    node[newParent.type] = newParent.id;
+                }
             }
-            $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
+            if (selectedTab && (typeof selectedTab === 'object' ? selectedTab.id : selectedTab)) {
+                $('#selectedTabDisplay').html(generatePathBadges(typeof selectedTab === 'object' ? selectedTab.id : selectedTab));
+            }
             applyCutClasses();
         });
 
         $('#nodeeditjstree').on('select_node.jstree', function (e, data) {
+            var instance = $.jstree.reference('#nodeeditjstree');
+            var isParentMode = nodeEditJSTreeOptions && nodeEditJSTreeOptions.mode === 'parent';
+            var parentType = nodeEditJSTreeOptions && nodeEditJSTreeOptions.parentType;
+
+            if (isParentMode) {
+                // Selectable types: folder/link parent = root or folder; page parent = folder; group parent = page; tab parent = group
+                var selectableTypes = { folder: ['root', 'folder'], page: ['folder'], group: ['page'], tab: ['group'] };
+                var allowed = selectableTypes[parentType] || [parentType];
+                var canSelect = allowed.indexOf(data.node.type) !== -1;
+                if (canSelect && parentType === 'tab' && nodeEditJSTreeOptions.excludeNodeId && data.node.id === nodeEditJSTreeOptions.excludeNodeId) {
+                    canSelect = false;
+                }
+                if (canSelect) {
+                    selectedTab = data.node;
+                    $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
+                    $('#nodeeditjstree').removeClass('input-error');
+                } else {
+                    if (instance.is_open(data.node)) {
+                        instance.close_node(data.node);
+                    } else {
+                        instance.open_node(data.node);
+                    }
+                    instance.deselect_node(data.node);
+                    if (selectedTab && selectedTab.id) {
+                        instance.select_node(selectedTab.id);
+                    }
+                    setTimeout(function () {
+                        instance.deselect_node(data.node);
+                        if (selectedTab && selectedTab.id) {
+                            instance.select_node(selectedTab.id);
+                        }
+                    }, 220);
+                }
+                return;
+            }
+
             if (data.node.type === 'tab' && !cutNodes.has(data.node.id)) {
                 selectedTab = data.node;
                 $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
                 $('#nodeeditjstree').removeClass('input-error');
             } else {
-                var instance = $.jstree.reference('#nodeeditjstree');
                 if (instance.is_open(data.node)) {
                     instance.close_node(data.node);
                 } else {
@@ -1221,34 +1571,66 @@ window.createMenuNode = createMenuNode;
                     return;
                 }
 
-                if (tabId) {
-                    instance.select_node(tabId);
-                    var selectedNode = instance.get_node(tabId);
-                    if (selectedNode) {
-                        $('#selectedTabDisplay').html(generatePathBadges(selectedNode.id));
-                        setTimeout(() => {
-                            scrollToNode(tabId);
+                if (selectedId) {
+                    var node = instance.get_node(selectedId);
+                    if (node) {
+                        instance.select_node(selectedId);
+                        selectedTab = node;
+                        $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
+                        setTimeout(function () {
+                            scrollToNode(selectedId);
                         }, 200);
                     } else {
                         $('#selectedTabDisplay').html(generatePathBadges(null));
+                        if (!isParentMode) {
+                            $('#nodeeditjstree').addClass('input-error');
+                        }
+                    }
+                } else if (isParentMode && allowRoot) {
+                    selectedTab = instance.get_node('root');
+                    if (selectedTab) {
+                        instance.select_node('root');
+                        $('#selectedTabDisplay').html(generatePathBadges('root'));
+                    } else {
+                        $('#selectedTabDisplay').html(generatePathBadges(null));
+                    }
+                } else {
+                    $('#selectedTabDisplay').html(generatePathBadges(null));
+                    if (!isParentMode) {
+                        $('#nodeeditjstree').addClass('input-error');
                     }
                 }
             }.bind(this)
         );
 
-        if (tabId) {
+        if (selectedId) {
             var instance = $.jstree.reference('#nodeeditjstree');
             if (instance) {
-                var storedNode = instance.get_node(tabId);
+                var storedNode = instance.get_node(selectedId);
                 if (storedNode) {
+                    selectedTab = storedNode;
                     $('#selectedTabDisplay').html(generatePathBadges(storedNode.id));
                 } else {
                     $('#selectedTabDisplay').html(generatePathBadges(null));
+                    if (!isParentMode) {
+                        $('#nodeeditjstree').addClass('input-error');
+                    }
+                }
+            }
+        } else if (isParentMode && allowRoot) {
+            var instance = $.jstree.reference('#nodeeditjstree');
+            if (instance) {
+                var rootNode = instance.get_node('root');
+                if (rootNode) {
+                    selectedTab = rootNode;
+                    $('#selectedTabDisplay').html(generatePathBadges('root'));
                 }
             }
         } else {
             $('#selectedTabDisplay').html(generatePathBadges(null));
-            $('#nodeeditjstree').addClass('input-error');
+            if (!isParentMode || (isParentMode && !selectedTab)) {
+                $('#nodeeditjstree').addClass('input-error');
+            }
         }
     }
 
@@ -1476,7 +1858,21 @@ window.createMenuNode = createMenuNode;
     }
 
     function getSelectedTab() {
-        return selectedTab ? selectedTab.id : null;
+        return selectedTab ? (typeof selectedTab === 'object' ? selectedTab.id : selectedTab) : null;
+    }
+
+    /**
+     * Returns the currently selected parent id in parent-selector mode.
+     * Returns 'root' when ROOT is selected, or the folder/page/group id.
+     * Returns null when not in parent mode or nothing selected.
+     */
+    function getSelectedParent() {
+        if (!nodeEditJSTreeOptions || nodeEditJSTreeOptions.mode !== 'parent') {
+            return null;
+        }
+        if (!selectedTab) return null;
+        var id = typeof selectedTab === 'object' ? selectedTab.id : selectedTab;
+        return id || null;
     }
 
     // Exposes functions to global scope for use in HTML scripts
@@ -1485,5 +1881,6 @@ window.createMenuNode = createMenuNode;
     window.refreshJSTree = refreshJSTree;
     window.refreshJSTreeBase = refreshJSTreeBase;
     window.getSelectedTab = getSelectedTab;
+    window.getSelectedParent = getSelectedParent;
     window.clearClipboard = clearClipboard;
 })();

@@ -35,6 +35,7 @@
             return A.order - B.order;
         },
         oneditprepare: function () {
+            initializeJsTree(this.folder || 'root', { mode: 'parent', parentType: 'folder', allowRoot: true, excludeNodeId: this.id });
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
                 var active = i.hasClass('fa-toggle-on');
@@ -76,6 +77,12 @@
         oneditsave: function () {
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
+            var p = getSelectedParent();
+            if (p === 'root' || p === '' || p == null) {
+                delete this.folder;
+            } else {
+                this.folder = p;
+            }
         },
         oneditdelete: function () {
             var folderId = this.id;
@@ -181,6 +188,19 @@
             ><i class="fa fa-tag"></i> <span data-i18n="ur_folder.label.name"></span
         ></label>
         <input type="text" id="node-config-input-name" />
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-folder-o"></i> <span data-i18n="ur_folder.label.folder"></span></label>
+    </div>
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Parent: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="nodeeditjstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label for="node-config-input-icon"

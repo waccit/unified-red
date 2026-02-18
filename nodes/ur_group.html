@@ -56,6 +56,7 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            initializeJsTree(this.page, { mode: 'parent', parentType: 'group', allowRoot: false });
             $('#node-input-size-lg').elementSizer({
                 width: '#node-config-input-widthLg',
                 auto: false,
@@ -117,6 +118,7 @@
             });
         },
         oneditsave: function () {
+            this.page = getSelectedParent() || this.page;
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
         },
@@ -163,10 +165,17 @@
         <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-page"
-            ><i class="fa fa-file-o"></i> <span data-i18n="ur_group.label.page"></span
-        ></label>
-        <input type="text" id="node-config-input-page" />
+        <label><i class="fa fa-file-o"></i> <span data-i18n="ur_group.label.page"></span></label>
+    </div>
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Page: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="nodeeditjstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label for="node-config-input-width-row"

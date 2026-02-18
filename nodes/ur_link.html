@@ -71,9 +71,9 @@
             document.getElementById('node-config-input-target-newtab').checked = this.target === 'newtab';
             document.getElementById('node-config-input-target-thistab').checked = this.target === 'thistab';
 
-            let folderSelect = $('#node-input-config-folder');
-            let val = this.folder ? this.folder : this._def.defaults.folder.value;
-            getUrFolders(folderSelect, val);
+            var folderId = this.folder;
+            if (!folderId || folderId === 'Root' || folderId === 'root') folderId = 'root';
+            initializeJsTree(folderId, { mode: 'parent', parentType: 'folder', allowRoot: true });
         },
         oneditsave: function () {
             this.disabled = $('#node-config-input-disabled').prop('checked');
@@ -85,49 +85,11 @@
             }
             this.target = t;
 
-            this.folder = $('#node-input-config-folder').val();
+            var p = getSelectedParent();
+            this.folder = (p === 'root' || p === '' || p == null) ? 'root' : p;
         },
     });
 
-    function getUrFolders(select, value) {
-        var node_def = RED.nodes.getType('ur_folder');
-        select.children().remove();
-
-        $('<option value="root"' + (value ? ' selected' : '') + '>ROOT</option>').appendTo(select);
-
-        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-        if (!activeWorkspace) {
-            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
-        }
-
-        var configNodes = [];
-        RED.nodes.eachConfig(function (config) {
-            if (config.type == 'ur_folder' && (!config.z || config.z === activeWorkspace.id)) {
-                var label = RED.utils.getNodeLabel(config, config.id);
-                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
-                configNodes.push(config);
-            }
-        });
-        try {
-            configNodes.sort(function (A, B) {
-                if (A.__label__ < B.__label__) {
-                    return -1;
-                } else if (A.__label__ > B.__label__) {
-                    return 1;
-                }
-                return 0;
-            });
-        } catch (ignore) {}
-        configNodes.forEach(function (cn) {
-            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
-                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
-                .appendTo(select);
-            delete cn.__label__;
-        });
-        window.setTimeout(function () {
-            select.trigger('change');
-        }, 50);
-    }
 </script>
 
 <script type="text/html" data-template-name="ur_link">
@@ -138,10 +100,17 @@
         <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-folder"
-            ><i class="fa fa-folder-o"></i> <span data-i18n="ur_link.label.folder"></span
-        ></label>
-        <select id="node-input-config-folder"></select>
+        <label><i class="fa fa-folder-o"></i> <span data-i18n="ur_link.label.folder"></span></label>
+    </div>
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Parent: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="nodeeditjstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label for="node-config-input-link"
