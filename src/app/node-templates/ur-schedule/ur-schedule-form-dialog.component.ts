@@ -20,6 +20,9 @@ export const UR_SCHEDULE_DATE_FORMATS = {
 };
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-schedule-form-dialog',
     templateUrl: './ur-schedule-form-dialog.component.html',
     styleUrls: ['./ur-schedule-form-dialog.component.sass'],

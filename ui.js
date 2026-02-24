@@ -620,7 +620,7 @@ function init(server, app, log, redSettings) {
     log.info('Unified-RED Dashboard version ' + urVersion + ' started at ' + fullPath);
 
     io.on('connection', function (socket) {
-        ev.emit('newsocket', socket.client.id, socket.request.connection.remoteAddress);
+        ev.emit('newsocket', socket.id, socket.handshake.address);
         updateUi(socket);
 
         socket.on(updateValueEventName, ev.emit.bind(ev, updateValueEventName));
@@ -654,17 +654,17 @@ function init(server, app, log, redSettings) {
                     typeof menu[folderIndex].items[pageIndex].header !== 'undefined'
                         ? menu[folderIndex].items[pageIndex].header
                         : menu[folderIndex].items[pageIndex].name;
-                ev.emit('changetab', index, name, socket.client.id, socket.request.connection.remoteAddress, params);
+                ev.emit('changetab', index, name, socket.id, socket.handshake.address, params);
             }
         });
         socket.on('ui-refresh', function () {
             updateUi();
         });
         socket.on('disconnect', function () {
-            ev.emit('endsocket', socket.client.id, socket.request.connection.remoteAddress);
+            ev.emit('endsocket', socket.id, socket.handshake.address);
         });
         socket.on('ui-audio', function (audioStatus) {
-            ev.emit('audiostatus', audioStatus, socket.client.id, socket.request.connection.remoteAddress);
+            ev.emit('audiostatus', audioStatus, socket.id, socket.handshake.address);
         });
         socket.on('ui-params', function (p) {
             delete p.socketid;

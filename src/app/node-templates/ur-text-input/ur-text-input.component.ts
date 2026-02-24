@@ -12,10 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service';
-import { render } from '@fullcalendar/common';
-import { __classPrivateFieldSet } from 'tslib';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-text-input',
     templateUrl: './ur-text-input.component.html',
     styleUrls: ['./ur-text-input.component.sass'],

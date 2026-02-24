@@ -12,6 +12,9 @@ import { Widget } from '../../data/widget.model';
 import { TabDirective } from '../../directives/tab.directive';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-tab',
     templateUrl: './tab.component.html',
     styleUrls: ['./tab.component.sass'],

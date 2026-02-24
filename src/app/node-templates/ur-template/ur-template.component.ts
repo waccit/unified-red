@@ -5,6 +5,9 @@ import { StyleService } from '../../services/style.service';
 
 declare var $: any;
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-template',
     templateUrl: './ur-template.component.html',
     styleUrls: ['./ur-template.component.sass'],

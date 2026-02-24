@@ -2,6 +2,9 @@ import { AfterViewInit, Component } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-button',
     templateUrl: './ur-button.component.html',
     styleUrls: ['./ur-button.component.sass'],

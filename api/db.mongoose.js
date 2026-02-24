@@ -6,16 +6,9 @@ Source: https://github.com/cornflourblue/node-mongo-registration-login-api
 const mongoose = require('mongoose');
 const logger = require('./logger');
 
-const connectionOptions = {
-    useCreateIndex: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-};
-
 async function testConnection(conn) {
     try {
-        return await mongoose.connect(conn, { useNewUrlParser: true, useUnifiedTopology: true });
+        return await mongoose.connect(conn);
     } catch (err) {
         logger.error('Error connecting to MongoDB:', err);
     }
@@ -61,7 +54,7 @@ module.exports = {
                 });
 
                 // Attempt connection
-                mongoose.connect(dbConnection, connectionOptions).catch((err) => {
+                mongoose.connect(dbConnection).catch((err) => {
                     connectionPromise = null;
                     reject(new Error('Initial connection error:', err));
                 });
@@ -69,8 +62,6 @@ module.exports = {
                 logger.error(err);
             });
         }
-
-        mongoose.Promise = global.Promise;
 
         // setup associations/lookup models
         const lookupModels = {
@@ -82,7 +73,7 @@ module.exports = {
         }
 
         function initiateConnection() {
-            mongoose.connect(dbConnection, connectionOptions).catch((err) => {
+            mongoose.connect(dbConnection).catch((err) => {
                 logger.error(err);
             });
         }
@@ -125,7 +116,7 @@ module.exports = {
             count: async (collection, ...args) => {
                 const connection = await ensureConnection();
                 if (connection === true) {
-                    return await collection.count();
+                    return await collection.countDocuments();
                 } else {
                     logger.error(`Database not connected for count()`);
                     return new Error('Database not connected for count()');
@@ -199,7 +190,7 @@ module.exports = {
             findByIdAndRemove: async (collection, ...args) => {
                 const connection = await ensureConnection();
                 if (connection === true) {
-                    return await collection.findByIdAndRemove(...args);
+                    return await collection.findByIdAndDelete(...args);
                 } else {
                     logger.error(`Database not connected for findByIdAndRemove()`);
                     return new Error('Database not connected for findByIdAndRemove()');
@@ -226,7 +217,7 @@ module.exports = {
             update: async (collection, ...args) => {
                 const connection = await ensureConnection();
                 if (connection === true) {
-                    return await collection.update(...args);
+                    return await collection.updateOne(...args);
                 } else {
                     logger.error(`Database not connected for update()`);
                     return new Error('Database not connected for update()');

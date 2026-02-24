@@ -17,6 +17,9 @@ import { Title } from '@angular/platform-browser';
 const document: any = window.document;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.sass'],
@@ -163,9 +166,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         }
     }
     public toggleRightSidebar(): void {
-        this.dataService.changeMsg(
-            (this.dataService.currentStatus._isScalar = !this.dataService.currentStatus._isScalar)
-        );
+        this.dataService.toggle();
     }
 
     logout() {

@@ -2,6 +2,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Component, Inject } from '@angular/core';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-user-delete-dialog',
     templateUrl: './user-delete-dialog.component.html',
     styleUrls: ['./user-delete-dialog.component.sass'],

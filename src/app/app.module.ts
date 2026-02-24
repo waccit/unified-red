@@ -13,11 +13,6 @@ import { SidebarComponent } from './layout/sidebar/sidebar.component';
 import { RightSidebarComponent } from './layout/right-sidebar/right-sidebar.component';
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { RightSidebarService } from './services/rightsidebar.service';
-import {
-    PerfectScrollbarModule,
-    PERFECT_SCROLLBAR_CONFIG,
-    PerfectScrollbarConfigInterface,
-} from 'ngx-perfect-scrollbar';
 import { UsersModule } from './users/users.module';
 import { AuthenticationModule } from './authentication/authentication.module';
 import { JwtInterceptor } from './authentication/jwt.interceptor';
@@ -30,7 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { NgxMaskModule } from 'ngx-mask';
+import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -45,25 +40,10 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { NgIdleModule } from '@ng-idle/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
 import { MenuEntityComponent } from './layout/sidebar/menu-entity/menu-entity.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { MatStepperModule } from '@angular/material/stepper';
 import { InitialSetupModule } from './initial-setup/initial-setup.module';
-
-FullCalendarModule.registerPlugins([
-    // register FullCalendar plugins
-    dayGridPlugin,
-    timeGridPlugin,
-    interactionPlugin,
-]);
-
-const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
-    suppressScrollX: true,
-    wheelPropagation: false,
-};
 
 @NgModule({
     declarations: [
@@ -88,7 +68,6 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         HttpClientModule,
         ReactiveFormsModule,
         FormsModule,
-        PerfectScrollbarModule,
         MatIconModule,
         MatButtonModule,
         MatProgressBarModule,
@@ -105,22 +84,19 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
         MatCheckboxModule,
         MatSlideToggleModule,
         MatMenuModule,
-        NgxMaskModule.forRoot(),
+        NgxMaskDirective,
+        NgxMaskPipe,
         NgIdleModule.forRoot(),
         FullCalendarModule,
         NgxChartsModule,
     ],
     providers: [
         { provide: LocationStrategy, useClass: HashLocationStrategy },
-        {
-            provide: PERFECT_SCROLLBAR_CONFIG,
-            useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG,
-        },
         RightSidebarService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+        provideNgxMask(),
     ],
-    entryComponents: [],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

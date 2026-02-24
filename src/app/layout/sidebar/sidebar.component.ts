@@ -7,6 +7,9 @@ import { RouteInfo } from './sidebar.metadata';
 // import { ROUTES } from './sidebar-items';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
     styleUrls: ['./sidebar.component.sass'],

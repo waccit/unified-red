@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ColorHelper } from '@swimlane/ngx-charts';
+import { ColorHelper, ScaleType } from '@swimlane/ngx-charts';
 import { BaseNode } from '../ur-base-node';
 import { BarStacker } from './BarStacker';
 import { LiquidFillGauge } from './LiquidFillGauge';
@@ -7,6 +7,9 @@ import { LiquidFillGauge } from './LiquidFillGauge';
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-gauge',
     templateUrl: './ur-gauge.component.html',
     styleUrls: ['./ur-gauge.component.sass'],
@@ -16,6 +19,9 @@ export class UrGaugeComponent extends BaseNode implements OnInit {
         view: null,
         animation: true,
         colorScheme: {
+            name: 'custom',
+            selectable: true,
+            group: ScaleType.Ordinal,
             domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5'],
         },
         startAngle: -120,
@@ -25,7 +31,7 @@ export class UrGaugeComponent extends BaseNode implements OnInit {
     private labels = {};
     dialGaugeResults = [];
     legendNames = [];
-    legendColors: ColorHelper = new ColorHelper('cool', 'ordinal', [], null);
+    legendColors: ColorHelper = new ColorHelper('cool', ScaleType.Ordinal, [], null);
 
     @ViewChildren("liquidGauge") liquidGaugeElems: QueryList<ElementRef>;
     private liquidGauges = {};
@@ -101,7 +107,7 @@ export class UrGaugeComponent extends BaseNode implements OnInit {
         this.dialGaugeOpt.colorScheme.domain = this.data.colors;
         this.legendColors = new ColorHelper(
             this.dialGaugeOpt.colorScheme,
-            'ordinal',
+            ScaleType.Ordinal,
             this.legendNames,
             this.dialGaugeOpt.colorScheme
         );
@@ -143,7 +149,7 @@ export class UrGaugeComponent extends BaseNode implements OnInit {
             this.legendNames = this.dialGaugeResults.map((d) => d.name);
             this.legendColors = new ColorHelper(
                 this.dialGaugeOpt.colorScheme,
-                'ordinal',
+                ScaleType.Ordinal,
                 this.legendNames,
                 this.dialGaugeOpt.colorScheme
             );

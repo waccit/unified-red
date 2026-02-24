@@ -8,6 +8,9 @@ import { MustMatch, PasswordStrengthValidator } from '../register/password.valid
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],

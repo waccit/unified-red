@@ -12,6 +12,9 @@ import { SnackbarService, UserService, RoleService } from '../../services';
 import { User, UserDataSource } from '../../data/';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-user-table',
     templateUrl: './user-table.component.html',
     styleUrls: ['./user-table.component.sass'],

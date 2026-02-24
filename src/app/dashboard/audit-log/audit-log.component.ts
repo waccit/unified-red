@@ -21,6 +21,9 @@ const MONTHS = {
 };
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-audit-log',
     templateUrl: './audit-log.component.html',
     styleUrls: ['./audit-log.component.sass'],

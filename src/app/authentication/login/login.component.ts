@@ -8,6 +8,9 @@ import { InstallService } from '../../services/install.service';
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss'],

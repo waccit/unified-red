@@ -4,6 +4,9 @@ import { UrTemplateComponent } from '../ur-template/ur-template.component';
 declare var $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-animation',
     templateUrl: './ur-animation.component.html',
     styleUrls: ['./ur-animation.component.sass'],

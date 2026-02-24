@@ -259,7 +259,7 @@
                                                 </form>
                                             </mat-sidenav>
                                             <mat-sidenav-content>
-                                                <div cdkDropList class="task-list" (cdkDropListDropped)="drop($event)" style="position: relative; height: 240px;" [perfectScrollbar]>
+                                                <div cdkDropList class="task-list" (cdkDropListDropped)="drop($event)" style="position: relative; height: 240px;" >
                                                     <div class="task-box" *ngFor="let event of events" (click)="eventClick(event, sidenav)" cdkDrag>
                                                         <div class="task-handle m-r-20" cdkDragHandle><mat-icon>drag_handle</mat-icon></div>
                                                         <div class="task-custom-placeholder" *cdkDragPlaceholder></div>

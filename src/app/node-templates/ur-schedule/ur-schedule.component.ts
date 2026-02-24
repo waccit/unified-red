@@ -1,6 +1,10 @@
 import { Component, ViewChild, AfterViewInit, Renderer2 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { FullCalendarComponent, CalendarOptions, render } from '@fullcalendar/angular';
+import { FullCalendarComponent } from '@fullcalendar/angular';
+import { CalendarOptions } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import * as parser from 'cron-parser';
 import * as moment from 'moment';
 import { BaseNode } from '../ur-base-node';
@@ -13,6 +17,9 @@ import { StyleService } from '../../services/style.service';
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-schedule',
     templateUrl: './ur-schedule.component.html',
     styleUrls: ['./ur-schedule.component.sass'],
@@ -22,6 +29,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     calendarComponent: FullCalendarComponent;
 
     calendarOptions: CalendarOptions = {
+        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         headerToolbar: this.isMobile()
             ? { left: '', center: 'title', right: '' } // mobile
             : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop
@@ -96,7 +104,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     private saveCurrentViewType() {
         if (this.calendarComponent) {
-            let currentViewType = this.calendarComponent.getApi().currentData.currentViewType;
+            let currentViewType = this.calendarComponent.getApi().view.type;
             localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
         }
     }

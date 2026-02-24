@@ -7,6 +7,9 @@ import { SnackbarService } from '../services';
 import { InitialSetupConfirmation } from './initial-setup-confirmation.component';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-initial-setup',
     templateUrl: './initial-setup.component.html',
     styleUrls: ['./initial-setup.component.scss'],

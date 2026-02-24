@@ -14,12 +14,14 @@ import * as shape from 'd3-shape';
 import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
-import { element } from 'protractor';
 import { StyleService } from '../../services/style.service';
 
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-chart',
     templateUrl: './ur-chart.component.html',
     styleUrls: ['./ur-chart.component.sass'],

@@ -3,6 +3,9 @@ import { Component, OnInit } from '@angular/core';
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-page500',
     templateUrl: './page500.component.html',
     styleUrls: ['./page500.component.scss'],

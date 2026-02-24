@@ -8,6 +8,9 @@ import { SnackbarService, RoleService } from '../../services';
 import { RoleDataSource } from '../../data/';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-roles-table',
     templateUrl: './roles-table.component.html',
     styleUrls: ['./roles-table.component.sass'],

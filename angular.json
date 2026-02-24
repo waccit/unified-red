@@ -26,7 +26,7 @@
                         "assets": ["src/favicon.ico", "src/assets"],
                         "styles": [
                             "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-                            "node_modules/angular-archwizard/archwizard.css",
+                            "node_modules/angular-archwizard/styles/archwizard.css",
                             "src/assets/scss/style.scss",
                             "src/assets/scss/theme/all-themes.scss",
                             "src/styles.scss"

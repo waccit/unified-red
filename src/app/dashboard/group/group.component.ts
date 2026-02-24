@@ -14,6 +14,9 @@ import { CurrentUserService } from '../../services';
 import { TabComponent } from '../tab/tab.component';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-group',
     templateUrl: './group.component.html',
     styleUrls: ['./group.component.sass'],

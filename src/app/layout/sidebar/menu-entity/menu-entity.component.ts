@@ -5,6 +5,9 @@ import { CurrentUserService } from '../../../services';
 import { RouteInfo } from '../sidebar.metadata';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-menu-entity',
     templateUrl: './menu-entity.component.html',
     styleUrls: ['./menu-entity.component.sass'],

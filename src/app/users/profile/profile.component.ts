@@ -9,6 +9,9 @@ import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 import { Observable } from 'rxjs';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss'],

@@ -11,6 +11,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { AlarmDialogComponent } from './alarm-dialog.component';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-alarm-console',
     templateUrl: './alarm-console.component.html',
     styleUrls: ['./alarm-console.component.sass'],

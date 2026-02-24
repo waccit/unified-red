@@ -123,7 +123,7 @@
         "body-parser": "^1.20.4",
         "bootstrap": "^5.3.8",
         "compression": "^1.8.1",
-        "cron-parser": "^5.5.0",
+        "cron-parser": "^4.9.0",
         "express": "^4.22.1",
         "express-jwt": "^8.5.1",
         "jquery": "^3.7.1",
@@ -151,6 +151,7 @@
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "~20.3.17",
+        "ajv": "^8.17.1",
         "@angular/cli": "~20.3.17",
         "@angular/compiler-cli": "~20.3.16",
         "@angular/language-service": "~20.3.16",
