@@ -29,8 +29,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     recentAlarms: Alarm[] = [];
     site = { name: '', address: '', contactName: '', contactEmail: '', monitorServer: '' };
     showAuditLog = false;
-    private _wsSubscription: Subscription;
-    private _wsAlarmUpdate: Subscription;
+    private _wsSubscription: Subscription | undefined;
+    private _wsAlarmUpdate: Subscription | undefined;
 
     constructor(
         @Inject(DOCUMENT) private doc: Document,
@@ -46,44 +46,47 @@ export class HeaderComponent implements OnInit, OnDestroy {
         private webSocketService: WebSocketService,
         private titleService: Title
     ) {
-        this.currentUserService.currentUser.subscribe((user) => {
+        this.currentUserService.currentUser?.subscribe((user) => {
             if (user) {
                 this.setupInactivityMonitor(user.sessionInactivity);
             }
         });
         this.alarmService.getRecentActive().subscribe((alarms) => {
-            this.recentAlarms = alarms;
+            this.recentAlarms = Array.isArray(alarms) ? alarms.filter((a) => a != null) : [];
         });
         this.showAuditLog = this.authenticationService.getUserRole() >= Role.Level5; //show/hide audit log link
     }
 
     ngOnInit(): void {
         this.setStartupStyles();
-        this._wsAlarmUpdate = this.webSocketService.listen('ur-alarm-update').subscribe((msg: any) => {
+        const alarm$ = this.webSocketService.listen('ur-alarm-update');
+        this._wsAlarmUpdate = alarm$?.subscribe((msg: any) => {
             if (msg && msg.payload) {
-                if (msg.action === 'create') {
-                    if (msg.payload.state) {
-                        // active alarms only
-                        this.recentAlarms.unshift(msg.payload);
-                        this.recentAlarms.pop();
-                        this.snackbar.error(msg.payload.name + ' alarm', null, 5000);
-                        this.newalarm = true;
-                    }
-                } else if (msg.action === 'update') {
-                    this.recentAlarms = this.recentAlarms.map((a) => (a._id === msg.payload.id ? msg.payload : a));
-                } else if (msg.action === 'delete') {
-                    this.recentAlarms = this.recentAlarms.filter((a) => a._id !== msg.payload.id);
+                const payload = msg.payload;
+                if (msg.action === 'create' && payload && payload.state) {
+                    this.recentAlarms.unshift(payload);
+                    this.recentAlarms.pop();
+                    this.recentAlarms = this.recentAlarms.filter((a) => a != null);
+                    this.snackbar.error((payload.name ?? 'Alarm') + ' alarm', null, 5000);
+                    this.newalarm = true;
+                } else if (msg.action === 'update' && payload) {
+                    this.recentAlarms = this.recentAlarms
+                        .map((a) => (a && a._id === payload.id ? payload : a))
+                        .filter((a) => a != null);
+                } else if (msg.action === 'delete' && payload) {
+                    this.recentAlarms = this.recentAlarms.filter((a) => a != null && a._id !== payload.id);
                 }
             }
-        });
-        this._wsSubscription = this.webSocketService.listen('ui-controls').subscribe((data: any) => {
+        }) ?? undefined;
+        const uiControls$ = this.webSocketService.listen('ui-controls');
+        this._wsSubscription = uiControls$?.subscribe((data: any) => {
             if (data && data.site) {
                 this.site = data.site;
                 if (this.site && this.site.name) {
                     this.titleService.setTitle(this.site.name + ' - Unified-RED');
                 }
             }
-        });
+        }) ?? undefined;
     }
 
     ngOnDestroy(): void {
@@ -175,24 +178,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
 
     setupInactivityMonitor(sessionInactivity: number) {
-        if (!sessionInactivity) {
+        if (!sessionInactivity || !this.idle) {
             return;
         }
         this.idle.setIdle(sessionInactivity * 60); // set idle time in seconds
         this.idle.setTimeout(120); // warn for 2 mins before logging out
         this.idle.setInterrupts(DEFAULT_INTERRUPTSOURCES);
-        this.idle.onTimeout.subscribe(() => {
+        this.idle.onTimeout?.subscribe(() => {
             this.logout();
         });
-        // this.idle.onIdleEnd.subscribe(() => {
-        //     console.log('No longer idle');
-        // });
-        this.idle.onIdleStart.subscribe(() => {
+        this.idle.onIdleStart?.subscribe(() => {
             this.snackbar.default("You've been idle for sometime...", 'Stay logged in');
         });
-        // this.idle.onTimeoutWarning.subscribe((countdown) => {
-        // console.log('You will time out in ' + countdown + ' seconds!');
-        // });
         this.idle.watch();
     }
 }

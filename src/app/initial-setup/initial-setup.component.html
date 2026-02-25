@@ -1,4 +1,5 @@
-<div class="limiter" *ngIf="!canInstall">
+@if (!canInstall) {
+<div class="limiter">
     <div class="container-login100">
         <div class="wrap-login100">
             <div class="login100-form">
@@ -13,8 +14,10 @@
         </div>
     </div>
 </div>
+}
 
-<div class="limiter" *ngIf="canInstall">
+@if (canInstall) {
+<div class="limiter">
     <div class="container-login100">
         <div class="row clearfix">
             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
@@ -33,9 +36,11 @@
                                     <mat-form-field class="example-full-width" appearance="outline">
                                         <mat-label>Database Connection</mat-label>
                                         <input matInput formControlName="dbConnection" required>
-                                        <mat-error *ngIf="dbForm.get('dbConnection').hasError('required')">A database
+                                        @if (dbForm.get('dbConnection').hasError('required')) {
+                                        <mat-error>A database
                                             connection is required
                                         </mat-error>
+                                        }
                                     </mat-form-field>
                                     <div>
                                         Unified-RED requires a connection to a MongoDB or SQLite database.
@@ -141,7 +146,10 @@
                                     </div>
                                     <div>
                                         <button mat-button (click)="testDb()">
-                                            Test<mat-progress-bar mode="buffer" *ngIf="dbProgress"></mat-progress-bar>
+                                            Test
+                                            @if (dbProgress) {
+                                                <mat-progress-bar mode="buffer"></mat-progress-bar>
+                                            }
                                         </button>
                                         <button mat-raised-button matStepperNext color="primary"
                                             [disabled]="!dbConnectionOk">Next</button>
@@ -160,9 +168,9 @@
                                     <mat-form-field class="example-full-width" appearance="outline">
                                         <mat-label>JWT Secret</mat-label>
                                         <input matInput formControlName="jwtsecret" required>
-                                        <mat-error *ngIf="jwtForm.get('jwtsecret').hasError('required')">
-                                            A secret is required
-                                        </mat-error>
+                                        @if (jwtForm.get('jwtsecret').hasError('required')) {
+                                        <mat-error>A secret is required</mat-error>
+                                        }
                                     </mat-form-field>
                                     <div>
                                         <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
@@ -179,18 +187,18 @@
                                             <mat-form-field class="example-full-width" appearance="outline">
                                                 <mat-label>Server Hostname</mat-label>
                                                 <input matInput formControlName="host" required>
-                                                <mat-error *ngIf="smtpForm.get('host').hasError('required')">
-                                                    A server hostname is required
-                                                </mat-error>
+                                                @if (smtpForm.get('host').hasError('required')) {
+                                                <mat-error>A server hostname is required</mat-error>
+                                                }
                                             </mat-form-field>
                                         </div>
                                         <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
                                             <mat-form-field class="example-full-width" appearance="outline">
                                                 <mat-label>Server Port</mat-label>
                                                 <input matInput formControlName="port" required>
-                                                <mat-error *ngIf="smtpForm.get('port').hasError('required')">
-                                                    A server port is required
-                                                </mat-error>
+                                                @if (smtpForm.get('port').hasError('required')) {
+                                                <mat-error>A server port is required</mat-error>
+                                                }
                                             </mat-form-field>
                                         </div>
                                         <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 mb-2">
@@ -208,18 +216,18 @@
                                             <mat-form-field class="example-full-width" appearance="outline">
                                                 <mat-label>From Name</mat-label>
                                                 <input matInput formControlName="fromName" required>
-                                                <mat-error *ngIf="smtpForm.get('fromName').hasError('required')">
-                                                    A from name is required
-                                                </mat-error>
+                                                @if (smtpForm.get('fromName').hasError('required')) {
+                                                <mat-error>A from name is required</mat-error>
+                                                }
                                             </mat-form-field>
                                         </div>
                                         <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 mb-2">
                                             <mat-form-field class="example-full-width" appearance="outline">
                                                 <mat-label>From Address</mat-label>
                                                 <input matInput formControlName="fromAddress" required>
-                                                <mat-error *ngIf="smtpForm.get('fromAddress').hasError('required')">
-                                                    A from address is required
-                                                </mat-error>
+                                                @if (smtpForm.get('fromAddress').hasError('required')) {
+                                                <mat-error>A from address is required</mat-error>
+                                                }
                                             </mat-form-field>
                                         </div>
                                     </div>
@@ -241,7 +249,10 @@
                                     <div>
                                         <!-- <button mat-raised-button matStepperPrevious color="warn" class="mr-2">Back</button> -->
                                         <button mat-button (click)="testSmtp()">
-                                            Test<mat-progress-bar mode="buffer" *ngIf="smtpProgress"></mat-progress-bar>
+                                            Test
+                                            @if (smtpProgress) {
+                                                <mat-progress-bar mode="buffer"></mat-progress-bar>
+                                            }
                                         </button>
                                         <button mat-raised-button matStepperNext color="primary"
                                             [disabled]="!smtpServerOk">Next</button>
@@ -300,3 +311,4 @@
         </div>
     </div>
 </div>
+}

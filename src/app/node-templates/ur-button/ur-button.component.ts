@@ -16,6 +16,7 @@ export class UrButtonComponent extends BaseNode implements AfterViewInit {
     ngAfterViewInit(): void {
         super.ngAfterViewInit();
         this.setupDatapointAccess();
+
         this.label = this.data.label.includes('{{') ? '' : this.data.label;
     }
 

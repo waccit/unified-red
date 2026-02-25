@@ -67,9 +67,7 @@ export class SidebarComponent implements OnInit {
         });
 
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
-            }
+            this.userRole = user ? user.role : undefined;
         });
         this.initLeftSidebar();
         this.bodyTag = this.document.body;
@@ -77,7 +75,6 @@ export class SidebarComponent implements OnInit {
 
     hasAccess(access) {
         if (!access) access = 0;
-
         return this.userRole >= access;
     }
 

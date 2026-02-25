@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  Document   : _tables.scss
  *  Author     : RedStar Template
  *  Description: This scss file for tables style classes
@@ -179,11 +179,18 @@ tr.group:hover {
 //     }
 // }
 td.details-control {
-    background: url('../images/details_open.png') no-repeat center center;
     cursor: pointer;
+    position: relative;
+    &::before {
+        content: '+';
+        display: inline-block;
+        width: 1em;
+        text-align: center;
+        font-weight: bold;
+    }
 }
-tr.shown td.details-control {
-    background: url('../images/details_close.png') no-repeat center center;
+tr.shown td.details-control::before {
+    content: '−';
 }
 
 // ngx-datatables material theme import

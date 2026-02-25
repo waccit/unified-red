@@ -42,9 +42,7 @@ export class GroupComponent implements OnInit, OnDestroy {
         this.viewContainerRef = this.groupHost.viewContainerRef;
 
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
-            }
+            this.userRole = user ? user.role : undefined;
         });
 
         // do not render hidden tabs
@@ -58,7 +56,6 @@ export class GroupComponent implements OnInit, OnDestroy {
                 tab.disabled || (tab.accessBehavior === 'disable' && !this.hasAccess(tab.access)) ? true : false;
         });
 
-        // this.loadTabs(); => this is being handled in html
         if (this.tabs && this.tabs.length < 2) {
             this.loadTab();
         }
@@ -72,7 +69,6 @@ export class GroupComponent implements OnInit, OnDestroy {
 
     hasAccess(access): boolean {
         if (!access) access = 0;
-
         return this.userRole >= access;
     }
 

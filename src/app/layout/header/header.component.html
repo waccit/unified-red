@@ -45,8 +45,10 @@
                         (click)="newalarm = false"
                     >
                         <i class="nav-hdr-btn ti-bell"></i>
-                        <span class="notify" *ngIf="newalarm"></span>
-                        <span class="heartbeat" *ngIf="newalarm"></span>
+                        @if (newalarm) {
+                            <span class="notify"></span>
+                            <span class="heartbeat"></span>
+                        }
                     </button>
                     <ul class="dropdown-menu">
                         <li class="header">Recent Alarms</li>
@@ -57,23 +59,30 @@
                                 
                             >
                                 <li>
-                                    <a href="#" *ngFor="let alarm of recentAlarms" onClick="return false;">
-                                        <span class="table-img msg-user">
-                                            <i
-                                                class="fas fa-exclamation-triangle"
-                                                *ngIf="alarm.severity === 'warning'"
-                                            ></i>
-                                            <i class="fas fa-exclamation-circle" *ngIf="alarm.severity === 'alert'"></i>
-                                            <i class="fas fa-fire" *ngIf="alarm.severity === 'critical'"></i>
-                                        </span>
-                                        <span class="menu-info">
-                                            <span class="menu-title">{{ alarm.name }}</span>
-                                            <span class="menu-desc">
-                                                <i class="material-icons">access_time</i>
-                                                {{ alarm.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
-                                            </span>
-                                        </span>
-                                    </a>
+                                    @for (alarm of (recentAlarms ?? []); track alarm?._id ?? $index) {
+                                        @if (alarm) {
+                                            <a href="#" onClick="return false;">
+                                                <span class="table-img msg-user">
+                                                    @if (alarm.severity === 'warning') {
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                    }
+                                                    @if (alarm.severity === 'alert') {
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                    }
+                                                    @if (alarm.severity === 'critical') {
+                                                        <i class="fas fa-fire"></i>
+                                                    }
+                                                </span>
+                                                <span class="menu-info">
+                                                    <span class="menu-title">{{ alarm.name }}</span>
+                                                    <span class="menu-desc">
+                                                        <i class="material-icons">access_time</i>
+                                                        {{ alarm.timestamp | date: 'MM/dd/yyyy HH:mm:ss' }}
+                                                    </span>
+                                                </span>
+                                            </a>
+                                        }
+                                    }
                                 </li>
                             </ul>
                         </li>
@@ -95,21 +104,13 @@
                                         <mat-icon aria-hidden="false" class="mr-2">person</mat-icon>Profile
                                     </a>
                                 </li>
-                                <li *ngIf="showAuditLog">
-                                    <a routerLink="/audit-log">
-                                        <mat-icon aria-hidden="false" class="mr-2">info</mat-icon>Audit Log
-                                    </a>
-                                </li>
-                                <!-- <li>
-                                    <a href="#" onClick="return false;">
-                                        <mat-icon aria-hidden="false" class="mr-2">feedback</mat-icon>Feedback
-                                    </a>
-                                </li> -->
-                                <!-- <li>
-                                    <a href="#" onClick="return false;">
-                                        <mat-icon aria-hidden="false" class="mr-2">help</mat-icon>Help
-                                    </a>
-                                </li> -->
+                                @if (showAuditLog) {
+                                    <li>
+                                        <a routerLink="/audit-log">
+                                            <mat-icon aria-hidden="false" class="mr-2">info</mat-icon>Audit Log
+                                        </a>
+                                    </li>
+                                }
                                 <li>
                                     <a href="#" (click)="logout()">
                                         <mat-icon aria-hidden="false" class="mr-2">power_settings_new</mat-icon>Logout
@@ -119,7 +120,6 @@
                         </li>
                     </ul>
                 </li>
-                <!-- #END# Tasks -->
                 <li class="pull-right">
                     <button mat-icon-button (click)="toggleRightSidebar()" class="nav-notification-icons">
                         <i class="nav-hdr-btn ti-layout-grid2"></i>

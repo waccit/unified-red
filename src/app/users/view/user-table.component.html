@@ -47,10 +47,11 @@
                                 <ng-container matColumnDef="enabled">
                                     <mat-header-cell *matHeaderCellDef mat-sort-header></mat-header-cell>
                                     <mat-cell *matCellDef="let row">
-                                        <mat-icon *ngIf="row.enabled" aria-label="Enabled" color="primary">check_circle
-                                        </mat-icon>
-                                        <mat-icon *ngIf="!row.enabled" aria-label="Disabled" color="warn">cancel
-                                        </mat-icon>
+                                        @if (row.enabled) {
+                                            <mat-icon aria-label="Enabled" color="primary">check_circle</mat-icon>
+                                        } @else {
+                                            <mat-icon aria-label="Disabled" color="warn">cancel</mat-icon>
+                                        }
                                     </mat-cell>
                                 </ng-container>
                                 <ng-container matColumnDef="username">

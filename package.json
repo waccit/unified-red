@@ -113,6 +113,7 @@
         "@fullcalendar/daygrid": "^6.1.20",
         "@fullcalendar/interaction": "^6.1.20",
         "@fullcalendar/timegrid": "^6.1.20",
+        "@fortawesome/fontawesome-free": "^6.7.2",
         "@ng-bootstrap/ng-bootstrap": "^19.0.1",
         "@ng-idle/core": "^16.0.0",
         "@popperjs/core": "^2.11.8",

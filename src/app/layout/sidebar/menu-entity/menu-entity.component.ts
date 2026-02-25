@@ -40,15 +40,15 @@ export class MenuEntityComponent implements OnInit {
 
     ngOnInit(): void {
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
-            }
+            this.userRole = user ? user.role : undefined;
         });
     }
 
     hasAccess(access) {
         if (!access) access = 0;
-
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 }

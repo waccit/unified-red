@@ -4,72 +4,17 @@
         <li role="presentation">
             <a href="#skins" data-toggle="tab" class="active">SKINS</a>
         </li>
-        <li role="presentation" *ngIf="showSettings">
-            <a href="#settings" data-toggle="tab">SETTINGS</a>
-        </li>
+        @if (showSettings) {
+            <li role="presentation">
+                <a href="#settings" data-toggle="tab">SETTINGS</a>
+            </li>
+        }
     </ul>
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane in active in active" id="skins">
             <div class="demo-skin"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 >
-                <!-- <div class="rightSetting">
-                    <p>GENERAL SETTINGS</p>
-                    <ul class="setting-list list-unstyled m-t-20">
-                        <li>
-                            <div class="form-check">
-                                <div class="form-check m-l-10">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" checked> Save
-                                        History
-                                        <span class="form-check-sign">
-                                            <span class="check"></span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <div class="form-check m-l-10">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" checked> Show
-                                        Status
-                                        <span class="form-check-sign">
-                                            <span class="check"></span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <div class="form-check m-l-10">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" checked> Auto
-                                        Submit Issue
-                                        <span class="form-check-sign">
-                                            <span class="check"></span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </li>
-                        <li>
-                            <div class="form-check">
-                                <div class="form-check m-l-10">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="checkbox" value="" checked> Show
-                                        Status To All
-                                        <span class="form-check-sign">
-                                            <span class="check"></span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div> -->
                 <div class="rightSetting">
                     <p>SIDEBAR MENU COLORS</p>
                     <mat-button-toggle-group class="mt-2" [value]="menuOption">
@@ -117,51 +62,22 @@
                         </li>
                     </ul>
                 </div>
-                <!-- <div class="rightSetting">
-                    <p>Disk Space</p>
-                    <div class="sidebar-progress">
-                        <div class="progress m-t-20">
-                            <div class="progress-bar l-bg-cyan shadow-style width-per-45" role="progressbar"
-                                aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <span class="progress-description">
-                            <small>26% remaining</small>
-                        </span>
-                    </div>
-                </div>
-                <div class="rightSetting m-b-15">
-                    <p>Server Load</p>
-                    <div class="sidebar-progress">
-                        <div class="progress m-t-20">
-                            <div class="progress-bar l-bg-orange shadow-style width-per-63" role="progressbar"
-                                aria-valuenow="63" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <span class="progress-description">
-                            <small>Highly Loaded</small>
-                        </span>
-                    </div>
-                </div> -->
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="settings"  *ngIf="showSettings">
-            <div class="demo-settings"
-                [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
-                >
-                <p>ACCOUNT SETTINGS</p>
-                <div class="body">
-                    <div class="list-group m-t-20">
-                        <!-- <a href="#" onClick="return false;" class="list-group-item active">
-                            Cras justo odio
-                        </a> -->
-                        <a class="list-group-item" routerLink="/users/view" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Management</a>
-                        <a class="list-group-item" routerLink="/users/roles" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Roles</a>
-                        <!-- <a href="#" onClick="return false;" class="list-group-item">Dapibus ac facilisis in</a>
-                        <a href="#" onClick="return false;" class="list-group-item">Morbi leo risus</a>
-                        <a href="#" onClick="return false;" class="list-group-item">Porta ac consectetur ac</a>
-                        <a href="#" onClick="return false;" class="list-group-item">Vestibulum at eros</a> -->
+        @if (showSettings) {
+            <div role="tabpanel" class="tab-pane" id="settings">
+                <div class="demo-settings"
+                    [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
+                    >
+                    <p>ACCOUNT SETTINGS</p>
+                    <div class="body">
+                        <div class="list-group m-t-20">
+                            <a class="list-group-item" routerLink="/users/view" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Management</a>
+                            <a class="list-group-item" routerLink="/users/roles" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Roles</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </aside>

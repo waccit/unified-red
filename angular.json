@@ -23,10 +23,19 @@
                         "polyfills": "src/polyfills.ts",
                         "tsConfig": "src/tsconfig.app.json",
                         "aot": true,
-                        "assets": ["src/favicon.ico", "src/assets"],
+                        "assets": [
+                            "src/favicon.ico",
+                            "src/assets",
+                            {
+                                "glob": "**/*",
+                                "input": "node_modules/@fortawesome/fontawesome-free/webfonts",
+                                "output": "/webfonts"
+                            }
+                        ],
                         "styles": [
                             "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
                             "node_modules/angular-archwizard/styles/archwizard.css",
+                            "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
                             "src/assets/scss/style.scss",
                             "src/assets/scss/theme/all-themes.scss",
                             "src/styles.scss"

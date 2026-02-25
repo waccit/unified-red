@@ -46,26 +46,24 @@ export class PageComponent implements OnInit {
         this.viewContainerRef = this.pageHost.viewContainerRef;
 
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
+            this.userRole = user ? user.role : undefined;
+        });
 
-                this.route.url.subscribe((segments: UrlSegment[]) => {
-                    this.pathList = [...segments.map((seg) => seg.path)];
+        this.route.url.subscribe((segments: UrlSegment[]) => {
+            this.pathList = [...segments.map((seg) => seg.path)];
 
-                    if (this._menuSubscription !== undefined) {
-                        this._menuSubscription.unsubscribe();
-                    }
-
-                    this._menuSubscription = this.menuService.menu
-                        .pipe(debounceTime(300))
-                        .subscribe((menu: RouteInfo[]) => {
-                        if (menu.length) {
-                            this.setGroups(menu);
-                            this.loadGroups();
-                        }
-                    });
-                });
+            if (this._menuSubscription !== undefined) {
+                this._menuSubscription.unsubscribe();
             }
+
+            this._menuSubscription = this.menuService.menu
+                .pipe(debounceTime(300))
+                .subscribe((menu: RouteInfo[]) => {
+                    if (menu && menu.length) {
+                        this.setGroups(menu);
+                        this.loadGroups();
+                    }
+                });
         });
     }
 
@@ -145,7 +143,6 @@ export class PageComponent implements OnInit {
 
     hasAccess(access) {
         if (!access) access = 0;
-
         return this.userRole >= access;
     }
 

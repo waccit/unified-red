@@ -220,12 +220,11 @@ export class BaseNode implements AfterViewInit, OnDestroy {
 
     setupAccess(aclkey: string) {
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                if (!this.data.access || this.data.access === '0') {
-                    this.access = this.roleService.getRoleAccess(aclkey, user.role);
-                } else {
-                    this.access = this.roleService.overrideRoleAccess(aclkey, user.role, this.data.access);
-                }
+            const role = user ? user.role : '1';
+            if (!this.data.access || this.data.access === '0') {
+                this.access = this.roleService.getRoleAccess(aclkey, role);
+            } else {
+                this.access = this.roleService.overrideRoleAccess(aclkey, role, this.data.access);
             }
         });
     }

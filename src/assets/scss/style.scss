@@ -27,10 +27,7 @@
 
 /*                 [2. Icons ]                   				*/
 @import 'fonts/_material.scss';
-@import 'fonts/fontawesome/fontawesome.scss';
-@import 'fonts/fontawesome/regular.scss';
-@import 'fonts/fontawesome/solid.scss';
-@import 'fonts/fontawesome/brands.scss';
+/* Font Awesome loaded via @fortawesome/fontawesome-free in angular.json (WOFF2 webfonts for modern browsers) */
 @import url(../fonts/themify-icons/themify-icons.css);
 
 /*                 [3. Components ]                   		*/
