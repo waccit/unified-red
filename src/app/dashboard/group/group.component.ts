@@ -3,7 +3,6 @@ import {
     OnInit,
     OnDestroy,
     ViewChild,
-    ComponentFactoryResolver,
     ViewContainerRef,
     Renderer2,
 } from '@angular/core';
@@ -32,7 +31,6 @@ export class GroupComponent implements OnInit, OnDestroy {
     selectedTab: number;
 
     constructor(
-        private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
         private renderer2: Renderer2,
         private currentUserService: CurrentUserService
@@ -69,6 +67,9 @@ export class GroupComponent implements OnInit, OnDestroy {
 
     hasAccess(access): boolean {
         if (!access) access = 0;
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 
@@ -77,9 +78,7 @@ export class GroupComponent implements OnInit, OnDestroy {
 
         if (this.tabs[0].widgets) {
             this.tabs[0].widgets.forEach((widget) => {
-                const componentFactory = this.componentFactoryResolver.resolveComponentFactory(widget.component);
-
-                const componentRef = this.viewContainerRef.createComponent(componentFactory);
+                const componentRef = this.viewContainerRef.createComponent(widget.component);
                 componentRef.instance.data = widget.data;
                 const colWidth = +widget.data.width || 12;
                 const colClass = 'col-' + colWidth;

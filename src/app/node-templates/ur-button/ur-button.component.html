@@ -2,7 +2,7 @@
     <button mat-raised-button class="w-100" color='primary' style="white-space: normal;" 
         [ngStyle]="this.styleService.getStyle(data)" (click)="send()" 
         [ngClass]="this.styleService.getClass(data)"
-        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')" 
+        [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
         #tooltip="matTooltip" [matTooltip]="data.tooltip" matTooltipPosition="below">
         @if (data.icon) {
             <mat-icon class="mr-2">{{ data.icon }}</mat-icon>

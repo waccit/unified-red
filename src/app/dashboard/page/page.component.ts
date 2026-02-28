@@ -1,4 +1,4 @@
-import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import { PageDirective } from '../../directives/page.directive';
 import { GroupComponent } from '../group/group.component';
@@ -26,6 +26,7 @@ export class PageComponent implements OnInit {
     private page: string;
     private groups: Group[];
     private _menuSubscription: Subscription;
+    private _lastMenu: RouteInfo[];
     breadcrumbs: string[];
     @ViewChild(PageDirective, { static: true }) pageHost: PageDirective;
     private userRole: string;
@@ -33,7 +34,6 @@ export class PageComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private componentFactoryResolver: ComponentFactoryResolver,
         private widgetService: WidgetService,
         private menuService: MenuService,
         private viewContainerRef: ViewContainerRef,
@@ -47,6 +47,10 @@ export class PageComponent implements OnInit {
 
         this.currentUserService.currentUser.subscribe((user: User) => {
             this.userRole = user ? user.role : undefined;
+            if (user && this._lastMenu?.length) {
+                this.setGroups(this._lastMenu);
+                this.loadGroups();
+            }
         });
 
         this.route.url.subscribe((segments: UrlSegment[]) => {
@@ -60,6 +64,7 @@ export class PageComponent implements OnInit {
                 .pipe(debounceTime(300))
                 .subscribe((menu: RouteInfo[]) => {
                     if (menu && menu.length) {
+                        this._lastMenu = menu;
                         this.setGroups(menu);
                         this.loadGroups();
                     }
@@ -143,6 +148,9 @@ export class PageComponent implements OnInit {
 
     hasAccess(access) {
         if (!access) access = 0;
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 
@@ -191,8 +199,7 @@ export class PageComponent implements OnInit {
             //     return;
             // }
 
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(GroupComponent);
-            const componentRef = this.viewContainerRef.createComponent(componentFactory);
+            const componentRef = this.viewContainerRef.createComponent(GroupComponent);
 
             componentRef.instance.header = group.header;
             componentRef.instance.displayHeader = group.displayHeader;

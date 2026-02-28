@@ -75,6 +75,9 @@ export class SidebarComponent implements OnInit {
 
     hasAccess(access) {
         if (!access) access = 0;
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 

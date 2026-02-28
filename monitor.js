@@ -1,8 +1,41 @@
-const request = require('request');
 const version = require('./package.json').version;
+const { URL } = require('url');
 
 let heartbeatInterval = null;
 let uid = getUID();
+
+function postJson(urlString, body, callback) {
+    const url = new URL(urlString);
+    const isHttps = url.protocol === 'https:';
+    const lib = isHttps ? require('https') : require('http');
+    const data = JSON.stringify(body);
+    const options = {
+        hostname: url.hostname,
+        port: url.port || (isHttps ? 443 : 80),
+        path: url.pathname + url.search,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(data),
+        },
+    };
+    const req = lib.request(options, (res) => {
+        let raw = '';
+        res.on('data', (chunk) => (raw += chunk));
+        res.on('end', () => {
+            let parsed;
+            try {
+                parsed = raw ? JSON.parse(raw) : null;
+            } catch (_) {
+                parsed = null;
+            }
+            callback(null, res, parsed);
+        });
+    });
+    req.on('error', (err) => callback(err, null, null));
+    req.write(data);
+    req.end();
+}
 
 function start(site) {
     if (heartbeatInterval) {
@@ -10,19 +43,15 @@ function start(site) {
     }
     heartbeatInterval = setInterval(function () {
         try {
-            request(
+            postJson(
+                site.monitorServer,
                 {
-                    uri: site.monitorServer,
-                    method: 'POST',
-                    json: true,
-                    body: {
-                        uid: uid,
-                        version: version,
-                        name: site.name || '',
-                        address: site.address || '',
-                        contactName: site.contactName || '',
-                        contactEmail: site.contactEmail || '',
-                    },
+                    uid: uid,
+                    version: version,
+                    name: site.name || '',
+                    address: site.address || '',
+                    contactName: site.contactName || '',
+                    contactEmail: site.contactEmail || '',
                 },
                 (err, res, body) => {}
             );

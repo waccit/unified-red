@@ -1625,8 +1625,7 @@ function updateAndClone(source, update) {
         return {};
     }
 
-    let clone = require('lodash.clone');
-    let updatedClone = clone(source);
+    const updatedClone = Object.assign({}, source);
     Object.assign(updatedClone, update);
     return updatedClone;
 }

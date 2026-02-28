@@ -32,7 +32,7 @@
                                     ? precision(stripHTML(data.formValue[field.topic]), field.options.precision)
                                     : ''
                             "
-                            [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                            [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                             (change)="valueChange(field.topic, $event.target.value, field.type)"
                         />
                         @if (field.options.units) {
@@ -54,7 +54,7 @@
                             [rows]="field.options.rows"
                             class="colorIndicator"
                             [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
-                            [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                            [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                             (change)="valueChange(field.topic, $event.target.value, field.type)"
                         ></textarea>
                     </mat-form-field>
@@ -71,7 +71,7 @@
                             matNativeControl
                             #defaultElement
                             class="colorIndicator"
-                            [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                            [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                             (change)="valueChange(field.topic, $event.target.value, field.type)"
                         >
                             @for (opt of field.options | keyvalue; track opt.key) {
@@ -92,7 +92,7 @@
                     <mat-checkbox
                         class="colorIndicator example-margin mb-3"
                         [checked]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                        [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                         (change)="valueChange(field.topic, $event.checked)"
                         color="primary"
                         >{{ field.label }}</mat-checkbox
@@ -103,7 +103,7 @@
                     <mat-slide-toggle
                         class="colorIndicator example-margin mb-3"
                         [checked]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                        [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                         (change)="valueChange(field.topic, $event.checked)"
                         color="primary"
                         >{{ field.label }}</mat-slide-toggle
@@ -118,7 +118,7 @@
                         mat-raised-button
                         color="primary"
                         (click)="submit()"
-                        [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                        [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                     >
                         {{ data.submit }}
                     </button>
@@ -127,7 +127,7 @@
                             mat-raised-button
                             color="warn"
                             (click)="reset()"
-                            [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                            [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                         >
                             {{ data.cancel }}
                         </button>

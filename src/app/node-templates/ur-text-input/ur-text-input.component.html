@@ -19,7 +19,7 @@
                     #myInputarea
                     [type]="data.mode"
                     [value]="access.read ? stripHTML(valueIn) : ''"
-                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                    [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                     (keyup)="delay > 0 && keyup($event.target.value)"
                     (change)="delay === 0 && change($event.target.value)"
                     #tooltip="matTooltip"
@@ -41,7 +41,7 @@
                     placeholder="EX: (435) 345-3454"
                     mask="(000) 000-0000"
                     [value]="access.read ? stripHTML(valueIn) : ''"
-                    [disabled]="disabled || (!access.write && data.accessBehavior === 'disable')"
+                    [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                     (keyup)="delay > 0 && keyup($event.target.value)"
                     (change)="delay === 0 && change($event.target.value)"
                     #tooltip="matTooltip"

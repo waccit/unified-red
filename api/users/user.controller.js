@@ -76,7 +76,7 @@ function getAll(req, res, next) {
 // curl test:
 // curl -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/users/current
 function getCurrent(req, res, next) {
-    const userId = req.user && req.user.sub;
+    const userId = req.auth && req.auth.sub;
     userService
         .getById(userId)
         .then((user) => (user ? res.json(user) : res.sendStatus(404)))

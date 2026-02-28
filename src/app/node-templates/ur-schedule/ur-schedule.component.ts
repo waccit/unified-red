@@ -133,7 +133,13 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     break;
             }
         }
-        this.calendarComponent.getApi().changeView(viewType);
+        if (this.calendarComponent) {
+            this.calendarComponent.getApi().changeView(viewType);
+        } else {
+            // Calendar not yet rendered (access guard is still resolving); set initialView
+            // so the correct view is used when the calendar first renders.
+            this.calendarOptions = { ...this.calendarOptions, initialView: viewType };
+        }
     }
 
     private sortChronologically(scheduleArray) {

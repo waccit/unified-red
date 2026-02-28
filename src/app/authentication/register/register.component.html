@@ -38,12 +38,10 @@
                     <mat-error>Please enter a valid email address</mat-error>
                     }
                 </mat-form-field>
-                <mat-form-field class="example-full-width" appearance="outline" style="padding-bottom: 10px;">
+                <mat-form-field class="example-full-width" appearance="outline">
                     <mat-label>Password</mat-label>
                     <input matInput formControlName="password" [type]="hide ? 'password' : 'text'" required>
                     <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-                    <mat-hint>Password must have a minimum of 8 characters containing a lowercase character, an
-                        uppercase character, and a digit or symbol.</mat-hint>
                     @if (registerForm.get('password').hasError('required')) {
                     <mat-error>Password is required</mat-error>
                     }
@@ -51,6 +49,7 @@
                     <mat-error>{{ registerForm.get('password').errors['passwordStrength'] }}</mat-error>
                     }
                 </mat-form-field>
+                <p class="password-requirements">Password must have a minimum of 8 characters containing a lowercase character, an uppercase character, and a digit or symbol.</p>
                 <mat-form-field class="example-full-width" appearance="outline">
                     <mat-label>Confirm Password</mat-label>
                     <input matInput formControlName="cpassword" [type]="chide ? 'password' : 'text'" required>

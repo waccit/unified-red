@@ -1,6 +1,7 @@
 import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive, Renderer2 } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { User } from '../data';
 import { StyleService } from '../services/style.service';
 
@@ -219,12 +220,11 @@ export class BaseNode implements AfterViewInit, OnDestroy {
     }
 
     setupAccess(aclkey: string) {
-        this.currentUserService.currentUser.subscribe((user: User) => {
-            const role = user ? user.role : '1';
-            if (!this.data.access || this.data.access === '0') {
-                this.access = this.roleService.getRoleAccess(aclkey, role);
+        this.currentUserService.currentUser.pipe(filter((user: User) => !!user)).subscribe((user: User) => {
+            if (!this.data?.access || this.data.access === '0') {
+                this.access = this.roleService.getRoleAccess(aclkey, user.role);
             } else {
-                this.access = this.roleService.overrideRoleAccess(aclkey, role, this.data.access);
+                this.access = this.roleService.overrideRoleAccess(aclkey, user.role, this.data.access);
             }
         });
     }

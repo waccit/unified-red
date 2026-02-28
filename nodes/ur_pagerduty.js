@@ -1,4 +1,39 @@
-const request = require('request');
+const https = require('https');
+const { URL } = require('url');
+
+function postJson(options, callback) {
+    const data = JSON.stringify(options.body);
+    const url = new URL(options.uri);
+    const reqOptions = {
+        hostname: url.hostname,
+        port: url.port || 443,
+        path: url.pathname + url.search,
+        method: options.method || 'POST',
+        headers: Object.assign(
+            {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data),
+            },
+            options.headers || {}
+        ),
+    };
+    const req = https.request(reqOptions, (res) => {
+        let raw = '';
+        res.on('data', (chunk) => (raw += chunk));
+        res.on('end', () => {
+            let parsed;
+            try {
+                parsed = raw ? JSON.parse(raw) : null;
+            } catch (_) {
+                parsed = null;
+            }
+            callback(null, res, parsed);
+        });
+    });
+    req.on('error', (err) => callback(err, null, null));
+    req.write(data);
+    req.end();
+}
 
 module.exports = function (RED) {
     function PagerDutyNode(config) {
@@ -113,7 +148,7 @@ module.exports = function (RED) {
                     body: payload,
                 };
 
-                request(options, (err, res, body) => {
+                postJson(options, (err, res, body) => {
                     if (err) {
                         node.status({ fill: 'red', shape: 'dot', text: err.code + ': ' + err.toString() });
                     } else {
