@@ -58,6 +58,9 @@
     "type": "git",
     "url": "https://github.com/waccit/unified-red.git"
   },
+  "overrides": {
+    "core-js": "^3.40.0"
+  },
   "prettier": {
     "singleQuote": true,
     "trailingComma": "es5",
