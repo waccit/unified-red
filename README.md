@@ -13,11 +13,11 @@ This module provides a set of nodes in Node-RED to create a customizable buildin
 -   Local or cloud **Alarm Logging** and alarm console node
 -   Equipment animated graphics node
 -   Reusable templated pages aka _Multi pages_
--   New responsive UI rewritten in Angular 9 and Bootstrap 4
+-   New responsive UI rewritten in Angular 21 and Bootstrap 5
 -   Built-in file manager
 -   Remote uptime monitor server and API for system integrator monitoring
 
-These nodes require node.js version 8 or newer.
+These nodes require node.js version 18 or newer.
 
 ## Pre-requisites
 
@@ -159,7 +159,7 @@ The dashboard has 3 sets of icons built in. They are:
 -   [Angular Material icons](https://klarsys.github.io/angular-material-icons/): e.g. `send`
 -   [Material Design Iconfont](https://jossef.github.io/material-design-icons-iconfont/): e.g. `mi-alarm_on` - note: add mi- to the icon name in the iconset.
 <!-- - [Themify icons](https://themify.me/themify-icons): e.g. `check` or `close` - note: omit the ti- prefix -->
--   [Font Awesome Free 5.3.1](https://fontawesome.com/icons): e.g. `fas fa-fire`
+-   [Font Awesome Free 6](https://fontawesome.com/icons): e.g. `fas fa-fire`
 
 You can use Material <!-- and Themify --> icons in any of the Icon fields. You may also be able to use some icons in labels via their inline style eg `<i class="fas fa-flag"></i>`
 
@@ -191,7 +191,7 @@ cd ~/
 git clone https://github.com/waccit/unified-red.git
 cd unified-red
 npm install
-ng build --prod
+ng build --configuration production
 ```
 
 Then symlink Node-RED to your development folder:
@@ -232,10 +232,10 @@ Use the _--watch_ flag to build automatically on a file save:
 ng build --watch
 ```
 
-Use the _--prod_ flag for a production build:
+Use the _--configuration production_ flag for a production build:
 
 ```
-ng build --prod
+ng build --configuration production
 ```
 
 We also suggest _lint_ checking with:
