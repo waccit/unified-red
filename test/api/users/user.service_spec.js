@@ -1,5 +1,5 @@
 const should = require('should');
-const mockery = require('mockery');
+const proxyquire = require('proxyquire');
 const nodemailerMock = require('nodemailer-mock');
 let userService;
 
@@ -7,11 +7,13 @@ describe('userService', function () {
     let test_user_id, test_disabled_user_id, test_expired_user_id;
 
     before(async function () {
-        mockery.enable({ warnOnUnregistered: false, useCleanCache: true }); // Enable mockery to mock objects
-        mockery.registerMock('nodemailer', nodemailerMock); // Once mocked, any code that calls require('nodemailer') will get our nodemailerMock
-
-        /* IMPORTANT! Make sure anything that uses nodemailer is loaded here, after it is mocked just above... */
-        userService = require('../../../api/users/user.service');
+        // Load email.service with nodemailer mocked, then inject that into user.service
+        const emailServiceMock = proxyquire('../../../api/email.service', {
+            'nodemailer': nodemailerMock,
+        });
+        userService = proxyquire('../../../api/users/user.service', {
+            '../email.service': emailServiceMock,
+        });
 
         let result = await userService.create({
             'firstName': 'Test',
@@ -48,10 +50,6 @@ describe('userService', function () {
     });
 
     after(function () {
-        // Remove our mocked nodemailer and disable mockery
-        mockery.deregisterAll();
-        mockery.disable();
-
         userService.delete(test_user_id);
         userService.delete(test_disabled_user_id);
         userService.delete(test_expired_user_id);
