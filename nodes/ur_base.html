@@ -3871,7 +3871,7 @@
     $.get('./uisettings', function (uiSettings) {
         uiRoot = uiSettings.path || '/ui';
     });
-    let possibleApiRoots = ['/', '/admin/'];
+    let possibleApiRoots = ['/', '/admin/', '/node-red/'];
     if (!possibleApiRoots.includes(window.location.pathname)) {
         possibleApiRoots.push(window.location.pathname);
     }
