@@ -166,7 +166,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
         // Init table and graph
         this.queryParams = {
-            limit: 50000,
+            limit: 500000,
             topic: this.topics,
             startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.getRangeInSeconds() * 1000)
             // startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.data.xrangeunits * 1000),
@@ -193,7 +193,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
 
     rebuildChartAndTable() {
       this.queryParams = {
-        limit: 50000,
+        limit: 500000,
         topic: this.topics,
         startTimestamp: new Date(new Date().getTime() - this.data.xrange * this.getRangeInSeconds() * 1000)
     };
