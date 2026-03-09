@@ -7,7 +7,8 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write      
+  issues: write  
 
 jobs:
   build:
@@ -37,7 +38,7 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Download Build
         uses: actions/download-artifact@v4
         with:
