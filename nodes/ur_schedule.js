@@ -374,7 +374,7 @@ module.exports = function (RED) {
             return false;
         };
 
-        let isLastDate = function () {
+        let isLastDateOfMonth = function () {
             let m = moment().add(1, 'months').date(1).subtract(1, 'days');
             return moment().diff(m, 'days') === 0;
         };
@@ -386,7 +386,7 @@ module.exports = function (RED) {
                 let date = pattern[3];
                 let weekday = pattern[5];
                 if (date === 'L') {
-                    if (isLastDate()) {
+                    if (isLastDateOfMonth()) {
                         // if the last day, overwrite date field with today
                         pattern[3] = moment().date();
                         return pattern.join(' ');
