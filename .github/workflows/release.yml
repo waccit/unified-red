@@ -5,6 +5,10 @@ on:
      branches:
         - master
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build:
     name: Build
@@ -26,6 +30,7 @@ jobs:
         with:
           name: dist
           path: dist
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -41,5 +46,4 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release@22
