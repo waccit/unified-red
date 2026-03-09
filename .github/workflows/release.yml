@@ -7,7 +7,8 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write      
+  issues: write  
 
 jobs:
   build:
@@ -15,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: '12.x'
       - name: Install Dependencies
@@ -37,7 +38,7 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Download Build
         uses: actions/download-artifact@v4
         with:
