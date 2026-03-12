@@ -94,6 +94,7 @@
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
             let node = this;
+            initializeJsTree(node.folder, { mode: 'parent', parentType: 'page', allowRoot: false });
 
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
@@ -387,6 +388,7 @@
         oneditsave: function () {
             let node = this;
 
+            this.folder = getSelectedParent() || this.folder;
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
             this.pageType = $('#node-config-input-page-type').val();
@@ -484,6 +486,53 @@
                 });
             }
         },
+        oneditdelete: function () {
+            var pageId = this.id;
+            var groupsToDelete = [];
+            var tabsToDelete = [];
+
+            // groups
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_group' && node.page === pageId) {
+                    groupsToDelete.push(node);
+                }
+            });
+
+            // tabs
+            groupsToDelete.forEach(function (group) {
+                RED.nodes.eachConfig(function (tabNode) {
+                    if (tabNode.type === 'ur_tab' && tabNode.group === group.id) {
+                        tabsToDelete.push(tabNode);
+                    }
+                });
+            });
+
+            var affectedNodes = [];
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.eachNode(function (node) {
+                    if (node.tab === tab.id) {
+                        delete node.tab;
+                        node.dirty = true;
+                        node.changed = true;
+                        affectedNodes.push(node);
+                    }
+                });
+            });
+
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.remove(tab.id);
+            });
+
+            groupsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+            
+            affectedNodes.forEach(function (node) {
+                RED.editor.validateNode(node);
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
+        },
     });
 
     function explodeRange(exp) {
@@ -571,10 +620,17 @@
         <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-folder">
-            <i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span>
-        </label>
-        <input type="text" id="node-config-input-folder" />
+        <label><i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span></label>
+    </div>
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Parent: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="nodeeditjstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label for="node-config-input-disabled-btn">

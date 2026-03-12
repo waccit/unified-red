@@ -53,6 +53,7 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            initializeJsTree(this.group, { mode: 'parent', parentType: 'tab', allowRoot: false, excludeNodeId: this.group });
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
                 var active = i.hasClass('fa-toggle-on');
@@ -92,8 +93,22 @@
             }
         },
         oneditsave: function () {
+            this.group = getSelectedParent() || this.group;
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
+        },
+        oneditdelete: function () {
+            var tabId = this.id;
+            RED.nodes.eachNode(function (node) {
+                if (node.tab === tabId) {
+                    delete node.tab;
+                    node.dirty = true;
+                    node.changed = true;
+                    RED.editor.validateNode(node);
+                }
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
         },
     });
 </script>
@@ -106,10 +121,17 @@
         <input type="text" id="node-config-input-name" />
     </div>
     <div class="form-row">
-        <label for="node-config-input-group"
-            ><i class="fa fa-window-maximize"></i> <span data-i18n="ur_tab.label.group"></span
-        ></label>
-        <input type="text" id="node-config-input-group" />
+        <label><i class="fa fa-window-maximize"></i> <span data-i18n="ur_tab.label.group"></span></label>
+    </div>
+    <div style="display: flex; align-items: center; padding-bottom: 10px;">
+        <div id="selectedTabDisplay">Selected Group: None</div>
+    </div>
+    <div id="jstree-container" class="form-row">
+        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
+        <div
+            id="nodeeditjstree"
+            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
+        ></div>
     </div>
     <div class="form-row">
         <label for="node-config-input-disabled-btn">
