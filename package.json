@@ -35,13 +35,10 @@
         "socket.js",
         "ui.js",
         "dist/*",
-        "api/config.json"
+        "api/config.json",
+        "scripts/*"
     ],
     "contributors": [
-        {
-            "name": "Nick Lee",
-            "email": "nlee@wasocal.com"
-        },
         {
             "name": "Samy Arbid",
             "email": "sarbid@wasocal.com"
@@ -53,6 +50,10 @@
         {
             "name": "Eric Ko",
             "email": "sko@wasocal.com"
+        },
+        {
+            "name": "Max Christy",
+            "email": "mchristy@wasocal.com"
         }
     ],
     "license": "Apache-2.0",
@@ -193,3 +194,4 @@
         "typescript": "3.7.5"
     }
 }
+
