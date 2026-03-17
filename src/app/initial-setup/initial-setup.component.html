@@ -69,12 +69,15 @@
                                                     <table>
                                                         <tr>
                                                             <td class="pl-4">Local server:</td>
-                                                            <td class="pl-4"><code>mongodb://localhost:27017/unified-red</code></td>
+                                                            <td class="pl-4"><code>mongodb://localhost:27017/unified-red</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('mongodb://localhost:27017/unified-red')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">MongoDB Atlas:</td>
                                                             <td class="pl-4" style="word-break: break-all;">
                                                                 <code>mongodb+srv://kay:myRealPassword@cluster0.mongodb.net/?serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000&w=majority</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('mongodb+srv://kay:myRealPassword@cluster0.mongodb.net/?serverSelectionTryOnce=false&serverSelectionTimeoutMS=15000&w=majority')" title="Copy"><i class="fa fa-clipboard"></i></button>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -93,11 +96,15 @@
                                                     <table>
                                                         <tr>
                                                             <td class="pl-4">Relative path</td>
-                                                            <td class="pl-4"><code>sqlite:node_modules/unified-red/unified-red.db</code></td>
+                                                            <td class="pl-4"><code>sqlite:node_modules/unified-red/unified-red.db</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('sqlite:node_modules/unified-red/unified-red.db')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">Absolute path</td>
-                                                            <td class="pl-4"><code>sqlite:/media/sdcard/data/unified-red/unified-red.db</code></td>
+                                                            <td class="pl-4"><code>sqlite:/media/sdcard/data/unified-red/unified-red.db</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('sqlite:/media/sdcard/data/unified-red/unified-red.db')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                     </table>
                                                     <p class="mt-4">
@@ -106,38 +113,54 @@
                                                     <table>
                                                         <tr>
                                                             <td class="pl-4">Postgres:</td>
-                                                            <td class="pl-4"><code>npm install --save pg pg-hstore</code></td>
+                                                            <td class="pl-4"><code>npm install --save pg pg-hstore</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('npm install --save pg pg-hstore')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">MySQL</td>
-                                                            <td class="pl-4"><code>npm install --save mysql2</code></td>
+                                                            <td class="pl-4"><code>npm install --save mysql2</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('npm install --save mysql2')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">MariaDB:</td>
-                                                            <td class="pl-4"><code>npm install --save mariadb</code></td>
+                                                            <td class="pl-4"><code>npm install --save mariadb</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('npm install --save mariadb')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">Microsoft SQL Server:</td>
-                                                            <td class="pl-4"><code>npm install --save tedious</code></td>
+                                                            <td class="pl-4"><code>npm install --save tedious</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('npm install --save tedious')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                     </table>
                                                     <p class="mt-3">Example connection strings:</p>
                                                     <table>
                                                         <tr>
                                                             <td class="pl-4">Postgres:</td>
-                                                            <td class="pl-4"><code>postgres://user:pass@&lt;hostname&gt;:5432/unified-red</code></td>
+                                                            <td class="pl-4"><code>postgres://user:pass@&lt;hostname&gt;:5432/unified-red</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('postgres://user:pass@<hostname>:5432/unified-red')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">MySQL:</td>
-                                                            <td class="pl-4"><code>mysql://user:pass@&lt;hostname&gt;:3306/unified-red</code></td>
+                                                            <td class="pl-4"><code>mysql://user:pass@&lt;hostname&gt;:3306/unified-red</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('mysql://user:pass@<hostname>:3306/unified-red')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">MariaDB:</td>
-                                                            <td class="pl-4"><code>mariadb://user:pass@&lt;hostname&gt;:3306/unified-red</code></td>
+                                                            <td class="pl-4"><code>mariadb://user:pass@&lt;hostname&gt;:3306/unified-red</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('mariadb://user:pass@<hostname>:3306/unified-red')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <td class="pl-4">Microsoft SQL Server:</td>
-                                                            <td class="pl-4"><code>mssql://user:pass@&lt;hostname&gt;:1433/unified-red</code></td>
+                                                            <td class="pl-4"><code>mssql://user:pass@&lt;hostname&gt;:1433/unified-red</code>
+                                                                <button mat-icon-button class="copy-btn" (click)="copyToClipboard('mssql://user:pass@<hostname>:1433/unified-red')" title="Copy"><i class="fa fa-clipboard"></i></button>
+                                                            </td>
                                                         </tr>
                                                     </table>
                                                 </mat-expansion-panel>

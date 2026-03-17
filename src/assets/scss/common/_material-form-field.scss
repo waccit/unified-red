@@ -1,0 +1,33 @@
+/*
+ * Project-wide overrides for Angular Material form fields (mat-form-field / mat-input).
+ * Keeps input and label font size consistent with the rest of the app (13px).
+ */
+
+/* MDC-based form field (Angular Material 15+) */
+.mat-mdc-form-field {
+  .mat-mdc-input-element,
+  input.mat-mdc-input-element {
+    font-size: 13px !important;
+    line-height: 1.42857;
+  }
+
+  .mat-mdc-floating-label {
+    font-size: 13px !important;
+  }
+
+  .mdc-floating-label {
+    font-size: 13px !important;
+  }
+}
+
+/* Legacy form field (pre-MDC) */
+.mat-form-field {
+  .mat-input-element {
+    font-size: 13px !important;
+    line-height: 1.42857;
+  }
+
+  .mat-form-field-label {
+    font-size: 13px !important;
+  }
+}

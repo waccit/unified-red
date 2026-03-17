@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  Document   : _modals.scss
  *  Author     : RedStar Template
  *  Description: This scss file for modals style classes
@@ -80,11 +80,9 @@
 
 .modalHeader {
     display: flex;
-
     align-items: flex-start;
-
     justify-content: space-between;
-    padding: 0px 10px 0px 10px;
+    padding: 20px 10px 10px 10px;
 }
 .modal-close-button {
     background-color: transparent !important;

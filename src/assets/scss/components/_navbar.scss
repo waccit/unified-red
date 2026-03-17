@@ -63,12 +63,23 @@
     }
     .collapse-menu-icon {
         margin-bottom: 0px;
-        line-height: 60px;
+        line-height: 54px;
         padding-left: 35px;
     }
     .nav-notification-icons {
         margin-bottom: 0px;
-        line-height: 60px;
+        line-height: 54px;
+    }
+
+    /* Tighter vertical spacing for header icons (match older version) */
+    .collapse-menu-icon .mat-icon-button,
+    .collapse-menu-icon .mat-mdc-icon-button,
+    .navbar-nav .mat-icon-button,
+    .navbar-nav .mat-mdc-icon-button {
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
     }
 }
 
@@ -151,7 +162,7 @@
     > li {
         > a {
             padding: 5px 7px 2px 7px;
-            margin-top: 12px;
+            margin-top: 0;
             margin-left: 5px;
 
             &.js-right-sidebar {
@@ -398,8 +409,8 @@ span.notify {
     margin: 0px 30px;
 
     > li > a {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: 6px;
+        padding-bottom: 6px;
         line-height: 20px;
     }
 }
@@ -416,7 +427,7 @@ span.notify {
         > a {
             position: relative;
             //	display: block;
-            margin: 8px 5px;
+            margin: 4px 5px;
             height: 30px;
         }
     }

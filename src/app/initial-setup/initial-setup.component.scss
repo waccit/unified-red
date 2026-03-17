@@ -1,0 +1,14 @@
+.copy-btn {
+    width: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    padding: 0 !important;
+    margin-left: 4px;
+    vertical-align: middle;
+    opacity: 0.4;
+    cursor: pointer;
+
+    &:hover {
+        opacity: .8;
+    }
+}

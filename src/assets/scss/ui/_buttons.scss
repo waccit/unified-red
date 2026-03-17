@@ -1,8 +1,17 @@
-﻿/*
+/*
  *  Document   : _buttons.scss
  *  Author     : RedStar Template
  *  Description: This scss file for button style classes
  */
+
+/* Material buttons: thinner font weight to match legacy button style */
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-button,
+.mat-raised-button {
+    font-weight: 400 !important;
+}
 
 .example-button-row button,
 .example-button-row a {

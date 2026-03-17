@@ -1,17 +1,18 @@
 <div class="scheduluDialogContainer">
-    <div class="modalHeader">
-        <div class="editRowModal">
-            <div class="modalHeader clearfix">
-                <div class="modal-about">
-                    <div class="font-weight-bold p-t-5 p-l-10 font-17">{{title}}</div>
+    <div class="schedule-dialog-inner">
+        <div class="modalHeader schedule-dialog-header">
+            <div class="editRowModal">
+                <div class="modalHeader clearfix schedule-dialog-title-row">
+                    <div class="modal-about">
+                        <div class="font-weight-bold font-17">{{title}}</div>
+                    </div>
                 </div>
             </div>
+            <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
+                <mat-icon>close</mat-icon>
+            </button>
         </div>
-        <button mat-icon-button (click)="dialogRef.close()" aria-label="Close dialog">
-            <mat-icon>close</mat-icon>
-        </button>
-    </div>
-    <div mat-dialog-content>
+        <div mat-dialog-content class="schedule-dialog-content">
         <form class="register-form m-4" [formGroup]="form" (ngSubmit)="submit()">
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
@@ -234,8 +235,8 @@
                         <div class="card-body" style="padding: 0;">
                             <div class="task-module ur-schedule-event-module">
                                 <div class="task-header">
-                                    <div class="task-title">
-                                        <div class="font-weight-bold p-t-5 p-l-10 font-17">Events</div>
+                                    <div class="task-title schedule-dialog-events-title">
+                                        <div class="font-weight-bold p-t-5 font-17">Events</div>
                                     </div>
                                     <div class="header-button">
                                         <button mat-raised-button color="primary" (click)="addNewEvent(sidenav)">Add Event</button>
@@ -330,7 +331,7 @@
                     <div class="example-button-row">
                         <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
                             [mat-dialog-close]="submit()" (click)="confirm()">Save</button>
-                        <button mat-raised-button (click)="dialogRef.close()" tabindex="-1">Cancel</button>
+                        <button mat-stroked-button (click)="dialogRef.close()" tabindex="-1">Cancel</button>
 
                         <button mat-icon-button [matMenuTriggerFor]="eventMoreMenu" [disabled]="!form.valid"
                             [hidden]="form.controls.type.value !== 'weekday'">
@@ -359,5 +360,6 @@
                 </div>
             </div>
         </form>
+        </div>
     </div>
 </div>

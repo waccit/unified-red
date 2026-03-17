@@ -1,0 +1,49 @@
+// Single wrapper: one left padding for both "New Schedule" and "Events" so they align
+.schedule-dialog-inner
+  padding-left: 24px
+
+  .schedule-dialog-header
+    padding-left: 0
+    padding-right: 10px
+    padding-top: 20px
+    padding-bottom: 0
+
+  .schedule-dialog-title-row
+    padding-left: 10px
+    margin-left: 10px
+
+.schedule-dialog-content
+  padding-left: 0
+  padding-top: 12px !important
+
+:host .register-form
+  margin-left: 0
+
+// Events heading: black text
+.schedule-dialog-events-title
+  color: #000 !important
+
+// Match old dialog styling: invalid fields grey (not red), consistent with rest of dialog
+:host ::ng-deep
+  .mat-form-field.mat-form-field-invalid
+    .mat-form-field-outline-thick,
+    .mat-form-field-outline
+      color: rgba(0, 0, 0, 0.38) !important
+
+    .mat-form-field-label,
+    .mat-focused .mat-form-field-label
+      color: rgba(0, 0, 0, 0.6) !important
+
+  .mat-mdc-form-field.mat-form-field-invalid
+    .mdc-notched-outline
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing
+        border-color: rgba(0, 0, 0, 0.38) !important
+
+    .mat-mdc-floating-label,
+    .mdc-floating-label
+      color: rgba(0, 0, 0, 0.6) !important
+
+    .mat-mdc-input-element
+      color: rgba(0, 0, 0, 0.87) !important

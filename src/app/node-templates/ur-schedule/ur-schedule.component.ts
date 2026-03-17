@@ -396,7 +396,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
 
         this.dialog
-            .open(UrScheduleFormDialogComponent, { data: dialogData })
+            .open(UrScheduleFormDialogComponent, { data: dialogData, autoFocus: false })
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
@@ -448,7 +448,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
 
         this.dialog
-            .open(UrScheduleFormDialogComponent, { data: { data: dialogData, action: 'edit' } })
+            .open(UrScheduleFormDialogComponent, { data: { data: dialogData, action: 'edit' }, autoFocus: false })
             .afterClosed()
             .subscribe((result) => {
                 if (result) {

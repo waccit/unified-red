@@ -1,10 +1,11 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import * as moment from 'moment';
+import { take } from 'rxjs/operators';
 import { HolidayValidator } from './schedule.validators';
 
 export const UR_SCHEDULE_DATE_FORMATS = {
@@ -35,7 +36,8 @@ export const UR_SCHEDULE_DATE_FORMATS = {
         { provide: MAT_DATE_FORMATS, useValue: UR_SCHEDULE_DATE_FORMATS },
     ],
 })
-export class UrScheduleFormDialogComponent {
+export class UrScheduleFormDialogComponent implements OnInit {
+    @ViewChild('closeBtn') closeBtn: ElementRef<HTMLButtonElement> | undefined;
     title: string;
     form: FormGroup;
     data: any; // { start, end, values, type }
@@ -166,6 +168,13 @@ export class UrScheduleFormDialogComponent {
             });
         }
         this.eventForm = this.createEventFormGroup(null);
+    }
+
+    ngOnInit(): void {
+        // Blur close button after dialog open so focus circle doesn't show (focus trap runs first)
+        this.dialogRef.afterOpened().pipe(take(1)).subscribe(() => {
+            setTimeout(() => this.closeBtn?.nativeElement?.blur(), 100);
+        });
     }
 
     submit(addTo = null) {
