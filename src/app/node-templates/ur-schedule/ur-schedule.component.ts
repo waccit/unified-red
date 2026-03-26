@@ -30,6 +30,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     calendarOptions: CalendarOptions = {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+        // Prevent the last visible hour slot from stretching to fill leftover view height.
+        expandRows: false,
+        contentHeight: 'auto',
         headerToolbar: this.isMobile()
             ? { left: '', center: 'title', right: '' } // mobile
             : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop

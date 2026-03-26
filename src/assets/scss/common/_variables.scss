@@ -32,6 +32,13 @@ $linear-colors: (
     'purple-dark': linear-gradient(45deg, #a52dd8, #e29bf1),
 );
 
+// App UI sans stack (Poppins — primary UI face)
+$app-font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial,
+    sans-serif;
+// Sidebar / dense nav
+$sidebar-menu-font-weight: 500;
+$sidebar-menu-active-font-weight: 600;
+
 //Fonts Family
-$navbar-font-family: 'Roboto', "Helvetica Neue", 'Poppins', sans-serif;
-$sidebar-font-family: 'Roboto', "Helvetica Neue", 'Poppins', sans-serif;
+$navbar-font-family: $app-font-family;
+$sidebar-font-family: $app-font-family;

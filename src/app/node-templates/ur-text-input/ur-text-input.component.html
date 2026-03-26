@@ -3,7 +3,9 @@
         @if (data.mode !== 'tel') {
             <mat-form-field class="example-full-width healthIndicator" appearance="outline">
                 <span [innerHTML]="valueIn" hidden></span>
-                <mat-label>{{ label }}</mat-label>
+                @if (label) {
+                    <mat-label>{{ label }}</mat-label>
+                }
                 @if (data.mode === 'email') {
                     <span matPrefix>
                         <mat-icon class="mr-2">email</mat-icon>
@@ -18,6 +20,7 @@
                     matInput
                     #myInputarea
                     [type]="data.mode"
+                    [attr.aria-label]="label ? null : (data.topic || 'Text input')"
                     [value]="access.read ? stripHTML(valueIn) : ''"
                     [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                     (keyup)="delay > 0 && keyup($event.target.value)"
@@ -32,7 +35,9 @@
         @if (data.mode === 'tel') {
             <mat-form-field class="example-full-width healthIndicator" appearance="outline">
                 <span [innerHTML]="valueIn" hidden></span>
-                <mat-label>{{ label }}</mat-label>
+                @if (label) {
+                    <mat-label>{{ label }}</mat-label>
+                }
                 <span matPrefix>
                     <mat-icon class="mr-2">phone</mat-icon>
                 </span>
@@ -40,6 +45,7 @@
                     matInput
                     placeholder="EX: (435) 345-3454"
                     mask="(000) 000-0000"
+                    [attr.aria-label]="label ? null : (data.topic || 'Phone number')"
                     [value]="access.read ? stripHTML(valueIn) : ''"
                     [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                     (keyup)="delay > 0 && keyup($event.target.value)"

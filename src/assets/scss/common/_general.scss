@@ -4,20 +4,15 @@
  *  Description: This scss file for all common style classes
  */
 
-@font-face {
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 400;
-    src: local('Poppins Regular'), local('Poppins-Regular'),
-        url('../../fonts/poppins/poppins-v5-latin-regular.svg#Poppins') format('svg');
-}
-
 body,
 html {
     background-color: #f1f2f7;
     @include transition(all 0.5s);
-    font-family: 'Roboto', "Helvetica Neue", 'Poppins', sans-serif;
-    font-size: 13px;
+    font-family: $app-font-family;
+    font-size: 14px;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 html {
@@ -37,7 +32,29 @@ h3,
 h4,
 h5,
 h6 {
-    font-weight: bold;
+    font-weight: 700;
+}
+
+// Prebuilt Material theme uses Roboto; align tabs, tables, forms, and dialogs with app stack
+.mat-mdc-tab .mdc-tab__text-label,
+.mat-mdc-button .mdc-button__label,
+.mat-mdc-raised-button .mdc-button__label,
+.mat-mdc-outlined-button .mdc-button__label,
+.mat-mdc-unelevated-button .mdc-button__label,
+.mat-mdc-icon-button,
+.mat-mdc-form-field,
+.mat-mdc-table,
+.mat-mdc-select,
+.mat-mdc-option,
+.mat-mdc-list-item,
+.mat-mdc-dialog-container,
+.mat-mdc-snack-bar-container,
+.mat-datepicker-content {
+    font-family: $app-font-family;
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+    font-weight: 500;
 }
 
 button,

@@ -16,7 +16,9 @@
                         appearance="outline"
                     >
                         <span [title]="field.intopic" hidden></span>
-                        <mat-label>{{ field.label }}</mat-label>
+                        @if (field.label) {
+                            <mat-label>{{ field.label }}</mat-label>
+                        }
                         @if (field.type === 'email') {
                             <span matPrefix>
                                 <mat-icon class="mr-2">email</mat-icon>
@@ -27,6 +29,7 @@
                             #defaultElement
                             [type]="field.type"
                             class="colorIndicator"
+                            [attr.aria-label]="field.label ? null : (field.topic || 'Field')"
                             [value]="
                                 access.read
                                     ? precision(stripHTML(data.formValue[field.topic]), field.options.precision)
@@ -47,12 +50,15 @@
                         appearance="outline"
                     >
                         <span [title]="field.intopic" hidden></span>
-                        <mat-label>{{ field.label }}</mat-label>
+                        @if (field.label) {
+                            <mat-label>{{ field.label }}</mat-label>
+                        }
                         <textarea
                             matInput
                             #defaultElement
                             [rows]="field.options.rows"
                             class="colorIndicator"
+                            [attr.aria-label]="field.label ? null : (field.topic || 'Field')"
                             [value]="access.read ? stripHTML(data.formValue[field.topic]) : ''"
                             [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                             (change)="valueChange(field.topic, $event.target.value, field.type)"
@@ -66,11 +72,14 @@
                         appearance="outline"
                     >
                         <span [title]="field.intopic" hidden></span>
-                        <mat-label>{{ field.label }}</mat-label>
+                        @if (field.label) {
+                            <mat-label>{{ field.label }}</mat-label>
+                        }
                         <select
                             matNativeControl
                             #defaultElement
                             class="colorIndicator"
+                            [attr.aria-label]="field.label ? null : (field.topic || 'Field')"
                             [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"
                             (change)="valueChange(field.topic, $event.target.value, field.type)"
                         >

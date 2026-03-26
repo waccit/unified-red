@@ -310,10 +310,22 @@ tr.shown td.details-control::before {
 //         color: #5b626b;
 //     }
 // }
-.mat-table {
-    .mat-header-cell {
+.mat-table,
+.mat-mdc-table {
+    font-family: $app-font-family;
+
+    .mat-header-cell,
+    .mat-mdc-header-cell {
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .mat-cell,
+    .mat-mdc-cell {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
     }
 }
 // .ngx-datatable.material {

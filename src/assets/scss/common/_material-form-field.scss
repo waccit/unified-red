@@ -1,33 +1,44 @@
 /*
  * Project-wide overrides for Angular Material form fields (mat-form-field / mat-input).
- * Keeps input and label font size consistent with the rest of the app (13px).
+ * Keeps input and label font size consistent with dashboard body (14px).
  */
 
 /* MDC-based form field (Angular Material 15+) */
 .mat-mdc-form-field {
   .mat-mdc-input-element,
   input.mat-mdc-input-element {
-    font-size: 13px !important;
+    font-size: 14px !important;
     line-height: 1.42857;
   }
 
   .mat-mdc-floating-label {
-    font-size: 13px !important;
+    font-size: 14px !important;
   }
 
   .mdc-floating-label {
-    font-size: 13px !important;
+    font-size: 14px !important;
+  }
+}
+
+/*
+ * Outlined appearance reserves a “notch” in the top border for the floating label.
+ * Empty <mat-label> still allocates notch width — collapse it so the border is continuous.
+ */
+.mat-mdc-form-field.mat-form-field-appearance-outline:has(mat-label:empty) {
+  .mdc-notched-outline__notch {
+    width: 0 !important;
+    padding: 0 !important;
   }
 }
 
 /* Legacy form field (pre-MDC) */
 .mat-form-field {
   .mat-input-element {
-    font-size: 13px !important;
+    font-size: 14px !important;
     line-height: 1.42857;
   }
 
   .mat-form-field-label {
-    font-size: 13px !important;
+    font-size: 14px !important;
   }
 }

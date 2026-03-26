@@ -1,3 +1,5 @@
+@import '../common/variables';
+
 $weekdayEventColor: var(--fc-event-bg-color,#3788d8);
 $weekdayInactiveEventColor: #9bc4ec;
 $dateEventColor: seagreen;
@@ -90,8 +92,14 @@ $holidateEventColor: tomato;
 }
 
 .ur-schedule-container {
+    font-family: $app-font-family;
+
     a:not([href]), a:not([href]):hover {
         color: #555555;
         text-decoration:none
     }
+}
+
+.fc {
+    font-family: $app-font-family;
 }

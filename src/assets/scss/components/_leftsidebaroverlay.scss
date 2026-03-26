@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  Document   : _leftsidebaroverlay.scss
  *  Author     : RedStar Template
  *  Description: This scss file for left side bar style classes
@@ -28,6 +28,9 @@
 .sidebar {
     @include transition(all 0.5s);
     font-family: $sidebar-font-family;
+    // Crisper, slightly lighter rendering on macOS (closer to reference screenshots)
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     background: #ffffff;
     width: 260px;
     overflow: hidden;
@@ -126,7 +129,7 @@
                 &.active {
                     > :first-child {
                         span {
-                            font-weight: bold;
+                            font-weight: $sidebar-menu-active-font-weight;
                         }
                     }
                 }
@@ -248,10 +251,11 @@
             }
 
             a {
-                color: #545454;
+                color: #333;
                 position: relative;
                 vertical-align: middle;
                 font-size: 14px;
+                font-weight: $sidebar-menu-font-weight;
                 display: block;
                 overflow: hidden;
                 line-height: 2rem;
@@ -274,7 +278,7 @@
                 span {
                     margin: 7px 0 7px 12px;
                     color: #333;
-                    // font-weight: bold;
+                    font-weight: $sidebar-menu-font-weight;
                     font-size: 14px;
                     overflow: hidden;
                 }
@@ -286,7 +290,7 @@
                 padding-left: 0;
 
                 span {
-                    font-weight: normal;
+                    font-weight: $sidebar-menu-font-weight;
                     font-size: 14px;
                     margin: 3px 0 1px 6px;
                 }
