@@ -81,6 +81,48 @@
         padding-top: 0;
         padding-bottom: 0;
     }
+
+    /*
+     * MDC icon buttons center the circular ripple on the control; a fixed-height .nav-hdr-btn (24px)
+     * + line-height on the toolbar was shifting the glyph vs. the ripple. Center content in the
+     * button only — do not offset with top/margin (that misaligns icon vs. circle).
+     */
+    .navbar-nav .mat-mdc-icon-button.nav-notification-icons,
+    .navbar-nav .mat-icon-button.nav-notification-icons,
+    .collapse-menu-icon .mat-mdc-icon-button.sidemenu-collapse,
+    .collapse-menu-icon .mat-icon-button.sidemenu-collapse {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        .nav-hdr-btn {
+            height: auto;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    /*
+     * Bar is 60px at >=601px (see `nav { height: 60px }` below) but icon rows used 54px line-height,
+     * which visually hugged the top. Nudge the icon list items down slightly — does not move the
+     * glyph inside the MDC circle (that stays handled by inline-flex on the button).
+     */
+    @media screen and (min-width: 601px) {
+        .collapse-menu-icon {
+            line-height: 60px;
+        }
+
+        /* Let the 48px MDC control sit in the 60px bar; 54px line-height pulled the cluster up */
+        .nav-notification-icons {
+            line-height: normal;
+        }
+
+        .navbar-nav.navbar-right > li {
+            padding-top: 4px;
+        }
+    }
 }
 
 .ls-closed {
