@@ -50,7 +50,11 @@ async function canRegister() {
     return !(await db.findOne(User));
 }
 
-async function getAll() {
+async function getAll(maxRole) {
+    if (maxRole !== undefined) {
+        const lte = db.chooseOperator('$lte');
+        return await db.find(User, { role: { [lte]: maxRole } });
+    }
     return await db.find(User);
 }
 

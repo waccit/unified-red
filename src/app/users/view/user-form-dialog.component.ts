@@ -34,7 +34,9 @@ export class UserFormDialogComponent {
         if (this.action === 'edit') {
             this.data = this.dialogData.data;
             this.title = 'Edit ' + this.data.username;
-            const roleLevel = this.roles.find(r => r.name === this.data.role).level;
+            const roleEntry = this.roles?.find(r => r.name === this.data.role)
+                ?? this.roles?.find(r => String(r.level) === String(this.data.role));
+            const roleLevel = roleEntry?.level ?? '';
             this.form = this.formBuilder.group({
                 enabled: [this.data.enabled],
                 username: [this.data.username, [Validators.required, Validators.minLength(3)]],
