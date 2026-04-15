@@ -31,6 +31,11 @@
   }
 }
 
+/* Suffix (units like °F) — add spacing so text doesn't hug the outline edge */
+.mat-mdc-form-field-icon-suffix {
+  padding-right: 12px !important;
+}
+
 /* Legacy form field (pre-MDC) */
 .mat-form-field {
   .mat-input-element {
