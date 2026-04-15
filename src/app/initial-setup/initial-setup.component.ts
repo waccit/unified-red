@@ -147,7 +147,7 @@ export class InitialSetupComponent implements OnInit {
 
     copyToClipboard(text: string) {
         navigator.clipboard.writeText(text).then(() => {
-            this.snackbar.success('Copied to clipboard', 'OK');
+            this.snackbar.success('Copied to clipboard', '', 5000);
         });
     }
 
