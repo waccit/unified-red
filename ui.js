@@ -133,6 +133,27 @@ function setCurrentValue(id, topic, value) {
     currentValues[id][topic] = value;
 }
 
+// Extracts variable names from a Unified-RED topic pattern (e.g. "glp/0/{sid}/*/Web Server/{ws}/oStatus{x}.*_{index}")
+// and returns them sorted alphabetically. This is the canonical ordering used to
+// build instance suffixes on both the server-side newId and the client-side nodeId.
+// Deriving from the pattern (instead of from instances) guarantees consistency even
+// when a base multi-page has empty instances and is only used as a template for
+// inherited pages.
+function sortedVarsFromTopicPattern(topicPattern) {
+    let vars = [];
+    if (typeof topicPattern === 'string' && topicPattern.length) {
+        let rx = /\{([^/}]+)\}/g;
+        let m;
+        while ((m = rx.exec(topicPattern)) !== null) {
+            if (!vars.includes(m[1])) {
+                vars.push(m[1]);
+            }
+        }
+        vars.sort();
+    }
+    return vars;
+}
+
 function getCurrentValue(id, topic) {
     return currentValues[id] ? currentValues[id][topic] : null;
 }
@@ -356,35 +377,68 @@ function add(opt) {
 
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
+                // GLP shorthand: */{sid}/*/Web Server/... means the same as
+                // glp/0/{sid}/*/Web Server/... Using the legacy '.*' matcher on the
+                // */ form otherwise captures {sid} from the wrong segment (e.g. "lon").
+                if (topicPattern.startsWith('*/{sid}/*/Web Server/')) {
+                    topicPattern =
+                        'glp/0/{sid}/*/Web Server/' +
+                        topicPattern.slice('*/{sid}/*/Web Server/'.length);
+                }
                 let sortedVars = opt.control.sortedVars;
+
+                // Defensive fallback: if addControl was unable to populate sortedVars
+                // (e.g. base multi-page with no instances before inherited pages were
+                // registered), derive them from the topicPattern so we still produce
+                // the correct extended newId for Socket.IO room routing.
+                if (!sortedVars || !sortedVars.length) {
+                    sortedVars = sortedVarsFromTopicPattern(topicPattern);
+                    opt.control.sortedVars = sortedVars;
+                }
 
                 let varMap = {};
 
-                // find and escape hyphen, brackets, parentheses, plus, punctuation, backslash,
-                // caret, dollar, vertical bar, and pound symbols
-                let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
-                // find and replace wildcard (*)
-                topicRegex = topicRegex.replace(/\*/g, '.*');
+                // Collect variable names in order of occurrence in the topic pattern.
+                // This is our source of truth for mapping captures -> variable names,
+                // independent of how the match regex is built.
+                let varNames = [];
+                let vnRx = /\{([^/}]+)\}/g;
+                let vm;
+                while ((vm = vnRx.exec(topicPattern)) !== null) {
+                    varNames.push(vm[1]);
+                }
 
-                // make a copy of topicRegex for pattern (includes {}) to capture variable names in topicPattern
-                let patternRegex = topicRegex.replace(/\{[^/}]*}/g, '{([\\w\\. ]+)}');
+                // Escape regex metacharacters (leave * and {} alone; they are handled below)
+                let escapePattern = (s) => s.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
 
-                // find variables and replace with capture groups
-                topicRegex = topicRegex.replace(/\{[^/}]*}/g, '([\\w\\. ]+)');
+                // Strict matcher: treat '*' as a single path-segment wildcard ([^/]*)
+                // and '{var}' as a single-segment capture ([^/]+). This prevents leading
+                // wildcards like '*/foo/{id}' from silently capturing the wrong segment
+                // (a common source of broken multi-page routing).
+                let strictRegex = escapePattern(topicPattern)
+                    .replace(/\*/g, '[^/]*')
+                    .replace(/\{[^/}]*}/g, '([^/]+)');
+                let strictRe = new RegExp('^' + strictRegex + '$');
+                let topicMatches = strictRe.exec(topic);
 
-                // make regexs
-                topicRegex = new RegExp('^' + topicRegex + '$');
-                patternRegex = new RegExp('^' + patternRegex + '$');
+                if (!topicMatches) {
+                    // Legacy fallback: '*' as greedy '.*' (can span slashes). Preserved for
+                    // backward compatibility with patterns that intentionally rely on
+                    // multi-segment wildcards (e.g. '**/Web Server/{ws}' style prefixes).
+                    // NOTE: greedy '.*' may cause ambiguous captures when the pattern
+                    // starts with '*/' - prefer an explicit prefix (e.g. 'glp/0/') or
+                    // split the wildcard into single-segment pieces to avoid this.
+                    let legacyRegex = escapePattern(topicPattern)
+                        .replace(/\*/g, '.*')
+                        .replace(/\{[^/}]*}/g, '([\\w\\. ]+)');
+                    let legacyRe = new RegExp('^' + legacyRegex + '$');
+                    topicMatches = legacyRe.exec(topic);
+                }
 
-                // find matches in topic
-                let topicMatches = topicRegex.exec(topic);
-                // find matches in topicPattern
-                let patternMatches = patternRegex.exec(topicPattern);
-
-                // if a match, make variable dict from topic & topicPattern
+                // if a match, make variable dict from capture groups
                 if (topicMatches) {
-                    for (let i = 1; i < topicMatches.length; i++) {
-                        varMap[patternMatches[i]] = topicMatches[i];
+                    for (let i = 0; i < varNames.length; i++) {
+                        varMap[varNames[i]] = topicMatches[i + 1];
                     }
                 }
 
@@ -974,6 +1028,18 @@ function addControl(folders, page, group, tab, control) {
                 }
             });
 
+            // When a base multi-page has no instances of its own but is used as a
+            // template (with one or more inherited pages providing the instances),
+            // sortedVars ends up empty here. The original control object lives on
+            // the base page, so its sortedVars would stay empty and the per-message
+            // newId computed in add()'s input handler would not include any instance
+            // suffix - causing Socket.IO updates to be emitted to the wrong room.
+            // Fall back to deriving sortedVars from the widget's topicPattern so
+            // the base-page control has the correct variable list for routing.
+            if (!sortedVars.length && control.topicPattern) {
+                sortedVars = sortedVarsFromTopicPattern(control.topicPattern);
+            }
+
             let incomingSettings = {
                 instanceNames,
                 instanceParams,
@@ -1032,11 +1098,12 @@ function addControl(folders, page, group, tab, control) {
 
                                                 // if tab's items already have the widget => update widget
                                                 if (t.items.findIndex((w) => w.id.startsWith(control.id)) !== -1) {
-                                                    t.items.forEach((w) => {
+                                                    t.items = t.items.map((w) => {
                                                         if (w.id.startsWith(control.id)) {
                                                             let newCtrlId = control.id + p.instance._id;
-                                                            w = { ...control, 'id': newCtrlId, 'instance': p.instance };
+                                                            return { ...control, id: newCtrlId, instance: p.instance };
                                                         }
+                                                        return w;
                                                     });
                                                 } else {
                                                     // else add new widget

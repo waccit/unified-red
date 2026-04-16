@@ -90,6 +90,11 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 		let newId = nodeId;
 		let topic = msg.topic;
 		let topicPattern = this.data.topicPattern;
+		if (topicPattern.startsWith('*/{sid}/*/Web Server/')) {
+			topicPattern =
+				'glp/0/{sid}/*/Web Server/' +
+				topicPattern.slice('*/{sid}/*/Web Server/'.length);
+		}
 		let firstPage = Object.values<any>(this.pages).find(p => p.id.startsWith(nodeId));
 		if (topic && topicPattern && firstPage && firstPage.instance && firstPage.instance._idVar) {
 			let idVar = firstPage.instance._idVar;
