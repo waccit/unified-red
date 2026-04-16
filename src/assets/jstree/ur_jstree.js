@@ -319,9 +319,16 @@ window.createMenuNode = createMenuNode;
         return node.label || node.name || node.type;
     }
 
+    function getNodeDisplayText(name, redNode) {
+        if (redNode && redNode.hidden) {
+            return '<s>' + name + '</s>';
+        }
+        return name;
+    }
+
     function extractFolderChildren(folderNode, includeWidgets) {
         const folder = {
-            text: folderNode.name,
+            text: getNodeDisplayText(folderNode.name, folderNode),
             id: folderNode.id,
             type: folderNode.type === 'ur_folder' ? 'folder' : 'link',
             children: [],
@@ -336,7 +343,7 @@ window.createMenuNode = createMenuNode;
                 pageIcon = 'fa fa-copy';
             }
             const pageNode = {
-                text: page.name,
+                text: getNodeDisplayText(page.name, page),
                 id: page.id,
                 type: 'page',
                 icon: pageIcon,
@@ -344,12 +351,12 @@ window.createMenuNode = createMenuNode;
             };
             extractNodesFromConfig('ur_group', 'page', page).forEach((group) => {
                 const groupNode = {
-                    text: group.name,
+                    text: getNodeDisplayText(group.name, group),
                     id: group.id,
                     type: 'group',
                     children: extractNodesFromConfig('ur_tab', 'group', group).map((tab) => {
                         const tabNode = {
-                            text: tab.name,
+                            text: getNodeDisplayText(tab.name, tab),
                             id: tab.id,
                             type: 'tab',
                             children: [],
@@ -380,7 +387,7 @@ window.createMenuNode = createMenuNode;
 
         extractNodesFromConfig('ur_link', 'folder', folderNode).forEach((link) => {
             folder.children.push({
-                text: link.name,
+                text: getNodeDisplayText(link.name, link),
                 id: link.id,
                 type: 'link',
             });
