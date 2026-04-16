@@ -37,6 +37,7 @@ var baseConfiguration = {};
 var io;
 var menu = [];
 var inheritedPages = {}; // schema: <key=refPage.id, value=[inhPage1, inhPage2, inhPage3, ...]>
+var removingInhControls = false; // true while removeInhControls is running; suppresses cleanupInhPageDict inside multiRemove/singleRemove
 var globals = [];
 var settings = {};
 var updateValueEventName = 'update-value';
@@ -1310,7 +1311,10 @@ function addControl(folders, page, group, tab, control) {
                             delete multiPages[page.id];
 
                             // if a inherited page clean-up inheritedPages dict
+                            // skip when called from removeInhControls: the inherited page node is still
+                            // alive and the dict entry must survive so new base-page widgets can re-register
                             if (
+                                !removingInhControls &&
                                 page.config.pageType === 'inherited' &&
                                 inheritedPages.hasOwnProperty(page.config.refPage)
                             ) {
@@ -1478,7 +1482,10 @@ function addControl(folders, page, group, tab, control) {
                                     // If the page is now empty, remove it from the folder
                                     if (foundPage.items.length === 0) {
                                         // If a inherited page cleanup inheritedPages dict
+                                        // skip when called from removeInhControls: the inherited page node is still
+                                        // alive and the dict entry must survive so new base-page widgets can re-register
                                         if (
+                                            !removingInhControls &&
                                             page.config.pageType === 'inherited' &&
                                             inheritedPages.hasOwnProperty(page.config.refPage)
                                         ) {
@@ -1700,12 +1707,14 @@ function updateAndClone(source, update) {
 
 function removeInhControls(refPageId, controlId) {
     if (inheritedPages.hasOwnProperty(refPageId)) {
+        removingInhControls = true;
         inheritedPages[refPageId].forEach((inhPage) => {
             if (inhPage.config.refPage === refPageId && inhPage.removes.hasOwnProperty(controlId)) {
                 inhPage.removes[controlId]();
                 delete inhPage.removes[controlId];
             }
         });
+        removingInhControls = false;
     }
 }
 
