@@ -377,14 +377,6 @@ function add(opt) {
 
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
-                // GLP shorthand: */{sid}/*/Web Server/... means the same as
-                // glp/0/{sid}/*/Web Server/... Using the legacy '.*' matcher on the
-                // */ form otherwise captures {sid} from the wrong segment (e.g. "lon").
-                if (topicPattern.startsWith('*/{sid}/*/Web Server/')) {
-                    topicPattern =
-                        'glp/0/{sid}/*/Web Server/' +
-                        topicPattern.slice('*/{sid}/*/Web Server/'.length);
-                }
                 let sortedVars = opt.control.sortedVars;
 
                 // Defensive fallback: if addControl was unable to populate sortedVars
@@ -443,8 +435,10 @@ function add(opt) {
                 }
 
                 // add newId suffixes
-                for (v of sortedVars) {
-                    newId += '.' + v + varMap[v];
+                for (let v of sortedVars) {
+                    if (varMap[v] !== undefined) {
+                        newId += '.' + v + varMap[v];
+                    }
                 }
             }
 

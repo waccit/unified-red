@@ -90,40 +90,33 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 		let newId = nodeId;
 		let topic = msg.topic;
 		let topicPattern = this.data.topicPattern;
-		if (topicPattern.startsWith('*/{sid}/*/Web Server/')) {
-			topicPattern =
-				'glp/0/{sid}/*/Web Server/' +
-				topicPattern.slice('*/{sid}/*/Web Server/'.length);
-		}
 		let firstPage = Object.values<any>(this.pages).find(p => p.id.startsWith(nodeId));
 		if (topic && topicPattern && firstPage && firstPage.instance && firstPage.instance._idVar) {
 			let idVar = firstPage.instance._idVar;
-	
-			//
-			// START --- Copied from ui.js at line 352 ---
-			//
-			// find and escape hyphen, brackets, parentheses, plus, punctuation, backslash,
-			// caret, dollar, vertical bar, and pound symbols
-			let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
-			// find and replace wildcard (*)
-			topicRegex = topicRegex.replace(/\*/g, '.*');
-			// find and replace capture group (idVar)
-			topicRegex = topicRegex.replace(new RegExp('{' + idVar + '}', 'gi'), '([\\w\\. ]+)');
-			// find and replace ignored {variables}
-			topicRegex = topicRegex.replace(/\{.*}/g, '[\\w\\. ]+');
-	
-			// make new regex
-			topicRegex = new RegExp('^' + topicRegex + '$');
-	
-			let topicArr = topicRegex.exec(topic);
-	
+
+			let escapePattern = (s) => s.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+
+			// Build a regex that captures only the idVar variable and treats
+			// other {variables} as non-capturing single-segment matchers.
+			let buildRegex = (wildcardReplacement) => {
+				let r = escapePattern(topicPattern).replace(/\*/g, wildcardReplacement);
+				r = r.replace(new RegExp('\\{' + idVar + '\\}', 'gi'), '([^/]+)');
+				r = r.replace(/\{[^}]*}/g, '[^/]+');
+				return new RegExp('^' + r + '$');
+			};
+
+			// Strict: '*' matches a single path segment only
+			let topicArr = buildRegex('[^/]*').exec(topic);
+
+			if (!topicArr) {
+				// Legacy fallback: '*' as greedy '.*' for backward compatibility
+				topicArr = buildRegex('.*').exec(topic);
+			}
+
 			if (topicArr) {
 				let destinationInstNum = topicArr[1];
 				newId += '.' + idVar + destinationInstNum;
 			}
-			//
-			// END --- Copied from ui.js at line 352 ---
-			//
 		}
 		return this.pages[newId];
 	}
