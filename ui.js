@@ -1200,7 +1200,7 @@ function addControl(folders, page, group, tab, control) {
                 };
             }
 
-            function multiRemove() {
+            function multiRemove(opts = {}) {
                 // Clean up any inherited pages that reference me
                 removeInhControls(page.id, control.id);
 
@@ -1244,6 +1244,7 @@ function addControl(folders, page, group, tab, control) {
 
                             // if a inherited page clean-up inheritedPages dict
                             if (
+                                !opts.skipInhCleanup &&
                                 page.config.pageType === 'inherited' &&
                                 inheritedPages.hasOwnProperty(page.config.refPage)
                             ) {
@@ -1635,7 +1636,7 @@ function removeInhControls(refPageId, controlId) {
     if (inheritedPages.hasOwnProperty(refPageId)) {
         inheritedPages[refPageId].forEach((inhPage) => {
             if (inhPage.config.refPage === refPageId && inhPage.removes.hasOwnProperty(controlId)) {
-                inhPage.removes[controlId]();
+                inhPage.removes[controlId]({ skipInhCleanup: true });
                 delete inhPage.removes[controlId];
             }
         });
