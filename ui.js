@@ -133,6 +133,41 @@ function setCurrentValue(id, topic, value) {
     currentValues[id][topic] = value;
 }
 
+// Tests whether a string matches a pattern where * is a wildcard that matches
+// any sequence of characters (including empty and across path separators).
+// Splits the pattern on * to get literal fragments, then checks that each
+// fragment appears in the string in order.
+function wildcardMatch(str, pattern) {
+    let parts = pattern.split('*');
+
+    // No wildcards — exact match required
+    if (parts.length === 1) return str === pattern;
+
+    let pos = 0;
+
+    // No leading * — string must start with the first fragment
+    if (parts[0].length) {
+        if (!str.startsWith(parts[0])) return false;
+        pos = parts[0].length;
+    }
+
+    // Middle fragments must appear in order
+    for (let i = 1; i < parts.length - 1; i++) {
+        let idx = str.indexOf(parts[i], pos);
+        if (idx === -1) return false;
+        pos = idx + parts[i].length;
+    }
+
+    // No trailing * — string must end with the last fragment
+    let last = parts[parts.length - 1];
+    if (last.length) {
+        if (!str.endsWith(last)) return false;
+        if (str.length - last.length < pos) return false;
+    }
+
+    return true;
+}
+
 // Extracts variable names from a Unified-RED topic pattern (e.g. "glp/0/{sid}/*/Web Server/{ws}/oStatus{x}.*_{index}")
 // and returns them sorted alphabetically. This is the canonical ordering used to
 // build instance suffixes on both the server-side newId and the client-side nodeId.
@@ -378,6 +413,8 @@ function add(opt) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
                 let sortedVars = opt.control.sortedVars;
+                let instanceParams = opt.control.instanceParams || [];
+                let instanceIds = opt.control.instanceIds || [];
 
                 // Defensive fallback: if addControl was unable to populate sortedVars
                 // (e.g. base multi-page with no instances before inherited pages were
@@ -389,48 +426,50 @@ function add(opt) {
                 }
 
                 let varMap = {};
+                let matched = false;
 
-                // Collect variable names in order of occurrence in the topic pattern.
-                // This is our source of truth for mapping captures -> variable names,
-                // independent of how the match regex is built.
-                let varNames = [];
-                let vnRx = /\{([^/}]+)\}/g;
-                let vm;
-                while ((vm = vnRx.exec(topicPattern)) !== null) {
-                    varNames.push(vm[1]);
+                // Primary: match against known instances by substituting their
+                // values into the pattern, leaving only * wildcards. Then test
+                // with simple string matching — no regex needed.
+                if (instanceParams.length) {
+                    for (let i = 0; i < instanceParams.length; i++) {
+                        let concrete = topicPattern;
+                        for (let v of sortedVars) {
+                            if (instanceParams[i][v] !== undefined) {
+                                concrete = concrete.replaceAll('{' + v + '}', String(instanceParams[i][v]));
+                            }
+                        }
+                        // Replace any remaining {var} tokens (not in sortedVars) with *
+                        concrete = concrete.replace(/\{[^}]*\}/g, '*');
+
+                        if (wildcardMatch(topic, concrete)) {
+                            varMap = { ...instanceParams[i] };
+                            matched = true;
+                            break;
+                        }
+                    }
                 }
 
-                // Escape regex metacharacters (leave * and {} alone; they are handled below)
-                let escapePattern = (s) => s.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+                // Fallback: regex extraction for unknown/unregistered instances.
+                // Uses .* for * (multi-segment wildcard) with capture groups for {var}.
+                if (!matched) {
+                    let escapeRe = (s) => s.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+                    let varNames = [];
+                    let vnRx = /\{([^/}]+)\}/g;
+                    let vm;
+                    while ((vm = vnRx.exec(topicPattern)) !== null) {
+                        varNames.push(vm[1]);
+                    }
 
-                // Strict matcher: treat '*' as a single path-segment wildcard ([^/]*)
-                // and '{var}' as a single-segment capture ([^/]+). This prevents leading
-                // wildcards like '*/foo/{id}' from silently capturing the wrong segment
-                // (a common source of broken multi-page routing).
-                let strictRegex = escapePattern(topicPattern)
-                    .replace(/\*/g, '[^/]*')
-                    .replace(/\{[^/}]*}/g, '([^/]+)');
-                let strictRe = new RegExp('^' + strictRegex + '$');
-                let topicMatches = strictRe.exec(topic);
-
-                if (!topicMatches) {
-                    // Legacy fallback: '*' as greedy '.*' (can span slashes). Preserved for
-                    // backward compatibility with patterns that intentionally rely on
-                    // multi-segment wildcards (e.g. '**/Web Server/{ws}' style prefixes).
-                    // NOTE: greedy '.*' may cause ambiguous captures when the pattern
-                    // starts with '*/' - prefer an explicit prefix (e.g. 'glp/0/') or
-                    // split the wildcard into single-segment pieces to avoid this.
-                    let legacyRegex = escapePattern(topicPattern)
+                    let legacyRegex = escapeRe(topicPattern)
                         .replace(/\*/g, '.*')
                         .replace(/\{[^/}]*}/g, '([\\w\\. ]+)');
-                    let legacyRe = new RegExp('^' + legacyRegex + '$');
-                    topicMatches = legacyRe.exec(topic);
-                }
+                    let topicMatches = new RegExp('^' + legacyRegex + '$').exec(topic);
 
-                // if a match, make variable dict from capture groups
-                if (topicMatches) {
-                    for (let i = 0; i < varNames.length; i++) {
-                        varMap[varNames[i]] = topicMatches[i + 1];
+                    if (topicMatches) {
+                        for (let i = 0; i < varNames.length; i++) {
+                            varMap[varNames[i]] = topicMatches[i + 1];
+                        }
                     }
                 }
 
@@ -1330,8 +1369,10 @@ function addControl(folders, page, group, tab, control) {
 
             removeFunc = multiRemove;
 
-            // save a copy of the sorted variable names for filtering topics
+            // save a copy of the sorted variable names and instance data for filtering topics
             control['sortedVars'] = sortedVars;
+            control['instanceParams'] = instanceParams;
+            control['instanceIds'] = instanceIds;
         }
         // Single Page
         else if (page.config.pageType === 'single' || page.config.isSingle) {

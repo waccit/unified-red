@@ -86,38 +86,72 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 		}
 	}
 
+	private wildcardMatch(str: string, pattern: string): boolean {
+		let parts = pattern.split('*');
+
+		if (parts.length === 1) return str === pattern;
+
+		let pos = 0;
+
+		if (parts[0].length) {
+			if (!str.startsWith(parts[0])) return false;
+			pos = parts[0].length;
+		}
+
+		for (let i = 1; i < parts.length - 1; i++) {
+			let idx = str.indexOf(parts[i], pos);
+			if (idx === -1) return false;
+			pos = idx + parts[i].length;
+		}
+
+		let last = parts[parts.length - 1];
+		if (last.length) {
+			if (!str.endsWith(last)) return false;
+			if (str.length - last.length < pos) return false;
+		}
+
+		return true;
+	}
+
 	findPageInstanceByTopic(msg, nodeId) {
-		let newId = nodeId;
 		let topic = msg.topic;
 		let topicPattern = this.data.topicPattern;
-		let firstPage = Object.values<any>(this.pages).find(p => p.id.startsWith(nodeId));
-		if (topic && topicPattern && firstPage && firstPage.instance && firstPage.instance._idVar) {
-			let idVar = firstPage.instance._idVar;
+		if (!topic || !topicPattern) return this.pages[nodeId];
 
-			let escapePattern = (s) => s.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+		// Primary: iterate over known page instances and test the topic
+		// against the pattern with the instance's variable values substituted.
+		// Uses simple wildcard string matching — no regex needed.
+		let candidatePages = Object.values<any>(this.pages).filter(p => p.id.startsWith(nodeId) && p.instance);
+		for (let page of candidatePages) {
+			let params = page.instance.parameters;
+			if (!params) continue;
 
-			// Build a regex that captures only the idVar variable and treats
-			// other {variables} as non-capturing single-segment matchers.
-			let buildRegex = (wildcardReplacement) => {
-				let r = escapePattern(topicPattern).replace(/\*/g, wildcardReplacement);
-				r = r.replace(new RegExp('\\{' + idVar + '\\}', 'gi'), '([^/]+)');
-				r = r.replace(/\{[^}]*}/g, '[^/]+');
-				return new RegExp('^' + r + '$');
-			};
-
-			// Strict: '*' matches a single path segment only
-			let topicArr = buildRegex('[^/]*').exec(topic);
-
-			if (!topicArr) {
-				// Legacy fallback: '*' as greedy '.*' for backward compatibility
-				topicArr = buildRegex('.*').exec(topic);
+			let concrete = topicPattern;
+			for (let key of Object.keys(params)) {
+				concrete = concrete.replaceAll('{' + key + '}', String(params[key]));
 			}
+			concrete = concrete.replace(/\{[^}]*\}/g, '*');
 
-			if (topicArr) {
-				let destinationInstNum = topicArr[1];
-				newId += '.' + idVar + destinationInstNum;
+			if (this.wildcardMatch(topic, concrete)) {
+				return page;
 			}
 		}
-		return this.pages[newId];
+
+		// Fallback: regex extraction using .* for * (multi-segment wildcard)
+		let escapeRe = (s: string) => s.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+		let firstPage = candidatePages[0];
+		if (firstPage && firstPage.instance && firstPage.instance._idVar) {
+			let idVar = firstPage.instance._idVar;
+			let r = escapeRe(topicPattern).replace(/\*/g, '.*');
+			r = r.replace(new RegExp('\\{' + idVar + '\\}', 'gi'), '([\\w\\. ]+)');
+			r = r.replace(/\{[^}]*}/g, '[\\w\\. ]+');
+			let topicArr = new RegExp('^' + r + '$').exec(topic);
+			if (topicArr) {
+				let newId = nodeId + '.' + idVar + topicArr[1];
+				return this.pages[newId];
+			}
+		}
+
+		return this.pages[nodeId];
 	}
 }
