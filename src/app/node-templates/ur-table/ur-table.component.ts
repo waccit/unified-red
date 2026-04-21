@@ -43,6 +43,7 @@ export class UrTableComponent extends BaseNode implements AfterViewInit {
 					let regex = /glp\/.+\/fb\/dev\/(.+\/if\/[^\/]+\/\d+)\/(.*)/; // default to SSIoT
 					switch (element.deviceType) {
 						case 'custom': regex = new RegExp(element.device); break;
+						case 'webApp': regex = /^(.+)\/([^\/]+)$/; break;
 					}
 					let parts = regex.exec(data.msg.topic);
 					deviceName = parts[1];
