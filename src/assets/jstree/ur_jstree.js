@@ -73,12 +73,14 @@ var injectedStyles = `
         border: 1px solid #aaa;
     }
     .badge-standard {
-        color: #444;
+        color: #555;
         background-color: #f4f4f4;
+        border-color: #c8c8c8;
     }
     .badge-selected {
-        color: #444;
-        background-color: #ccecff;
+        color: #1a4a6e;
+        background-color: #e3f2fd;
+        border-color: #64b5f6;
     }
     .badge-none {
         color: #444;
@@ -288,6 +290,8 @@ window.createMenuNode = createMenuNode;
 (function () {
     var selectedTab = null;
     var nodeEditJSTreeOptions = null; // { mode: 'tab'|'parent', parentType?: 'folder'|'page'|'group', allowRoot?: boolean }
+    var selectedRefPage = null;
+    var refPageTreeOptions = null; // { onChange, displayLabel, selfPageId }
 
     function injectJsTreeStyles() {
         if (document.getElementById('ur-jstree-styles')) {
@@ -324,6 +328,40 @@ window.createMenuNode = createMenuNode;
             return '<s>' + name + '</s>';
         }
         return name;
+    }
+
+    /** Strips display markup from jstree `text` so search matches the visible name. */
+    function plainTextForJstreeSearch(node) {
+        var t = node && node.text != null ? String(node.text) : '';
+        return t.replace(/<[^>]*>/g, '');
+    }
+
+    /**
+     * Truncation + hidden styling for path/badge labels (uses plain RED name, not raw jstree text).
+     */
+    function badgeLabelHtmlForJstreeNode(jstreeNode) {
+        if (!jstreeNode || jstreeNode.id == null) {
+            return '';
+        }
+        var n = RED.nodes.node(jstreeNode.id);
+        if (n) {
+            var base = n.name != null && n.name !== '' ? n.name : n.label != null && n.label !== '' ? n.label : '';
+            if (base === '' && n.type) {
+                base = n.type;
+            }
+            var t = String(base);
+            t = t.length > 25 ? t.slice(0, 25) + '...' : t;
+            return getNodeDisplayText(t, n);
+        }
+        if (jstreeNode.id === 'root') {
+            return 'ROOT';
+        }
+        if (jstreeNode.id === 'none') {
+            return 'None';
+        }
+        var fall = jstreeNode.text != null ? String(jstreeNode.text) : '';
+        fall = fall.replace(/<[^>]*>/g, '');
+        return fall.length > 25 ? fall.slice(0, 25) + '...' : fall;
     }
 
     function extractFolderChildren(folderNode, includeWidgets) {
@@ -436,7 +474,7 @@ window.createMenuNode = createMenuNode;
                 return n.id !== excludeNodeId;
             });
             return {
-                text: folderNode.name,
+                text: getNodeDisplayText(folderNode.name, folderNode),
                 id: folderNode.id,
                 type: 'folder',
                 icon: 'fa fa-folder-o',
@@ -475,13 +513,13 @@ window.createMenuNode = createMenuNode;
                 return p.id !== excludeNodeId;
             });
             return {
-                text: folderNode.name,
+                text: getNodeDisplayText(folderNode.name, folderNode),
                 id: folderNode.id,
                 type: 'folder',
                 icon: 'fa fa-folder-o',
                 children: pages.map(function (page) {
                     return {
-                        text: page.name,
+                        text: getNodeDisplayText(page.name, page),
                         id: page.id,
                         type: 'page',
                         icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
@@ -517,7 +555,7 @@ window.createMenuNode = createMenuNode;
             var childFolders = extractNodesFromConfig('ur_folder', 'folder', folderNode);
             var pageNodes = pages.map(function (page) {
                 return {
-                    text: page.name,
+                    text: getNodeDisplayText(page.name, page),
                     id: page.id,
                     type: 'page',
                     icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
@@ -526,7 +564,7 @@ window.createMenuNode = createMenuNode;
             });
             var folderNodes = childFolders.map(folderWithPagesAndNestedFolders);
             return {
-                text: folderNode.name,
+                text: getNodeDisplayText(folderNode.name, folderNode),
                 id: folderNode.id,
                 type: 'folder',
                 icon: 'fa fa-folder-o',
@@ -556,7 +594,7 @@ window.createMenuNode = createMenuNode;
         function folderWithPagesAndGroups(folderNode) {
             var pages = extractNodesFromConfig('ur_page', 'folder', folderNode);
             return {
-                text: folderNode.name,
+                text: getNodeDisplayText(folderNode.name, folderNode),
                 id: folderNode.id,
                 type: 'folder',
                 icon: 'fa fa-folder-o',
@@ -565,13 +603,13 @@ window.createMenuNode = createMenuNode;
                         return g.id !== excludeNodeId;
                     });
                     return {
-                        text: page.name,
+                        text: getNodeDisplayText(page.name, page),
                         id: page.id,
                         type: 'page',
                         icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
                         children: groups.map(function (group) {
                             return {
-                                text: group.name,
+                                text: getNodeDisplayText(group.name, group),
                                 id: group.id,
                                 type: 'group',
                                 icon: 'fa fa-window-maximize',
@@ -615,13 +653,13 @@ window.createMenuNode = createMenuNode;
                 });
                 groups = groups.sort(function (a, b) { return a.order - b.order; });
                 return {
-                    text: page.name,
+                    text: getNodeDisplayText(page.name, page),
                     id: pageId,
                     type: 'page',
                     icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
                     children: groups.map(function (group) {
                         return {
-                            text: group.name,
+                            text: getNodeDisplayText(group.name, group),
                             id: group.id,
                             type: 'group',
                             icon: 'fa fa-window-maximize',
@@ -632,7 +670,7 @@ window.createMenuNode = createMenuNode;
             });
             var folderNodes = childFolders.map(folderWithPagesAndGroupsNested);
             return {
-                text: folderNode.name,
+                text: getNodeDisplayText(folderNode.name, folderNode),
                 id: folderNode.id,
                 type: 'folder',
                 icon: 'fa fa-folder-o',
@@ -641,6 +679,67 @@ window.createMenuNode = createMenuNode;
         }
 
         return rootFolders.map(folderWithPagesAndGroupsNested);
+    }
+
+    /**
+     * Tree for inherited page "referenced page" picker: same nested layout as group page
+     * selection, but only non-inherited pages, same workspace, excluding self. Includes a
+     * root-level "None" node (id: none, type: ref-none).
+     */
+    function extractTreeForRefPage(selfPageId) {
+        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
+        if (!activeWorkspace) {
+            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
+        }
+        var workspaceId = activeWorkspace ? activeWorkspace.id : null;
+
+        function pageIsSelectable(page) {
+            if (!page || page.id === selfPageId) {
+                return false;
+            }
+            if (page.pageType === 'inherited') {
+                return false;
+            }
+            if (page.z && workspaceId && page.z !== workspaceId) {
+                return false;
+            }
+            return true;
+        }
+
+        function folderWithPagesAndNestedFolders(folderNode) {
+            var pages = extractNodesFromConfig('ur_page', 'folder', folderNode).filter(pageIsSelectable);
+            var childFolders = extractNodesFromConfig('ur_folder', 'folder', folderNode);
+            var pageNodes = pages.map(function (page) {
+                return {
+                    text: getNodeDisplayText(page.name, page),
+                    id: page.id,
+                    type: 'page',
+                    icon: page.pageType === 'inherited' ? 'fa fa-paste' : page.pageType === 'multi' || page.isMulti ? 'fa fa-copy' : 'fa fa-file-o',
+                    children: [],
+                };
+            });
+            var folderNodes = childFolders.map(folderWithPagesAndNestedFolders);
+            return {
+                text: getNodeDisplayText(folderNode.name, folderNode),
+                id: folderNode.id,
+                type: 'folder',
+                icon: 'fa fa-folder-o',
+                children: pageNodes.concat(folderNodes),
+            };
+        }
+
+        var rootFolders = [];
+        RED.nodes.eachConfig(function (node) {
+            if (node.type === 'ur_folder' && !node.folder) {
+                rootFolders.push(node);
+            }
+        });
+        rootFolders.sort((a, b) => a.order - b.order);
+
+        var data = rootFolders.map(folderWithPagesAndNestedFolders);
+        return [
+            { id: 'none', text: 'None', type: 'ref-none', icon: 'fa fa-ban', children: [] },
+        ].concat(data);
     }
 
     /**
@@ -666,8 +765,9 @@ window.createMenuNode = createMenuNode;
         return [];
     }
 
-    function scrollToNode(nodeId) {
-        let treeInstance = $.jstree.reference('#nodeeditjstree');
+    function scrollToNode(nodeId, treeSelector) {
+        treeSelector = treeSelector || '#nodeeditjstree';
+        let treeInstance = $.jstree.reference(treeSelector);
         if (!treeInstance) {
             console.error('jsTree instance not available for scrollToNode');
             return;
@@ -708,19 +808,88 @@ window.createMenuNode = createMenuNode;
             return `<i class="fa fa-columns"></i> ${label}: <span class="badge badge-none">None</span>`;
         }
 
-        let pathArray = [];
+        let pathSegments = [];
         while (currentNode && currentNode.id !== '#') {
-            let nodeType = currentNode.type || 'default';
-            const badgeText = currentNode.text.length > 25 ? currentNode.text.slice(0, 25) + '...' : currentNode.text;
-            var badgeClass = (nodeType === 'tab' || nodeType === nodeEditJSTreeOptions?.parentType || nodeType === 'root') ? 'selected' : 'standard';
-            let badge = `<span class="badge badge-${badgeClass}"><i class="${currentNode.icon || ''}"></i> ${badgeText}</span>`;
-            pathArray.unshift(badge);
+            const badgeBody = badgeLabelHtmlForJstreeNode(currentNode);
+            pathSegments.unshift({ node: currentNode, badgeBody: badgeBody });
             currentNode = treeInstance.get_node(currentNode.parent);
         }
+        var lastIdx = pathSegments.length - 1;
+        let pathArray = pathSegments.map(function (seg, i) {
+            var badgeClass = i === lastIdx ? 'selected' : 'standard';
+            return (
+                '<span class="badge badge-' +
+                badgeClass +
+                '"><i class="' +
+                (seg.node.icon || '') +
+                '"></i> ' +
+                seg.badgeBody +
+                '</span>'
+            );
+        });
 
         return `<i class="fa fa-columns"></i> ${label}: ${pathArray.join(
             ' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> '
         )}`;
+    }
+
+    var REF_PAGE_TREE = '#refPageJstree';
+    var REF_PAGE_SEARCH = '#refPageTreeSearch';
+    var REF_PAGE_DISPLAY = '#refPageSelectedDisplay';
+
+    function generateRefPagePathBadges(nodeId) {
+        var displayLabel = (refPageTreeOptions && refPageTreeOptions.displayLabel) || 'Referenced Page';
+        var treeInstance = $.jstree.reference(REF_PAGE_TREE);
+        if (!treeInstance) {
+            return (
+                '<i class="fa fa-file-text-o"></i> ' +
+                displayLabel +
+                ': <span class="badge badge-none">None</span>'
+            );
+        }
+        if (!nodeId || nodeId === 'none') {
+            return (
+                '<i class="fa fa-file-text-o"></i> ' +
+                displayLabel +
+                ': <span class="badge badge-none">None</span>'
+            );
+        }
+
+        let currentNode = treeInstance.get_node(nodeId);
+        if (!currentNode) {
+            return (
+                '<i class="fa fa-file-text-o"></i> ' +
+                displayLabel +
+                ': <span class="badge badge-none">None</span>'
+            );
+        }
+
+        let refPathSegments = [];
+        while (currentNode && currentNode.id !== '#') {
+            const badgeBody = badgeLabelHtmlForJstreeNode(currentNode);
+            refPathSegments.unshift({ node: currentNode, badgeBody: badgeBody });
+            currentNode = treeInstance.get_node(currentNode.parent);
+        }
+        var refLastIdx = refPathSegments.length - 1;
+        let pathArray = refPathSegments.map(function (seg, i) {
+            var badgeClass = i === refLastIdx ? 'selected' : 'standard';
+            return (
+                '<span class="badge badge-' +
+                badgeClass +
+                '"><i class="' +
+                (seg.node.icon || '') +
+                '"></i> ' +
+                seg.badgeBody +
+                '</span>'
+            );
+        });
+
+        return (
+            '<i class="fa fa-file-text-o"></i> ' +
+            displayLabel +
+            ': ' +
+            pathArray.join(' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> ')
+        );
     }
 
     function refreshJSTree() {
@@ -1421,7 +1590,7 @@ window.createMenuNode = createMenuNode;
             'search': {
                 'show_only_matches': true,
                 'search_callback': function (searchString, node) {
-                    return fuzzyMatch(node.text, searchString);
+                    return fuzzyMatch(plainTextForJstreeSearch(node), searchString);
                 },
             },
         });
@@ -1739,7 +1908,7 @@ window.createMenuNode = createMenuNode;
             'search': {
                 'show_only_matches': true,
                 'search_callback': function (searchString, node) {
-                    return fuzzyMatch(node.text, searchString);
+                    return fuzzyMatch(plainTextForJstreeSearch(node), searchString);
                 },
             },
         });
@@ -1864,6 +2033,169 @@ window.createMenuNode = createMenuNode;
         instance.refresh(true); // true = skip loading indicator
     }
 
+    function destroyRefPageJsTree() {
+        if (typeof $ === 'undefined' || !$.jstree) {
+            return;
+        }
+        $(REF_PAGE_TREE).off('select_node.jstree');
+        $(REF_PAGE_TREE).off('ready.jstree');
+        if ($.jstree.reference(REF_PAGE_TREE)) {
+            $(REF_PAGE_TREE).jstree('destroy');
+        }
+        $(REF_PAGE_SEARCH).off('.refpagejstree');
+        $(REF_PAGE_TREE).off('.refpagejstree');
+        selectedRefPage = null;
+        refPageTreeOptions = null;
+    }
+
+    /**
+     * Referenced page picker for ur_page inherited mode (separate from folder parent tree).
+     * @param {string} selectedId - 'none' or page config id
+     * @param {string} selfPageId - current page id to exclude
+     * @param {function(string): void} [onSelectionChange] - 'none' or page id
+     * @param {string} [displayLabel] - header label for selection display
+     */
+    function initializeRefPageJsTree(selectedId, selfPageId, onSelectionChange, displayLabel) {
+        destroyRefPageJsTree();
+        if ($(REF_PAGE_TREE).length === 0) {
+            console.error("Referenced page tree element 'refPageJstree' not found in the DOM");
+            return;
+        }
+        refPageTreeOptions = {
+            onChange: typeof onSelectionChange === 'function' ? onSelectionChange : null,
+            displayLabel: displayLabel || 'Referenced Page',
+            selfPageId: selfPageId,
+        };
+
+        var treeData = extractTreeForRefPage(selfPageId);
+        var debounce = false;
+
+        $(REF_PAGE_TREE).jstree({
+            core: {
+                data: treeData,
+                dblclick_toggle: false,
+                check_callback: function () {
+                    return false;
+                },
+            },
+            multiple: false,
+            plugins: ['types', 'search', 'wholerow'],
+            types: {
+                'default': {},
+                'ref-none': {
+                    icon: 'fa fa-ban',
+                },
+                'root': {
+                    icon: 'fa fa-home',
+                },
+                'folder': {
+                    icon: 'fa fa-folder-o',
+                },
+                'page': {
+                    icon: 'fa fa-file-o',
+                },
+                'page-multi': {
+                    icon: 'fa fa-copy',
+                },
+                'page-inherited': {
+                    icon: 'fa fa-paste',
+                },
+                'group': {
+                    icon: 'fa fa-window-maximize',
+                },
+                'tab': {
+                    icon: 'fa fa-columns',
+                },
+                'link': {
+                    icon: 'fa fa-link',
+                },
+            },
+            search: {
+                show_only_matches: true,
+                search_callback: function (searchString, node) {
+                    return fuzzyMatch(plainTextForJstreeSearch(node), searchString);
+                },
+            },
+        });
+
+        $(REF_PAGE_TREE).on('select_node.jstree', function (e, data) {
+            var instance = $.jstree.reference(REF_PAGE_TREE);
+            var isSelectable = data.node.type === 'page' || data.node.type === 'ref-none';
+            if (isSelectable) {
+                selectedRefPage = data.node;
+                $(REF_PAGE_DISPLAY).html(generateRefPagePathBadges(data.node.id));
+                $(REF_PAGE_TREE).removeClass('input-error');
+                if (refPageTreeOptions && refPageTreeOptions.onChange) {
+                    refPageTreeOptions.onChange(getSelectedRefPage());
+                }
+            } else {
+                if (instance.is_open(data.node)) {
+                    instance.close_node(data.node);
+                } else {
+                    instance.open_node(data.node);
+                }
+                instance.deselect_node(data.node);
+                if (selectedRefPage && selectedRefPage.id) {
+                    instance.select_node(selectedRefPage.id);
+                }
+                setTimeout(function () {
+                    instance.deselect_node(data.node);
+                    if (selectedRefPage && selectedRefPage.id) {
+                        instance.select_node(selectedRefPage.id);
+                    }
+                }, 220);
+            }
+        });
+
+        $(REF_PAGE_SEARCH).on('keyup.refpagejstree', function () {
+            if (debounce) {
+                clearTimeout(debounce);
+            }
+            debounce = setTimeout(function () {
+                var v = $(REF_PAGE_SEARCH).val();
+                var inst = $.jstree.reference(REF_PAGE_TREE);
+                if (inst) {
+                    inst.search(v);
+                }
+            }, 250);
+        });
+
+        $(REF_PAGE_TREE).on('ready.jstree', function () {
+            var inst = $.jstree.reference(REF_PAGE_TREE);
+            if (!inst) {
+                return;
+            }
+            var toSelect = 'none';
+            if (selectedId && inst.get_node(selectedId)) {
+                toSelect = selectedId;
+            } else if (selectedId && selectedId !== 'none') {
+                toSelect = 'none';
+            }
+            inst.select_node(toSelect);
+            var node = inst.get_node(toSelect);
+            if (node) {
+                selectedRefPage = node;
+                $(REF_PAGE_DISPLAY).html(generateRefPagePathBadges(toSelect));
+            } else {
+                $(REF_PAGE_DISPLAY).html(generateRefPagePathBadges('none'));
+            }
+            setTimeout(function () {
+                scrollToNode(toSelect, REF_PAGE_TREE);
+            }, 200);
+            if (refPageTreeOptions && refPageTreeOptions.onChange) {
+                refPageTreeOptions.onChange(getSelectedRefPage());
+            }
+        });
+    }
+
+    function getSelectedRefPage() {
+        if (!selectedRefPage) {
+            return 'none';
+        }
+        var id = typeof selectedRefPage === 'object' ? selectedRefPage.id : selectedRefPage;
+        return id || 'none';
+    }
+
     function getSelectedTab() {
         return selectedTab ? (typeof selectedTab === 'object' ? selectedTab.id : selectedTab) : null;
     }
@@ -1890,4 +2222,7 @@ window.createMenuNode = createMenuNode;
     window.getSelectedTab = getSelectedTab;
     window.getSelectedParent = getSelectedParent;
     window.clearClipboard = clearClipboard;
+    window.initializeRefPageJsTree = initializeRefPageJsTree;
+    window.destroyRefPageJsTree = destroyRefPageJsTree;
+    window.getSelectedRefPage = getSelectedRefPage;
 })();
