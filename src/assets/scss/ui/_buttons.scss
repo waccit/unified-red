@@ -4,13 +4,19 @@
  *  Description: This scss file for button style classes
  */
 
-/* Material buttons: thinner font weight to match legacy button style */
+/* Material text buttons: Roboto 14px, line-height 36px, weight 500 (matches Material label / Chrome) */
 .mat-mdc-button,
 .mat-mdc-unelevated-button,
 .mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-tonal-button,
 .mat-button,
 .mat-raised-button {
-    font-weight: 400 !important;
+    font-family: $button-font-family !important;
+    font-size: 14px !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    line-height: 36px !important;
 }
 
 .example-button-row button,

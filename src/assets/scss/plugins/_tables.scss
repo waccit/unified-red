@@ -18,40 +18,80 @@ $white: #fff;
         @include box-shadow(0px 5px 25px 0px rgba(0, 0, 0, 0.2));
     }
 }
-.btn-tbl-edit {
-    background-color: #919aa3;
-    height: 30px !important;
-    width: 30px !important;
+// Matched to mat-mdc-icon-button layout: the old 30x30 + !important fought MDC padding, leaving the
+// inner area narrower than a 24px mat-icon, so the glyph was clipped to invisible (mat-icon { overflow: hidden }).
+$tbl-ico-btn-size: 32px;
+$tbl-ico-size: 20px;
+
+.btn-tbl-edit,
+.btn-tbl-delete {
+    &.mat-mdc-icon-button {
+        --mat-icon-button-state-layer-size: #{$tbl-ico-btn-size};
+        --mat-icon-button-icon-size: #{$tbl-ico-size};
+        // !important: theme + mat-accent otherwise set a token that matches our grey/orange (icons vanish)
+        --mat-icon-button-icon-color: #{$white} !important;
+        // Extra span after mat-icon in DOM can sit above the icon and hide it until :hover; disable it here.
+        --mat-icon-button-touch-target-display: none;
+        // Keep state layer from covering the icon at rest
+        --mat-icon-button-state-layer-color: transparent;
+        --mat-icon-button-focus-state-layer-opacity: 0;
+        --mat-icon-button-pressed-state-layer-opacity: 0.12;
+        --mat-icon-button-hover-state-layer-opacity: 0.2;
+        // Keep circle compact; MDC would otherwise add padding for a 40px touch target
+        padding: 0;
+    }
+    height: $tbl-ico-btn-size;
+    min-height: $tbl-ico-btn-size;
+    min-width: $tbl-ico-btn-size;
     margin: 2px !important;
-    line-height: 30px !important;
-    color: #fff;
+    line-height: 1;
+    color: $white !important;
+    // MDC: ripple and touch-target are absolutely positioned; keep content above
+    .mat-mdc-button-ripple,
+    .mat-mdc-button-persistent-ripple,
+    .mat-mdc-button-persistent-ripple::before,
+    .mat-mdc-button-touch-target {
+        z-index: 0;
+    }
+    // Ensure glyph matches layer size (and targets MDC, not only legacy .material-icons)
+    mat-icon.mat-icon,
+    .mat-icon,
     .material-icons {
-        font-size: 16px !important;
+        // Explicit font: parent .mat-mdc-icon-button gets $app-font-family; ligatures need Material Icons
+        font-family: 'Material Icons', 'Material Icons Outlined', sans-serif !important;
+        -webkit-text-fill-color: $white;
+        color: $white !important;
+        --mat-icon-color: #{$white} !important;
+        font-size: #{$tbl-ico-size} !important;
+        width: #{$tbl-ico-size} !important;
+        height: #{$tbl-ico-size} !important;
+        line-height: 1;
+        opacity: 1;
+        z-index: 2;
+        position: relative;
+        pointer-events: none; // let host button receive all clicks; avoids child hit-test quirks
     }
-    &:hover {
-        background-color: #888;
-        color: $white;
+    &:hover,
+    &:focus,
+    &:focus-visible,
+    &:active {
+        color: $white !important;
     }
-    &:focus {
-        background-color: #888;
+}
+.btn-tbl-edit {
+    background-color: #919aa3 !important;
+    &:not(.btn-tbl-ack) {
+        &:hover,
+        &:focus {
+            background-color: #888 !important;
+        }
     }
 }
 .btn-tbl-delete {
-    background-color: #ff944f;
-    height: 30px !important;
-    width: 30px !important;
-    margin: 2px !important;
-    line-height: 30px !important;
-    color: #fff;
-    .material-icons {
-        font-size: 16px !important;
-    }
-    &:hover {
-        background-color: #ff9600;
-        color: $white;
-    }
+    background-color: #ff944f !important;
+    &:hover,
     &:focus {
-        background-color: #ff9600;
+        background-color: #ff9600 !important;
     }
 }
 
@@ -326,6 +366,17 @@ tr.shown td.details-control::before {
         font-size: 14px;
         font-weight: 500;
         color: #333;
+    }
+
+    // "actions" column: keep flex:1 on other columns, but this one needs a floor width; default cell overflow
+    // hidden can also clip icon rows when the table is tight.
+    .mat-column-actions,
+    th.mat-mdc-header-cell.cdk-column-actions,
+    td.mat-mdc-cell.cdk-column-actions {
+        flex: 0 0 auto;
+        min-width: 5.5rem;
+        max-width: none;
+        overflow: visible;
     }
 }
 // .ngx-datatable.material {

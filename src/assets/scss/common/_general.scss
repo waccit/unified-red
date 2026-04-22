@@ -38,12 +38,8 @@ h6 {
     color: #555;
 }
 
-// Prebuilt Material theme uses Roboto; align tabs, tables, forms, and dialogs with app stack
+// Prebuilt Material theme; align tabs, tables, forms, and dialogs with app stack (not Material text buttons — see ui/_buttons)
 .mat-mdc-tab .mdc-tab__text-label,
-.mat-mdc-button .mdc-button__label,
-.mat-mdc-raised-button .mdc-button__label,
-.mat-mdc-outlined-button .mdc-button__label,
-.mat-mdc-unelevated-button .mdc-button__label,
 .mat-mdc-icon-button,
 .mat-mdc-form-field,
 .mat-mdc-table,

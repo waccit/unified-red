@@ -145,10 +145,9 @@ export class InitialSetupComponent implements OnInit {
         };
     }
 
-    copyToClipboard(text: string) {
-        navigator.clipboard.writeText(text).then(() => {
-            this.snackbar.success('Copied to clipboard', '', 5000);
-        });
+    applyDbConnection(connectionString: string) {
+        this.dbForm.get('dbConnection')?.setValue(connectionString);
+        this.dbConnectionOk = false;
     }
 
     openConfirmationDialog() {

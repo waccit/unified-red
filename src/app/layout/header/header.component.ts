@@ -150,13 +150,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
             }
         }
     }
-    mobileMenuSidebarOpen(event: any, className: string) {
-        const hasClass = event.target.classList.contains(className);
-        if (hasClass) {
+    mobileMenuSidebarOpen(event: Event, className: string) {
+        if (this.doc.body.classList.contains(className)) {
             this.renderer.removeClass(this.doc.body, className);
         } else {
             this.renderer.addClass(this.doc.body, className);
         }
+        event.preventDefault();
     }
     callSidemenuCollapse() {
         const hasClass = this.doc.body.classList.contains('side-closed');

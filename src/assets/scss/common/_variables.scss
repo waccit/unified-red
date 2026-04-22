@@ -34,6 +34,8 @@ $linear-colors: (
 
 // App UI sans stack — Poppins loaded via Google Fonts
 $app-font-family: Poppins, 'Helvetica Neue', sans-serif;
+// Material & primary actions — match UI reference (Roboto 14px / 36, weight 500)
+$button-font-family: Roboto, 'Helvetica Neue', sans-serif;
 $sidebar-menu-font-weight: 400;
 $sidebar-menu-active-font-weight: 600;
 

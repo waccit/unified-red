@@ -2,17 +2,9 @@ mat-form-field.example-full-width {
     padding-top: 8px;
 }
 
-.copy-btn {
-    width: 24px !important;
-    height: 24px !important;
-    line-height: 24px !important;
-    padding: 0 !important;
-    margin-left: 4px;
+.use-db-btn {
+    margin-left: 8px;
     vertical-align: middle;
-    opacity: 0.4;
-    cursor: pointer;
-
-    &:hover {
-        opacity: .8;
-    }
+    white-space: nowrap;
+    line-height: 1.25;
 }
