@@ -107,8 +107,10 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     private saveCurrentViewType() {
         if (this.calendarComponent) {
-            let currentViewType = this.calendarComponent.getApi().view.type;
+            const api = this.calendarComponent.getApi();
+            const currentViewType = api.view.type;
             localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
+            api.setOption('contentHeight', currentViewType === 'timeGridWeek' ? 600 : 'auto');
         }
     }
 

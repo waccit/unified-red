@@ -18,7 +18,7 @@
                     [view]="dialGaugeOpt.view"
                     [scheme]="dialGaugeOpt.colorScheme"
                     [results]="dialGaugeResults"
-                    [legend]="false" 
+                    [legend]="false"
                     [animations]="dialGaugeOpt.animation"
                     [bigSegments]="data.bigseg || 10"
                     [smallSegments]="data.smallseg || 5"
@@ -27,9 +27,17 @@
                     [min]="data.min"
                     [max]="data.max"
                     [showAxis]="!!data.showAxis"
-                    [showText]="dialGaugeResults?.length === 1"
+                    [showText]="false"
                     [units]="data.units">
                 </ngx-charts-gauge>
+                @if (dialGaugeResults?.length === 1) {
+                    <div class="ur-dial-overlay">
+                        <span class="ur-dial-value" [style.font-size]="gaugeValueFontSize">{{ gaugeDisplayValue }}</span>
+                        @if (data.units) {
+                            <span class="ur-dial-units">{{ data.units }}</span>
+                        }
+                    </div>
+                }
             </div>
         }
 

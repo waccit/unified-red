@@ -106,7 +106,8 @@
               <div class="col-4">
                   <mat-form-field appearance="outline" style="width:100%">
                       <mat-label>Time Range</mat-label>
-                      <input matInput type="number" (change)="setXRange($event.target.value)" [value]="data.xrange" />
+                      <input matInput type="number" [formControl]="xrangeControl" />
+                      <mat-error>Required</mat-error>
                   </mat-form-field>
               </div>
               }
@@ -191,7 +192,7 @@
             <div class="row">
                 <div class="col-12 mt-2 mb-2">
                     <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
-                        [disabled]="!dirty || disabled || (access.edit === false && data.accessBehavior === 'disable')">Deploy</button>
+                        [disabled]="!dirty || disabled || (needXRange && xrangeControl?.invalid) || (access.edit === false && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
             }
@@ -300,20 +301,20 @@
                     </form>
                 </div>
                 <div class="col-6 series-color">
+                    <div class="p-b-10 p-l-10 font-17">Colors</div>
                     <form [formGroup]="colorForm">
-                        <div class="p-b-10 p-l-10 font-17">Colors</div>
-                        <input matInput type="color" formControlName="color1" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color2" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color3" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color4" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color5" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color6" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color7" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color8" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color9" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color10" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color11" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color12" (change)="updateColor()" />
+                        <input type="color" formControlName="color1" (change)="updateColor()" />
+                        <input type="color" formControlName="color2" (change)="updateColor()" />
+                        <input type="color" formControlName="color3" (change)="updateColor()" />
+                        <input type="color" formControlName="color4" (change)="updateColor()" />
+                        <input type="color" formControlName="color5" (change)="updateColor()" />
+                        <input type="color" formControlName="color6" (change)="updateColor()" />
+                        <input type="color" formControlName="color7" (change)="updateColor()" />
+                        <input type="color" formControlName="color8" (change)="updateColor()" />
+                        <input type="color" formControlName="color9" (change)="updateColor()" />
+                        <input type="color" formControlName="color10" (change)="updateColor()" />
+                        <input type="color" formControlName="color11" (change)="updateColor()" />
+                        <input type="color" formControlName="color12" (change)="updateColor()" />
                     </form>
                 </div>
             </div>
@@ -321,7 +322,7 @@
             <div class="row">
                 <div class="col-12 mt-2 mb-2">
                     <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
-                        [disabled]="!dirty || disabled || (access.edit === false && data.accessBehavior === 'disable')">Deploy</button>
+                        [disabled]="!dirty || disabled || (needXRange && xrangeControl?.invalid) || (access.edit === false && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
             }

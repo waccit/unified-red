@@ -253,6 +253,18 @@ export class UrGaugeComponent extends BaseNode implements OnInit {
         return gauges;
     }
 
+    get gaugeDisplayValue(): string {
+        const val = this.dialGaugeResults?.[0]?.value;
+        return val != null ? val.toLocaleString() : '';
+    }
+
+    get gaugeValueFontSize(): string {
+        const maxChars = (this.data.max ?? 100).toLocaleString().length;
+        const height = this.data.height ?? 4;
+        const rem = Math.max(1.0, Math.min(3.5, Math.pow(height, 0.6) * 1.4 / Math.sqrt(maxChars)));
+        return `${rem.toFixed(2)}rem`;
+    }
+
     private resizeLiquidGauges() {
         let gaugeContainer = this.container.find('.ur-gauge-container');
         let width = gaugeContainer.width();

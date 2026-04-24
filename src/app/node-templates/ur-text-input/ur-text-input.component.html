@@ -3,9 +3,7 @@
         @if (data.mode !== 'tel') {
             <mat-form-field class="example-full-width healthIndicator" appearance="outline">
                 <span [innerHTML]="valueIn" hidden></span>
-                @if (label) {
-                    <mat-label>{{ label }}</mat-label>
-                }
+                <mat-label>{{ label }}</mat-label>
                 @if (data.mode === 'email') {
                     <span matPrefix>
                         <mat-icon class="mr-2">email</mat-icon>
@@ -35,9 +33,7 @@
         @if (data.mode === 'tel') {
             <mat-form-field class="example-full-width healthIndicator" appearance="outline">
                 <span [innerHTML]="valueIn" hidden></span>
-                @if (label) {
-                    <mat-label>{{ label }}</mat-label>
-                }
+                <mat-label>{{ label }}</mat-label>
                 <span matPrefix>
                     <mat-icon class="mr-2">phone</mat-icon>
                 </span>

@@ -43,16 +43,16 @@
             curve: { value: 'curveLinear', required: true },
             live: { value: true },
             xrange: {
-                value: '',
+                value: 1,
                 validate: function (value) {
-                    return value === '' || RED.validators.number();
+                    var units = $('#node-input-xrangeunits').val() || 'days';
+                    var needsQuantity = ['seconds', 'minutes', 'hours', 'days', 'months', 'years'].indexOf(units) !== -1;
+                    if (!needsQuantity) return true;
+                    return value !== '' && RED.validators.number()(value);
                 },
             },
             xrangeunits: {
-                value: '',
-                validate: function (value) {
-                    return value === '' || RED.validators.number();
-                },
+                value: 'days',
             },
             xrangeStartDate: { value: '' },
             xrangeEndDate: { value: '' },
@@ -122,7 +122,6 @@
             });
 
             $('#node-input-xrangeunits').on('change', function () {
-                console.log($(this).val());
                 if ($(this).val() === 'fixed_date_range') {
                     $('#date-ranges').show();
                 } else {
@@ -142,6 +141,7 @@
                     $('#node-input-xrange').hide();
                 }
             });
+            $('#node-input-xrangeunits').trigger('change');
 
             $('#node-input-topic-container')
                 .css('min-height', '100px')
