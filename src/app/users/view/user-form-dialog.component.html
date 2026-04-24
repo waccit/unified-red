@@ -104,6 +104,7 @@
                         <select matNativeControl formControlName="role" required>
                             <option *ngFor="let role of roles" [value]="role.level">{{ role.name }}</option>
                         </select>
+                        <mat-hint *ngIf="isSelf">You cannot change your own role</mat-hint>
                     </mat-form-field>
                 </div>
             </div>

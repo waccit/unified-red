@@ -4,7 +4,7 @@ import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { User, RoleName } from '../../data';
 import { PasswordStrengthValidator, MustMatch } from '../../authentication/register/password.validators';
-import { RoleService } from '../../services';
+import { RoleService, CurrentUserService } from '../../services';
 import { first } from 'rxjs/operators';
 
 @Component({
@@ -20,16 +20,28 @@ export class UserFormDialogComponent {
     data: User;
     hide = true;
     chide = true;
-    roles: [RoleName];
+    roles: RoleName[];
+    isSelf = false;
     objectKeys = Object.keys;
 
     constructor(
         public dialogRef: MatDialogRef<UserFormDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
         private formBuilder: FormBuilder,
-        private roleService: RoleService
+        private roleService: RoleService,
+        private currentUserService: CurrentUserService
     ) {
-        this.roles = this.roleService.roles;
+        this.roles = this.roleService.roles ?? [];
+        let currentUser = null;
+        this.currentUserService.currentUser.pipe(first()).subscribe(user => {
+            currentUser = user;
+            if (user && this.roles.length) {
+                const currentRoleEntry = this.roles.find(r => r.name === user.role)
+                    ?? this.roles.find(r => String(r.level) === String(user.role));
+                const currentLevel = currentRoleEntry ? parseInt(currentRoleEntry.level) : 0;
+                this.roles = this.roles.filter(r => parseInt(r.level) <= currentLevel);
+            }
+        });
         this.action = this.dialogData.action;
         if (this.action === 'edit') {
             this.data = this.dialogData.data;
@@ -48,6 +60,10 @@ export class UserFormDialogComponent {
                 sessionExpiration: [this.data.sessionExpiration || ''],
                 sessionInactivity: [this.data.sessionInactivity || ''],
         });
+            if (currentUser?._id === this.data._id) {
+                this.isSelf = true;
+                this.form.get('role').disable();
+            }
         } else {
             this.title = 'New User';
             this.data = ({} as User);

@@ -52,9 +52,12 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
-                    this.userService.add(result).subscribe((data) => {
-                        this.snackbar.success('Added user successfully!');
-                        this.refreshTable();
+                    this.userService.add(result).subscribe({
+                        next: () => {
+                            this.snackbar.success('Added user successfully!');
+                            this.refreshTable();
+                        },
+                        error: (error) => this.snackbar.error(error),
                     });
                 }
             });
@@ -66,9 +69,12 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
-                    this.userService.update(row._id, result).subscribe((data) => {
-                        this.snackbar.success('Edited user successfully!');
-                        this.refreshTable();
+                    this.userService.update(row._id, result).subscribe({
+                        next: () => {
+                            this.snackbar.success('Edited user successfully!');
+                            this.refreshTable();
+                        },
+                        error: (error) => this.snackbar.error(error),
                     });
                 }
             });
@@ -80,9 +86,12 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result === 1) {
-                    this.userService.delete(row._id).subscribe((data) => {
-                        this.snackbar.success('Deleted user successfully!');
-                        this.refreshTable();
+                    this.userService.delete(row._id).subscribe({
+                        next: () => {
+                            this.snackbar.success('Deleted user successfully!');
+                            this.refreshTable();
+                        },
+                        error: (error) => this.snackbar.error(error),
                     });
                 }
             });
