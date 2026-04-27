@@ -41,6 +41,9 @@ var injectedStyles = `
         margin-left: 0 !important;
         max-width: 70% !important;
     }
+    #nodeeditjstree.jstree-parent-picker ul.jstree-container-ul.jstree-children.jstree-wholerow-ul.jstree-no-dots {
+        max-width: 100% !important;
+    }
     .jstree-anchor {
         white-space: nowrap !important;
         overflow: hidden !important;
@@ -66,10 +69,9 @@ var injectedStyles = `
         line-height: 1;
         text-align: center;
         white-space: nowrap;
-        vertical-align: baseline;
+        vertical-align: middle;
         border-radius: 0.375rem;
         margin-right: 0.25rem;
-        margin-top: 0.5rem;
         border: 1px solid #aaa;
     }
     .badge-standard {
@@ -83,8 +85,13 @@ var injectedStyles = `
         border-color: #64b5f6;
     }
     .badge-none {
-        color: #444;
-        background-color: #f9c9c9;
+        color: #3a3a3a;
+        background-color: #f5d0d0;
+        border-color: #c4a0a0;
+    }
+    /* Align node-editor label with breadcrumb + edit button (form-row is flex in Node-RED) */
+    .form-row:has([id$='-summary-display']) {
+        align-items: center;
     }
     ul.jstree-children {
         margin-left: 10px !important;
@@ -140,6 +147,48 @@ var injectedStyles = `
     .jstree-hover-button:active {
         background-color: #f2f2f2 !important;
         transform: scale(0.98);
+    }
+
+    /* Done button hover: darken the primary red */
+    .ur-jstree-done-btn:hover {
+        filter: brightness(0.82) !important;
+    }
+
+    /* Table link path: left when it fits; right-justify + left-edge fade when clipped */
+    .ur-table-link-path-outer {
+        position: relative;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        min-height: 22px;
+    }
+    .ur-table-link-path-outer.ur-table-link-path-overflow {
+        justify-content: flex-end;
+    }
+    .ur-table-link-path-outer.ur-table-link-path-overflow::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 40px;
+        z-index: 2;
+        pointer-events: none;
+        background: linear-gradient(
+            90deg,
+            var(--red-ui-form-background, var(--red-ui-secondary-background, #ffffff)) 0%,
+            transparent 100%
+        );
+    }
+    /* Same inline layout as #ur-*-summary-display (block container; badges keep default .badge margins) */
+    .ur-table-link-path-inner {
+        flex: 0 0 auto;
+        display: inline-block;
+        white-space: nowrap;
+        vertical-align: middle;
     }
 `;
 
@@ -289,7 +338,9 @@ window.createMenuNode = createMenuNode;
 
 (function () {
     var selectedTab = null;
-    var nodeEditJSTreeOptions = null; // { mode: 'tab'|'parent', parentType?: 'folder'|'page'|'group', allowRoot?: boolean }
+    /** ur_table "link" field page picker; never use for getSelectedTab() (see mode: 'tablePage') */
+    var selectedTablePage = null;
+    var nodeEditJSTreeOptions = null; // { mode: 'tab'|'parent'|'tablePage', parentType?: 'folder'|'page'|'group', allowRoot?: boolean }
     var selectedRefPage = null;
     var refPageTreeOptions = null; // { onChange, displayLabel, selfPageId }
 
@@ -742,6 +793,33 @@ window.createMenuNode = createMenuNode;
         ].concat(data);
     }
 
+    function getNavConfigPathText(configId) {
+        if (!configId) {
+            return '';
+        }
+        var n = RED.nodes.node(configId);
+        if (!n) {
+            return '';
+        }
+        if (n.type === 'ur_link') {
+            var names = [n.name || n.label || 'link'];
+            var f = n.folder;
+            while (f && f !== 'root' && f !== 'Root') {
+                var fn = RED.nodes.node(f);
+                if (!fn) {
+                    break;
+                }
+                names.unshift(fn.name || f);
+                f = fn.folder;
+            }
+            return names.join(' / ');
+        }
+        if (n.type === 'ur_page') {
+            return (n.name || n.id) + ' (page)';
+        }
+        return n.name || String(configId);
+    }
+
     /**
      * Build tree data for parent selector. Shows only nodes up to parent level.
      * @param {string} parentType - 'folder' | 'page' | 'group' (type of the parent entity to select)
@@ -784,6 +862,9 @@ window.createMenuNode = createMenuNode;
     }
 
     function getParentSelectorLabel() {
+        if (nodeEditJSTreeOptions && nodeEditJSTreeOptions.mode === 'tablePage') {
+            return 'Selected Page';
+        }
         if (!nodeEditJSTreeOptions || nodeEditJSTreeOptions.mode !== 'parent') {
             return 'Selected Tab';
         }
@@ -795,27 +876,31 @@ window.createMenuNode = createMenuNode;
         return 'Selected Parent';
     }
 
-    function generatePathBadges(nodeId) {
-        let treeInstance = $.jstree.reference('#nodeeditjstree');
-        if (!treeInstance) {
-            console.error('jsTree instance not available for generatePathBadges');
+    function getParentSelectorIcon() {
+        if (nodeEditJSTreeOptions && nodeEditJSTreeOptions.mode === 'tablePage') {
+            return 'fa fa-file-o';
+        }
+        if (!nodeEditJSTreeOptions || nodeEditJSTreeOptions.mode !== 'parent') {
+            return 'fa fa-columns';
+        }
+        var t = nodeEditJSTreeOptions.parentType;
+        if (t === 'folder' || t === 'page') return 'fa fa-folder-o';
+        if (t === 'group') return 'fa fa-file-o';
+        if (t === 'tab') return 'fa fa-window-maximize';
+        return 'fa fa-folder-o';
+    }
+
+    /**
+     * Renders the breadcrumb row (badges + chevrons) used in the path display and the table link field.
+     * @param {Array<{ node: object, badgeBody: string }>} pathSegments
+     * @returns {string} HTML
+     */
+    function formatPathSegmentBadges(pathSegments) {
+        if (!pathSegments || !pathSegments.length) {
             return '<span class="badge badge-none">None</span>';
         }
-
-        let currentNode = nodeId ? treeInstance.get_node(nodeId) : null;
-        var label = getParentSelectorLabel();
-        if (!currentNode) {
-            return `<i class="fa fa-columns"></i> ${label}: <span class="badge badge-none">None</span>`;
-        }
-
-        let pathSegments = [];
-        while (currentNode && currentNode.id !== '#') {
-            const badgeBody = badgeLabelHtmlForJstreeNode(currentNode);
-            pathSegments.unshift({ node: currentNode, badgeBody: badgeBody });
-            currentNode = treeInstance.get_node(currentNode.parent);
-        }
         var lastIdx = pathSegments.length - 1;
-        let pathArray = pathSegments.map(function (seg, i) {
+        var pathArray = pathSegments.map(function (seg, i) {
             var badgeClass = i === lastIdx ? 'selected' : 'standard';
             return (
                 '<span class="badge badge-' +
@@ -827,10 +912,72 @@ window.createMenuNode = createMenuNode;
                 '</span>'
             );
         });
+        return pathArray.join(
+            ' <i class="fa fa-chevron-right" style="font-size:0.7em;vertical-align:middle"></i> '
+        );
+    }
 
-        return `<i class="fa fa-columns"></i> ${label}: ${pathArray.join(
-            ' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> '
-        )}`;
+    function generatePathBadges(nodeId) {
+        let treeInstance = $.jstree.reference('#nodeeditjstree');
+        if (!treeInstance) {
+            console.error('jsTree instance not available for generatePathBadges');
+            return '<span class="badge badge-none">None</span>';
+        }
+
+        let currentNode = nodeId ? treeInstance.get_node(nodeId) : null;
+        var label = getParentSelectorLabel();
+        var labelIcon = getParentSelectorIcon();
+        if (!currentNode) {
+            return `<i class="${labelIcon}"></i> ${label}: <span class="badge badge-none">None</span>`;
+        }
+
+        let pathSegments = [];
+        while (currentNode && currentNode.id !== '#') {
+            const badgeBody = badgeLabelHtmlForJstreeNode(currentNode);
+            pathSegments.unshift({ node: currentNode, badgeBody: badgeBody });
+            currentNode = treeInstance.get_node(currentNode.parent);
+        }
+        return `<i class="${labelIcon}"></i> ${label}: ${formatPathSegmentBadges(pathSegments)}`;
+    }
+
+    /**
+     * Breadcrumb for ur_table "link" column: folders + page (match picker). No jstree required.
+     */
+    function getFormSummaryPathHtmlForTablePageId(configId) {
+        if (!configId) {
+            return formatPathSegmentBadges(null);
+        }
+        var n = RED.nodes.node(configId);
+        if (!n) {
+            return formatPathSegmentBadges(null);
+        }
+        if (n.type === 'ur_page') {
+            var pathSegs = [];
+            var f = n.folder;
+            var folderList = [];
+            while (f && f !== 'root' && f !== 'Root') {
+                var fn2 = RED.nodes.node(f);
+                if (!fn2) {
+                    break;
+                }
+                folderList.unshift(fn2);
+                f = fn2.folder;
+            }
+            folderList.forEach(function (fn) {
+                var fj = { id: fn.id, type: 'folder', icon: 'fa fa-folder-o' };
+                pathSegs.push({ node: fj, badgeBody: badgeLabelHtmlForJstreeNode(fj) });
+            });
+            var pageIcon = 'fa fa-file-o';
+            if (n.pageType === 'inherited') {
+                pageIcon = 'fa fa-paste';
+            } else if (n.pageType === 'multi' || n.isMulti) {
+                pageIcon = 'fa fa-copy';
+            }
+            var pj = { id: n.id, type: 'page', icon: pageIcon };
+            pathSegs.push({ node: pj, badgeBody: badgeLabelHtmlForJstreeNode(pj) });
+            return formatPathSegmentBadges(pathSegs);
+        }
+        return formatPathSegmentBadges(null);
     }
 
     var REF_PAGE_TREE = '#refPageJstree';
@@ -888,7 +1035,7 @@ window.createMenuNode = createMenuNode;
             '<i class="fa fa-file-text-o"></i> ' +
             displayLabel +
             ': ' +
-            pathArray.join(' <i class="fa fa-chevron-right" style="font-size: 0.7em"></i> ')
+            pathArray.join(' <i class="fa fa-chevron-right" style="font-size:0.7em;vertical-align:middle"></i> ')
         );
     }
 
@@ -1362,8 +1509,11 @@ window.createMenuNode = createMenuNode;
                 buttons.push(editButton);
             }
 
-            // Only restrict to edit button when in the node-edit dialog's tree (#nodeeditjstree) in parent mode
-            var isParentMode = treeSelector === '#nodeeditjstree' && nodeEditJSTreeOptions && nodeEditJSTreeOptions.mode === 'parent';
+            // Only restrict to edit button in parent or link picker mode
+            var isParentMode =
+                treeSelector === '#nodeeditjstree' &&
+                nodeEditJSTreeOptions &&
+                (nodeEditJSTreeOptions.mode === 'parent' || nodeEditJSTreeOptions.mode === 'tablePage');
             if (!isParentMode && ['folder', 'page', 'group', 'tab', 'link'].includes(node.type)) {
                 if (['folder', 'page', 'group', 'link'].includes(node.type)) {
                     let pasteButton = $(actionButtonHTML('paste'));
@@ -1456,6 +1606,7 @@ window.createMenuNode = createMenuNode;
         options = options || { mode: 'tab' };
         nodeEditJSTreeOptions = options;
         var isParentMode = options.mode === 'parent';
+        var isTablePageMode = options.mode === 'tablePage';
         var parentType = options.parentType;
         var allowRoot = options.allowRoot === true;
 
@@ -1476,7 +1627,7 @@ window.createMenuNode = createMenuNode;
 
             if (isVisible !== lastVisibilityState) {
                 lastVisibilityState = isVisible;
-                if (isVisible && !ignoreVisibilityChange && !isParentMode) {
+                if (isVisible && !ignoreVisibilityChange && !isParentMode && !isTablePageMode) {
                     refreshJSTree();
                 } else {
                     ignoreVisibilityChange = false;
@@ -1487,17 +1638,27 @@ window.createMenuNode = createMenuNode;
             clearTimeout(window.visibilityCheckTimeout);
             window.visibilityCheckTimeout = setTimeout(checkVisibility, 100);
         });
-        observer.observe(editPane, {
-            attributes: true,
-            childList: true,
-            subtree: true,
-        });
+        if (editPane) {
+            observer.observe(editPane, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+            });
+        }
 
-        selectedTab = selectedId;
+        if (isTablePageMode) {
+            selectedTablePage = selectedId;
+        } else {
+            selectedTab = selectedId;
+        }
         var excludeNodeId = options.excludeNodeId || null;
         var foldersTreeData;
         if (isParentMode) {
             foldersTreeData = extractTreeForParentSelection(parentType, allowRoot, excludeNodeId);
+        } else if (isTablePageMode) {
+            foldersTreeData = [
+                { id: 'none', text: 'None', type: 'ref-none', icon: 'fa fa-ban', children: [] },
+            ].concat(extractTreeForParentPageNested(null));
         } else {
             var rootFolders = extractRootFolders();
             foldersTreeData = rootFolders.map((folder) => extractFolderChildren(folder, false));
@@ -1508,13 +1669,15 @@ window.createMenuNode = createMenuNode;
             $('#nodeeditjstree').jstree('destroy');
         }
 
+        $('#nodeeditjstree').toggleClass('jstree-parent-picker', isParentMode || isTablePageMode);
+
         $('#nodeeditjstree').jstree({
             'core': {
                 'data': foldersTreeData,
                 'dblclick_toggle': false,
                 'check_callback': function (operation, node, parent) {
-                    if (isParentMode) {
-                        return false; // no move/create in parent selector mode
+                    if (isParentMode || isTablePageMode) {
+                        return false; // no move/create in parent selector or table page picker mode
                     }
                     if (operation === 'move_node' || operation === 'create_node') {
                         switch (parent?.type) {
@@ -1547,8 +1710,8 @@ window.createMenuNode = createMenuNode;
                 },
             },
             'multiple': false,
-            'plugins': isParentMode ? ['types', 'search', 'wholerow'] : ['types', 'search', 'wholerow', 'dnd'],
-            'dnd': isParentMode ? undefined : {
+            'plugins': isParentMode || isTablePageMode ? ['types', 'search', 'wholerow'] : ['types', 'search', 'wholerow', 'dnd'],
+            'dnd': isParentMode || isTablePageMode ? undefined : {
                 'copy': false,
                 'large_drop_target': true,
                 'large_drag_target': true,
@@ -1562,6 +1725,9 @@ window.createMenuNode = createMenuNode;
             },
             'types': {
                 'default': {},
+                'ref-none': {
+                    'icon': 'fa fa-ban',
+                },
                 'root': {
                     'icon': 'fa fa-home',
                 },
@@ -1686,6 +1852,33 @@ window.createMenuNode = createMenuNode;
                 return;
             }
 
+            var isTablePageModeSel = nodeEditJSTreeOptions && nodeEditJSTreeOptions.mode === 'tablePage';
+            if (isTablePageModeSel) {
+                if (data.node.type === 'page' || data.node.id === 'none' || data.node.type === 'ref-none') {
+                    selectedTablePage = data.node;
+                    var tid = data.node.id === 'none' || data.node.type === 'ref-none' ? 'none' : data.node.id;
+                    $('#selectedTabDisplay').html(generatePathBadges(tid));
+                    $('#nodeeditjstree').removeClass('input-error');
+                } else {
+                    if (instance.is_open(data.node)) {
+                        instance.close_node(data.node);
+                    } else {
+                        instance.open_node(data.node);
+                    }
+                    instance.deselect_node(data.node);
+                    if (selectedTablePage && selectedTablePage.id) {
+                        instance.select_node(selectedTablePage.id);
+                    }
+                    setTimeout(function () {
+                        instance.deselect_node(data.node);
+                        if (selectedTablePage && selectedTablePage.id) {
+                            instance.select_node(selectedTablePage.id);
+                        }
+                    }, 220);
+                }
+                return;
+            }
+
             if (data.node.type === 'tab' && !cutNodes.has(data.node.id)) {
                 selectedTab = data.node;
                 $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
@@ -1751,8 +1944,13 @@ window.createMenuNode = createMenuNode;
                     var node = instance.get_node(selectedId);
                     if (node) {
                         instance.select_node(selectedId);
-                        selectedTab = node;
-                        $('#selectedTabDisplay').html(generatePathBadges(selectedTab.id));
+                        if (isTablePageMode) {
+                            selectedTablePage = node;
+                        } else {
+                            selectedTab = node;
+                        }
+                        var displayId = isTablePageMode && node && node.id === 'none' ? 'none' : node.id;
+                        $('#selectedTabDisplay').html(generatePathBadges(displayId));
                         setTimeout(function () {
                             scrollToNode(selectedId);
                         }, 200);
@@ -1772,7 +1970,7 @@ window.createMenuNode = createMenuNode;
                     }
                 } else {
                     $('#selectedTabDisplay').html(generatePathBadges(null));
-                    if (!isParentMode) {
+                    if (!isParentMode && !isTablePageMode) {
                         $('#nodeeditjstree').addClass('input-error');
                     }
                 }
@@ -1784,8 +1982,13 @@ window.createMenuNode = createMenuNode;
             if (instance) {
                 var storedNode = instance.get_node(selectedId);
                 if (storedNode) {
-                    selectedTab = storedNode;
-                    $('#selectedTabDisplay').html(generatePathBadges(storedNode.id));
+                    if (isTablePageMode) {
+                        selectedTablePage = storedNode;
+                    } else {
+                        selectedTab = storedNode;
+                    }
+                    var showId = isTablePageMode && storedNode.id === 'none' ? 'none' : storedNode.id;
+                    $('#selectedTabDisplay').html(generatePathBadges(showId));
                 } else {
                     $('#selectedTabDisplay').html(generatePathBadges(null));
                     if (!isParentMode) {
@@ -1804,7 +2007,7 @@ window.createMenuNode = createMenuNode;
             }
         } else {
             $('#selectedTabDisplay').html(generatePathBadges(null));
-            if (!isParentMode || (isParentMode && !selectedTab)) {
+            if (!isTablePageMode && (!isParentMode || (isParentMode && !selectedTab))) {
                 $('#nodeeditjstree').addClass('input-error');
             }
         }
@@ -2201,6 +2404,24 @@ window.createMenuNode = createMenuNode;
     }
 
     /**
+     * Selected ur_page id in table "link" column picker (mode: 'tablePage'). Unrelated to getSelectedTab.
+     * Returns null when "None" is selected or the dialog has no page.
+     */
+    function getSelectedTablePage() {
+        if (!nodeEditJSTreeOptions || nodeEditJSTreeOptions.mode !== 'tablePage') {
+            return null;
+        }
+        if (selectedTablePage == null) {
+            return null;
+        }
+        var id = typeof selectedTablePage === 'object' ? selectedTablePage.id : selectedTablePage;
+        if (id === 'none') {
+            return null;
+        }
+        return id;
+    }
+
+    /**
      * Returns the currently selected parent id in parent-selector mode.
      * Returns 'root' when ROOT is selected, or the folder/page/group id.
      * Returns null when not in parent mode or nothing selected.
@@ -2214,15 +2435,265 @@ window.createMenuNode = createMenuNode;
         return id || null;
     }
 
+    /**
+     * Creates a parent-picker dialog backed by jstree and returns an open() function.
+     *
+     * @param {Object} opts
+     *   opts.title         {string}  Dialog title
+     *   opts.selectedId    {string}  Node ID to pre-select ('root' or a node id)
+     *   opts.jstreeOptions {Object}  Passed directly to initializeJsTree
+     *   opts.summaryEl     {jQuery}  Form element that receives the selected-path badge HTML
+     *   opts.onDone        {function(id)} Optional; called on Done with selected id (or getSelectedParent in parent mode)
+     * @returns {Function} Call to open the dialog
+     */
+    function createParentPickerDialog(opts) {
+        var title = opts.title || 'Select Parent';
+        var jstreeOptions = opts.jstreeOptions || { mode: 'parent' };
+        var $summaryEl = opts.summaryEl;
+        var selectedId =
+            opts.selectedId == null || opts.selectedId === ''
+                ? jstreeOptions.mode === 'tablePage'
+                    ? null
+                    : 'root'
+                : opts.selectedId;
+
+        var $existing = $('#ur-parent-picker-dialog');
+        if ($existing.length) {
+            try { $existing.dialog('destroy'); } catch (e) {}
+            $existing.remove();
+        }
+
+        var $dlg = $('<div id="ur-parent-picker-dialog" class="red-ui-editor-dialog" style="padding:10px 12px;">')
+            .append('<div id="selectedTabDisplay" style="margin-bottom:8px;min-height:22px;"></div>')
+            .append('<input type="text" id="treeSearch" placeholder="Search..." style="width:100%;margin-bottom:6px;">')
+            .append('<div id="nodeeditjstree" style="height:280px;overflow-y:auto;border:1px solid #ccc;padding:5px;border-radius:4px;"></div>');
+        $dlg.appendTo('body');
+
+        var $dialogPath = $('#selectedTabDisplay');
+
+        function syncSummaryBadges() {
+            if (!$summaryEl) return;
+            var parts = [];
+            var started = false;
+            $dialogPath.contents().each(function () {
+                if (!started) {
+                    if (this.nodeType === 1 && $(this).hasClass('badge')) {
+                        started = true;
+                        parts.push(this.outerHTML);
+                    }
+                } else {
+                    parts.push(this.nodeType === 3 ? this.textContent : this.outerHTML);
+                }
+            });
+            $summaryEl.html(parts.join(''));
+        }
+
+        initializeJsTree(selectedId, jstreeOptions);
+        $('#nodeeditjstree').one('ready.jstree', syncSummaryBadges);
+
+        var _originalSummaryHtml = '';
+        var _originalSelectedId = selectedId;
+        var _confirmed = false;
+
+        $dlg.dialog({
+            modal: true,
+            title: title,
+            autoOpen: false,
+            width: 420,
+            resizable: false,
+            open: function () {
+                _confirmed = false;
+                _originalSummaryHtml = $summaryEl ? $summaryEl.html() : '';
+                var current;
+                if (jstreeOptions.mode === 'parent') {
+                    current = getSelectedParent();
+                } else if (jstreeOptions.mode === 'tablePage') {
+                    current = getSelectedTablePage();
+                } else {
+                    current = getSelectedTab();
+                }
+                _originalSelectedId = current != null && current !== '' ? current : selectedId;
+            },
+            beforeClose: function () {
+                if (!_confirmed) {
+                    if ($summaryEl) $summaryEl.html(_originalSummaryHtml);
+                    initializeJsTree(_originalSelectedId, jstreeOptions);
+                }
+                _confirmed = false;
+            },
+            create: function () {
+                $(this).closest('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+                var btn = $(this).closest('.ui-dialog').find('.ui-dialog-buttonset button').last();
+                btn.addClass('ur-jstree-done-btn');
+                btn.css({
+                    background: 'var(--red-ui-workspace-button-background-primary)',
+                    borderColor: 'var(--red-ui-workspace-button-background-primary)'
+                });
+                btn[0].style.setProperty('color', '#fff', 'important');
+            },
+            buttons: [
+                {
+                    text: 'Cancel',
+                    click: function () { $(this).dialog('close'); }
+                },
+                {
+                    text: 'Done',
+                    click: function () {
+                        _confirmed = true;
+                        syncSummaryBadges();
+                        if (typeof opts.onDone === 'function') {
+                            var id;
+                            if (jstreeOptions.mode === 'parent') {
+                                id = getSelectedParent();
+                            } else if (jstreeOptions.mode === 'tablePage') {
+                                id = getSelectedTablePage();
+                            } else {
+                                id = getSelectedTab();
+                            }
+                            opts.onDone(id);
+                        }
+                        $(this).dialog('close');
+                    }
+                }
+            ]
+        });
+
+        return function () { $dlg.dialog('open'); };
+    }
+
+    /**
+     * Creates a ref-page picker dialog backed by the ref-page jstree and returns { open, destroy }.
+     *
+     * @param {Object} opts
+     *   opts.title              {string}   jQuery UI dialog titlebar text
+     *   opts.selectedId         {string}   'none' or page id to pre-select
+     *   opts.selfPageId         {string}   Current page id to exclude from the tree
+     *   opts.displayLabel       {string}   Badge prefix shown in the dialog path display
+     *   opts.summaryEl          {jQuery}   Form element that receives the selected-path badge HTML
+     *   opts.onSelectionChange  {Function} Called with the selected page id on every tree selection
+     * @returns {{ open: Function, destroy: Function }}
+     */
+    function createRefPagePickerDialog(opts) {
+        var $existing = $('#ur-refpage-picker-dialog');
+        if ($existing.length) {
+            try { $existing.dialog('destroy'); } catch (e) {}
+            $existing.remove();
+            destroyRefPageJsTree();
+        }
+
+        var $dlg = $('<div id="ur-refpage-picker-dialog" class="red-ui-editor-dialog" style="padding:10px 12px;">')
+            .append('<div id="refPageSelectedDisplay" style="margin-bottom:8px;min-height:22px;"></div>')
+            .append('<input type="text" id="refPageTreeSearch" placeholder="Search..." style="width:100%;margin-bottom:6px;">')
+            .append('<div id="refPageJstree" style="height:280px;overflow-y:auto;border:1px solid #ccc;padding:5px;border-radius:4px;"></div>');
+        $dlg.appendTo('body');
+
+        var $displayEl = $('#refPageSelectedDisplay');
+
+        function syncSummaryBadges() {
+            if (!opts.summaryEl) return;
+            var parts = [];
+            var started = false;
+            $displayEl.contents().each(function () {
+                if (!started) {
+                    if (this.nodeType === 1 && $(this).hasClass('badge')) {
+                        started = true;
+                        parts.push(this.outerHTML);
+                    }
+                } else {
+                    parts.push(this.nodeType === 3 ? this.textContent : this.outerHTML);
+                }
+            });
+            opts.summaryEl.html(parts.join(''));
+        }
+
+        function initWithSync(refId) {
+            initializeRefPageJsTree(
+                refId,
+                opts.selfPageId,
+                opts.onSelectionChange || null,
+                opts.displayLabel || 'Referenced Page'
+            );
+            $(REF_PAGE_TREE).one('ready.jstree', syncSummaryBadges);
+        }
+
+        initWithSync(opts.selectedId || 'none');
+
+        var _originalSummaryHtml = '';
+        var _originalRefId = opts.selectedId || 'none';
+        var _confirmed = false;
+
+        $dlg.dialog({
+            modal: true,
+            title: opts.title || opts.displayLabel || 'Select Referenced Page',
+            autoOpen: false,
+            width: 420,
+            resizable: false,
+            open: function () {
+                _confirmed = false;
+                _originalSummaryHtml = opts.summaryEl ? opts.summaryEl.html() : '';
+                _originalRefId = getSelectedRefPage() || opts.selectedId || 'none';
+            },
+            beforeClose: function () {
+                if (!_confirmed) {
+                    if (opts.summaryEl) opts.summaryEl.html(_originalSummaryHtml);
+                    initWithSync(_originalRefId);
+                }
+                _confirmed = false;
+            },
+            create: function () {
+                $(this).closest('.ui-dialog').find('.ui-dialog-titlebar-close').hide();
+                var btn = $(this).closest('.ui-dialog').find('.ui-dialog-buttonset button').last();
+                btn.addClass('ur-jstree-done-btn');
+                btn.css({
+                    background: 'var(--red-ui-workspace-button-background-primary)',
+                    borderColor: 'var(--red-ui-workspace-button-background-primary)'
+                });
+                btn[0].style.setProperty('color', '#fff', 'important');
+            },
+            buttons: [
+                {
+                    text: 'Cancel',
+                    click: function () { $(this).dialog('close'); }
+                },
+                {
+                    text: 'Done',
+                    click: function () {
+                        _confirmed = true;
+                        syncSummaryBadges();
+                        $(this).dialog('close');
+                    }
+                }
+            ]
+        });
+
+        function destroy() {
+            if ($dlg.data('ui-dialog')) {
+                try { $dlg.dialog('destroy'); } catch (e) {}
+            }
+            $dlg.remove();
+            destroyRefPageJsTree();
+        }
+
+        return {
+            open: function () { $dlg.dialog('open'); },
+            destroy: destroy
+        };
+    }
+
     // Exposes functions to global scope for use in HTML scripts
     window.initializeJsTree = initializeJsTree;
     window.initializeJsTreeBase = initializeJsTreeBase;
     window.refreshJSTree = refreshJSTree;
     window.refreshJSTreeBase = refreshJSTreeBase;
     window.getSelectedTab = getSelectedTab;
+    window.getSelectedTablePage = getSelectedTablePage;
     window.getSelectedParent = getSelectedParent;
     window.clearClipboard = clearClipboard;
     window.initializeRefPageJsTree = initializeRefPageJsTree;
     window.destroyRefPageJsTree = destroyRefPageJsTree;
     window.getSelectedRefPage = getSelectedRefPage;
+    window.createParentPickerDialog = createParentPickerDialog;
+    window.createRefPagePickerDialog = createRefPagePickerDialog;
+    window.getNavConfigPathText = getNavConfigPathText;
+    window.getFormSummaryPathHtmlForTablePageId = getFormSummaryPathHtmlForTablePageId;
 })();

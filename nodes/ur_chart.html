@@ -104,7 +104,16 @@
         },
         oneditprepare: function () {
             let node = this;
-            initializeJsTree(node.tab);
+            var openPicker = createParentPickerDialog({
+                title: 'Select Tab',
+                selectedId: node.tab,
+                jstreeOptions: { mode: 'tab' },
+                summaryEl: $('#ur-chart-summary-display')
+            });
+            $('#ur-chart-tab-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                openPicker();
+            });
             if (!$('#node-input-chartType').val()) {
                 $('#node-input-chartType').val('line');
             }
@@ -300,15 +309,14 @@
 </script>
 
 <script type="text/html" data-template-name="ur_chart">
-    <div style="display: flex; align-items: center; padding-bottom: 10px;">
-        <div id="selectedTabDisplay">Selected Tab: None</div>
-    </div>
-    <div id="jstree-container" class="form-row">
-        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
-        <div
-            id="nodeeditjstree"
-            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
-        ></div>
+    <div class="form-row" style="min-height: 30px;">
+        <label style="display: inline-flex; align-items: center;"><i class="fa fa-columns" style="margin-right: 5px;"></i> Selected Tab</label>
+        <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+            <div id="ur-chart-summary-display" style="flex:1; min-width:0;"></div>
+            <button type="button" id="ur-chart-tab-edit-btn" class="editor-button editor-button-small" title="Change tab">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
     </div>
     <div class="form-row">
         <label><i class="fa fa-object-group"></i> Size</label>

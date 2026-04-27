@@ -94,7 +94,16 @@
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
             let node = this;
-            initializeJsTree(node.folder, { mode: 'parent', parentType: 'page', allowRoot: false });
+            var openPicker = createParentPickerDialog({
+                title: 'Select Parent Folder',
+                selectedId: node.folder,
+                jstreeOptions: { mode: 'parent', parentType: 'page', allowRoot: false },
+                summaryEl: $('#ur-page-summary-display')
+            });
+            $('#ur-page-parent-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                openPicker();
+            });
 
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
@@ -188,38 +197,40 @@
                 }
             }
 
+            var refPagePicker = null;
+
+            $('#ur-page-refpage-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                if (refPagePicker) refPagePicker.open();
+            });
+
             $('#node-config-input-page-type').change(function () {
                 var type = $(this).val();
 
                 switch (type) {
                     case 'multi':
-                        if (typeof window.destroyRefPageJsTree === 'function') {
-                            window.destroyRefPageJsTree();
-                        }
+                        if (refPagePicker) { refPagePicker.destroy(); refPagePicker = null; }
+                        $('#ur-page-refpage-row').hide();
                         $('#inherit-instances').hide();
-                        $('#referenced-page').hide();
                         $('#instance-expression').show();
                         $('#instances-map').show();
                         break;
                     case 'inherited':
-                        $('#referenced-page').show();
-                        if (typeof window.initializeRefPageJsTree === 'function') {
-                            var initialRef = node.refPage && node.refPage !== 'none' ? node.refPage : 'none';
-                            window.initializeRefPageJsTree(
-                                initialRef,
-                                node.id,
-                                syncInheritedInstancesForRefPage,
-                                c_ur_page('label.refPage')
-                            );
-                        }
+                        $('#ur-page-refpage-row').show();
+                        refPagePicker = createRefPagePickerDialog({
+                            title: c_ur_page('label.refPage'),
+                            selectedId: node.refPage && node.refPage !== 'none' ? node.refPage : 'none',
+                            selfPageId: node.id,
+                            displayLabel: c_ur_page('label.refPage'),
+                            summaryEl: $('#ur-page-refpage-summary-display'),
+                            onSelectionChange: syncInheritedInstancesForRefPage
+                        });
                         break;
                     case 'single':
                     default:
-                        if (typeof window.destroyRefPageJsTree === 'function') {
-                            window.destroyRefPageJsTree();
-                        }
+                        if (refPagePicker) { refPagePicker.destroy(); refPagePicker = null; }
+                        $('#ur-page-refpage-row').hide();
                         $('#inherit-instances').hide();
-                        $('#referenced-page').hide();
                         $('#instance-expression').hide();
                         $('#instances-map').hide();
                         break;
@@ -389,6 +400,14 @@
         },
         oneditsave: function () {
             let node = this;
+            var $d = $('#ur-parent-picker-dialog');
+            if ($d.length && $d.data('ui-dialog') && $d.dialog('isOpen')) {
+                $d.dialog('close');
+            }
+            var $rd = $('#ur-refpage-picker-dialog');
+            if ($rd.length && $rd.data('ui-dialog') && $rd.dialog('isOpen')) {
+                $rd.dialog('close');
+            }
 
             this.folder = getSelectedParent() || this.folder;
             this.disabled = $('#node-config-input-disabled').prop('checked');
@@ -580,15 +599,14 @@
         </label>
         <input type="text" id="node-config-input-name" />
     </div>
-    <div style="display: flex; align-items: center; padding-bottom: 10px;">
-        <div id="selectedTabDisplay">Selected Parent: None</div>
-    </div>
-    <div id="jstree-container" class="form-row">
-        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
-        <div
-            id="nodeeditjstree"
-            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
-        ></div>
+    <div class="form-row" style="min-height: 30px;">
+        <label style="display: inline-flex; align-items: center;"><i class="fa fa-folder-o" style="margin-right: 5px;"></i> Selected Folder</label>
+        <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+            <div id="ur-page-summary-display" style="flex:1; min-width:0;"></div>
+            <button type="button" id="ur-page-parent-edit-btn" class="editor-button editor-button-small" title="Change parent folder">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-config-input-disabled-btn">
@@ -622,21 +640,15 @@
             <option value="inherited">Inherited Page</option>
         </select>
     </div>
-    <div id="referenced-page" style="display: none">
-        <div style="display: flex; align-items: center; padding-bottom: 10px">
-            <div id="refPageSelectedDisplay">Referenced Page: None</div>
-        </div>
-        <div class="form-row" id="refPageJstreeContainer">
-            <input
-                type="text"
-                id="refPageTreeSearch"
-                placeholder="Search..."
-                style="width: 100%; margin-bottom: 5px"
-            />
-            <div
-                id="refPageJstree"
-                style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px"
-            ></div>
+    <div id="ur-page-refpage-row" style="display: none;">
+        <div class="form-row" style="min-height: 30px;">
+            <label style="display: inline-flex; align-items: center;"><i class="fa fa-file-text-o" style="margin-right: 5px;"></i> Referenced Page</label>
+            <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+                <div id="ur-page-refpage-summary-display" style="flex:1; min-width:0;"></div>
+                <button type="button" id="ur-page-refpage-edit-btn" class="editor-button editor-button-small" title="Change referenced page">
+                    <i class="fa fa-pencil"></i>
+                </button>
+            </div>
         </div>
     </div>
     <!-- <div class="form-row" id="inherited-is-multi">
