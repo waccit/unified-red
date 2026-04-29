@@ -28,6 +28,9 @@ function getAll(req, res, next) {
 // curl test:
 // curl -X PUT -d '{ "name": "View123" }' -H 'Content-Type: application/json' -H "Authorization: Bearer $TOKEN" http://localhost:1880/api/roles/1
 function update(req, res, next) {
+    if (parseInt(req.params.level) > req.user.role) {
+        return res.status(403).json({ message: 'Forbidden: Cannot edit a role higher than your own' });
+    }
     roleService
         .update(req.params.level, req.body)
         .then((role) => res.json(role))
