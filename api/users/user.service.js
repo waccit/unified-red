@@ -75,6 +75,9 @@ async function create(userParam) {
     if (await db.findOne(User, { username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
     }
+    if (await db.findOne(User, { email: userParam.email })) {
+        throw 'Email "' + userParam.email + '" is already in use';
+    }
     validateEmailAddress(userParam.email);
 
     const user = new User(userParam);
@@ -102,6 +105,13 @@ async function update(id, userParam) {
         (await db.findOne(User, { username: userParam.username }))
     ) {
         throw 'Username "' + userParam.username + '" is already taken';
+    }
+    if (
+        userParam.email &&
+        user.email !== userParam.email &&
+        (await db.findOne(User, { email: userParam.email }))
+    ) {
+        throw 'Email "' + userParam.email + '" is already in use';
     }
     // validate email address if it was entered
     if (userParam.email) {

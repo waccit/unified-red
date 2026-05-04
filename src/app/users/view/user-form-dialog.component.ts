@@ -1,10 +1,10 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { User, RoleName } from '../../data';
 import { PasswordStrengthValidator, MustMatch } from '../../authentication/register/password.validators';
-import { RoleService, CurrentUserService } from '../../services';
+import { RoleService, CurrentUserService, UserService, SnackbarService } from '../../services';
 import { first } from 'rxjs/operators';
 
 @Component({
@@ -22,6 +22,7 @@ export class UserFormDialogComponent {
     chide = true;
     roles: RoleName[];
     isSelf = false;
+    loading = false;
     objectKeys = Object.keys;
 
     constructor(
@@ -29,7 +30,9 @@ export class UserFormDialogComponent {
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
         private formBuilder: FormBuilder,
         private roleService: RoleService,
-        private currentUserService: CurrentUserService
+        private currentUserService: CurrentUserService,
+        private userService: UserService,
+        private snackbar: SnackbarService
     ) {
         this.roles = this.roleService.roles ?? [];
         let currentUser = null;
@@ -90,5 +93,22 @@ export class UserFormDialogComponent {
 
     submit() {}
 
-    public confirm(): void {}
+    public confirm(): void {
+        if (this.form.invalid || this.loading) return;
+        this.loading = true;
+        const value = this.form.getRawValue();
+        const call = this.action === 'edit'
+            ? this.userService.update(this.data._id, value)
+            : this.userService.add(value);
+        call.subscribe({
+            next: () => {
+                this.snackbar.success(this.action === 'edit' ? 'Edited user successfully!' : 'Added user successfully!');
+                this.dialogRef.close(true);
+            },
+            error: (err) => {
+                this.snackbar.error(err);
+                this.loading = false;
+            },
+        });
+    }
 }
