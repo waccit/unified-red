@@ -125,6 +125,13 @@ var injectedStyles = `
     #jstree-marker {
         z-index: 5555;
     }
+    #jstree .jstree-themeicon-custom {
+        background-size: contain !important;
+        background-repeat: no-repeat !important;
+    }
+    #jstree .jstree-themeicon-custom:not(.fa) {
+        filter: invert(1);
+    }
     .jstree-disabled {
         opacity: 0.5;
         pointer-events: none;
@@ -371,7 +378,37 @@ window.createMenuNode = createMenuNode;
     }
 
     function getWidgetNodeDisplayText(node) {
-        return node.label || node.name || node.type;
+        if (node.label) return node.label;
+        if (node.name) return node.name;
+        var def = RED.nodes.getType(node.type);
+        if (def && typeof def.label === 'function') {
+            try { return def.label.call(node) || node.type; } catch (e) {}
+        }
+        return node.type;
+    }
+
+    function getWidgetJstreeIcon(node) {
+        var def = RED.nodes.getType(node.type);
+        if (!def) {
+            return 'fa fa-picture-o';
+        }
+        var icon;
+        if (RED.utils && RED.utils.getNodeIcon) {
+            try { icon = RED.utils.getNodeIcon(def, node); } catch (e) {}
+        }
+        if (!icon) {
+            icon = typeof def.icon === 'function' ? def.icon.call(node) : def.icon;
+        }
+        if (!icon || typeof icon !== 'string') {
+            return 'fa fa-picture-o';
+        }
+        if (icon.indexOf('font-awesome/') === 0) {
+            return 'fa ' + icon.replace('font-awesome/', '');
+        }
+        if (icon.indexOf('icons/') === 0) {
+            return icon;
+        }
+        return 'icons/' + (def.__module || 'unified-red') + '/' + icon;
     }
 
     function getNodeDisplayText(name, redNode) {
@@ -381,7 +418,6 @@ window.createMenuNode = createMenuNode;
         return name;
     }
 
-    /** Strips display markup from jstree `text` so search matches the visible name. */
     function plainTextForJstreeSearch(node) {
         var t = node && node.text != null ? String(node.text) : '';
         return t.replace(/<[^>]*>/g, '');
@@ -451,7 +487,6 @@ window.createMenuNode = createMenuNode;
                             children: [],
                         };
 
-                        // Only add widgets if explicitly requested (for base tree)
                         if (includeWidgets) {
                             RED.nodes.eachNode(function (node) {
                                 if (/^ur_/.test(node.type) && node.tab === tab.id) {
@@ -460,6 +495,7 @@ window.createMenuNode = createMenuNode;
                                         id: node.id,
                                         order: node.order,
                                         type: 'widget',
+                                        icon: getWidgetJstreeIcon(node),
                                     });
                                 }
                             });
@@ -2120,6 +2156,7 @@ window.createMenuNode = createMenuNode;
 
         $('#jstree').on('refresh.jstree', function () {
             applyCutClasses();
+            applyWidgetIcons();
         });
 
         $('#jstree').on('open_node.jstree', function () {
@@ -2207,6 +2244,17 @@ window.createMenuNode = createMenuNode;
 
         $('#jstree').on('ready.jstree', function () {
             applyCutClasses();
+            applyWidgetIcons();
+        });
+    }
+
+    function applyWidgetIcons() {
+        var inst = $.jstree.reference('#jstree');
+        if (!inst) return;
+        RED.nodes.eachNode(function (node) {
+            if (/^ur_/.test(node.type) && inst.get_node(node.id)) {
+                inst.set_icon(node.id, getWidgetJstreeIcon(node));
+            }
         });
     }
 
