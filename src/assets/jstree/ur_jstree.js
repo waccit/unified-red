@@ -1755,6 +1755,7 @@ window.createMenuNode = createMenuNode;
             },
             'search': {
                 'show_only_matches': true,
+                'show_only_matches_children': true,
                 'search_callback': function (searchString, node) {
                     return fuzzyMatch(plainTextForJstreeSearch(node), searchString);
                 },
@@ -2110,6 +2111,7 @@ window.createMenuNode = createMenuNode;
             },
             'search': {
                 'show_only_matches': true,
+                'show_only_matches_children': true,
                 'search_callback': function (searchString, node) {
                     return fuzzyMatch(plainTextForJstreeSearch(node), searchString);
                 },
@@ -2315,6 +2317,7 @@ window.createMenuNode = createMenuNode;
             },
             search: {
                 show_only_matches: true,
+                show_only_matches_children: true,
                 search_callback: function (searchString, node) {
                     return fuzzyMatch(plainTextForJstreeSearch(node), searchString);
                 },
