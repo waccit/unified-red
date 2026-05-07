@@ -1,10 +1,10 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { Validators, FormGroup, FormBuilder } from '@angular/forms';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
 import { User, RoleName } from '../../data';
 import { PasswordStrengthValidator, MustMatch } from '../../authentication/register/password.validators';
-import { RoleService } from '../../services';
+import { RoleService, CurrentUserService, UserService, SnackbarService } from '../../services';
 import { first } from 'rxjs/operators';
 
 @Component({
@@ -20,21 +20,38 @@ export class UserFormDialogComponent {
     data: User;
     hide = true;
     chide = true;
-    roles: [RoleName];
+    roles: RoleName[];
+    isSelf = false;
+    loading = false;
     objectKeys = Object.keys;
 
     constructor(
         public dialogRef: MatDialogRef<UserFormDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public dialogData: any,
         private formBuilder: FormBuilder,
-        private roleService: RoleService
+        private roleService: RoleService,
+        private currentUserService: CurrentUserService,
+        private userService: UserService,
+        private snackbar: SnackbarService
     ) {
-        this.roles = this.roleService.roles;
+        this.roles = this.roleService.roles ?? [];
+        let currentUser = null;
+        this.currentUserService.currentUser.pipe(first()).subscribe(user => {
+            currentUser = user;
+            if (user && this.roles.length) {
+                const currentRoleEntry = this.roles.find(r => r.name === user.role)
+                    ?? this.roles.find(r => String(r.level) === String(user.role));
+                const currentLevel = currentRoleEntry ? parseInt(currentRoleEntry.level) : 0;
+                this.roles = this.roles.filter(r => parseInt(r.level) <= currentLevel);
+            }
+        });
         this.action = this.dialogData.action;
         if (this.action === 'edit') {
             this.data = this.dialogData.data;
             this.title = 'Edit ' + this.data.username;
-            const roleLevel = this.roles.find(r => r.name === this.data.role).level;
+            const roleEntry = this.roles?.find(r => r.name === this.data.role)
+                ?? this.roles?.find(r => String(r.level) === String(this.data.role));
+            const roleLevel = roleEntry?.level ?? '';
             this.form = this.formBuilder.group({
                 enabled: [this.data.enabled],
                 username: [this.data.username, [Validators.required, Validators.minLength(3)]],
@@ -46,6 +63,10 @@ export class UserFormDialogComponent {
                 sessionExpiration: [this.data.sessionExpiration || ''],
                 sessionInactivity: [this.data.sessionInactivity || ''],
         });
+            if (currentUser?._id === this.data._id) {
+                this.isSelf = true;
+                this.form.get('role').disable();
+            }
         } else {
             this.title = 'New User';
             this.data = ({} as User);
@@ -72,5 +93,22 @@ export class UserFormDialogComponent {
 
     submit() {}
 
-    public confirm(): void {}
+    public confirm(): void {
+        if (this.form.invalid || this.loading) return;
+        this.loading = true;
+        const value = this.form.getRawValue();
+        const call = this.action === 'edit'
+            ? this.userService.update(this.data._id, value)
+            : this.userService.add(value);
+        call.subscribe({
+            next: () => {
+                this.snackbar.success(this.action === 'edit' ? 'Edited user successfully!' : 'Added user successfully!');
+                this.dialogRef.close(true);
+            },
+            error: (err) => {
+                this.snackbar.error(err);
+                this.loading = false;
+            },
+        });
+    }
 }

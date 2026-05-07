@@ -51,12 +51,7 @@ export class UserTableComponent implements OnInit {
             .open(UserFormDialogComponent, { data: { data: {} as User, action: 'add' } })
             .afterClosed()
             .subscribe((result) => {
-                if (result) {
-                    this.userService.add(result).subscribe((data) => {
-                        this.snackbar.success('Added user successfully!');
-                        this.refreshTable();
-                    });
-                }
+                if (result) this.refreshTable();
             });
     }
 
@@ -65,12 +60,7 @@ export class UserTableComponent implements OnInit {
             .open(UserFormDialogComponent, { data: { data: row, action: 'edit' } })
             .afterClosed()
             .subscribe((result) => {
-                if (result) {
-                    this.userService.update(row._id, result).subscribe((data) => {
-                        this.snackbar.success('Edited user successfully!');
-                        this.refreshTable();
-                    });
-                }
+                if (result) this.refreshTable();
             });
     }
 
@@ -80,9 +70,12 @@ export class UserTableComponent implements OnInit {
             .afterClosed()
             .subscribe((result) => {
                 if (result === 1) {
-                    this.userService.delete(row._id).subscribe((data) => {
-                        this.snackbar.success('Deleted user successfully!');
-                        this.refreshTable();
+                    this.userService.delete(row._id).subscribe({
+                        next: () => {
+                            this.snackbar.success('Deleted user successfully!');
+                            this.refreshTable();
+                        },
+                        error: (error) => this.snackbar.error(error),
                     });
                 }
             });
