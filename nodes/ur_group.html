@@ -56,6 +56,16 @@
             return this.name ? 'node_label_italic' : '';
         },
         oneditprepare: function () {
+            var openPicker = createParentPickerDialog({
+                title: 'Select Parent Page',
+                selectedId: this.page,
+                jstreeOptions: { mode: 'parent', parentType: 'group', allowRoot: false },
+                summaryEl: $('#ur-group-summary-display')
+            });
+            $('#ur-group-parent-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                openPicker();
+            });
             $('#node-input-size-lg').elementSizer({
                 width: '#node-config-input-widthLg',
                 auto: false,
@@ -117,8 +127,45 @@
             });
         },
         oneditsave: function () {
+            var $d = $('#ur-parent-picker-dialog');
+            if ($d.length && $d.data('ui-dialog') && $d.dialog('isOpen')) {
+                $d.dialog('close');
+            }
+            this.page = getSelectedParent() || this.page;
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
+        },
+        oneditdelete: function () {
+            var groupId = this.id;
+            var tabsToDelete = [];
+
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_tab' && node.group === groupId) {
+                    tabsToDelete.push(node);
+                }
+            });
+
+            var affectedNodes = [];
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.eachNode(function (node) {
+                    if (node.tab === tab.id) {
+                        delete node.tab;
+                        node.dirty = true;
+                        node.changed = true;
+                        affectedNodes.push(node);
+                    }
+                });
+            });
+
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.remove(tab.id);
+            });
+            
+            affectedNodes.forEach(function (node) {
+                RED.editor.validateNode(node);
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
         },
     });
 </script>
@@ -130,11 +177,14 @@
         ></label>
         <input type="text" id="node-config-input-name" />
     </div>
-    <div class="form-row">
-        <label for="node-config-input-page"
-            ><i class="fa fa-file-o"></i> <span data-i18n="ur_group.label.page"></span
-        ></label>
-        <input type="text" id="node-config-input-page" />
+    <div class="form-row" style="min-height: 30px;">
+        <label style="display: inline-flex; align-items: center;"><i class="fa fa-file-o" style="margin-right: 5px;"></i> Selected Page</label>
+        <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+            <div id="ur-group-summary-display" style="flex:1; min-width:0;"></div>
+            <button type="button" id="ur-group-parent-edit-btn" class="editor-button editor-button-small" title="Change parent page">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-config-input-width-row"

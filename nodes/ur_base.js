@@ -140,8 +140,8 @@ module.exports = function (RED) {
         });
     });
 
-    RED.httpAdmin.get('/ur_base/js/*', function (req, res) {
-        var filename = path.join(__dirname, '../dist/assets/js', req.params[0]);
+    RED.httpAdmin.get('/ur_base/jstree/*', function (req, res) {
+        var filename = path.join(__dirname, '../dist/assets/jstree', req.params[0]);
         res.sendFile(filename, function (err) {
             if (err) {
                 if (node) {

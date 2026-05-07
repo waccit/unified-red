@@ -94,6 +94,16 @@
         // labelStyle: function() { return this.name?"node_label_italic":""; },
         oneditprepare: function () {
             let node = this;
+            var openPicker = createParentPickerDialog({
+                title: 'Select Parent Folder',
+                selectedId: node.folder,
+                jstreeOptions: { mode: 'parent', parentType: 'page', allowRoot: false },
+                summaryEl: $('#ur-page-summary-display')
+            });
+            $('#ur-page-parent-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                openPicker();
+            });
 
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
@@ -162,26 +172,65 @@
                 $('#node-config-input-inherit-instances-info').hide();
             }
 
-            $('#node-config-input-page-type').change({ refPage: node.refPage }, function (e) {
-                let type = $(this).val();
+            function syncInheritedInstancesForRefPage(refId) {
+                var refPageIsMulti = false;
+                if (refId && refId !== 'none') {
+                    var refPageNode = RED.nodes.node(refId);
+                    if (refPageNode) {
+                        refPageIsMulti = refPageNode.isMulti;
+                    }
+                }
+                if (refPageIsMulti) {
+                    $('#inherit-instances').show();
+                    if (node.inheritInst) {
+                        $('#node-config-input-inherit-instances-btn').click();
+                    } else {
+                        $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
+                        $('#instance-expression').show();
+                        $('#instances-map').show();
+                        $('#node-config-input-inherit-instances-info').hide();
+                    }
+                } else {
+                    $('#inherit-instances').hide();
+                    $('#instance-expression').hide();
+                    $('#instances-map').hide();
+                }
+            }
+
+            var refPagePicker = null;
+
+            $('#ur-page-refpage-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                if (refPagePicker) refPagePicker.open();
+            });
+
+            $('#node-config-input-page-type').change(function () {
+                var type = $(this).val();
 
                 switch (type) {
                     case 'multi':
+                        if (refPagePicker) { refPagePicker.destroy(); refPagePicker = null; }
+                        $('#ur-page-refpage-row').hide();
                         $('#inherit-instances').hide();
-                        $('#referenced-page').hide();
                         $('#instance-expression').show();
                         $('#instances-map').show();
                         break;
                     case 'inherited':
-                        $('#referenced-page').show();
-                        $('#node-config-input-referenced-page')
-                            .val(e.data.refPage || 'none')
-                            .trigger('change', [type]);
+                        $('#ur-page-refpage-row').show();
+                        refPagePicker = createRefPagePickerDialog({
+                            title: c_ur_page('label.refPage'),
+                            selectedId: node.refPage && node.refPage !== 'none' ? node.refPage : 'none',
+                            selfPageId: node.id,
+                            displayLabel: c_ur_page('label.refPage'),
+                            summaryEl: $('#ur-page-refpage-summary-display'),
+                            onSelectionChange: syncInheritedInstancesForRefPage
+                        });
                         break;
                     case 'single':
                     default:
+                        if (refPagePicker) { refPagePicker.destroy(); refPagePicker = null; }
+                        $('#ur-page-refpage-row').hide();
                         $('#inherit-instances').hide();
-                        $('#referenced-page').hide();
                         $('#instance-expression').hide();
                         $('#instances-map').hide();
                         break;
@@ -199,41 +248,6 @@
                 }
             }
 
-            let refPageSelect = $('#node-config-input-referenced-page');
-            getRefPages(node, refPageSelect, node.refPage);
-
-            refPageSelect
-                .change({ inheritInst: node.inheritInst }, function (e, pageType) {
-                    let refPageNode;
-                    let refPageIsMulti = false;
-
-                    if (this.value && this.value !== 'none') {
-                        refPageNode = RED.nodes.node(this.value);
-                        refPageIsMulti = refPageNode.isMulti;
-                    }
-
-                    // pageType is undefined => user selection
-                    // otherwise, pageType is invoked by initialization
-                    if (pageType && pageType !== 'inherited') return;
-
-                    if (refPageIsMulti) {
-                        $('#inherit-instances').show();
-                        if (e.data.inheritInst) {
-                            $('#node-config-input-inherit-instances-btn').click();
-                        } else {
-                            $('#node-config-input-inherit-instances-label').text(c_ur_page('label.define'));
-                            $('#instance-expression').show();
-                            $('#instances-map').show();
-                            $('#node-config-input-inherit-instances-info').hide();
-                        }
-                    } else {
-                        $('#inherit-instances').hide();
-                        $('#instance-expression').hide();
-                        $('#instances-map').hide();
-                    }
-                })
-                .val(node.refPage || 'none')
-                .trigger('change', [node.pageType]);
 
             $('#node-config-input-instance-expressions-list')
                 .css('min-height', '150px')
@@ -386,7 +400,16 @@
         },
         oneditsave: function () {
             let node = this;
+            var $d = $('#ur-parent-picker-dialog');
+            if ($d.length && $d.data('ui-dialog') && $d.dialog('isOpen')) {
+                $d.dialog('close');
+            }
+            var $rd = $('#ur-refpage-picker-dialog');
+            if ($rd.length && $rd.data('ui-dialog') && $rd.dialog('isOpen')) {
+                $rd.dialog('close');
+            }
 
+            this.folder = getSelectedParent() || this.folder;
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
             this.pageType = $('#node-config-input-page-type').val();
@@ -394,7 +417,10 @@
 
             // Inherited Housekeeping
             if (this.pageType == 'inherited') {
-                this.refPage = $('#node-config-input-referenced-page').val();
+                this.refPage =
+                    typeof window.getSelectedRefPage === 'function'
+                        ? window.getSelectedRefPage()
+                        : this.refPage || 'none';
 
                 let refPageIsMulti = false;
 
@@ -484,6 +510,53 @@
                 });
             }
         },
+        oneditdelete: function () {
+            var pageId = this.id;
+            var groupsToDelete = [];
+            var tabsToDelete = [];
+
+            // groups
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_group' && node.page === pageId) {
+                    groupsToDelete.push(node);
+                }
+            });
+
+            // tabs
+            groupsToDelete.forEach(function (group) {
+                RED.nodes.eachConfig(function (tabNode) {
+                    if (tabNode.type === 'ur_tab' && tabNode.group === group.id) {
+                        tabsToDelete.push(tabNode);
+                    }
+                });
+            });
+
+            var affectedNodes = [];
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.eachNode(function (node) {
+                    if (node.tab === tab.id) {
+                        delete node.tab;
+                        node.dirty = true;
+                        node.changed = true;
+                        affectedNodes.push(node);
+                    }
+                });
+            });
+
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.remove(tab.id);
+            });
+
+            groupsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+            
+            affectedNodes.forEach(function (node) {
+                RED.editor.validateNode(node);
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
+        },
     });
 
     function explodeRange(exp) {
@@ -517,50 +590,6 @@
         return result;
     }
 
-    function getRefPages(self, select, value) {
-        var node_def = RED.nodes.getType('ur_page');
-        select.children().remove();
-
-        $('<option value="none"' + (value ? ' selected' : '') + '>NONE</option>').appendTo(select);
-
-        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-        if (!activeWorkspace) {
-            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
-        }
-
-        var configNodes = [];
-        RED.nodes.eachConfig(function (config) {
-            if (
-                config.id !== self.id &&
-                config.type == 'ur_page' &&
-                config.pageType !== 'inherited' &&
-                (!config.z || config.z === activeWorkspace.id)
-            ) {
-                var label = RED.utils.getNodeLabel(config, config.id);
-                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
-                configNodes.push(config);
-            }
-        });
-        try {
-            configNodes.sort(function (A, B) {
-                if (A.__label__ < B.__label__) {
-                    return -1;
-                } else if (A.__label__ > B.__label__) {
-                    return 1;
-                }
-                return 0;
-            });
-        } catch (ignore) {}
-        configNodes.forEach(function (cn) {
-            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
-                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
-                .appendTo(select);
-            delete cn.__label__;
-        });
-        window.setTimeout(function () {
-            select.trigger('change', [self.pageType]);
-        }, 50);
-    }
 </script>
 
 <script type="text/html" data-template-name="ur_page">
@@ -570,11 +599,14 @@
         </label>
         <input type="text" id="node-config-input-name" />
     </div>
-    <div class="form-row">
-        <label for="node-config-input-folder">
-            <i class="fa fa-folder-o"></i> <span data-i18n="ur_page.label.folder"></span>
-        </label>
-        <input type="text" id="node-config-input-folder" />
+    <div class="form-row" style="min-height: 30px;">
+        <label style="display: inline-flex; align-items: center;"><i class="fa fa-folder-o" style="margin-right: 5px;"></i> Selected Folder</label>
+        <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+            <div id="ur-page-summary-display" style="flex:1; min-width:0;"></div>
+            <button type="button" id="ur-page-parent-edit-btn" class="editor-button editor-button-small" title="Change parent folder">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-config-input-disabled-btn">
@@ -608,11 +640,16 @@
             <option value="inherited">Inherited Page</option>
         </select>
     </div>
-    <div class="form-row" id="referenced-page">
-        <label for="node-config-input-referenced-page" style="display: inline-flex; align-items: center">
-            <i class="fa fa-file-text-o" style="margin-right: 5px"></i> <span data-i18n="ur_page.label.refPage"></span>
-        </label>
-        <select id="node-config-input-referenced-page"></select>
+    <div id="ur-page-refpage-row" style="display: none;">
+        <div class="form-row" style="min-height: 30px;">
+            <label style="display: inline-flex; align-items: center;"><i class="fa fa-file-text-o" style="margin-right: 5px;"></i> Referenced Page</label>
+            <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+                <div id="ur-page-refpage-summary-display" style="flex:1; min-width:0;"></div>
+                <button type="button" id="ur-page-refpage-edit-btn" class="editor-button editor-button-small" title="Change referenced page">
+                    <i class="fa fa-pencil"></i>
+                </button>
+            </div>
+        </div>
     </div>
     <!-- <div class="form-row" id="inherited-is-multi">
         <label for="node-config-input-inherited-multi"><i class="fa fa-files-o"></i> Is Multi?</label>
