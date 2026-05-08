@@ -32,7 +32,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         // Prevent the last visible hour slot from stretching to fill leftover view height.
         expandRows: false,
-        contentHeight: 'auto',
         headerToolbar: this.isMobile()
             ? { left: '', center: 'title', right: '' } // mobile
             : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop
@@ -63,6 +62,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         eventChange: this.handleEventChange.bind(this),
         datesSet: this.renderDateRange.bind(this),
         viewClassNames: this.saveCurrentViewType.bind(this),
+        aspectRatio: 1.4
     };
 
     dirty = false;
@@ -110,7 +110,6 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             const api = this.calendarComponent.getApi();
             const currentViewType = api.view.type;
             localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
-            api.setOption('contentHeight', currentViewType === 'timeGridWeek' ? 600 : 'auto');
         }
     }
 
