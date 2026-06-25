@@ -17,7 +17,7 @@ function authorize(role) {
 
         // authorize based on user role
         (req, res, next) => {
-            if (role && req.user.role >= role) {
+            if (role && req.user.role < role) {
                 return res.status(401).json({ message: 'Unauthorized' }); // user's role is not authorized
             }
             // authentication and authorization successful

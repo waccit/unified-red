@@ -35,6 +35,20 @@
             return A.order - B.order;
         },
         oneditprepare: function () {
+            var self = this;
+
+            var openPicker = createParentPickerDialog({
+                title: 'Select Parent Folder',
+                selectedId: self.folder || 'root',
+                jstreeOptions: { mode: 'parent', parentType: 'folder', allowRoot: true, excludeNodeId: self.id },
+                summaryEl: $('#ur-folder-summary-display')
+            });
+
+            $('#ur-folder-parent-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                openPicker();
+            });
+
             $('#node-config-input-disabled-btn').on('click', function (e) {
                 var i = $(this).find('i');
                 var active = i.hasClass('fa-toggle-on');
@@ -74,8 +88,113 @@
             }
         },
         oneditsave: function () {
+            var $d = $('#ur-parent-picker-dialog');
+            if ($d.length && $d.data('ui-dialog') && $d.dialog('isOpen')) {
+                $d.dialog('close');
+            }
             this.disabled = $('#node-config-input-disabled').prop('checked');
             this.hidden = $('#node-config-input-hidden').prop('checked');
+            var p = getSelectedParent();
+            if (p === 'root' || p === '' || p == null) {
+                delete this.folder;
+            } else {
+                this.folder = p;
+            }
+        },
+        oneditdelete: function () {
+            var folderId = this.id;
+            var foldersToDelete = [];
+            var linksToDelete = [];
+            var pagesToDelete = [];
+            var groupsToDelete = [];
+            var tabsToDelete = [];
+
+            // folders
+            function collectChildFolders(parentFolderId) {
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_folder' && node.folder === parentFolderId) {
+                        foldersToDelete.push(node);
+                        collectChildFolders(node.id);
+                    }
+                });
+            }
+            collectChildFolders(folderId);
+
+            var allFolderIds = [folderId].concat(
+                foldersToDelete.map(function (f) {
+                    return f.id;
+                })
+            );
+
+            // links
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_link' && allFolderIds.indexOf(node.folder) !== -1) {
+                    linksToDelete.push(node);
+                }
+            });
+
+            // pages
+            RED.nodes.eachConfig(function (node) {
+                if (node.type === 'ur_page' && allFolderIds.indexOf(node.folder) !== -1) {
+                    pagesToDelete.push(node);
+                }
+            });
+
+            // groups
+            pagesToDelete.forEach(function (page) {
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_group' && node.page === page.id) {
+                        groupsToDelete.push(node);
+                    }
+                });
+            });
+
+            // tabs
+            groupsToDelete.forEach(function (group) {
+                RED.nodes.eachConfig(function (node) {
+                    if (node.type === 'ur_tab' && node.group === group.id) {
+                        tabsToDelete.push(node);
+                    }
+                });
+            });
+
+            var affectedNodes = [];
+            tabsToDelete.forEach(function (tab) {
+                RED.nodes.eachNode(function (node) {
+                    if (node.tab === tab.id) {
+                        delete node.tab;
+                        node.dirty = true;
+                        node.changed = true;
+                        affectedNodes.push(node);
+                    }
+                });
+            });
+
+            tabsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            groupsToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            pagesToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            linksToDelete.forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+
+            foldersToDelete.reverse().forEach(function (node) {
+                RED.nodes.remove(node.id);
+            });
+            
+            affectedNodes.forEach(function (node) {
+                RED.editor.validateNode(node);
+            });
+            RED.nodes.dirty(true);
+            RED.view.redraw();
         },
     });
 </script>
@@ -86,6 +205,15 @@
             ><i class="fa fa-tag"></i> <span data-i18n="ur_folder.label.name"></span
         ></label>
         <input type="text" id="node-config-input-name" />
+    </div>
+    <div class="form-row" style="min-height: 30px;">
+        <label style="display: inline-flex; align-items: center;"><i class="fa fa-folder-o" style="margin-right: 5px;"></i> Selected Parent</label>
+        <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+            <div id="ur-folder-summary-display" style="flex:1; min-width:0;"></div>
+            <button type="button" id="ur-folder-parent-edit-btn" class="editor-button editor-button-small" title="Change parent folder">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-config-input-icon"

@@ -357,40 +357,55 @@ function add(opt) {
                 let topic = msg.topic;
                 let topicPattern = opt.control.topicPattern;
                 let sortedVars = opt.control.sortedVars;
+                let instanceParams = opt.control.instanceParams;
+                let instanceIds = opt.control.instanceIds;
 
-                let varMap = {};
+                let matchedId = null;
 
-                // find and escape hyphen, brackets, parentheses, plus, punctuation, backslash,
-                // caret, dollar, vertical bar, and pound symbols
-                let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
-                // find and replace wildcard (*)
-                topicRegex = topicRegex.replace(/\*/g, '.*');
-
-                // make a copy of topicRegex for pattern (includes {}) to capture variable names in topicPattern
-                let patternRegex = topicRegex.replace(/\{[^/}]*}/g, '{([\\w\\. ]+)}');
-
-                // find variables and replace with capture groups
-                topicRegex = topicRegex.replace(/\{[^/}]*}/g, '([\\w\\. ]+)');
-
-                // make regexs
-                topicRegex = new RegExp('^' + topicRegex + '$');
-                patternRegex = new RegExp('^' + patternRegex + '$');
-
-                // find matches in topic
-                let topicMatches = topicRegex.exec(topic);
-                // find matches in topicPattern
-                let patternMatches = patternRegex.exec(topicPattern);
-
-                // if a match, make variable dict from topic & topicPattern
-                if (topicMatches) {
-                    for (let i = 1; i < topicMatches.length; i++) {
-                        varMap[patternMatches[i]] = topicMatches[i];
+                // Match topic against each known instance by substituting its parameter values
+                // into the pattern and testing. This avoids greedy-regex ambiguity when the
+                // pattern contains wildcards (*) before named variable segments.
+                if (instanceParams && instanceIds && instanceParams.length) {
+                    for (let i = 0; i < instanceParams.length; i++) {
+                        let params = instanceParams[i];
+                        let instanceTopicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+                        instanceTopicRegex = instanceTopicRegex.replace(/\*/g, '.*');
+                        for (let varName of sortedVars) {
+                            if (params[varName] !== undefined) {
+                                let escapedVal = String(params[varName]).replace(/[-[\]()+?.,\\^$|#\s]/g, '\\$&');
+                                instanceTopicRegex = instanceTopicRegex.replace(new RegExp('\\{' + varName + '\\}', 'gi'), escapedVal);
+                            }
+                        }
+                        instanceTopicRegex = instanceTopicRegex.replace(/\{[^/}]*}/g, '[\\w\\. ]+');
+                        if (new RegExp('^' + instanceTopicRegex + '$').test(topic)) {
+                            matchedId = instanceIds[i];
+                            break;
+                        }
                     }
                 }
 
-                // add newId suffixes
-                for (v of sortedVars) {
-                    newId += '.' + v + varMap[v];
+                if (matchedId !== null) {
+                    newId += matchedId;
+                } else {
+                    // Fallback: extract variables via capture groups (original approach).
+                    // Used when instanceParams is unavailable or no instance matched.
+                    let varMap = {};
+                    let topicRegex = topicPattern.replace(/[-[\]()+?.,\\^$|#]/g, '\\$&');
+                    topicRegex = topicRegex.replace(/\*/g, '.*');
+                    let patternRegex = topicRegex.replace(/\{[^/}]*}/g, '{([\\w\\. ]+)}');
+                    topicRegex = topicRegex.replace(/\{[^/}]*}/g, '([\\w\\. ]+)');
+                    topicRegex = new RegExp('^' + topicRegex + '$');
+                    patternRegex = new RegExp('^' + patternRegex + '$');
+                    let topicMatches = topicRegex.exec(topic);
+                    let patternMatches = patternRegex.exec(topicPattern);
+                    if (topicMatches) {
+                        for (let i = 1; i < topicMatches.length; i++) {
+                            varMap[patternMatches[i]] = topicMatches[i];
+                        }
+                    }
+                    for (v of sortedVars) {
+                        newId += '.' + v + varMap[v];
+                    }
                 }
             }
 
@@ -904,6 +919,21 @@ function addControl(folders, page, group, tab, control) {
                 }
 
                 inhPage.removes[control.id] = addControl(inhPage.folders, inhPage, inhGroup, inhTab, inhCtrl);
+
+                // The Node-RED input handler (set up by add()) captures opt.control by reference.
+                // addControl uses a clone (inhCtrl) for the inherited page, so the original control
+                // never receives the instance routing data unless we propagate it back here.
+                if (inhCtrl.instanceParams && inhCtrl.instanceIds && inhCtrl.sortedVars) {
+                    if (!control._inhPageInstances) {
+                        control._inhPageInstances = { sortedVars: [], instanceParams: [], instanceIds: [] };
+                    }
+                    inhCtrl.sortedVars.forEach(v => {
+                        if (!control._inhPageInstances.sortedVars.includes(v)) control._inhPageInstances.sortedVars.push(v);
+                    });
+                    control._inhPageInstances.sortedVars.sort();
+                    control._inhPageInstances.instanceParams = control._inhPageInstances.instanceParams.concat(inhCtrl.instanceParams);
+                    control._inhPageInstances.instanceIds = control._inhPageInstances.instanceIds.concat(inhCtrl.instanceIds);
+                }
             });
         }
 
@@ -1200,7 +1230,7 @@ function addControl(folders, page, group, tab, control) {
                 };
             }
 
-            function multiRemove() {
+            function multiRemove(opts = {}) {
                 // Clean up any inherited pages that reference me
                 removeInhControls(page.id, control.id);
 
@@ -1244,6 +1274,7 @@ function addControl(folders, page, group, tab, control) {
 
                             // if a inherited page clean-up inheritedPages dict
                             if (
+                                !opts.skipInhCleanup &&
                                 page.config.pageType === 'inherited' &&
                                 inheritedPages.hasOwnProperty(page.config.refPage)
                             ) {
@@ -1266,8 +1297,15 @@ function addControl(folders, page, group, tab, control) {
 
             removeFunc = multiRemove;
 
-            // save a copy of the sorted variable names for filtering topics
-            control['sortedVars'] = sortedVars;
+            // Save instance routing data for the Node-RED input handler.
+            // If this template page has no own instances, fall back to data accumulated
+            // from inherited pages above (propagated via control._inhPageInstances).
+            let _inh = control._inhPageInstances || { sortedVars: [], instanceParams: [], instanceIds: [] };
+            delete control._inhPageInstances;
+
+            control['sortedVars'] = sortedVars.length ? sortedVars : _inh.sortedVars;
+            control['instanceParams'] = instanceParams.length ? instanceParams : _inh.instanceParams;
+            control['instanceIds'] = instanceIds.length ? instanceIds : _inh.instanceIds;
         }
         // Single Page
         else if (page.config.pageType === 'single' || page.config.isSingle) {
@@ -1635,7 +1673,7 @@ function removeInhControls(refPageId, controlId) {
     if (inheritedPages.hasOwnProperty(refPageId)) {
         inheritedPages[refPageId].forEach((inhPage) => {
             if (inhPage.config.refPage === refPageId && inhPage.removes.hasOwnProperty(controlId)) {
-                inhPage.removes[controlId]();
+                inhPage.removes[controlId]({ skipInhCleanup: true });
                 delete inhPage.removes[controlId];
             }
         });

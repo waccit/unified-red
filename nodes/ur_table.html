@@ -42,7 +42,16 @@
         },
         oneditprepare: function () {
             let node = this;
-            initializeJsTree(node.tab);
+            var openPicker = createParentPickerDialog({
+                title: 'Select Tab',
+                selectedId: node.tab,
+                jstreeOptions: { mode: 'tab' },
+                summaryEl: $('#ur-table-summary-display')
+            });
+            $('#ur-table-tab-edit-btn').on('click', function (e) {
+                e.preventDefault();
+                openPicker();
+            });
             if (RED.nodes.getType('ur_tab')) {
                 $('.form-tips').hide();
             } else {
@@ -130,21 +139,92 @@
                                 types: [optionAuto, optionManual],
                             });
 
-                        //format link
-                        let formatLinkSelect = $('<select/>', {
+                        //format "link" type: nav path + jsTree (folders and pages; ur_page id in format)
+                        let linkFormatSection = $('<div/>', {
+                            class: 'ur-table-link-field',
+                            style:
+                                'width: 36.5%; box-sizing: border-box; align-items: center; gap: 6px; padding-left: 5px; vertical-align: middle;',
+                        })
+                            .appendTo(row)
+                            .css({ display: 'inline-flex' })
+                            .hide();
+                        let linkPathOuter = $('<div/>', {
+                            class: 'ur-table-link-path-outer',
+                        }).appendTo(linkFormatSection);
+                        let linkPathInner = $('<div/>', {
+                            class: 'ur-table-link-path-inner',
+                        }).appendTo(linkPathOuter);
+                        let formatLinkHidden = $('<input/>', {
+                            type: 'hidden',
                             class: 'node-input-field-format-link',
-                            style: 'margin-left: 5px; width: 36%; display: none',
-                        }).appendTo(row);
-                        getUrPages(formatLinkSelect, field.format);
+                        })
+                            .val(field.format || '')
+                            .appendTo(linkFormatSection);
+                        function updateLinkPathOverflowFade($outer) {
+                            var oe = $outer[0];
+                            var inner = $outer.children('.ur-table-link-path-inner')[0];
+                            if (!oe || !inner) {
+                                return;
+                            }
+                            var overflow = inner.scrollWidth > oe.clientWidth + 1;
+                            $outer.toggleClass('ur-table-link-path-overflow', overflow);
+                        }
+                        function refreshLinkPathDisplay() {
+                            var v = formatLinkHidden.val();
+                            if (typeof getFormSummaryPathHtmlForTablePageId === 'function') {
+                                linkPathInner.html(getFormSummaryPathHtmlForTablePageId(v));
+                            } else {
+                                linkPathInner.html(
+                                    '<span class="badge badge-none">None</span>'
+                                );
+                            }
+                            window.setTimeout(function () {
+                                updateLinkPathOverflowFade(linkPathOuter);
+                            }, 0);
+                        }
+                        refreshLinkPathDisplay();
+                        if (typeof ResizeObserver !== 'undefined') {
+                            var linkPathResizeObserver = new ResizeObserver(function () {
+                                updateLinkPathOverflowFade(linkPathOuter);
+                            });
+                            linkPathResizeObserver.observe(linkPathOuter[0]);
+                            linkPathResizeObserver.observe(linkPathInner[0]);
+                        }
+                        $('<button/>', {
+                            type: 'button',
+                            class: 'editor-button editor-button-small',
+                            title: 'Select page in navigation',
+                        })
+                            .html('<i class="fa fa-pencil"></i>')
+                            .on('click', function (e) {
+                                e.preventDefault();
+                                var p = createParentPickerDialog({
+                                    title: 'Select Page',
+                                    selectedId: formatLinkHidden.val() || null,
+                                    jstreeOptions: { mode: 'tablePage' },
+                                    summaryEl: linkPathInner,
+                                    onDone: function (selId) {
+                                        formatLinkHidden.val(selId || '');
+                                        window.setTimeout(function () {
+                                            updateLinkPathOverflowFade(linkPathOuter);
+                                        }, 0);
+                                    },
+                                });
+                                p();
+                            })
+                            .appendTo(linkFormatSection);
 
                         formatTypeSelect
                             .on('change', () => {
                                 if (formatTypeSelect.val() === 'link') {
                                     textFormatSection.hide();
-                                    formatLinkSelect.show();
+                                    linkFormatSection.css('display', 'inline-flex');
+                                    window.setTimeout(function () {
+                                        updateLinkPathOverflowFade(linkPathOuter);
+                                    }, 0);
                                 } else {
-                                    formatLinkSelect.hide();
-                                    textFormatSection.show();
+                                    linkFormatSection.hide();
+                                    textFormatSection.css('display', 'inline-flex');
                                 }
                             })
                             .val(field.formatType || 'text')
@@ -217,58 +297,30 @@
             height -= parseInt(editorRow.css('marginTop')) + parseInt(editorRow.css('marginBottom'));
 
             $('#node-input-field-container').editableList('height', height);
+            window.setTimeout(function () {
+                $('#node-input-field-container .ur-table-link-path-outer').each(function () {
+                    var $o = $(this);
+                    var inner = $o.children('.ur-table-link-path-inner')[0];
+                    if (!this || !inner) {
+                        return;
+                    }
+                    $o.toggleClass('ur-table-link-path-overflow', inner.scrollWidth > this.clientWidth + 1);
+                });
+            }, 0);
         },
     });
 
-    function getUrPages(select, value) {
-        var node_def = RED.nodes.getType('ur_page');
-        select.children().remove();
-
-        var activeWorkspace = RED.nodes.workspace(RED.workspaces.active());
-        if (!activeWorkspace) {
-            activeWorkspace = RED.nodes.subflow(RED.workspaces.active());
-        }
-
-        var configNodes = [];
-        RED.nodes.eachConfig(function (config) {
-            if (config.type == 'ur_page' && (!config.z || config.z === activeWorkspace.id)) {
-                var label = RED.utils.getNodeLabel(config, config.id);
-                config.__label__ = label + (config.d ? ' [' + RED._('workspace.disabled') + ']' : '');
-                configNodes.push(config);
-            }
-        });
-        try {
-            configNodes.sort(function (A, B) {
-                if (A.__label__ < B.__label__) {
-                    return -1;
-                } else if (A.__label__ > B.__label__) {
-                    return 1;
-                }
-                return 0;
-            });
-        } catch (ignore) {}
-        configNodes.forEach(function (cn) {
-            $('<option value="' + cn.id + '"' + (value == cn.id ? ' selected' : '') + '></option>')
-                .text(RED.text.bidi.enforceTextDirectionWithUCC(cn.__label__))
-                .appendTo(select);
-            delete cn.__label__;
-        });
-        window.setTimeout(function () {
-            select.trigger('change');
-        }, 50);
-    }
 </script>
 
 <script type="text/html" data-template-name="ur_table">
-    <div style="display: flex; align-items: center; padding-bottom: 10px;">
-        <div id="selectedTabDisplay">Selected Tab: None</div>
-    </div>
-    <div id="jstree-container" class="form-row">
-        <input type="text" id="treeSearch" placeholder="Search..." style="width: 100%; margin-bottom: 5px;" />
-        <div
-            id="jstree"
-            style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; border-radius: 4px;"
-        ></div>
+    <div class="form-row" style="min-height: 30px;">
+        <label style="display: inline-flex; align-items: center;"><i class="fa fa-columns" style="margin-right: 5px;"></i> Selected Tab</label>
+        <div style="display:inline-flex; align-items:center; gap:6px; width:70%; vertical-align:middle;">
+            <div id="ur-table-summary-display" style="flex:1; min-width:0;"></div>
+            <button type="button" id="ur-table-tab-edit-btn" class="editor-button editor-button-small" title="Change tab">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
     </div>
     <div class="form-row" id="table-row-size">
         <label><i class="fa fa-object-group"></i> Size</label>
@@ -325,9 +377,9 @@
     </div>
 </script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/themes/default/style.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.17/jstree.min.js"></script>
-<script src="./ur_base/js/ur_jstree.js"></script>
+<link rel="stylesheet" href="./ur_base/jstree/jstree.style.min.css" />
+<script src="./ur_base/jstree/jstree.min.js"></script>
+<script src="./ur_base/jstree/ur_jstree.js"></script>
 
 <script type="text/html" data-help-name="ur_table">
         <p>Adds a table to the user interface.</p>
@@ -363,7 +415,7 @@
                 <b>Text Format</b> : Formats the text value to be displayed. Units of measurement can be automatically appended to the value
                 if they are included in <code>msg.payload.units</code> or can be manually set.</li>
             </li>
-            <li><b>Link</b> : Navigates the user to the selected page when the hyperlink is clicked.</li>
+            <li><b>Link</b> : Navigates the user to a <b>page</b> in the app navigation when the cell link is clicked. Pick a page from the folder tree in the editor.</li>
             <li>
                 <b>Device Filter</b> : Used to generate rows (or columns when pivoted) based on the messages received. Setting to
                 <code>SmartServer IoT</code> will detect devices using the SmartServer IoT IAP topic schema. <code>Custom</code> allows you
