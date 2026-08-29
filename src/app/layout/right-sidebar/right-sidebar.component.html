@@ -2,10 +2,10 @@
     <div class="rightSidebarClose" (click)="toggleRightSidebar()"><i class="nav-hdr-btn ti-close"></i></div>
     <ul class="nav nav-tabs tab-nav-right" role="tablist">
         <li role="presentation">
-            <a href="#skins" data-toggle="tab" class="active">SKINS</a>
+            <a href="#skins" data-toggle="tab" class="active">{{'SKINS'|translate}}</a>
         </li>
         <li role="presentation" *ngIf="showSettings">
-            <a href="#settings" data-toggle="tab">SETTINGS</a>
+            <a href="#settings" data-toggle="tab">{{'SETTINGS'|translate}}</a>
         </li>
     </ul>
     <div class="tab-content">
@@ -71,21 +71,21 @@
                     </ul>
                 </div> -->
                 <div class="rightSetting">
-                    <p>SIDEBAR MENU COLORS</p>
+                    <p>{{'SIDEBAR MENU COLORS'|translate}}</p>
                     <mat-button-toggle-group class="mt-2" [value]="menuOption">
-                        <mat-button-toggle (click)="lightSidebar()" value="menu_light">Light</mat-button-toggle>
-                        <mat-button-toggle (click)="darkSidebar()" value="menu_dark">Dark</mat-button-toggle>
+                        <mat-button-toggle (click)="lightSidebar()" value="menu_light">{{'Light'|translate}}</mat-button-toggle>
+                        <mat-button-toggle (click)="darkSidebar()" value="menu_dark">{{'Dark'|translate}}</mat-button-toggle>
                     </mat-button-toggle-group>
                 </div>
                 <div class="rightSetting">
-                    <p>THEME COLORS</p>
+                    <p>{{'THEME COLORS'|translate}}</p>
                     <mat-button-toggle-group class="mt-2" [value]="theme">
-                        <mat-button-toggle (click)="lightTheme()" value="light">Light</mat-button-toggle>
-                        <mat-button-toggle (click)="darkTheme()" value="dark">Dark</mat-button-toggle>
+                        <mat-button-toggle (click)="lightTheme()" value="light">{{'Light'|translate}}</mat-button-toggle>
+                        <mat-button-toggle (click)="darkTheme()" value="dark">{{'Dark'|translate}}</mat-button-toggle>
                     </mat-button-toggle-group>
                 </div>
                 <div class="rightSetting">
-                    <p>SKINS</p>
+                    <p>{{'SKINS'|translate}}</p>
                     <ul class="demo-choose-skin choose-theme list-unstyled">
                         <li data-theme="black" [ngClass]="{'actived': selectedBgColor === 'black'}"
                             (click)="selectTheme('black')">
@@ -147,14 +147,37 @@
             <div class="demo-settings"
                 [ngStyle]="{'position' : 'relative', 'max-height' : maxHeight+'px', 'max-width' : maxWidth+'px'}"
                 [perfectScrollbar]>
-                <p>ACCOUNT SETTINGS</p>
+                <p>{{'ACCOUNT SETTINGS'|translate}}</p>
                 <div class="body">
                     <div class="list-group m-t-20">
                         <!-- <a href="#" onClick="return false;" class="list-group-item active">
                             Cras justo odio
                         </a> -->
-                        <a class="list-group-item" routerLink="/users/view" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Management</a>
-                        <a class="list-group-item" routerLink="/users/roles" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>User Roles</a>
+                        <!--<span class="form-inline">
+                            <select
+                                class="form-control"
+                                #selectedLang
+                                (change)="switchLanguage(selectedLang.value)">
+                             <option *ngFor="let language of translate.getLangs()"
+                                [value]="language"
+                                [selected]="language === translate.currentLang">
+                                {{ language }}
+                                </option>
+                            </select>
+                            </span> -->
+                        <span class="list-group-item"><mat-icon aria-hidden="false">language</mat-icon><select
+                            class="form-control"
+                            style="width:100px; vertical-align:middle"
+                            #selectedLang
+                            (change)="switchLanguage(selectedLang.value)">
+                         <option *ngFor="let language of translate.getLangs()"
+                            [value]="language"
+                            [selected]="language === translate.currentLang">
+                            {{ language }}
+                            </option>
+                        </select></span>    
+                        <a class="list-group-item" routerLink="/users/view" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>{{'User Management'|translate }}</a>
+                        <a class="list-group-item" routerLink="/users/roles" (click)="toggleRightSidebar()"><mat-icon aria-hidden="false">person</mat-icon>{{'User Roles'|translate }}</a>
                         <!-- <a href="#" onClick="return false;" class="list-group-item">Dapibus ac facilisis in</a>
                         <a href="#" onClick="return false;" class="list-group-item">Morbi leo risus</a>
                         <a href="#" onClick="return false;" class="list-group-item">Porta ac consectetur ac</a>

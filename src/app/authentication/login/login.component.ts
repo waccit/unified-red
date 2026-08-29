@@ -5,6 +5,8 @@ import { first } from 'rxjs/operators';
 import { AuthenticationService, SnackbarService } from '../../services';
 import { InstallService } from '../../services/install.service';
 
+import { TranslateService } from '@ngx-translate/core'; //Added DI
+
 declare const $: any;
 
 @Component({
@@ -18,6 +20,7 @@ export class LoginComponent implements OnInit {
     hide = true;
 
     constructor(
+        public translate: TranslateService, //Added DI
         private formBuilder: FormBuilder,
         private route: ActivatedRoute,
         private router: Router,
@@ -67,4 +70,7 @@ export class LoginComponent implements OnInit {
                 }
             );
     }
+    switchLanguage(lang: string) { //Added DI
+        this.translate.use(lang);
+      }
 }
