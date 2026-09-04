@@ -9,7 +9,7 @@ module.exports = function (RED) {
 
         if (config.templateScope !== 'global') {
             if (!config.width) {
-                config.width = group.config.width;
+                config.width = group?.config?.width;
             }
         }
         var hei = Number(config.height || 0);

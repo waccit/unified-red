@@ -351,7 +351,7 @@ function add(opt) {
             }
 
             let newId = opt.node.id;
-            if (opt.page.config.pageType === 'multi' || opt.page.config.isMulti) {
+            if (opt.page && (opt.page.config.pageType === 'multi' || opt.page.config.isMulti)) {
                 if (!opt.control.topicPattern.length) throw new Error('Topic Pattern is Required');
 
                 let topic = msg.topic;
@@ -1460,6 +1460,11 @@ function addInheritedPage(RED, page) {
 
     let refPage = RED.nodes.getNode(page.config.refPage);
 
+    // the referenced page may be disabled or deleted
+    if (!refPage) {
+        return remove;
+    }
+
     let inhConfig = {
         id: page.id,
         name: page.name,
@@ -1705,11 +1710,18 @@ function makeMenuTree(RED, config) {
             folder = RED.nodes.getNode(folder);
         }
 
-        folders.push(folder);
-
-        while (folder.config && folder.config.folder) {
-            folder = RED.nodes.getNode(folder.config.folder);
+        // Walk up to the root folder. A disabled or deleted folder resolves to
+        // null, which breaks the chain: discard the partial tree so the caller
+        // skips the control rather than re-rooting it under the wrong parent.
+        while (folder && folder.config) {
             folders.push(folder);
+            if (!folder.config.folder) {
+                break;
+            }
+            folder = RED.nodes.getNode(folder.config.folder);
+        }
+        if (!folder || !folder.config) {
+            folders = [];
         }
     }
 

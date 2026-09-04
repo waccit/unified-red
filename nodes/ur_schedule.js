@@ -8,7 +8,9 @@ module.exports = function (RED) {
 
     function ScheduleNode(config) {
         RED.nodes.createNode(this, config);
-        this.holidays = RED.nodes.getNode(config.holidays).events;
+        // the holidays config node may be unset, disabled or deleted
+        let holidaysNode = RED.nodes.getNode(config.holidays);
+        this.holidays = (holidaysNode && holidaysNode.events) || [];
         this.cronJobs = {}; // { job, event, type }
         this.heartbeatTimer = null;
         this.valuePriority = { holiday: null, date: null, weekday: null };
@@ -672,7 +674,7 @@ module.exports = function (RED) {
             type: 'schedule',
             label: config.label,
             order: config.order,
-            width: config.width || group.config.width || 12,
+            width: config.width || group?.config?.width || 12,
             values: config.values,
             payloadType: config.payloadType,
             defaultView: config.defaultView,
@@ -698,7 +700,7 @@ module.exports = function (RED) {
             //     type: 'schedule',
             //     label: config.label,
             //     order: config.order,
-            //     width: config.width || group.config.width || 12,
+            //     width: config.width || group?.config?.width || 12,
             //     values: config.values,
             //     weekdays: config.weekdays,
             //     dates: config.dates,

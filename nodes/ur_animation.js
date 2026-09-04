@@ -8,7 +8,7 @@ module.exports = function (RED) {
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
         if (!config.width) {
-            config.width = group.config.width;
+            config.width = group?.config?.width;
         }
         var hei = Number(config.height || 0);
 
