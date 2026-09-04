@@ -47,3 +47,102 @@
 
     .mat-mdc-input-element
       color: rgba(0, 0, 0, 0.87) !important
+
+// Add/Edit event panel. Bootstrap's .m-4, .register-form, .row and .col-* are
+// all inert in this app (none are defined in the bundle), so the panel's own
+// spacing has to be set explicitly rather than inherited from the grid.
+.event-panel-header
+  padding-bottom: 4px
+
+.event-form
+  padding-top: 0
+
+  // Shorten the outlined Value field via Material's own tokens
+  // (container defaults to 56px) rather than overriding internal classes
+  ::ng-deep .mat-mdc-form-field
+    --mat-form-field-container-height: 46px
+    --mat-form-field-container-vertical-padding: 11px
+
+// NgbTimepicker is Bootstrap-styled; align it with the Material fields above it.
+// Sized to sit comfortably in the Add/Edit event panel without scrolling.
+.event-time-field
+  // Value uses subscriptSizing=dynamic, so it reserves no space below it;
+  // the gap above the label has to come from here instead.
+  margin-top: 18px
+  margin-bottom: 16px
+
+  // Mirrors the Material floating label on the Value field above, and sits
+  // tight to its own picker so the two group visually
+  .event-time-label
+    display: block
+    margin-bottom: 3px
+    font-size: 12px
+    line-height: 1
+    color: rgba(0, 0, 0, 0.6)
+
+  ::ng-deep ngb-timepicker
+    // ng-bootstrap 20 targets Bootstrap 5, which renamed .sr-only to
+    // .visually-hidden. This app only vendors the Bootstrap 4 name, so the
+    // timepicker's screen-reader labels ('Increment hours') would render
+    // visibly and break the layout. Define it locally rather than pulling in
+    // all of Bootstrap 5.
+    .visually-hidden
+      position: absolute !important
+      width: 1px !important
+      height: 1px !important
+      padding: 0 !important
+      margin: -1px !important
+      overflow: hidden !important
+      clip: rect(0, 0, 0, 0) !important
+      white-space: nowrap !important
+      border: 0 !important
+
+    // Bootstrap's base .form-control / .btn rules are not bundled in this app
+    // (only scoped overrides exist), so style the widget explicitly instead
+    // of relying on classes that resolve to nothing.
+    .ngb-tp-input
+      text-align: center
+      height: 38px
+      padding: 4px 6px
+      font-size: 14px
+      color: rgba(0, 0, 0, 0.87)
+      background: #fff
+      border: 1px solid rgba(0, 0, 0, 0.38)
+      border-radius: 4px
+
+      &:focus
+        outline: none
+        border-color: rgba(0, 0, 0, 0.87)
+
+    .btn-link
+      padding: 2px 4px
+      line-height: 1.2
+      background: none
+      border: 0
+      box-shadow: none
+      color: rgba(0, 0, 0, 0.54)
+      text-decoration: none
+
+      &:hover
+        color: rgba(0, 0, 0, 0.87)
+
+    .btn-outline-primary
+      height: 38px
+      padding: 0 10px
+      font-size: 14px
+      background: none
+      color: rgba(0, 0, 0, 0.87)
+      border: 1px solid rgba(0, 0, 0, 0.38)
+      border-radius: 4px
+
+    // ng-bootstrap reserves 4em per column and 1rem font; trim both
+    font-size: 14px
+
+    .ngb-tp-input-container
+      width: 3.9em
+
+    .ngb-tp-spacer
+      width: 0.85em
+
+    .ngb-tp-meridian .btn
+      margin-left: 6px

@@ -11,6 +11,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
@@ -68,6 +69,7 @@ import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autoco
         MatDialogModule,
         MatSelectModule,
         MatDatepickerModule,
+        NgbTimepickerModule,
         MatRadioModule,
         MatSlideToggleModule,
         MatSidenavModule,

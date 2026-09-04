@@ -246,7 +246,7 @@
                                     <div class="col-md-12 col-sm-12">
                                         <mat-sidenav-container class="task-container">
                                             <mat-sidenav #sidenav [mode]="mode.value" position="end">
-                                                <div class="header">
+                                                <div class="header event-panel-header">
                                                     <h2 class="header-title">{{dialogTitle}}</h2>
                                                     <div class="header-close m-l-0">
                                                         @if (!isNewEvent) {
@@ -261,15 +261,10 @@
                                                         <button mat-icon-button (click)="closeSlider(sidenav)"><mat-icon>close</mat-icon></button>
                                                     </div>
                                                 </div>
-                                                <form class="register-form m-4" [formGroup]="eventForm">
+                                                <form class="register-form m-4 event-form" [formGroup]="eventForm">
                                                     <div class="row">
                                                         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                                                            <mat-form-field [hidden]="true"><input matInput formControlName="id"></mat-form-field>
-                                                        </div>
-                                                    </div>
-                                                    <div class="row">
-                                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                                                            <mat-form-field class="example-full-width" appearance="outline">
+                                                            <mat-form-field class="example-full-width" appearance="outline" subscriptSizing="dynamic">
                                                                 <mat-label>Value</mat-label>
                                                                 <select matNativeControl formControlName="value" required>
                                                                     @for (value of data.values; track value.name) {
@@ -278,25 +273,11 @@
                                                                 </select>
                                                             </mat-form-field>
                                                         </div>
-                                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
-                                                            <mat-form-field class="example-full-width" appearance="outline">
-                                                                <mat-label>Hour</mat-label>
-                                                                <select matNativeControl formControlName="hour" required>
-                                                                    @for (i of hours; track i) {
-                                                                        <option [value]="i">{{ i }}</option>
-                                                                    }
-                                                                </select>
-                                                            </mat-form-field>
-                                                        </div>
-                                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
-                                                            <mat-form-field class="example-full-width" appearance="outline">
-                                                                <mat-label>Minute</mat-label>
-                                                                <select matNativeControl formControlName="minute" required>
-                                                                    @for (i of minutes; track i) {
-                                                                        <option [value]="i">{{ i }}</option>
-                                                                    }
-                                                                </select>
-                                                            </mat-form-field>
+                                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                                                            <div class="event-time-field">
+                                                                <span class="event-time-label">Time</span>
+                                                                <ngb-timepicker formControlName="time" [meridian]="true" [minuteStep]="5"></ngb-timepicker>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div class="row">
