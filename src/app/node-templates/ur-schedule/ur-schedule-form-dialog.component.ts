@@ -61,7 +61,7 @@ export class UrScheduleFormDialogComponent implements OnInit {
         { value: '3', text: '3rd' },
         { value: '4', text: '4th' },
         { value: '5', text: '5th' },
-        // { value: 'L', text: 'Last' },
+        { value: 'L', text: 'Last' },
     ];
     months = [
         { value: '1', text: 'Jan' },
@@ -113,10 +113,15 @@ export class UrScheduleFormDialogComponent implements OnInit {
                 } else if (this.isMonthlyWeekdayPattern(this.oldHoliday)) {
                     r.repeat = 'monthly';
                     r.month.type = 'weekday';
-                    const w = weekday.split('#');
-                    if (w.length === 2) {
-                        r.month.weekday = w[0];
-                        r.month.weekdayOccurrence = w[1];
+                    if (weekday.includes('#')) {
+                        const w = weekday.split('#');
+                        if (w.length === 2) {
+                            r.month.weekday = w[0];
+                            r.month.weekdayOccurrence = w[1];
+                        }
+                    } else if (weekday.includes('L')) {
+                        r.month.weekday = weekday[0];
+                        r.month.weekdayOccurrence = 'L';
                     }
                 } else if (this.isYearlyDatePattern(this.oldHoliday)) {
                     r.repeat = 'yearly';
@@ -127,10 +132,15 @@ export class UrScheduleFormDialogComponent implements OnInit {
                     r.repeat = 'yearly';
                     r.year.type = 'weekday';
                     r.year.month = month.split(',');
-                    const w = weekday.split('#');
-                    if (w.length === 2) {
-                        r.year.weekday = w[0];
-                        r.year.weekdayOccurrence = w[1];
+                    if (weekday.includes('#')) {
+                        const w = weekday.split('#');
+                        if (w.length === 2) {
+                            r.year.weekday = w[0];
+                            r.year.weekdayOccurrence = w[1];
+                        }
+                    } else if (weekday.includes('L')) {
+                        r.year.weekday = weekday[0];
+                        r.year.weekdayOccurrence = 'L';
                     }
                 }
             }
@@ -214,7 +224,10 @@ export class UrScheduleFormDialogComponent implements OnInit {
                 weekday = '*';
             } else if (fc.repeatMonthType.value === 'weekday') {
                 date = '*';
-                weekday = fc.repeatMonthWeekday.value + '#' + fc.repeatMonthWeekdayOccurrence.value;
+                weekday =
+                    fc.repeatMonthWeekday.value +
+                    (fc.repeatMonthWeekdayOccurrence.value !== 'L' ? '#' : '') +
+                    fc.repeatMonthWeekdayOccurrence.value;
             }
         } else if (fc.repeat.value === 'yearly') {
             month = fc.repeatYearMonth.value;
@@ -223,7 +236,10 @@ export class UrScheduleFormDialogComponent implements OnInit {
                 weekday = '*';
             } else if (fc.repeatYearType.value === 'weekday') {
                 date = '*';
-                weekday = fc.repeatYearWeekday.value + '#' + fc.repeatYearWeekdayOccurrence.value;
+                weekday =
+                    fc.repeatYearWeekday.value +
+                    (fc.repeatYearWeekdayOccurrence.value !== 'L' ? '#' : '') +
+                    fc.repeatYearWeekdayOccurrence.value;
             }
         }
         const smh = this.oldHoliday ? this.oldHoliday.split(' ').slice(0, 3) : ['0', '0', '0'];

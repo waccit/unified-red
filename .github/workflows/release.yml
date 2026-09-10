@@ -5,6 +5,11 @@ on:
      branches:
         - master
 
+permissions:
+  id-token: write
+  contents: write      
+  issues: write  
+
 jobs:
   build:
     name: Build
@@ -15,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '12.x'
       - name: Install Dependencies
         run: npm ci
       - name: Build
@@ -26,6 +31,7 @@ jobs:
         with:
           name: dist
           path: dist
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -33,6 +39,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
       - name: Download Build
         uses: actions/download-artifact@v4
         with:
@@ -41,5 +52,4 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release@22
+        run: npx semantic-release@25

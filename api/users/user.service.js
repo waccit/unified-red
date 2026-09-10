@@ -50,7 +50,11 @@ async function canRegister() {
     return !(await db.findOne(User));
 }
 
-async function getAll() {
+async function getAll(maxRole) {
+    if (maxRole !== undefined) {
+        const lte = db.chooseOperator('$lte');
+        return await db.find(User, { role: { [lte]: maxRole } });
+    }
     return await db.find(User);
 }
 
@@ -70,6 +74,9 @@ async function create(userParam) {
     // validate
     if (await db.findOne(User, { username: userParam.username })) {
         throw 'Username "' + userParam.username + '" is already taken';
+    }
+    if (await db.findOne(User, { email: userParam.email })) {
+        throw 'Email "' + userParam.email + '" is already in use';
     }
     validateEmailAddress(userParam.email);
 
@@ -98,6 +105,13 @@ async function update(id, userParam) {
         (await db.findOne(User, { username: userParam.username }))
     ) {
         throw 'Username "' + userParam.username + '" is already taken';
+    }
+    if (
+        userParam.email &&
+        user.email !== userParam.email &&
+        (await db.findOne(User, { email: userParam.email }))
+    ) {
+        throw 'Email "' + userParam.email + '" is already in use';
     }
     // validate email address if it was entered
     if (userParam.email) {

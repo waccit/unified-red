@@ -4,13 +4,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { RoleFormDialogComponent } from './role-form-dialog.component';
-import { SnackbarService, RoleService } from '../../services';
+import { SnackbarService, RoleService, AuthenticationService } from '../../services';
 import { RoleDataSource } from '../../data/';
 
 @Component({
-
     standalone: false,
-
     selector: 'app-roles-table',
     templateUrl: './roles-table.component.html',
     styleUrls: ['./roles-table.component.sass'],
@@ -18,6 +16,8 @@ import { RoleDataSource } from '../../data/';
 export class RolesTableComponent implements OnInit {
     displayedColumns = ['level', 'name', 'actions'];
     dataSource: RoleDataSource;
+    userRole: number;
+    private allRoleNames: string[] = [];
 
     @ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
     @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -26,26 +26,35 @@ export class RolesTableComponent implements OnInit {
         public httpClient: HttpClient,
         public dialog: MatDialog,
         private roleService: RoleService,
-        private snackbar: SnackbarService
+        private snackbar: SnackbarService,
+        private authService: AuthenticationService
     ) {}
 
     ngOnInit() {
+        this.userRole = this.authService.getUserRole();
+        this.roleService.getAll().subscribe((roles) => {
+            this.allRoleNames = roles.map((r) => r.name);
+        });
         this.refreshData();
     }
 
     refreshData() {
-        this.dataSource = new RoleDataSource(this.roleService, this.paginator, this.sort);
+        this.dataSource = new RoleDataSource(this.roleService, this.paginator, this.sort, this.userRole);
     }
 
     editRole(row) {
+        if (Number(row.level) > this.userRole) return;
         this.dialog
-            .open(RoleFormDialogComponent, { data: { data: row } })
+            .open(RoleFormDialogComponent, { data: { data: row, existingNames: this.allRoleNames } })
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
                     this.roleService.update(row.level, result).subscribe(
-                        (data) => {
+                        () => {
                             this.snackbar.success('Edited role successfully!');
+                            this.roleService.getAll().subscribe((roles) => {
+                                this.allRoleNames = roles.map((r) => r.name);
+                            });
                             this.refreshTable();
                         },
                         (error) => {

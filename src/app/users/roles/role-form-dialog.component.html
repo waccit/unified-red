@@ -21,6 +21,9 @@
                         @if (form.get('name').hasError('required')) {
                             <mat-error>Name is required</mat-error>
                         }
+                        @if (form.get('name').hasError('nameTaken')) {
+                            <mat-error>Role name is already taken</mat-error>
+                        }
                     </mat-form-field>
                 </div>
             </div>
