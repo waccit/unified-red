@@ -1,4 +1,6 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_BUTTON_TOGGLE_DEFAULT_OPTIONS } from '@angular/material/button-toggle';
+import { MatSidenav } from '@angular/material/sidenav';
 import { Component, Inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -35,10 +37,21 @@ export const UR_SCHEDULE_DATE_FORMATS = {
             deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
         },
         { provide: MAT_DATE_FORMATS, useValue: UR_SCHEDULE_DATE_FORMATS },
+        {
+            // Material's button toggles render a checkmark for the selected state,
+            // which eats horizontal space and shoves the label off-centre. These
+            // pickers are narrow (single letters / 3-letter months) and rely on the
+            // fill colour to show selection, so the indicator is redundant here.
+            // Scoped to this dialog so the toggles in alarm-console and
+            // right-sidebar keep their default appearance.
+            provide: MAT_BUTTON_TOGGLE_DEFAULT_OPTIONS,
+            useValue: { hideSingleSelectionIndicator: true, hideMultipleSelectionIndicator: true },
+        },
     ],
 })
 export class UrScheduleFormDialogComponent implements OnInit {
     @ViewChild('closeBtn') closeBtn: ElementRef<HTMLButtonElement> | undefined;
+    @ViewChild('sidenav') eventPane: MatSidenav | undefined;
     title: string;
     form: FormGroup;
     data: any; // { start, end, values, type }
@@ -204,6 +217,39 @@ export class UrScheduleFormDialogComponent implements OnInit {
         };
     }
 
+    /**
+     * Commit an add/edit event pane the user left open. Clicking the dialog's Save
+     * without first clicking the pane's own save tick used to discard the event.
+     * Only a valid pane is committed; an untouched "Add Event" pane has no value
+     * selected and so is invalid and skipped.
+     */
+    private commitOpenEventPane(): void {
+        if (!this.eventPane?.opened || !this.eventForm?.valid) {
+            return;
+        }
+        if (this.isNewEvent) {
+            this.events.push(this.buildEvent());
+        } else {
+            const i = this.events.findIndex((item) => item.id === this.eventForm.value.id);
+            if (i > -1) {
+                this.events[i] = this.buildEvent();
+            }
+        }
+        this.eventPane.close();
+    }
+
+    /** Save the schedule, folding in any outstanding event-pane edit first. */
+    save(addTo = null): void {
+        this.commitOpenEventPane();
+        this.confirm();
+        this.dialogRef.close(this.submit(addTo));
+    }
+
+    /** Delete the schedule. */
+    remove(): void {
+        this.dialogRef.close(this.delete());
+    }
+
     public confirm(): void {}
 
     generateHolidayPattern() {
@@ -252,7 +298,10 @@ export class UrScheduleFormDialogComponent implements OnInit {
     }
 
     addNewEvent(nav: any) {
-        this.resetEventFormField();
+        // A fresh group, not resetEventFormField(): that leaves the previous event's
+        // id in place, so two consecutive adds would produce duplicate ids and the
+        // id lookups in editEvent/commitOpenEventPane would resolve to the wrong row.
+        this.eventForm = this.createEventFormGroup(null);
         this.isNewEvent = true;
         this.dialogTitle = 'Add';
         nav.open();
@@ -266,7 +315,7 @@ export class UrScheduleFormDialogComponent implements OnInit {
     }
 
     closeSlider(nav: any) {
-        if (nav.open()) {
+        if (nav.opened) {
             nav.close();
         }
     }
@@ -274,7 +323,7 @@ export class UrScheduleFormDialogComponent implements OnInit {
     createEventFormGroup(data: any) {
         return this.formBuilder.group({
             id: [data ? data.id : this.getRandomID()],
-            value: [data ? data.value : ''],
+            value: [data ? data.value : '', Validators.required],
             time: [this.toTimeValue(data ? data.hour : 0, data ? data.minute : 0), Validators.required],
         });
     }
@@ -316,8 +365,10 @@ export class UrScheduleFormDialogComponent implements OnInit {
 
     editEvent(nav: any) {
         if (this.eventForm.valid) {
-            const i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
-            this.events[i] = this.buildEvent();
+            const i = this.events.findIndex((item) => item.id === this.eventForm.value.id);
+            if (i > -1) {
+                this.events[i] = this.buildEvent();
+            }
             nav.close();
         }
     }
