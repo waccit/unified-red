@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { MAT_TABS_CONFIG } from '@angular/material/tabs';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -96,6 +97,7 @@ import { InitialSetupModule } from './initial-setup/initial-setup.module';
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         provideNgxMask(),
+        { provide: MAT_TABS_CONFIG, useValue: { stretchTabs: false } },
     ],
     bootstrap: [AppComponent],
 })
