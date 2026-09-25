@@ -102,7 +102,7 @@ var injectedStyles = `
         padding-left: 7px !important;
     }
     #vakata-dnd {
-        font-family: 'Arial', sans-serif !important;
+        font-family: Poppins, 'Helvetica Neue', sans-serif !important;
         font-size: 14px !important;
         font-weight: normal !important;
         color: #333 !important;

@@ -14,12 +14,14 @@ import * as shape from 'd3-shape';
 import { first, map, startWith } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DataLogDataSource, DataLogQuery } from '../../data';
-import { element } from 'protractor';
 import { StyleService } from '../../services/style.service';
 
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-chart',
     templateUrl: './ur-chart.component.html',
     styleUrls: ['./ur-chart.component.sass'],
@@ -59,6 +61,7 @@ export class UrChartComponent extends BaseNode implements OnInit {
     private queriedEndTimestamp: Date;
     msgFlag: boolean = true;;
     needXRange: boolean = true;
+    xrangeControl: FormControl;
 
     xRangeStart;
     xRangeEnd;
@@ -147,6 +150,15 @@ export class UrChartComponent extends BaseNode implements OnInit {
             color11: [this.data.colors[10], Validators.required],
             color12: [this.data.colors[11], Validators.required],
         });
+        this.xrangeControl = new FormControl(this.data.xrange ?? null, [Validators.required]);
+        this.xrangeControl.valueChanges.subscribe((value) => {
+            if (this.xrangeControl.valid && value !== null) {
+                this.data.xrange = parseFloat(value);
+                this.refreshTime();
+                this.setDirty();
+            }
+        });
+
         this.live.subscribe((live) => {
             if (live) {
                 if (!this.liveSubscription) {

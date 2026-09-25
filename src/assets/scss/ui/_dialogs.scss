@@ -1,8 +1,15 @@
-﻿/*
+/*
  *  Document   : _dialogs.scss
  *  Author     : RedStar Template
  *  Description: This scss file for dialogs style classes
  */
+
+/* Consistent spacing for Material dialogs: content below header */
+.mat-dialog-container .mat-dialog-content,
+.mat-mdc-dialog-container .mat-mdc-dialog-content {
+    padding-top: 20px;
+}
+
 .sweet-alert {
     @include border-radius(0 !important);
 

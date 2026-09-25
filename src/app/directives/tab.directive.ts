@@ -1,6 +1,9 @@
 import { Directive, ViewContainerRef } from '@angular/core';
 
 @Directive({
+
+    standalone: false,
+
     selector: '[tab-host]',
 })
 export class TabDirective {

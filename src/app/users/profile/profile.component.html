@@ -13,30 +13,28 @@
                                     <mat-label>First Name</mat-label>
                                     <input matInput formControlName="firstName" required />
                                     <mat-icon matSuffix>face</mat-icon>
-                                    <mat-error *ngIf="settingsForm.get('firstName').hasError('required')"
-                                        >First name is required
-                                    </mat-error>
+                                    @if (settingsForm.get('firstName').hasError('required')) {
+                                        <mat-error>First name is required</mat-error>
+                                    }
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Last Name</mat-label>
                                     <input matInput formControlName="lastName" required />
                                     <mat-icon matSuffix>face</mat-icon>
-                                    <mat-error *ngIf="settingsForm.get('lastName').hasError('required')"
-                                        >Last name is required
-                                    </mat-error>
+                                    @if (settingsForm.get('lastName').hasError('required')) {
+                                        <mat-error>Last name is required</mat-error>
+                                    }
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Email</mat-label>
                                     <input matInput formControlName="email" required />
                                     <mat-icon matSuffix>mail</mat-icon>
-                                    <mat-error
-                                        *ngIf="
-                                            settingsForm.get('email').hasError('required') ||
-                                            settingsForm.get('email').touched
-                                        "
-                                    >
-                                        Please enter a valid email address</mat-error
-                                    >
+                                    @if (
+                                        settingsForm.get('email').hasError('required') ||
+                                        settingsForm.get('email').touched
+                                    ) {
+                                        <mat-error>Please enter a valid email address</mat-error>
+                                    }
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Home Page</mat-label>
@@ -48,23 +46,11 @@
                                     />
                                     <mat-icon matSuffix>home</mat-icon>
                                     <mat-autocomplete #auto="matAutocomplete">
-                                        <mat-option *ngFor="let page of filteredPages | async" [value]="page">{{
-                                            page
-                                        }}</mat-option>
+                                        @for (page of (filteredPages | async) ?? []; track page) {
+                                            <mat-option [value]="page">{{ page }}</mat-option>
+                                        }
                                     </mat-autocomplete>
                                 </mat-form-field>
-                                <!-- <div class="form-group">
-                                    <mat-checkbox class="example-margin">Profile Visibility For Everyone
-                                    </mat-checkbox>
-                                </div>
-                                <div class="form-group">
-                                    <mat-checkbox class="example-margin">New task notifications
-                                    </mat-checkbox>
-                                </div>
-                                <div class="form-group">
-                                    <mat-checkbox class="example-margin">New friend request notifications
-                                    </mat-checkbox>
-                                </div> -->
                             </div>
                             <div class="row clearfix">
                                 <div class="col-md-12">
@@ -87,9 +73,9 @@
                                     <mat-label>New Username</mat-label>
                                     <input matInput formControlName="username" required />
                                     <mat-icon matSuffix>face</mat-icon>
-                                    <mat-error *ngIf="usernameForm.get('username').hasError('required')"
-                                        >Username is required
-                                    </mat-error>
+                                    @if (usernameForm.get('username').hasError('required')) {
+                                        <mat-error>Username is required</mat-error>
+                                    }
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Current Password</mat-label>
@@ -102,9 +88,9 @@
                                     <mat-icon matSuffix (click)="hide = !hide">{{
                                         hide ? 'visibility_off' : 'visibility'
                                     }}</mat-icon>
-                                    <mat-error *ngIf="usernameForm.get('password').hasError('required')"
-                                        >Password is required
-                                    </mat-error>
+                                    @if (usernameForm.get('password').hasError('required')) {
+                                        <mat-error>Password is required</mat-error>
+                                    }
                                 </mat-form-field>
                             </div>
                             <div class="row clearfix">
@@ -135,9 +121,9 @@
                                     <mat-icon matSuffix (click)="hide = !hide">{{
                                         hide ? 'visibility_off' : 'visibility'
                                     }}</mat-icon>
-                                    <mat-error *ngIf="passwordForm.get('password').hasError('required')"
-                                        >Password is required
-                                    </mat-error>
+                                    @if (passwordForm.get('password').hasError('required')) {
+                                        <mat-error>Password is required</mat-error>
+                                    }
                                 </mat-form-field>
                                 <mat-form-field
                                     class="example-full-width"
@@ -158,12 +144,12 @@
                                         >Password must have a minimum of 8 characters containing a lowercase character,
                                         an uppercase character, and a digit or symbol.</mat-hint
                                     >
-                                    <mat-error *ngIf="passwordForm.get('newPassword').hasError('required')"
-                                        >Password is required
-                                    </mat-error>
-                                    <mat-error *ngIf="passwordForm.get('newPassword').hasError('passwordStrength')">
-                                        {{ passwordForm.get('newPassword').errors['passwordStrength'] }}</mat-error
-                                    >
+                                    @if (passwordForm.get('newPassword').hasError('required')) {
+                                        <mat-error>Password is required</mat-error>
+                                    }
+                                    @if (passwordForm.get('newPassword').hasError('passwordStrength')) {
+                                        <mat-error>{{ passwordForm.get('newPassword').errors['passwordStrength'] }}</mat-error>
+                                    }
                                 </mat-form-field>
                                 <mat-form-field class="example-full-width" appearance="fill">
                                     <mat-label>Confirm New Password</mat-label>
@@ -176,12 +162,12 @@
                                     <mat-icon matSuffix (click)="chide = !chide">{{
                                         chide ? 'visibility_off' : 'visibility'
                                     }}</mat-icon>
-                                    <mat-error *ngIf="passwordForm.get('cNewPassword').hasError('required')"
-                                        >Confirm Password is required
-                                    </mat-error>
-                                    <mat-error *ngIf="passwordForm.get('cNewPassword').hasError('mustMatch')"
-                                        >Passwords must match
-                                    </mat-error>
+                                    @if (passwordForm.get('cNewPassword').hasError('required')) {
+                                        <mat-error>Confirm Password is required</mat-error>
+                                    }
+                                    @if (passwordForm.get('cNewPassword').hasError('mustMatch')) {
+                                        <mat-error>Passwords must match</mat-error>
+                                    }
                                 </mat-form-field>
                             </div>
                             <div class="row clearfix">
@@ -194,32 +180,5 @@
                 </div>
             </div>
         </div>
-
-        <!--
-        <div class="row clearfix">
-            <div class="col-lg-12 col-md-12">
-                <div class="card">
-                    <div class="profile-tab-box">
-                        <div class="p-l-20">
-                            <ul class="nav ">
-                                <li class="nav-item tab-all">
-                                    <a class="nav-link active show" href="#accountsettings" data-toggle="tab">Account Settings</a>
-                                </li>
-                                <li class="nav-item tab-all p-l-20">
-                                    <a class="nav-link" href="#securitysettings" data-toggle="tab">Security Settings</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="accountsettings" aria-expanded="false">
-                    </div>
-                    <div role="tabpanel" class="tab-pane" id="securitysettings" aria-expanded="false">
-                    </div>
-                </div>
-            </div>
-        </div>
-        -->
     </div>
 </section>

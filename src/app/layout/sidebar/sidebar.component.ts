@@ -7,6 +7,9 @@ import { RouteInfo } from './sidebar.metadata';
 // import { ROUTES } from './sidebar-items';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-sidebar',
     templateUrl: './sidebar.component.html',
     styleUrls: ['./sidebar.component.sass'],
@@ -38,10 +41,24 @@ export class SidebarComponent implements OnInit {
     }
 
     @HostListener('document:mousedown', ['$event'])
-    onGlobalClick(event): void {
-        if (!this.elementRef.nativeElement.contains(event.target)) {
-            this.renderer.removeClass(this.document.body, 'overlay-open');
+    onGlobalClick(event: MouseEvent): void {
+        const target = event.target;
+        if (target == null) {
+            return;
         }
+        if (!(target instanceof Node)) {
+            return;
+        }
+        if (this.elementRef.nativeElement.contains(target)) {
+            return;
+        }
+        // Defer to header `(click)` on `.bars` — mousedown would fire first and confuse the toggle.
+        const clickFromBars =
+            (target instanceof Element && target.closest('.bars')) || target.parentElement?.closest?.('.bars');
+        if (clickFromBars) {
+            return;
+        }
+        this.renderer.removeClass(this.document.body, 'overlay-open');
     }
 
     callMenuToggle(event: any, element: any) {
@@ -64,9 +81,7 @@ export class SidebarComponent implements OnInit {
         });
 
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
-            }
+            this.userRole = user ? user.role : undefined;
         });
         this.initLeftSidebar();
         this.bodyTag = this.document.body;
@@ -74,7 +89,9 @@ export class SidebarComponent implements OnInit {
 
     hasAccess(access) {
         if (!access) access = 0;
-
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 

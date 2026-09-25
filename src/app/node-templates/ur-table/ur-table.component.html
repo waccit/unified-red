@@ -1,54 +1,66 @@
 <div #container>
-    <ng-template [ngIf]="access.read || data.accessBehavior !== 'hide'">
-        <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
-        <div *ngIf="!data.pivot" class="table-responsive">
-            <table class="table table-sm table-bordered table-hover w-100 table-striped">
-                <thead>
-                    <th *ngFor="let c of data.fields">{{ c.label }}</th>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let device of sortedDeviceList" class="healthIndicator">
-                        <ng-container *ngFor="let c of data.fields">
-                            <ng-container *ngFor="let point of dataSource[device] | keyvalue">
-                                <ng-container *ngIf="point.key.includes(c.param)">
-                                    <ng-container *ngIf="c.formatType !== 'link'">
-                                        <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
-                                            [innerHTML]="point.value[c.label]"></td>
-                                    </ng-container>
-                                    <ng-container *ngIf="c.formatType === 'link'">
-                                        <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
-                                                [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
-                                    </ng-container>
-                                </ng-container>
-                            </ng-container>
-                        </ng-container>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    @if (access.read || data.accessBehavior !== 'hide') {
+        @if (data.label) {
+            <div class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
+        }
+        @if (!data.pivot) {
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover w-100 table-striped">
+                    <thead>
+                        @for (c of data.fields; track c.label) {
+                            <th>{{ c.label }}</th>
+                        }
+                    </thead>
+                    <tbody>
+                        @for (device of sortedDeviceList; track device) {
+                            <tr class="healthIndicator">
+                                @for (c of data.fields; track c.param) {
+                                    @for (point of dataSource[device] | keyvalue; track point.key) {
+                                        @if (point.key.includes(c.param)) {
+                                            @if (c.formatType !== 'link') {
+                                                <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
+                                                    [innerHTML]="point.value[c.label]"></td>
+                                            }
+                                            @if (c.formatType === 'link') {
+                                                <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
+                                                        [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
+                                            }
+                                        }
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
 
-        <div *ngIf="data.pivot" class="table-responsive">
-            <table class="table table-sm table-bordered table-hover w-100 table-striped">
-                <tbody>
-                    <tr *ngFor="let c of data.fields" class="healthIndicator">
-                        <th>{{ c.label }}</th>
-                        <ng-container *ngFor="let device of sortedDeviceList">
-                            <ng-container *ngFor="let point of dataSource[device] | keyvalue">
-                                <ng-container *ngIf="point.key.includes(c.param)">
-                                    <ng-container *ngIf="c.formatType !== 'link'">
-                                        <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
-                                            [innerHTML]="point.value[c.label]"></td>
-                                    </ng-container>
-                                    <ng-container *ngIf="c.formatType === 'link'">
-                                        <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
-                                                [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
-                                    </ng-container>
-                                </ng-container>
-                            </ng-container>
-                        </ng-container>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </ng-template>
+        @if (data.pivot) {
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover w-100 table-striped">
+                    <tbody>
+                        @for (c of data.fields; track c.param) {
+                            <tr class="healthIndicator">
+                                <th>{{ c.label }}</th>
+                                @for (device of sortedDeviceList; track device) {
+                                    @for (point of dataSource[device] | keyvalue; track point.key) {
+                                        @if (point.key.includes(c.param)) {
+                                            @if (c.formatType !== 'link') {
+                                                <td [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
+                                                    [innerHTML]="point.value[c.label]"></td>
+                                            }
+                                            @if (c.formatType === 'link') {
+                                                <td><a [ngStyle]="this.styleService.getStyle(data, point.key)" [ngClass]="this.styleService.getClass(data, point.key)" 
+                                                        [routerLink]="dataLink[device][point.key].href">{{ dataLink[device][point.key].text }}</a></td>
+                                            }
+                                        }
+                                    }
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
 </div>

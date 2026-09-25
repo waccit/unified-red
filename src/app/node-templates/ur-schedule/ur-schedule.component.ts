@@ -1,6 +1,10 @@
 import { Component, ViewChild, AfterViewInit, Renderer2 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { FullCalendarComponent, CalendarOptions, render } from '@fullcalendar/angular';
+import { FullCalendarComponent } from '@fullcalendar/angular';
+import { CalendarOptions } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import * as parser from 'cron-parser';
 import * as moment from 'moment';
 import { BaseNode } from '../ur-base-node';
@@ -13,6 +17,9 @@ import { StyleService } from '../../services/style.service';
 declare const $: any;
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-schedule',
     templateUrl: './ur-schedule.component.html',
     styleUrls: ['./ur-schedule.component.sass'],
@@ -22,6 +29,9 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
     calendarComponent: FullCalendarComponent;
 
     calendarOptions: CalendarOptions = {
+        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+        // Prevent the last visible hour slot from stretching to fill leftover view height.
+        expandRows: false,
         headerToolbar: this.isMobile()
             ? { left: '', center: 'title', right: '' } // mobile
             : { left: 'prev,next', center: 'title', right: 'dayGridMonth,timeGridWeek,dayGridDay' }, //desktop
@@ -52,6 +62,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         eventChange: this.handleEventChange.bind(this),
         datesSet: this.renderDateRange.bind(this),
         viewClassNames: this.saveCurrentViewType.bind(this),
+        aspectRatio: 1.4
     };
 
     dirty = false;
@@ -96,7 +107,8 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
 
     private saveCurrentViewType() {
         if (this.calendarComponent) {
-            let currentViewType = this.calendarComponent.getApi().currentData.currentViewType;
+            const api = this.calendarComponent.getApi();
+            const currentViewType = api.view.type;
             localStorage.setItem(`fcInitialView-${this.getBaseNodeId(this.data.id)}`, currentViewType);
         }
     }
@@ -125,7 +137,13 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
                     break;
             }
         }
-        this.calendarComponent.getApi().changeView(viewType);
+        if (this.calendarComponent) {
+            this.calendarComponent.getApi().changeView(viewType);
+        } else {
+            // Calendar not yet rendered (access guard is still resolving); set initialView
+            // so the correct view is used when the calendar first renders.
+            this.calendarOptions = { ...this.calendarOptions, initialView: viewType };
+        }
     }
 
     private sortChronologically(scheduleArray) {
@@ -382,7 +400,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
 
         this.dialog
-            .open(UrScheduleFormDialogComponent, { data: dialogData })
+            .open(UrScheduleFormDialogComponent, { data: dialogData, autoFocus: false })
             .afterClosed()
             .subscribe((result) => {
                 if (result) {
@@ -434,7 +452,7 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
         }
 
         this.dialog
-            .open(UrScheduleFormDialogComponent, { data: { data: dialogData, action: 'edit' } })
+            .open(UrScheduleFormDialogComponent, { data: { data: dialogData, action: 'edit' }, autoFocus: false })
             .afterClosed()
             .subscribe((result) => {
                 if (result) {

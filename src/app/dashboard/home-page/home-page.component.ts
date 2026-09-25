@@ -6,6 +6,9 @@ import { CurrentUserService } from '../../services';
 import { MenuService } from '../../services/menu.service';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-home-page',
     templateUrl: './home-page.component.html',
     styleUrls: ['./home-page.component.sass'],

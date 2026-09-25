@@ -1,6 +1,5 @@
 import {
     Component,
-    ComponentFactoryResolver,
     Input,
     OnDestroy,
     OnInit,
@@ -12,6 +11,9 @@ import { Widget } from '../../data/widget.model';
 import { TabDirective } from '../../directives/tab.directive';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-tab',
     templateUrl: './tab.component.html',
     styleUrls: ['./tab.component.sass'],
@@ -22,7 +24,6 @@ export class TabComponent implements OnInit, OnDestroy {
     @ViewChild(TabDirective, { static: true }) tabHost: TabDirective;
 
     constructor(
-        private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
         private renderer2: Renderer2
     ) {}
@@ -41,9 +42,7 @@ export class TabComponent implements OnInit, OnDestroy {
 
         if (this.widgets) {
             this.widgets.forEach((widget) => {
-                const componentFactory = this.componentFactoryResolver.resolveComponentFactory(widget.component);
-
-                const componentRef = this.viewContainerRef.createComponent(componentFactory);
+                const componentRef = this.viewContainerRef.createComponent(widget.component);
                 componentRef.instance.data = widget.data;
                 const colWidth = +widget.data.width || 12;
                 const colClass = 'col-' + colWidth;

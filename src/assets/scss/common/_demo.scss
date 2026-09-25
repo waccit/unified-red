@@ -297,6 +297,19 @@
             }
         }
     }
+
+    .demo-settings {
+        .list-group .list-group-item {
+            display: flex;
+            align-items: center;
+            column-gap: 8px;
+
+            mat-icon.mat-icon,
+            .mat-icon {
+                flex-shrink: 0;
+            }
+        }
+    }
     .progress {
         -webkit-border-radius: 50px;
         -moz-border-radius: 50px;

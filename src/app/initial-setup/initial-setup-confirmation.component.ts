@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-initial-setup-confirmation',
     templateUrl: './initial-setup-confirmation.component.html',
     styleUrls: ['./initial-setup-confirmation.component.scss'],

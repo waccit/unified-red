@@ -1,10 +1,12 @@
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import * as moment from 'moment';
+import { take } from 'rxjs/operators';
+import { NgbTimeStruct } from '@ng-bootstrap/ng-bootstrap';
 import { HolidayValidator } from './schedule.validators';
 
 export const UR_SCHEDULE_DATE_FORMATS = {
@@ -20,6 +22,9 @@ export const UR_SCHEDULE_DATE_FORMATS = {
 };
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-schedule-form-dialog',
     templateUrl: './ur-schedule-form-dialog.component.html',
     styleUrls: ['./ur-schedule-form-dialog.component.sass'],
@@ -32,15 +37,14 @@ export const UR_SCHEDULE_DATE_FORMATS = {
         { provide: MAT_DATE_FORMATS, useValue: UR_SCHEDULE_DATE_FORMATS },
     ],
 })
-export class UrScheduleFormDialogComponent {
+export class UrScheduleFormDialogComponent implements OnInit {
+    @ViewChild('closeBtn') closeBtn: ElementRef<HTMLButtonElement> | undefined;
     title: string;
     form: FormGroup;
     data: any; // { start, end, values, type }
     oldHoliday = '';
 
     // select field options
-    hours = [...Array(24).keys()];
-    minutes = [...Array(60).keys()].map((i) => i.toString().padStart(2, '0'));
     dates = [...Array(31).keys()].map((i) => (i + 1).toString());
     weekdays = [
         { value: '0', text: 'Sunday', short: 'Su' },
@@ -175,6 +179,13 @@ export class UrScheduleFormDialogComponent {
         this.eventForm = this.createEventFormGroup(null);
     }
 
+    ngOnInit(): void {
+        // Blur close button after dialog open so focus circle doesn't show (focus trap runs first)
+        this.dialogRef.afterOpened().pipe(take(1)).subscribe(() => {
+            setTimeout(() => this.closeBtn?.nativeElement?.blur(), 100);
+        });
+    }
+
     submit(addTo = null) {
         return {
             action: this.action,
@@ -264,14 +275,40 @@ export class UrScheduleFormDialogComponent {
         return this.formBuilder.group({
             id: [data ? data.id : this.getRandomID()],
             value: [data ? data.value : ''],
-            hour: [data ? data.hour : '0'],
-            minute: [data ? data.minute.toString().padStart(2, '0') : '00'],
+            time: [this.toTimeValue(data ? data.hour : 0, data ? data.minute : 0), Validators.required],
         });
+    }
+
+    /**
+     * The event model stores { hour, minute } as strings; NgbTimepicker binds
+     * to an NgbTimeStruct of numbers. Seconds are unused by the schedule.
+     */
+    private toTimeValue(hour: any, minute: any): NgbTimeStruct {
+        return { hour: parseInt(hour, 10) || 0, minute: parseInt(minute, 10) || 0, second: 0 };
+    }
+
+    /** Inverse of toTimeValue: back to the stored { hour, minute } shape. */
+    private fromTimeValue(time: NgbTimeStruct): { hour: string; minute: string } {
+        // NgbTimepicker emits null while the input is incomplete.
+        if (!time || !Number.isFinite(time.hour) || !Number.isFinite(time.minute)) {
+            return { hour: '0', minute: '00' };
+        }
+        return { hour: time.hour.toString(), minute: time.minute.toString().padStart(2, '0') };
+    }
+
+    /**
+     * Build the persisted event. The form carries a `time` control that must not
+     * reach the model, so the event is assembled explicitly rather than from
+     * eventForm.value.
+     */
+    private buildEvent() {
+        const { id, value, time } = this.eventForm.value as any;
+        return { id, value, ...this.fromTimeValue(time) };
     }
 
     saveEvent(nav: any) {
         if (this.eventForm.valid) {
-            this.events.push(this.eventForm.value);
+            this.events.push(this.buildEvent());
             this.resetEventFormField();
             nav.close();
         }
@@ -280,7 +317,7 @@ export class UrScheduleFormDialogComponent {
     editEvent(nav: any) {
         if (this.eventForm.valid) {
             const i = this.events.map((item) => item.id).indexOf(this.eventForm.value.id);
-            this.events[i] = this.eventForm.value;
+            this.events[i] = this.buildEvent();
             nav.close();
         }
     }
@@ -293,8 +330,7 @@ export class UrScheduleFormDialogComponent {
 
     resetEventFormField() {
         this.eventForm.controls.value.reset();
-        this.eventForm.controls.hour.reset();
-        this.eventForm.controls.minute.reset();
+        this.eventForm.controls.time.setValue(this.toTimeValue(0, 0));
     }
 
     public getRandomID(): string {

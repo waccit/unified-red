@@ -1,7 +1,10 @@
-<ng-template [ngIf]="access.view || data.accessBehavior !== 'hide'">
-    <div *ngIf="data.label" class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
+@if (access.view || data.accessBehavior !== 'hide') {
+    @if (data.label) {
+        <div class="p-b-10 p-l-10 font-17">{{ data.label }}</div>
+    }
     <mat-tab-group #container [id]="data.id">
-        <mat-tab *ngIf="data.chartType === 'line'">
+        @if (data.chartType === 'line') {
+        <mat-tab>
             <ng-template mat-tab-label>
                 <mat-icon>timeline</mat-icon>
             </ng-template>
@@ -21,8 +24,10 @@
                 </ngx-charts-line-chart>
             </div>
         </mat-tab>
+        }
 
-        <mat-tab *ngIf="data.chartType === 'table'">
+        @if (data.chartType === 'table') {
+        <mat-tab>
             <ng-template mat-tab-label>
                 <mat-icon>grid_on</mat-icon>
             </ng-template>
@@ -58,6 +63,7 @@
                 </ul>
             </div>
         </mat-tab>
+        }
 
         <mat-tab>
             <ng-template mat-tab-label>
@@ -96,14 +102,18 @@
                   </select>
                 </mat-form-field>
               </div>
-              <div class="col-4" *ngIf="needXRange">
+              @if (needXRange) {
+              <div class="col-4">
                   <mat-form-field appearance="outline" style="width:100%">
                       <mat-label>Time Range</mat-label>
-                      <input matInput type="number" (change)="setXRange($event.target.value)" [value]="data.xrange" />
+                      <input matInput type="number" [formControl]="xrangeControl" />
+                      <mat-error>Required</mat-error>
                   </mat-form-field>
               </div>
+              }
                 <!-- <button (click)="debug()">DEBUG</button> -->
-                <div *ngIf="data.xrangeunits === 'fixed_date_range'" class="col-3">
+                @if (data.xrangeunits === 'fixed_date_range') {
+                <div class="col-3">
                   <mat-form-field style="width:80%">
                     <mat-label>Start Date</mat-label>
                     <input matInput [matDatepicker]="startDatePicker" (dateChange)='setXRangeStartDate($event.target.value)' [(ngModel)]='xRangeStart'>
@@ -117,6 +127,7 @@
                     <mat-datepicker #endDatePicker></mat-datepicker>
                   </mat-form-field>
                 </div>
+                }
                 <div class="col-2 pt-4">
                     <mat-checkbox [(ngModel)]="data.live" (change)="live.next($event.checked); setDirty()">Live
                     </mat-checkbox>
@@ -162,9 +173,11 @@
                                     <input type="text" placeholder="topic" aria-label="Topic" matInput
                                         formControlName="topic" [matAutocomplete]="auto" required>
                                     <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-                                        <mat-option style='white-space: pre-line; line-height: normal;' *ngFor="let topic of filteredTopics | async" [value]="topic">
-                                            {{ topic }}
-                                        </mat-option>
+                                        @for (topic of (filteredTopics | async) ?? []; track topic) {
+                                            <mat-option style='white-space: pre-line; line-height: normal;' [value]="topic">
+                                                {{ topic }}
+                                            </mat-option>
+                                        }
                                     </mat-autocomplete>
                                 </mat-form-field>
                             </div>
@@ -175,15 +188,18 @@
                     </form>
                 </div>
             </div>
-            <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
+            @if (dirty && (access.edit || data.accessBehavior !== 'hide')) {
+            <div class="row">
                 <div class="col-12 mt-2 mb-2">
                     <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
-                        [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
+                        [disabled]="!dirty || disabled || (needXRange && xrangeControl?.invalid) || (access.edit === false && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
+            }
         </mat-tab>
 
-        <mat-tab *ngIf="data.chartType === 'line'">
+        @if (data.chartType === 'line') {
+        <mat-tab>
             <ng-template mat-tab-label>
                 <mat-icon>multiline_chart</mat-icon>
             </ng-template>
@@ -285,30 +301,33 @@
                     </form>
                 </div>
                 <div class="col-6 series-color">
+                    <div class="p-b-10 p-l-10 font-17">Colors</div>
                     <form [formGroup]="colorForm">
-                        <div class="p-b-10 p-l-10 font-17">Colors</div>
-                        <input matInput type="color" formControlName="color1" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color2" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color3" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color4" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color5" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color6" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color7" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color8" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color9" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color10" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color11" (change)="updateColor()" />
-                        <input matInput type="color" formControlName="color12" (change)="updateColor()" />
+                        <input type="color" formControlName="color1" (change)="updateColor()" />
+                        <input type="color" formControlName="color2" (change)="updateColor()" />
+                        <input type="color" formControlName="color3" (change)="updateColor()" />
+                        <input type="color" formControlName="color4" (change)="updateColor()" />
+                        <input type="color" formControlName="color5" (change)="updateColor()" />
+                        <input type="color" formControlName="color6" (change)="updateColor()" />
+                        <input type="color" formControlName="color7" (change)="updateColor()" />
+                        <input type="color" formControlName="color8" (change)="updateColor()" />
+                        <input type="color" formControlName="color9" (change)="updateColor()" />
+                        <input type="color" formControlName="color10" (change)="updateColor()" />
+                        <input type="color" formControlName="color11" (change)="updateColor()" />
+                        <input type="color" formControlName="color12" (change)="updateColor()" />
                     </form>
                 </div>
             </div>
-            <div class="row" *ngIf="dirty && (access.edit || data.accessBehavior !== 'hide')">
+            @if (dirty && (access.edit || data.accessBehavior !== 'hide')) {
+            <div class="row">
                 <div class="col-12 mt-2 mb-2">
                     <button mat-raised-button color="primary" class="example-full-width" (click)="deploy()"
-                        [disabled]="!dirty || disabled || (!access.edit && data.accessBehavior === 'disable')">Deploy</button>
+                        [disabled]="!dirty || disabled || (needXRange && xrangeControl?.invalid) || (access.edit === false && data.accessBehavior === 'disable')">Deploy</button>
                 </div>
             </div>
+            }
         </mat-tab>
+        }
 
     </mat-tab-group>
-</ng-template>
+}

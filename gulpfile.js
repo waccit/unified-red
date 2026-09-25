@@ -16,7 +16,7 @@ paths = {
 function scripts(done) {
     gulp.src([
         paths.npm + '/jquery/dist/jquery.js',
-        paths.npm + '/popper.js/dist/umd/popper.js',
+        paths.npm + '/@popperjs/core/dist/umd/popper.js',
         paths.npm + '/bootstrap/dist/js/bootstrap.js',
         paths.npm + '/moment/min/moment.min.js',
     ])

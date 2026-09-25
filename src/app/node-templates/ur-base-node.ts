@@ -1,6 +1,7 @@
 import { ElementRef, ViewChild, AfterViewInit, OnDestroy, Directive, Renderer2 } from '@angular/core';
 import { CurrentUserService, RoleService, SnackbarService, WebSocketService } from '../services';
 import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { User } from '../data';
 import { StyleService } from '../services/style.service';
 
@@ -158,9 +159,14 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             for (const exp of expression) {
                 let value = data;
                 let pipedExp = /\{\{([^\}\s]+)(?:\s*\|\s*enum\:\s*['"]([^\}]+)['"])?\}\}/g.exec(exp);
+                if (!pipedExp) {
+                    console.warn('[ur-base-node] formatFromData: could not parse expression:', exp);
+                    continue;
+                }
                 let inner = pipedExp[1];
                 let enums = pipedExp[2];
                 for (const part of inner.split('.')) {
+                    if (value == null) break;
                     value = value[part];
                 }
 
@@ -201,7 +207,7 @@ export class BaseNode implements AfterViewInit, OnDestroy {
             msg: { topic: topic, point: point },
         };
         const expression = /^\{\{([^\}]*)\}\}$/.exec(format);
-        if (expression.length >= 2 && typeof value !== 'undefined') {
+        if (expression && expression.length >= 2 && typeof value !== 'undefined') {
             let walk = data;
             const parts = expression[1].split('.');
             for (let i = 0; i < parts.length; i++) {
@@ -214,18 +220,18 @@ export class BaseNode implements AfterViewInit, OnDestroy {
                     walk = walk[parts[i]];
                 }
             }
+        } else if (!expression) {
+            console.warn('[ur-base-node] formatAndSend: format does not match expected pattern:', format);
         }
         this.send(data.msg);
     }
 
     setupAccess(aclkey: string) {
-        this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                if (!this.data.access || this.data.access === '0') {
-                    this.access = this.roleService.getRoleAccess(aclkey, user.role);
-                } else {
-                    this.access = this.roleService.overrideRoleAccess(aclkey, user.role, this.data.access);
-                }
+        this.currentUserService.currentUser.pipe(filter((user: User) => !!user)).subscribe((user: User) => {
+            if (!this.data?.access || this.data.access === '0') {
+                this.access = this.roleService.getRoleAccess(aclkey, user.role);
+            } else {
+                this.access = this.roleService.overrideRoleAccess(aclkey, user.role, this.data.access);
             }
         });
     }
