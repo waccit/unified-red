@@ -16,6 +16,12 @@ var midnightJob = null;
 // deploy would look like a change.
 var COMPUTED_FIELDS = { pattern: true, _pattern: true, type: true, timestamp: true, typeNum: true };
 
+// How far forward or back a single schedule is walked while looking for an
+// occurrence its own day does not outrank. A weekday schedule shadowed by date
+// schedules several weeks running is already unusual; past this the schedule is
+// treated as having nothing to report rather than walked indefinitely.
+var MAX_OCCURRENCE_STEPS = 12;
+
 // Deterministic serialisation: key order must not affect the result, because the
 // editor round-trips config through JSON and does not preserve insertion order.
 var stableStringify = function (value) {
@@ -170,7 +176,20 @@ module.exports = function (RED) {
                     rt.valuePriority[this.type] = getValueFromName(this.event.value);
                     let value = undefined;
 
-                    if (rt.valuePriority.holiday) {
+                    if (this.recovery) {
+                        // Restoring state at start-up rather than reacting to a live
+                        // event. prevEvent already applied the day-level priority rules
+                        // when it chose this event -- it walks back past anything its
+                        // own day outranks -- so the chain below, which answers the
+                        // different question of which of today's schedules wins right
+                        // now, must not veto it a second time. Without this a node
+                        // starting on a day claimed by a date schedule publishes
+                        // nothing at all until that schedule's first event, leaving the
+                        // point undefined where a node that had been running all along
+                        // would still be holding the previous value.
+                        let recovered = rt.valuePriority[this.type];
+                        value = recovered && recovered.value;
+                    } else if (rt.valuePriority.holiday) {
                         //prioritize holiday schedules over date schedules
                         if (this.type === 'holiday' && rt.valuePriority.holiday.value) {
                             value = rt.valuePriority.holiday.value;
@@ -186,15 +205,23 @@ module.exports = function (RED) {
                         }
                     }
                     if (value) {
+                        // There may be no next event to report: every remaining
+                        // occurrence can be outranked by a higher-priority schedule on
+                        // its own day. Reaching through an absent one used to throw
+                        // into the catch below and swallow the whole emit, so the
+                        // current value is now reported with or without a successor.
                         let next = nextEvent();
-                        let nextState = getValueFromName(next.event.value).value;
-                        let nextTimestamp = next.timestamp;
+                        let nextValue = next && getValueFromName(next.event.value);
+                        let nextState = nextValue ? nextValue.value : next && next.event.value;
+                        let nextTimestamp = next && next.timestamp;
                         let payload = value;
                         if (config.payloadType && config.payloadType === 'tod') {
                             payload = {
                                 'current_state': value,
                                 'next_state': nextState,
-                                'time_to_next_state': Math.floor((nextTimestamp - Date.now()) / 60000) /* minutes */,
+                                'time_to_next_state': nextTimestamp
+                                    ? Math.floor((nextTimestamp - Date.now()) / 60000) /* minutes */
+                                    : undefined,
                             };
                         }
                         if (RED.settings.verbose) {
@@ -202,9 +229,11 @@ module.exports = function (RED) {
                         }
                         let msg = { topic: config.topic, payload: payload };
                         let nowText = `now: ${value} [${this.type}]`;
-                        let statusText = `${nowText},  next: ${nextState} [${next.type}] @ ${new Date(
-                            nextTimestamp
-                        ).toLocaleString()}`;
+                        let statusText = next
+                            ? `${nowText},  next: ${nextState} [${next.type}] @ ${new Date(
+                                  nextTimestamp
+                              ).toLocaleString()}`
+                            : nowText;
                         // remembered so a redeploy that reuses these cron jobs can
                         // restore state without re-walking every cron pattern.
                         // nowText is kept separately so the "next:" half can be
@@ -268,182 +297,173 @@ module.exports = function (RED) {
             return events.concat(holidays);
         };
 
-        let applyPriorityFilter = function (events, today) {
-            if (events.length === 0) return events;
+        // A fully numeric day-of-month and month with no weekday restriction -- which
+        // is every date schedule and most holidays -- is decided by comparing fields.
+        // Returns undefined when the pattern is anything less obvious, leaving it to
+        // the parser. This matters because it sits in the per-event hot path.
+        let plainDayMatch = function (pattern, day) {
+            const parts = pattern.split(/\s+/);
+            if (parts.length !== 6) {
+                return undefined;
+            }
+            const dayOfMonth = parts[3],
+                month = parts[4],
+                weekday = parts[5];
+            if (!/^\d+$/.test(dayOfMonth) || !/^\d+$/.test(month) || (weekday !== '*' && weekday !== '?')) {
+                return undefined;
+            }
+            return parseInt(dayOfMonth, 10) === day.getDate() && parseInt(month, 10) === day.getMonth() + 1;
+        };
 
-            const eventsByDate = {};
-            for (const event of events) {
-                const eventDate = new Date(event.timestamp);
-                const dateKey = eventDate.toDateString();
-                if (!eventsByDate[dateKey]) {
-                    eventsByDate[dateKey] = [];
+        // Does this schedule fire at all on the given day -- ahead of us, behind us,
+        // it does not matter. This is the question fireEvent's priority marks answer:
+        // they are armed for the whole day (00:00:01 through 23:59:59), so a date
+        // schedule that already ran this morning still suppresses this afternoon's
+        // weekday event.
+        let occursOnDay = function (outranker, day) {
+            const quick = plainDayMatch(outranker.pattern, day);
+            if (quick !== undefined) {
+                return quick;
+            }
+            try {
+                const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0, 0);
+                // one second before midnight, so an occurrence at 00:00:00 still counts
+                const walk = parser.parseExpression(outranker.pattern, {
+                    currentDate: new Date(dayStart.getTime() - 1000),
+                });
+                const occurrence = walk.next().toDate();
+                if (!isSameDay(occurrence, day)) {
+                    return false;
                 }
-                eventsByDate[dateKey].push(event);
+                // mirror the nth-weekday compensation the candidate scan applies
+                if (outranker._pattern && outranker._pattern.indexOf('#') !== -1) {
+                    return isNthWeekday(outranker._pattern.split(' ')[5], occurrence.getTime());
+                }
+                return true;
+            } catch (e) {
+                return false;
             }
+        };
 
-            // For each date, only keep events with the highest priority
-            const filteredEvents = [];
-            for (const dateKey in eventsByDate) {
-                const dateEvents = eventsByDate[dateKey];
-                const highestPriority = Math.min(...dateEvents.map((e) => e.typeNum));
-                const highestPriorityEvents = dateEvents.filter((e) => e.typeNum === highestPriority);
-                filteredEvents.push(...highestPriorityEvents);
+        // Only higher-priority schedules are worth scanning and the first hit settles
+        // it, so a weekday candidate costs at most one pass over the date and holiday
+        // schedules and a holiday candidate costs nothing.
+        let isOutrankedOnDay = function (fireTypeNum, outrankers, day) {
+            for (const outranker of outrankers) {
+                if (outranker.typeNum >= fireTypeNum) {
+                    continue;
+                }
+                if (occursOnDay(outranker, day)) {
+                    return true;
+                }
             }
+            return false;
+        };
 
-            return filteredEvents;
+        // The schedules capable of outranking something, deduped by pattern:
+        // getEventsArray yields each holiday twice, once from its cron job and once
+        // from the holidays config it was built from.
+        let collectOutrankers = function (events, typeNum) {
+            const outrankers = [];
+            const seen = {};
+            for (const event of events) {
+                const n = typeNum[event.type];
+                if (typeof n === 'undefined' || n > 2) {
+                    continue; // only holidays and dates outrank anything
+                }
+                const pattern = event.type === 'holiday' && event._pattern ? event._pattern : event.pattern;
+                if (!pattern) {
+                    continue;
+                }
+                const key = n + '|' + pattern;
+                if (seen[key]) {
+                    continue;
+                }
+                seen[key] = true;
+                outrankers.push({ typeNum: n, pattern: pattern, _pattern: event._pattern });
+            }
+            return outrankers;
+        };
+
+        // Each event is asked for its first occurrence that its own day does not
+        // outrank, not merely its first occurrence. Taking one occurrence per event
+        // and filtering afterwards loses the real answer: when a date schedule
+        // suppresses today's weekday event, that weekday event's next run is next
+        // week, and dropping it from the running leaves the far-off date schedule
+        // looking like the soonest thing to happen.
+        let findQualifyingOccurrence = function (event, eventTypeNum, outrankers, cache, forward) {
+            // For holidays, use the original _pattern for event calculations
+            // correctForNthAndLastRules should only be used for cron job scheduling
+            const patternToUse = event.type === 'holiday' && event._pattern ? event._pattern : event.pattern;
+            if (!patternToUse) {
+                return undefined;
+            }
+            const currentTime = Date.now();
+            try {
+                const walk = parser.parseExpression(patternToUse);
+                for (let step = 0; step < MAX_OCCURRENCE_STEPS; step++) {
+                    const fireTime = (forward ? walk.next() : walk.prev()).toDate().getTime();
+                    if (forward ? fireTime <= currentTime : fireTime >= currentTime) {
+                        continue;
+                    }
+                    if (event._pattern && event._pattern.includes('#')) {
+                        if (!isNthWeekday(event._pattern.split(' ')[5], fireTime)) {
+                            continue;
+                        }
+                    }
+                    // a holiday is the top priority; nothing can outrank it
+                    if (eventTypeNum > 1) {
+                        const day = new Date(fireTime);
+                        const key = day.toDateString() + '|' + eventTypeNum;
+                        if (!(key in cache)) {
+                            cache[key] = isOutrankedOnDay(eventTypeNum, outrankers, day);
+                        }
+                        if (cache[key]) {
+                            continue;
+                        }
+                    }
+                    return { timestamp: fireTime, type: event.type, typeNum: eventTypeNum, event: event };
+                }
+            } catch (err) {
+                console.error('Error: ' + err.message);
+            }
+            return undefined;
+        };
+
+        let pickEvent = function (originFilter, forward) {
+            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
+            const events = getEventsArray(originFilter);
+            const outrankers = collectOutrankers(events, typeNum);
+            const cache = {};
+            let best;
+
+            for (const event of events) {
+                const eventTypeNum = typeNum[event.type];
+                if (typeof eventTypeNum === 'undefined') {
+                    continue;
+                }
+                const candidate = findQualifyingOccurrence(event, eventTypeNum, outrankers, cache, forward);
+                if (!candidate) {
+                    continue;
+                }
+                const closer = forward
+                    ? candidate.timestamp < best?.timestamp
+                    : candidate.timestamp > best?.timestamp;
+                const tieBrokenByPriority =
+                    candidate.timestamp === best?.timestamp && candidate.typeNum < best.typeNum;
+                if (!best || closer || tieBrokenByPriority) {
+                    best = candidate;
+                }
+            }
+            return best;
         };
 
         let nextEvent = function (originFilter) {
-            let greatestPriority = 4;
-            let nextFire = 0;
-            const today = new Date();
-            const currentTime = Date.now();
-            const nextFires = [];
-            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
-            let next;
-
-            const events = getEventsArray(originFilter);
-
-            for (const event of events) {
-                try {
-                    // For holidays, use the original _pattern for event calculations
-                    // correctForNthAndLastRules should only be used for cron job scheduling
-                    const patternToUse = (event.type === 'holiday' && event._pattern) ? event._pattern : event.pattern;
-                    if (!patternToUse) {
-                        continue;
-                    }
-
-                    const eventTypeNum = typeNum[event.type];
-                    if (typeof eventTypeNum === 'undefined') {
-                        continue;
-                    }
-
-                    const parsedFire = parser.parseExpression(patternToUse);
-                    nextFire = parsedFire.next().toDate().getTime();
-
-                    if (nextFire > currentTime) {
-                        const hasNthPattern = event._pattern && event._pattern.includes('#');
-                        if (hasNthPattern) {
-                            const weekdayPattern = event._pattern.split(' ')[5];
-                            if (isNthWeekday(weekdayPattern, nextFire)) {
-                                nextFires.push({
-                                    timestamp: nextFire,
-                                    type: event.type,
-                                    typeNum: eventTypeNum,
-                                    event: event,
-                                });
-                            }
-                        } else {
-                            nextFires.push({
-                                timestamp: nextFire,
-                                type: event.type,
-                                typeNum: eventTypeNum,
-                                event: event,
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error('Error: ' + err.message);
-                }
-            }
-
-            const filteredFires = applyPriorityFilter(nextFires, today);
-
-            let sortedFireTimes = filteredFires.sort((a, b) => a.timestamp - b.timestamp);
-
-            if (sortedFireTimes.length === 0) {
-                return undefined;
-            }
-
-            let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
-
-            // set next event based on event type priority
-            for (let fire of sortedFireTimes) {
-                // set fire to soonest occurrence of highest priority event on the date which a fire will soonest occur
-                if (fire.typeNum < greatestPriority && isSameDay(soonestFireDate, new Date(fire.timestamp))) {
-                    next = fire;
-                    greatestPriority = fire.typeNum;
-                }
-            }
-            return next;
+            return pickEvent(originFilter, true);
         };
 
         let prevEvent = function (originFilter) {
-            let greatestPriority = 4;
-            let prevFire = 0;
-            const today = new Date();
-            const currentTime = Date.now();
-            const prevFires = [];
-            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
-            let prev;
-
-            const events = getEventsArray(originFilter);
-
-            for (const event of events) {
-                try {
-                    // For holidays, use the original _pattern for event calculations
-                    // correctForNthAndLastRules should only be used for cron job scheduling
-                    const patternToUse = (event.type === 'holiday' && event._pattern) ? event._pattern : event.pattern;
-                    if (!patternToUse) {
-                        continue;
-                    }
-
-                    // Early type validation
-                    const eventTypeNum = typeNum[event.type];
-                    if (typeof eventTypeNum === 'undefined') {
-                        continue;
-                    }
-
-                    // parse cron pattern and get just the previous occurrence
-                    const parsedFire = parser.parseExpression(patternToUse);
-                    prevFire = parsedFire.prev().toDate().getTime();
-
-                    if (prevFire < currentTime) {
-                        // Cache pattern analysis to avoid repeated string operations
-                        const hasNthPattern = event._pattern && event._pattern.includes('#');
-                        if (hasNthPattern) {
-                            const weekdayPattern = event._pattern.split(' ')[5];
-                            if (isNthWeekday(weekdayPattern, prevFire)) {
-                                prevFires.push({
-                                    timestamp: prevFire,
-                                    type: event.type,
-                                    typeNum: eventTypeNum,
-                                    event: event,
-                                });
-                            }
-                        } else {
-                            prevFires.push({
-                                timestamp: prevFire,
-                                type: event.type,
-                                typeNum: eventTypeNum,
-                                event: event,
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error('Error: ' + err.message);
-                }
-            }
-
-            const filteredFires = applyPriorityFilter(prevFires, today);
-
-            let sortedFireTimes = filteredFires.sort((a, b) => b.timestamp - a.timestamp);
-
-            if (sortedFireTimes.length === 0) {
-                return undefined;
-            }
-
-            let mostRecentFireDate = new Date(sortedFireTimes[0].timestamp);
-
-            // set prev event based on event type priority
-            for (let fire of sortedFireTimes) {
-                if (fire.typeNum < greatestPriority && isSameDay(mostRecentFireDate, new Date(fire.timestamp))) {
-                    // set fire to last occurrence of highest priority event on the date which a fire most recently occurred
-                    prev = fire;
-                    greatestPriority = fire.typeNum;
-                }
-            }
-            return prev;
+            return pickEvent(originFilter, false);
         };
 
         let isSameDay = function (dateA, dateB) {
@@ -877,11 +897,17 @@ module.exports = function (RED) {
                     return;
                 }
 
-                // update node status text
+                // update node status text. event.value is the value's *name*; resolve it
+                // the way fireEvent and refreshStatus do so the status does not show a
+                // bare name whenever this provisional line is the one left standing.
+                let lastValue = getValueFromName(lastEvent.event.value);
+                let soonestValue = getValueFromName(soonestEvent.event.value);
                 node.status({
-                    text: `now: ${lastEvent.event.value} [${lastEvent.type}],  next: ${soonestEvent.event.value} [${
-                        soonestEvent.type
-                    }] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`,
+                    text:
+                        `now: ${lastValue ? lastValue.value : lastEvent.event.value} [${lastEvent.type}],  ` +
+                        `next: ${soonestValue ? soonestValue.value : soonestEvent.event.value} [${
+                            soonestEvent.type
+                        }] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`,
                 });
 
                 // schedule recovery job: find last (missed event) and fire after 5 second delay
@@ -893,7 +919,7 @@ module.exports = function (RED) {
                         scheduleDateJob(lastEvent.event, secondsFromNow(1));
                         schedulePriorityScheduleJobs(lastEvent.event, 'date', secondsFromNow(1));
                     } else {
-                        fireEvent.bind({ event: lastEvent.event, type: lastEvent.type })();
+                        fireEvent.bind({ event: lastEvent.event, type: lastEvent.type, recovery: true })();
                     }
                 }
             }
