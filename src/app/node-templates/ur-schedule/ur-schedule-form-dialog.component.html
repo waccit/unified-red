@@ -310,8 +310,8 @@
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
                     <div class="example-button-row">
-                        <button mat-raised-button color="primary" [type]="submit" [disabled]="!form.valid"
-                            [mat-dialog-close]="submit()" (click)="confirm()">Save</button>
+                        <button mat-raised-button color="primary" type="button" [disabled]="!form.valid"
+                            (click)="save()">Save</button>
                         <button mat-stroked-button (click)="dialogRef.close()" tabindex="-1">Cancel</button>
 
                         <button mat-icon-button [matMenuTriggerFor]="eventMoreMenu" [disabled]="!form.valid"
@@ -319,23 +319,23 @@
                             <mat-icon>more_horiz</mat-icon>
                         </button>
                         <mat-menu #eventMoreMenu="matMenu">
-                            <button mat-menu-item [mat-dialog-close]="submit('everyday')">
+                            <button mat-menu-item (click)="save('everyday')">
                                 <span>Add to everyday</span>
                             </button>
-                            <button mat-menu-item [mat-dialog-close]="submit('m-f')">
+                            <button mat-menu-item (click)="save('m-f')">
                                 <span>Add to M-F</span>
                             </button>
-                            <button mat-menu-item [mat-dialog-close]="submit('tu-f')">
+                            <button mat-menu-item (click)="save('tu-f')">
                                 <span>Add to Tu-F</span>
                             </button>
-                            <button mat-menu-item [mat-dialog-close]="submit('sa-su')">
+                            <button mat-menu-item (click)="save('sa-su')">
                                 <span>Add to Sa-Su</span>
                             </button>
                         </mat-menu>
 
                         @if (action !== 'add') {
                             <button mat-raised-button color="warn" class="float-right"
-                                [mat-dialog-close]="delete()" tabindex="-1">Delete</button>
+                                type="button" (click)="remove()" tabindex="-1">Delete</button>
                         }
                     </div>
                 </div>

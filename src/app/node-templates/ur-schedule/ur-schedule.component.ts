@@ -597,6 +597,11 @@ export class UrScheduleComponent extends BaseNode implements AfterViewInit {
             })
             .subscribe((response: any) => {
                 if (response?.rev) {
+                    // Clear the pending-changes flag, which is what shows and enables
+                    // the Deploy button. Without this it stays set and the button
+                    // sticks around after a successful deploy. Only on a confirmed
+                    // deploy: if the request failed the edits really are still pending.
+                    this.dirty = false;
                     this.snackbar.success('Deployed successfully!');
                 }
             });

@@ -1,7 +1,106 @@
 var cron = require('node-cron');
 var parser = require('cron-parser');
 var moment = require('moment');
-var buildJob = null;
+// Per-node schedule runtime, keyed by node id, living across redeploys.
+// Node-RED destroys and re-creates the node object on every deploy, but the cron
+// jobs are expensive to build (~2.5ms per cron.schedule() call), so an unchanged
+// node adopts the runtime it built last time instead of rebuilding it.
+var runtimes = new Map();
+
+// Single midnight rebuild job shared by every node (patterns like "last weekday"
+// are resolved relative to today, so they have to be recomputed each day).
+var midnightJob = null;
+
+// Fields the node computes and writes back onto its own config. They are derived
+// from the source fields, so they must stay out of the reuse signature or every
+// deploy would look like a change.
+var COMPUTED_FIELDS = { pattern: true, _pattern: true, type: true, timestamp: true, typeNum: true };
+
+// How far forward or back a single schedule is walked while looking for an
+// occurrence its own day does not outrank. A weekday schedule shadowed by date
+// schedules several weeks running is already unusual; past this the schedule is
+// treated as having nothing to report rather than walked indefinitely.
+var MAX_OCCURRENCE_STEPS = 12;
+
+// Deterministic serialisation: key order must not affect the result, because the
+// editor round-trips config through JSON and does not preserve insertion order.
+var stableStringify = function (value) {
+    if (value === null || typeof value !== 'object') {
+        return JSON.stringify(value === undefined ? null : value);
+    }
+    if (Array.isArray(value)) {
+        return '[' + value.map(stableStringify).join(',') + ']';
+    }
+    let keys = Object.keys(value)
+        .filter((k) => !COMPUTED_FIELDS[k])
+        .sort();
+    return '{' + keys.map((k) => JSON.stringify(k) + ':' + stableStringify(value[k])).join(',') + '}';
+};
+
+// Everything that decides which cron jobs exist. Excludes topic/topicPattern/label
+// and friends: those are read through the live config at fire time, so changing
+// them does not require rebuilding any cron job.
+var scheduleSignature = function (config) {
+    return stableStringify({
+        weekdays: config.weekdays || [],
+        dates: config.dates || [],
+        values: config.values || [],
+        payloadType: config.payloadType,
+        holidaysId: config.holidays,
+    });
+};
+
+var holidaySignature = function (holidays) {
+    return stableStringify(holidays || []);
+};
+
+var todayKey = function () {
+    let d = new Date();
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+};
+
+// Cron callbacks are created once and then outlive the node object that created
+// them. They dispatch through the runtime so they always reach the *current*
+// node and config rather than the closed-over one from a previous deploy.
+var dispatch = function () {
+    let rt = this.rt;
+    if (!rt || !rt.node) {
+        return;
+    }
+    let handler = rt[this.fn];
+    if (typeof handler === 'function') {
+        handler.call({ event: this.event, type: this.type });
+    }
+};
+
+// Identity of a cron job: the pattern actually handed to node-cron, plus which
+// handler it dispatches to. Jobs were previously keyed by the schedule's nominal
+// `sch.pattern`, which is neither. That conflated jobs that genuinely differ (a
+// recovery job fires at a one-off time, but carried the key of the annual job it
+// was recovering) and merged jobs that are genuinely distinct (the occupied and
+// unoccupied entries on one date both flatten to 00:00:01 and 23:59:59 markers).
+// Either way the loser was dropped from the map without destroy(), leaving a
+// node-cron task that ran forever -- two per date, on every rebuild.
+var cronJobKey = function (pattern, fn, type) {
+    return pattern + '|' + fn + '|' + type;
+};
+
+var destroyRuntimeJobs = function (rt, origin) {
+    for (let key in rt.cronJobs) {
+        let entry = rt.cronJobs[key];
+        if (origin && entry.origin !== origin) {
+            continue;
+        }
+        try {
+            // node-cron 4: stop() leaves the task in the global registry, only
+            // destroy() removes it. Using stop() here leaks every task forever.
+            entry.job.destroy();
+        } catch (e) {
+            /* task already gone */
+        }
+        delete rt.cronJobs[key];
+    }
+};
 
 module.exports = function (RED) {
     var ui = require('../ui')(RED);
@@ -10,11 +109,40 @@ module.exports = function (RED) {
         RED.nodes.createNode(this, config);
         // the holidays config node may be unset, disabled or deleted
         let holidaysNode = RED.nodes.getNode(config.holidays);
-        this.holidays = (holidaysNode && holidaysNode.events) || [];
-        this.cronJobs = {}; // { job, event, type }
-        this.heartbeatTimer = null;
-        this.valuePriority = { holiday: null, date: null, weekday: null };
+        let sourceHolidays = (holidaysNode && holidaysNode.events) || [];
+        // holidaysNode.events is the live config-node array shared by every schedule
+        // node; buildSchedules writes pattern/_pattern/type onto its entries, so each
+        // node gets its own copy rather than mutating what its siblings are reading.
+        this.holidays = JSON.parse(JSON.stringify(sourceHolidays));
         var node = this;
+
+        // Adopt the runtime this node id built on a previous deploy, if any.
+        let rt = runtimes.get(config.id);
+        let isNewRuntime = !rt;
+        if (isNewRuntime) {
+            rt = {
+                cronJobs: {}, // pattern -> { job, event, type, origin }
+                valuePriority: { holiday: null, date: null, weekday: null },
+                heartbeatTimer: null,
+                holidays: [],
+                signature: null,
+                holidaySignature: null,
+                builtOn: null,
+                orphanTimer: null,
+            };
+            runtimes.set(config.id, rt);
+        }
+        clearTimeout(rt.orphanTimer);
+        rt.orphanTimer = null;
+        // Re-point the runtime at the node object and config for this deploy. Cron
+        // callbacks created on earlier deploys reach these through `rt`.
+        rt.node = node;
+        rt.holidays = this.holidays;
+        this.cronJobs = rt.cronJobs;
+        this.valuePriority = rt.valuePriority;
+
+        let newSignature = scheduleSignature(config);
+        let newHolidaySignature = holidaySignature(sourceHolidays);
 
         var { tab, group, page, folders } = ui.makeMenuTree(RED, config);
 
@@ -26,14 +154,14 @@ module.exports = function (RED) {
             if (RED.settings.verbose) {
                 node.log('setPrioritySchedule for ' + this.type);
             }
-            node.valuePriority[this.type] = true; // just make the value non-falsy. Later an actual schedule value will be applied.
+            rt.valuePriority[this.type] = true; // just make the value non-falsy. Later an actual schedule value will be applied.
         };
 
         let clearPrioritySchedule = function () {
             if (RED.settings.verbose) {
                 node.log('clearPrioritySchedule for ' + this.type);
             }
-            node.valuePriority[this.type] = null;
+            rt.valuePriority[this.type] = null;
         };
 
         let getValueFromName = function (value) {
@@ -45,45 +173,74 @@ module.exports = function (RED) {
             if (this.event && this.type) {
                 try {
                     // set value in priority object
-                    node.valuePriority[this.type] = getValueFromName(this.event.value);
+                    rt.valuePriority[this.type] = getValueFromName(this.event.value);
                     let value = undefined;
 
-                    if (node.valuePriority.holiday) {
+                    if (this.recovery) {
+                        // Restoring state at start-up rather than reacting to a live
+                        // event. prevEvent already applied the day-level priority rules
+                        // when it chose this event -- it walks back past anything its
+                        // own day outranks -- so the chain below, which answers the
+                        // different question of which of today's schedules wins right
+                        // now, must not veto it a second time. Without this a node
+                        // starting on a day claimed by a date schedule publishes
+                        // nothing at all until that schedule's first event, leaving the
+                        // point undefined where a node that had been running all along
+                        // would still be holding the previous value.
+                        let recovered = rt.valuePriority[this.type];
+                        value = recovered && recovered.value;
+                    } else if (rt.valuePriority.holiday) {
                         //prioritize holiday schedules over date schedules
-                        if (this.type === 'holiday' && node.valuePriority.holiday.value) {
-                            value = node.valuePriority.holiday.value;
+                        if (this.type === 'holiday' && rt.valuePriority.holiday.value) {
+                            value = rt.valuePriority.holiday.value;
                         }
-                    } else if (node.valuePriority.date) {
+                    } else if (rt.valuePriority.date) {
                         //prioritize date schedules over weekday schedules
-                        if (this.type === 'date' && node.valuePriority.date.value) {
-                            value = node.valuePriority.date.value;
+                        if (this.type === 'date' && rt.valuePriority.date.value) {
+                            value = rt.valuePriority.date.value;
                         }
-                    } else if (node.valuePriority.weekday) {
-                        if (this.type === 'weekday' && node.valuePriority.weekday.value) {
-                            value = node.valuePriority.weekday.value;
+                    } else if (rt.valuePriority.weekday) {
+                        if (this.type === 'weekday' && rt.valuePriority.weekday.value) {
+                            value = rt.valuePriority.weekday.value;
                         }
                     }
                     if (value) {
+                        // There may be no next event to report: every remaining
+                        // occurrence can be outranked by a higher-priority schedule on
+                        // its own day. Reaching through an absent one used to throw
+                        // into the catch below and swallow the whole emit, so the
+                        // current value is now reported with or without a successor.
                         let next = nextEvent();
-                        let nextState = getValueFromName(next.event.value).value;
-                        let nextTimestamp = next.timestamp;
+                        let nextValue = next && getValueFromName(next.event.value);
+                        let nextState = nextValue ? nextValue.value : next && next.event.value;
+                        let nextTimestamp = next && next.timestamp;
                         let payload = value;
                         if (config.payloadType && config.payloadType === 'tod') {
                             payload = {
                                 'current_state': value,
                                 'next_state': nextState,
-                                'time_to_next_state': Math.floor((nextTimestamp - Date.now()) / 60000) /* minutes */,
+                                'time_to_next_state': nextTimestamp
+                                    ? Math.floor((nextTimestamp - Date.now()) / 60000) /* minutes */
+                                    : undefined,
                             };
                         }
                         if (RED.settings.verbose) {
                             node.log(`fireEvent ${this.type} ${JSON.stringify(payload)}`);
                         }
-                        heartbeatSend({ topic: config.topic, payload: payload });
-                        node.status({
-                            text: `now: ${value} [${this.type}],  next: ${nextState} [${next.type}] @ ${new Date(
-                                nextTimestamp
-                            ).toLocaleString()}`,
-                        });
+                        let msg = { topic: config.topic, payload: payload };
+                        let nowText = `now: ${value} [${this.type}]`;
+                        let statusText = next
+                            ? `${nowText},  next: ${nextState} [${next.type}] @ ${new Date(
+                                  nextTimestamp
+                              ).toLocaleString()}`
+                            : nowText;
+                        // remembered so a redeploy that reuses these cron jobs can
+                        // restore state without re-walking every cron pattern.
+                        // nowText is kept separately so the "next:" half can be
+                        // recomputed on its own when only the holidays changed.
+                        rt.lastEmit = { msg: msg, statusText: statusText, nowText: nowText };
+                        heartbeatSend(msg);
+                        node.status({ text: statusText });
                     }
                 } catch (err) {
                     node.error(err);
@@ -93,7 +250,7 @@ module.exports = function (RED) {
 
         let heartbeatSend = function (msg) {
             try {
-                node.send(msg);
+                rt.node.send(msg);
                 if (
                     typeof msg !== undefined &&
                     typeof msg.payload !== undefined &&
@@ -109,210 +266,204 @@ module.exports = function (RED) {
                         lasttime -= heartbeatMins;
                         let newMsg = { topic: topic, payload: payload }; // create new msg object
                         newMsg.payload.time_to_next_state = lasttime;
-                        node.send(newMsg);
+                        rt.node.send(newMsg);
                         if (lasttime > 0) {
-                            clearTimeout(node.heartbeatTimer);
-                            node.heartbeatTimer = setTimeout(heartbeatFunc, heartbeatMs);
+                            clearTimeout(rt.heartbeatTimer);
+                            rt.heartbeatTimer = setTimeout(heartbeatFunc, heartbeatMs);
                         }
                     };
-                    clearTimeout(node.heartbeatTimer);
-                    node.heartbeatTimer = setTimeout(heartbeatFunc, heartbeatMs);
+                    clearTimeout(rt.heartbeatTimer);
+                    rt.heartbeatTimer = setTimeout(heartbeatFunc, heartbeatMs);
                 }
             } catch (err) {
                 node.error(err);
             }
         };
 
-        let getEventsArray = function () {
+        // `originFilter` narrows the scan to events derived from one source, so a
+        // holiday-only rebuild does not pay for a cron-parser walk over every
+        // weekday and date event as well.
+        let getEventsArray = function (originFilter) {
             let events = [];
-            Object.values(node.cronJobs).forEach((item) => {
-                if (item.event) {
+            Object.values(rt.cronJobs).forEach((item) => {
+                if (item.event && (!originFilter || item.origin === originFilter)) {
                     events.push({ ...item.event, type: item.type });
                 }
             });
-            node.holidays.forEach((element) => {
+            rt.holidays.forEach((element) => {
                 element.type = 'holiday';
             });
-            const holidays = node.holidays;
+            const holidays = !originFilter || originFilter === 'holiday' ? rt.holidays : [];
             return events.concat(holidays);
         };
 
-        let applyPriorityFilter = function (events, today) {
-            if (events.length === 0) return events;
-
-            const eventsByDate = {};
-            for (const event of events) {
-                const eventDate = new Date(event.timestamp);
-                const dateKey = eventDate.toDateString();
-                if (!eventsByDate[dateKey]) {
-                    eventsByDate[dateKey] = [];
-                }
-                eventsByDate[dateKey].push(event);
-            }
-
-            // For each date, only keep events with the highest priority
-            const filteredEvents = [];
-            for (const dateKey in eventsByDate) {
-                const dateEvents = eventsByDate[dateKey];
-                const highestPriority = Math.min(...dateEvents.map((e) => e.typeNum));
-                const highestPriorityEvents = dateEvents.filter((e) => e.typeNum === highestPriority);
-                filteredEvents.push(...highestPriorityEvents);
-            }
-
-            return filteredEvents;
-        };
-
-        let nextEvent = function () {
-            let greatestPriority = 4;
-            let nextFire = 0;
-            const today = new Date();
-            const currentTime = Date.now();
-            const nextFires = [];
-            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
-            let next;
-
-            const events = getEventsArray();
-
-            for (const event of events) {
-                try {
-                    // For holidays, use the original _pattern for event calculations
-                    // correctForNthAndLastRules should only be used for cron job scheduling
-                    const patternToUse = (event.type === 'holiday' && event._pattern) ? event._pattern : event.pattern;
-                    if (!patternToUse) {
-                        continue;
-                    }
-
-                    const eventTypeNum = typeNum[event.type];
-                    if (typeof eventTypeNum === 'undefined') {
-                        continue;
-                    }
-
-                    const parsedFire = parser.parseExpression(patternToUse);
-                    nextFire = parsedFire.next().toDate().getTime();
-
-                    if (nextFire > currentTime) {
-                        const hasNthPattern = event._pattern && event._pattern.includes('#');
-                        if (hasNthPattern) {
-                            const weekdayPattern = event._pattern.split(' ')[5];
-                            if (isNthWeekday(weekdayPattern, nextFire)) {
-                                nextFires.push({
-                                    timestamp: nextFire,
-                                    type: event.type,
-                                    typeNum: eventTypeNum,
-                                    event: event,
-                                });
-                            }
-                        } else {
-                            nextFires.push({
-                                timestamp: nextFire,
-                                type: event.type,
-                                typeNum: eventTypeNum,
-                                event: event,
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error('Error: ' + err.message);
-                }
-            }
-
-            const filteredFires = applyPriorityFilter(nextFires, today);
-
-            let sortedFireTimes = filteredFires.sort((a, b) => a.timestamp - b.timestamp);
-
-            if (sortedFireTimes.length === 0) {
+        // A fully numeric day-of-month and month with no weekday restriction -- which
+        // is every date schedule and most holidays -- is decided by comparing fields.
+        // Returns undefined when the pattern is anything less obvious, leaving it to
+        // the parser. This matters because it sits in the per-event hot path.
+        let plainDayMatch = function (pattern, day) {
+            const parts = pattern.split(/\s+/);
+            if (parts.length !== 6) {
                 return undefined;
             }
-
-            let soonestFireDate = new Date(sortedFireTimes[0].timestamp);
-
-            // set next event based on event type priority
-            for (let fire of sortedFireTimes) {
-                // set fire to soonest occurrence of highest priority event on the date which a fire will soonest occur
-                if (fire.typeNum < greatestPriority && isSameDay(soonestFireDate, new Date(fire.timestamp))) {
-                    next = fire;
-                    greatestPriority = fire.typeNum;
-                }
-            }
-            return next;
-        };
-
-        let prevEvent = function () {
-            let greatestPriority = 4;
-            let prevFire = 0;
-            const today = new Date();
-            const currentTime = Date.now();
-            const prevFires = [];
-            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
-            let prev;
-
-            const events = getEventsArray();
-
-            for (const event of events) {
-                try {
-                    // For holidays, use the original _pattern for event calculations
-                    // correctForNthAndLastRules should only be used for cron job scheduling
-                    const patternToUse = (event.type === 'holiday' && event._pattern) ? event._pattern : event.pattern;
-                    if (!patternToUse) {
-                        continue;
-                    }
-
-                    // Early type validation
-                    const eventTypeNum = typeNum[event.type];
-                    if (typeof eventTypeNum === 'undefined') {
-                        continue;
-                    }
-
-                    // parse cron pattern and get just the previous occurrence
-                    const parsedFire = parser.parseExpression(patternToUse);
-                    prevFire = parsedFire.prev().toDate().getTime();
-
-                    if (prevFire < currentTime) {
-                        // Cache pattern analysis to avoid repeated string operations
-                        const hasNthPattern = event._pattern && event._pattern.includes('#');
-                        if (hasNthPattern) {
-                            const weekdayPattern = event._pattern.split(' ')[5];
-                            if (isNthWeekday(weekdayPattern, prevFire)) {
-                                prevFires.push({
-                                    timestamp: prevFire,
-                                    type: event.type,
-                                    typeNum: eventTypeNum,
-                                    event: event,
-                                });
-                            }
-                        } else {
-                            prevFires.push({
-                                timestamp: prevFire,
-                                type: event.type,
-                                typeNum: eventTypeNum,
-                                event: event,
-                            });
-                        }
-                    }
-                } catch (err) {
-                    console.error('Error: ' + err.message);
-                }
-            }
-
-            const filteredFires = applyPriorityFilter(prevFires, today);
-
-            let sortedFireTimes = filteredFires.sort((a, b) => b.timestamp - a.timestamp);
-
-            if (sortedFireTimes.length === 0) {
+            const dayOfMonth = parts[3],
+                month = parts[4],
+                weekday = parts[5];
+            if (!/^\d+$/.test(dayOfMonth) || !/^\d+$/.test(month) || (weekday !== '*' && weekday !== '?')) {
                 return undefined;
             }
+            return parseInt(dayOfMonth, 10) === day.getDate() && parseInt(month, 10) === day.getMonth() + 1;
+        };
 
-            let mostRecentFireDate = new Date(sortedFireTimes[0].timestamp);
+        // Does this schedule fire at all on the given day -- ahead of us, behind us,
+        // it does not matter. This is the question fireEvent's priority marks answer:
+        // they are armed for the whole day (00:00:01 through 23:59:59), so a date
+        // schedule that already ran this morning still suppresses this afternoon's
+        // weekday event.
+        let occursOnDay = function (outranker, day) {
+            const quick = plainDayMatch(outranker.pattern, day);
+            if (quick !== undefined) {
+                return quick;
+            }
+            try {
+                const dayStart = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0, 0, 0);
+                // one second before midnight, so an occurrence at 00:00:00 still counts
+                const walk = parser.parseExpression(outranker.pattern, {
+                    currentDate: new Date(dayStart.getTime() - 1000),
+                });
+                const occurrence = walk.next().toDate();
+                if (!isSameDay(occurrence, day)) {
+                    return false;
+                }
+                // mirror the nth-weekday compensation the candidate scan applies
+                if (outranker._pattern && outranker._pattern.indexOf('#') !== -1) {
+                    return isNthWeekday(outranker._pattern.split(' ')[5], occurrence.getTime());
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
 
-            // set prev event based on event type priority
-            for (let fire of sortedFireTimes) {
-                if (fire.typeNum < greatestPriority && isSameDay(mostRecentFireDate, new Date(fire.timestamp))) {
-                    // set fire to last occurrence of highest priority event on the date which a fire most recently occurred
-                    prev = fire;
-                    greatestPriority = fire.typeNum;
+        // Only higher-priority schedules are worth scanning and the first hit settles
+        // it, so a weekday candidate costs at most one pass over the date and holiday
+        // schedules and a holiday candidate costs nothing.
+        let isOutrankedOnDay = function (fireTypeNum, outrankers, day) {
+            for (const outranker of outrankers) {
+                if (outranker.typeNum >= fireTypeNum) {
+                    continue;
+                }
+                if (occursOnDay(outranker, day)) {
+                    return true;
                 }
             }
-            return prev;
+            return false;
+        };
+
+        // The schedules capable of outranking something, deduped by pattern:
+        // getEventsArray yields each holiday twice, once from its cron job and once
+        // from the holidays config it was built from.
+        let collectOutrankers = function (events, typeNum) {
+            const outrankers = [];
+            const seen = {};
+            for (const event of events) {
+                const n = typeNum[event.type];
+                if (typeof n === 'undefined' || n > 2) {
+                    continue; // only holidays and dates outrank anything
+                }
+                const pattern = event.type === 'holiday' && event._pattern ? event._pattern : event.pattern;
+                if (!pattern) {
+                    continue;
+                }
+                const key = n + '|' + pattern;
+                if (seen[key]) {
+                    continue;
+                }
+                seen[key] = true;
+                outrankers.push({ typeNum: n, pattern: pattern, _pattern: event._pattern });
+            }
+            return outrankers;
+        };
+
+        // Each event is asked for its first occurrence that its own day does not
+        // outrank, not merely its first occurrence. Taking one occurrence per event
+        // and filtering afterwards loses the real answer: when a date schedule
+        // suppresses today's weekday event, that weekday event's next run is next
+        // week, and dropping it from the running leaves the far-off date schedule
+        // looking like the soonest thing to happen.
+        let findQualifyingOccurrence = function (event, eventTypeNum, outrankers, cache, forward) {
+            // For holidays, use the original _pattern for event calculations
+            // correctForNthAndLastRules should only be used for cron job scheduling
+            const patternToUse = event.type === 'holiday' && event._pattern ? event._pattern : event.pattern;
+            if (!patternToUse) {
+                return undefined;
+            }
+            const currentTime = Date.now();
+            try {
+                const walk = parser.parseExpression(patternToUse);
+                for (let step = 0; step < MAX_OCCURRENCE_STEPS; step++) {
+                    const fireTime = (forward ? walk.next() : walk.prev()).toDate().getTime();
+                    if (forward ? fireTime <= currentTime : fireTime >= currentTime) {
+                        continue;
+                    }
+                    if (event._pattern && event._pattern.includes('#')) {
+                        if (!isNthWeekday(event._pattern.split(' ')[5], fireTime)) {
+                            continue;
+                        }
+                    }
+                    // a holiday is the top priority; nothing can outrank it
+                    if (eventTypeNum > 1) {
+                        const day = new Date(fireTime);
+                        const key = day.toDateString() + '|' + eventTypeNum;
+                        if (!(key in cache)) {
+                            cache[key] = isOutrankedOnDay(eventTypeNum, outrankers, day);
+                        }
+                        if (cache[key]) {
+                            continue;
+                        }
+                    }
+                    return { timestamp: fireTime, type: event.type, typeNum: eventTypeNum, event: event };
+                }
+            } catch (err) {
+                console.error('Error: ' + err.message);
+            }
+            return undefined;
+        };
+
+        let pickEvent = function (originFilter, forward) {
+            const typeNum = { 'holiday': 1, 'date': 2, 'weekday': 3 };
+            const events = getEventsArray(originFilter);
+            const outrankers = collectOutrankers(events, typeNum);
+            const cache = {};
+            let best;
+
+            for (const event of events) {
+                const eventTypeNum = typeNum[event.type];
+                if (typeof eventTypeNum === 'undefined') {
+                    continue;
+                }
+                const candidate = findQualifyingOccurrence(event, eventTypeNum, outrankers, cache, forward);
+                if (!candidate) {
+                    continue;
+                }
+                const closer = forward
+                    ? candidate.timestamp < best?.timestamp
+                    : candidate.timestamp > best?.timestamp;
+                const tieBrokenByPriority =
+                    candidate.timestamp === best?.timestamp && candidate.typeNum < best.typeNum;
+                if (!best || closer || tieBrokenByPriority) {
+                    best = candidate;
+                }
+            }
+            return best;
+        };
+
+        let nextEvent = function (originFilter) {
+            return pickEvent(originFilter, true);
+        };
+
+        let prevEvent = function (originFilter) {
+            return pickEvent(originFilter, false);
         };
 
         let isSameDay = function (dateA, dateB) {
@@ -415,6 +566,57 @@ module.exports = function (RED) {
             return schPattern;
         };
 
+        // Create a cron job and take ownership of it. Re-registering the same
+        // identity destroys the job it replaces, so a collision can no longer
+        // abandon a live node-cron task.
+        // `dispatchEvent` is what the callback receives and is not always the entry's
+        // own event: the date and weekday jobs hand their callback a copy carrying
+        // the pattern actually scheduled, while the entry keeps the original.
+        let trackCronJob = function (pattern, fn, dispatchType, dispatchEvent, entry) {
+            let key = cronJobKey(pattern, fn, dispatchType);
+            let previous = rt.cronJobs[key];
+            if (previous) {
+                try {
+                    previous.job.destroy();
+                } catch (e) {
+                    /* task already gone */
+                }
+            }
+            entry.job = cron.schedule(
+                pattern,
+                dispatch.bind({ rt: rt, fn: fn, event: dispatchEvent, type: dispatchType })
+            );
+            entry.pattern = pattern;
+            rt.cronJobs[key] = entry;
+            return entry;
+        };
+
+        // A rebuild destroys and recreates the priority markers. When the rebuild
+        // lands after a marker's fire time -- the midnight sweep starts at 00:00:00
+        // and the start marker is due at 00:00:01, a gap a large site cannot always
+        // make -- node-cron schedules the recreated job for its *next* occurrence
+        // and today's mark is simply never set. Re-derive it rather than depending
+        // on a timer that may already have passed.
+        // setCronTime only rewrites the second/minute/hour fields, so the start and end
+        // markers always cover the same set of days. One parse settles both: if the
+        // start marker has not already fired today then neither has the end marker,
+        // and the second parse is only paid on the days a schedule is actually live.
+        let applyMissedMarkers = function (startPattern, endPattern, type) {
+            try {
+                let now = new Date();
+                if (!isSameDay(parser.parseExpression(startPattern).prev().toDate(), now)) {
+                    return;
+                }
+                setPrioritySchedule.call({ type: type });
+                if (isSameDay(parser.parseExpression(endPattern).prev().toDate(), now)) {
+                    // the day is already over; end last so it stays clear
+                    clearPrioritySchedule.call({ type: type });
+                }
+            } catch (e) {
+                /* unparseable pattern: leave the cron jobs to do the work */
+            }
+        };
+
         let scheduleHolidayJob = function (sch, time) {
             // check nth and last rules that node-cron currently does not support
             let correctedPattern = correctForNthAndLastRules(sch.pattern);
@@ -429,10 +631,11 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(correctedPattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(sch.pattern, fireEvent.bind({ event: sch, type: 'holiday' }), {
-                recoverMissedExecutions: true,
+            trackCronJob(sch.pattern, 'fireEvent', 'holiday', sch, {
+                event: sch,
+                type: 'holiday',
+                origin: 'holiday',
             });
-            node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'holiday' };
         };
 
         let scheduleDateJob = function (sch, time) {
@@ -449,14 +652,11 @@ module.exports = function (RED) {
                     time.getSeconds()
                 );
             }
-            let job = cron.schedule(
-                temporary_pattern,
-                fireEvent.bind({ event: { ...sch, pattern: temporary_pattern }, type: 'date' }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'date' };
+            trackCronJob(temporary_pattern, 'fireEvent', 'date', { ...sch, pattern: temporary_pattern }, {
+                event: sch,
+                type: 'date',
+                origin: 'date',
+            });
         };
 
         let scheduleWeekdayJob = function (sch, time) {
@@ -473,14 +673,11 @@ module.exports = function (RED) {
                     time.getSeconds()
                 );
             }
-            let job = cron.schedule(
-                temporary_pattern,
-                fireEvent.bind({ event: { ...sch, pattern: temporary_pattern }, type: 'weekday' }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            node.cronJobs[sch.pattern] = { job: job, event: sch, type: 'weekday' };
+            trackCronJob(temporary_pattern, 'fireEvent', 'weekday', { ...sch, pattern: temporary_pattern }, {
+                event: sch,
+                type: 'weekday',
+                origin: 'weekday',
+            });
         };
 
         let schedulePriorityScheduleJobs = function (sch, type, time) {
@@ -498,47 +695,94 @@ module.exports = function (RED) {
                 time ? time.getMinutes() : 0,
                 time ? time.getSeconds() : 1
             );
-            let startJob = cron.schedule(
-                startPattern,
-                setPrioritySchedule.bind({ event: { ...sch, pattern: correctedPattern }, type: type }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            node.cronJobs[startPattern] = { job: startJob, event: sch, type: 'background' };
+            trackCronJob(startPattern, 'setPrioritySchedule', type, { ...sch, pattern: correctedPattern }, {
+                event: sch,
+                type: 'background',
+                origin: type,
+            });
             // deactivate date or holiday schedule at end of day
             let endPattern = setCronTime(sch.pattern, 23, 59, 59);
-            let endJob = cron.schedule(endPattern, clearPrioritySchedule.bind({ event: sch, type: type }), {
-                recoverMissedExecutions: true,
+            trackCronJob(endPattern, 'clearPrioritySchedule', type, sch, {
+                event: sch,
+                type: 'background',
+                origin: type,
             });
-            node.cronJobs[endPattern] = { job: endJob, event: sch, type: 'background' };
+            // Both markers may already be due by the time this rebuild runs; whichever
+            // has passed today is applied here rather than waiting on a timer that has
+            // gone by.
+            applyMissedMarkers(startPattern, endPattern, type);
         };
 
-        let destroyCronJobs = function () {
-            clearTimeout(node.heartbeatTimer);
+        // `origin` limits the teardown to jobs derived from one source
+        // ('weekday' | 'date' | 'holiday'); omit it to tear down everything.
+        let destroyCronJobs = function (origin) {
+            if (!origin) {
+                clearTimeout(rt.heartbeatTimer);
+                rt.heartbeatTimer = null;
+            }
             try {
-                for (let pattern in node.cronJobs) {
-                    node.cronJobs[pattern].job.stop();
-                }
+                destroyRuntimeJobs(rt, origin);
             } catch (e) {
                 node.error(e);
             }
-            node.cronJobs = {};
         };
 
         /*
         SCHEDULE MAGIC
         */
 
-        let buildSchedules = function () {
-            node.log('Building schedules...');
+        // Restore the visible state of a node whose cron jobs were reused. Replays the
+        // remembered emit instead of calling prevEvent()/nextEvent(), which would cost
+        // ~25ms of cron-parser work per node and undo the point of reusing.
+        let refreshStatus = function (soonestEvent) {
+            if (!rt.lastEmit) {
+                node.status({ text: '' });
+                return;
+            }
+            // The remembered msg carries the topic that was live when it was built.
+            // topic is deliberately outside the reuse signature (it is read through
+            // the live config at fire time), so a topic-only change reuses these cron
+            // jobs -- and replaying the msg verbatim would emit the previous topic
+            // until the next scheduled event, which can be hours away.
+            rt.lastEmit.msg = { ...rt.lastEmit.msg, topic: config.topic };
+            rt.node.send(rt.lastEmit.msg);
+            if (soonestEvent && rt.lastEmit.nowText) {
+                // The current value is unchanged, but the upcoming one may not be.
+                let nextValue = getValueFromName(soonestEvent.event.value);
+                rt.lastEmit.statusText =
+                    `${rt.lastEmit.nowText},  next: ${nextValue ? nextValue.value : soonestEvent.event.value} ` +
+                    `[${soonestEvent.type}] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`;
+            }
+            node.status({ text: rt.lastEmit.statusText });
+        };
 
-            // stop and delete any existing cron jobs
-            destroyCronJobs();
+        // scope 'holiday' rebuilds only the holiday-derived jobs and leaves the
+        // weekday/date cron jobs in place; anything else rebuilds the lot.
+        let buildSchedulesInternal = function (scope) {
+            let holidaysOnly = scope === 'holiday';
+            node.log(holidaysOnly ? 'Rebuilding holiday schedules...' : 'Building schedules...');
+
+            // stop and delete the cron jobs being replaced
+            destroyCronJobs(holidaysOnly ? 'holiday' : undefined);
+
+            // Drop the priority marks belonging to those jobs. The marks are set by
+            // the 00:00:01 background job and cleared by its 23:59:59 twin, so a
+            // schedule deleted while it was in effect would otherwise leave its mark
+            // set with no job left alive to clear it -- and fireEvent's priority
+            // chain would then suppress every lower-priority event indefinitely.
+            // Whatever is genuinely still in effect is re-marked by the recovery
+            // jobs at the end of this rebuild.
+            if (holidaysOnly) {
+                rt.valuePriority.holiday = null;
+            } else {
+                rt.valuePriority.holiday = null;
+                rt.valuePriority.date = null;
+                rt.valuePriority.weekday = null;
+            }
 
             // build map of all holiday events and index by cron pattern
-            if (node.holidays && node.holidays.length) {
-                for (let holidaySch of node.holidays) {
+            if (rt.holidays && rt.holidays.length) {
+                for (let holidaySch of rt.holidays) {
                     try {
                         // account for no ._pattern key
                         if (!('_pattern' in holidaySch)) {
@@ -565,7 +809,7 @@ module.exports = function (RED) {
             }
 
             // build map of all date events and index by date
-            if (config.dates && config.dates.length) {
+            if (!holidaysOnly && config.dates && config.dates.length) {
                 let dateSchedules = {};
                 for (let dateSch of config.dates) {
                     try {
@@ -591,7 +835,7 @@ module.exports = function (RED) {
             }
 
             // build array of all weekday events and index by weekday
-            if (config.weekdays && config.weekdays.length) {
+            if (!holidaysOnly && config.weekdays && config.weekdays.length) {
                 let weekdaySchedules = [
                     /* Sunday    */ [],
                     /* Monday    */ [],
@@ -624,18 +868,46 @@ module.exports = function (RED) {
                 }
             }
 
+            if (holidaysOnly) {
+                // Weekday and date jobs were left running, so the only thing that can
+                // have changed right now is whether a holiday is in effect today.
+                // Scanning just the holiday events avoids ~20 cron-parser walks.
+                let lastHoliday = prevEvent('holiday');
+                if (lastHoliday && isSameDay(new Date(), new Date(lastHoliday.timestamp))) {
+                    scheduleHolidayJob(lastHoliday.event, secondsFromNow(1));
+                    schedulePriorityScheduleJobs(lastHoliday.event, 'holiday', secondsFromNow(1));
+                } else {
+                    // Not in effect today, but the new holiday may still be the next
+                    // event, so the "next:" half of the status has to be recomputed.
+                    // Only nextEvent() is re-run; the current value cannot have moved.
+                    refreshStatus(nextEvent());
+                }
+                return;
+            }
+
             // checks if schedule is empty or not
             // avoids undefined errors
-            if (Object.keys(node.cronJobs).length !== 0) {
+            if (Object.keys(rt.cronJobs).length !== 0) {
                 let lastEvent = prevEvent();
 
                 let soonestEvent = nextEvent();
 
-                // update node status text
+                if (!lastEvent || !soonestEvent) {
+                    refreshStatus();
+                    return;
+                }
+
+                // update node status text. event.value is the value's *name*; resolve it
+                // the way fireEvent and refreshStatus do so the status does not show a
+                // bare name whenever this provisional line is the one left standing.
+                let lastValue = getValueFromName(lastEvent.event.value);
+                let soonestValue = getValueFromName(soonestEvent.event.value);
                 node.status({
-                    text: `now: ${lastEvent.event.value} [${lastEvent.type}],  next: ${soonestEvent.event.value} [${
-                        soonestEvent.type
-                    }] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`,
+                    text:
+                        `now: ${lastValue ? lastValue.value : lastEvent.event.value} [${lastEvent.type}],  ` +
+                        `next: ${soonestValue ? soonestValue.value : soonestEvent.event.value} [${
+                            soonestEvent.type
+                        }] @ ${new Date(soonestEvent.timestamp).toLocaleString()}`,
                 });
 
                 // schedule recovery job: find last (missed event) and fire after 5 second delay
@@ -647,7 +919,7 @@ module.exports = function (RED) {
                         scheduleDateJob(lastEvent.event, secondsFromNow(1));
                         schedulePriorityScheduleJobs(lastEvent.event, 'date', secondsFromNow(1));
                     } else {
-                        fireEvent.bind({ event: lastEvent.event, type: lastEvent.type })();
+                        fireEvent.bind({ event: lastEvent.event, type: lastEvent.type, recovery: true })();
                     }
                 }
             }
@@ -660,11 +932,66 @@ module.exports = function (RED) {
             }
         };
 
-        buildSchedules();
-        // rebuild schedules everyday at midnight
-        if (!buildJob) {
-            buildJob = cron.schedule('0 0 0 * * *', buildSchedules, {
-                recoverMissedExecutions: true,
+        let buildSchedules = function (scope) {
+            try {
+                buildSchedulesInternal(scope);
+            } finally {
+                rt.signature = newSignature;
+                rt.holidaySignature = newHolidaySignature;
+                rt.builtOn = todayKey();
+            }
+        };
+
+        // Cron callbacks created on earlier deploys dispatch through these, so they
+        // must always point at the current deploy's closures.
+        rt.fireEvent = fireEvent;
+        rt.setPrioritySchedule = setPrioritySchedule;
+        rt.clearPrioritySchedule = clearPrioritySchedule;
+        rt.rebuild = buildSchedules;
+
+        // Decide how much of this node actually has to be rebuilt.
+        // Patterns such as "last weekday of the month" resolve against today, so a
+        // runtime built on an earlier day is always stale regardless of config.
+        let builtToday = rt.builtOn === todayKey();
+        let hasJobs = Object.keys(rt.cronJobs).length > 0;
+        if (isNewRuntime || !builtToday || !hasJobs || rt.signature !== newSignature) {
+            buildSchedules();
+        } else if (rt.holidaySignature !== newHolidaySignature) {
+            // Schedule itself is unchanged; only the shared holidays config node moved.
+            buildSchedules('holiday');
+        } else {
+            // Nothing relevant changed: keep the cron jobs this node already owns.
+            if (RED.settings.verbose) {
+                node.log('Schedules unchanged, reusing existing cron jobs');
+            }
+            refreshStatus();
+        }
+
+        // rebuild every node's schedules at midnight. One shared job drives all of
+        // them; the previous per-node guard only ever armed the first node created.
+        if (!midnightJob) {
+            midnightJob = cron.schedule('0 0 0 * * *', () => {
+                // One rebuild per tick. Rebuilding every node in a single turn blocks
+                // the Node-RED event loop for the whole sweep -- measured at ~3.1 s
+                // for 20 nodes, during which nothing else in the runtime can run, cron
+                // callbacks included. Yielding keeps each pause to one node's work.
+                // The markers this destroys and recreates are re-derived by
+                // applyMissedMarker, so a sweep that outruns them is no longer a gap.
+                let pending = Array.from(runtimes.values());
+                let step = function () {
+                    let runtime = pending.shift();
+                    if (runtime && runtime.node && typeof runtime.rebuild === 'function') {
+                        try {
+                            runtime.rebuild();
+                        } catch (e) {
+                            runtime.node.error(e);
+                        }
+                    }
+                    if (pending.length) {
+                        setImmediate(step);
+                    }
+                };
+                step();
             });
         }
 
@@ -715,13 +1042,43 @@ module.exports = function (RED) {
         /*
          * This function is called when the node is being stopped, for example when a new flow configuration is deployed.
          */
-        node.on('close', () => {
-            // tear down all cron jobs
+        // `removed` is true only when the node is genuinely gone (deleted, or its tab
+        // disabled). A plain redeploy passes false, and the cron jobs are left running
+        // so the replacement node can adopt them.
+        node.on('close', (removed, closeDone) => {
             if (RED.settings.verbose) {
                 this.log(RED._('schedule.stopped'));
             }
-            destroyCronJobs();
+            if (removed) {
+                destroyCronJobs();
+                clearTimeout(rt.orphanTimer);
+                runtimes.delete(config.id);
+                // last schedule node gone: retire the shared midnight rebuild too
+                if (!runtimes.size && midnightJob) {
+                    midnightJob.destroy();
+                    midnightJob = null;
+                }
+            } else {
+                clearTimeout(rt.heartbeatTimer);
+                rt.heartbeatTimer = null;
+                // Detach until the replacement node adopts this runtime; dispatch()
+                // no-ops while node is null so jobs firing mid-deploy are dropped.
+                rt.node = null;
+                // Safety net: if no replacement arrives, this runtime is orphaned and
+                // its cron jobs would run forever against a dead node.
+                clearTimeout(rt.orphanTimer);
+                rt.orphanTimer = setTimeout(() => {
+                    if (!rt.node) {
+                        destroyRuntimeJobs(rt);
+                        runtimes.delete(config.id);
+                    }
+                }, 30000);
+                if (rt.orphanTimer.unref) {
+                    rt.orphanTimer.unref();
+                }
+            }
             done();
+            closeDone();
         });
     }
     RED.nodes.registerType('ur_schedule', ScheduleNode);

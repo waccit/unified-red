@@ -3,9 +3,9 @@
 app-ur-chart {
     font-family: $app-font-family;
 
-    .mat-tab-label {
-        padding: 0;
+    .mat-mdc-tab {
         min-width: 48px;
+        padding: 0 12px;
     }
 
     .mat-mdc-tab .mdc-tab__text-label {
