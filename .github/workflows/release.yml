@@ -10,6 +10,10 @@ permissions:
   contents: write      
   issues: write  
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build
@@ -20,7 +24,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '12.x'
+          node-version: '24.x'
+          cache: 'npm'
       - name: Install Dependencies
         run: npm ci
       - name: Build
@@ -31,6 +36,7 @@ jobs:
         with:
           name: dist
           path: dist
+          if-no-files-found: error
 
   deploy:
     name: Deploy
@@ -42,7 +48,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
       - name: Download Build
         uses: actions/download-artifact@v4
