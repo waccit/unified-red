@@ -1,4 +1,4 @@
-import { Component, OnInit, ComponentFactoryResolver, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ViewContainerRef, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import { PageDirective } from '../../directives/page.directive';
 import { GroupComponent } from '../group/group.component';
@@ -13,16 +13,41 @@ import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 import { User } from '../../data';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-page',
     templateUrl: './page.component.html',
     styleUrls: ['./page.component.sass'],
 })
-export class PageComponent implements OnInit {
+export class PageComponent implements OnInit, OnDestroy {
     private pathList: string[];
     private folder: string;
     private page: string;
     private groups: Group[];
     private _menuSubscription: Subscription;
+    private _userSubscription: Subscription;
+    private _urlSubscription: Subscription;
+    private _lastMenu: RouteInfo[];
+    private _notFoundTimer: any = null;
+
+    /**
+     * How long the menu must be QUIET, with the page still missing, before it is
+     * treated as a real 404.
+     *
+     * A deploy removes the node's menu entry and rebuilds it a moment later, and
+     * ui.js prunes a page once its last node is gone (cleanupChildlessFolders), so
+     * a page whose only widget is the node being redeployed disappears from the
+     * menu for the duration of the deploy. That duration is not a constant: a
+     * holidays change restarts every schedule node, which measured ~2.9s for 113
+     * nodes on a dev machine and is unbounded on slower hardware.
+     *
+     * So this is a debounce, not a deadline: every menu update that still lacks the
+     * page restarts the countdown, and the page reappearing cancels it. The timer
+     * therefore only expires once the backend has stopped sending menu updates
+     * altogether, which makes it independent of how long the deploy took.
+     */
+    private static readonly NOT_FOUND_GRACE_MS = 10000;
     breadcrumbs: string[];
     @ViewChild(PageDirective, { static: true }) pageHost: PageDirective;
     private userRole: string;
@@ -30,7 +55,6 @@ export class PageComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private router: Router,
-        private componentFactoryResolver: ComponentFactoryResolver,
         private widgetService: WidgetService,
         private menuService: MenuService,
         private viewContainerRef: ViewContainerRef,
@@ -42,27 +66,32 @@ export class PageComponent implements OnInit {
     ngOnInit(): void {
         this.viewContainerRef = this.pageHost.viewContainerRef;
 
-        this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
-
-                this.route.url.subscribe((segments: UrlSegment[]) => {
-                    this.pathList = [...segments.map((seg) => seg.path)];
-
-                    if (this._menuSubscription !== undefined) {
-                        this._menuSubscription.unsubscribe();
-                    }
-
-                    this._menuSubscription = this.menuService.menu
-                        .pipe(debounceTime(300))
-                        .subscribe((menu: RouteInfo[]) => {
-                        if (menu.length) {
-                            this.setGroups(menu);
-                            this.loadGroups();
-                        }
-                    });
-                });
+        this._userSubscription = this.currentUserService.currentUser.subscribe((user: User) => {
+            this.userRole = user ? user.role : undefined;
+            if (user && this._lastMenu?.length) {
+                this.setGroups(this._lastMenu);
+                this.loadGroups();
             }
+        });
+
+        this._urlSubscription = this.route.url.subscribe((segments: UrlSegment[]) => {
+            this.pathList = [...segments.map((seg) => seg.path)];
+            // resolving a different URL; any pending 404 refers to the old one
+            this.cancelNotFound();
+
+            if (this._menuSubscription !== undefined) {
+                this._menuSubscription.unsubscribe();
+            }
+
+            this._menuSubscription = this.menuService.menu
+                .pipe(debounceTime(300))
+                .subscribe((menu: RouteInfo[]) => {
+                    if (menu && menu.length) {
+                        this._lastMenu = menu;
+                        this.setGroups(menu);
+                        this.loadGroups();
+                    }
+                });
         });
     }
 
@@ -94,6 +123,7 @@ export class PageComponent implements OnInit {
             (foundFolder.disabled || (foundFolder.accessBehavior === 'disable' && !this.hasAccess(foundFolder.access)))
         ) {
             // this.router.navigate(['/d/disabled']);
+            this.cancelNotFound();
             this.breadcrumbs.push('DISABLED');
             return;
         }
@@ -102,10 +132,11 @@ export class PageComponent implements OnInit {
             this.breadcrumbs.push(foundFolder.title);
             foundPage = this.findMenuEntityByKeyValue(foundFolder.items, 'title', this.page);
         } else {
-            this.router.navigateByUrl('404');
+            this.scheduleNotFound();
         }
 
         if (foundPage) {
+            this.cancelNotFound();
             // do not render disabled pages
             if (foundPage.disabled) {
                 this.breadcrumbs.push('DISABLED');
@@ -136,13 +167,42 @@ export class PageComponent implements OnInit {
                 }
             });
         } else {
-            this.router.navigateByUrl('404');
+            this.scheduleNotFound();
         }
+    }
+
+    /** Defer the 404 so a menu that is mid-rebuild does not navigate the user away. */
+    private scheduleNotFound(): void {
+        // Restart, never coalesce: each menu update that still lacks the page has
+        // to push the deadline out, otherwise a long deploy would expire the timer
+        // that was armed at the start of it.
+        this.cancelNotFound();
+        this._notFoundTimer = setTimeout(() => {
+            this._notFoundTimer = null;
+            this.router.navigateByUrl('404');
+        }, PageComponent.NOT_FOUND_GRACE_MS);
+    }
+
+    private cancelNotFound(): void {
+        if (this._notFoundTimer) {
+            clearTimeout(this._notFoundTimer);
+            this._notFoundTimer = null;
+        }
+    }
+
+    ngOnDestroy(): void {
+        // a pending 404 must not fire after the user has navigated elsewhere
+        this.cancelNotFound();
+        this._menuSubscription?.unsubscribe();
+        this._userSubscription?.unsubscribe();
+        this._urlSubscription?.unsubscribe();
     }
 
     hasAccess(access) {
         if (!access) access = 0;
-
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 
@@ -191,8 +251,7 @@ export class PageComponent implements OnInit {
             //     return;
             // }
 
-            const componentFactory = this.componentFactoryResolver.resolveComponentFactory(GroupComponent);
-            const componentRef = this.viewContainerRef.createComponent(componentFactory);
+            const componentRef = this.viewContainerRef.createComponent(GroupComponent);
 
             componentRef.instance.header = group.header;
             componentRef.instance.displayHeader = group.displayHeader;

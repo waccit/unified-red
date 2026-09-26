@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 import { DashboardRoutingModule } from './dashboard-routing.module';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { GroupComponent } from './group/group.component';
 import { GroupDirective } from '../directives/group.directive';
 import { PageComponent } from './page/page.component';
@@ -45,7 +44,6 @@ import { NodeREDRouterComponent } from './node-red-router/node-red-router.compon
         CommonModule,
         DashboardRoutingModule,
         FullCalendarModule,
-        PerfectScrollbarModule,
         MatFormFieldModule,
         MatInputModule,
         MatTooltipModule,
@@ -58,6 +56,6 @@ import { NodeREDRouterComponent } from './node-red-router/node-red-router.compon
         MatTabsModule,
         MatSelectModule,
     ],
-    entryComponents: [GroupComponent],
+
 })
 export class DashboardModule {}

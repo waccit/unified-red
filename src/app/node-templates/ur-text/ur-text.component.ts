@@ -2,6 +2,9 @@ import { AfterViewInit, Component } from '@angular/core';
 import { BaseNode } from '../ur-base-node';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-text',
     templateUrl: './ur-text.component.html',
     styleUrls: ['./ur-text.component.sass'],

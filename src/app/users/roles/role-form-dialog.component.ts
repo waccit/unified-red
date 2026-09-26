@@ -4,6 +4,7 @@ import { AbstractControl, ValidationErrors, Validators, FormGroup, FormBuilder }
 import { RoleName } from '../../data';
 
 @Component({
+    standalone: false,
     selector: 'app-role-form-dialog',
     templateUrl: './role-form-dialog.component.html',
     styleUrls: ['./role-form-dialog.component.sass'],

@@ -13,6 +13,9 @@ import { BaseNode } from '../ur-base-node';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service';
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-form',
     templateUrl: './ur-form.component.html',
     styleUrls: ['./ur-form.component.sass'],

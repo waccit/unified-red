@@ -33,10 +33,14 @@
                                                 <mat-form-field>
                                                     <mat-label>Logs List</mat-label>
                                                     <mat-select (selectionChange)="loadLog($event)" [(value)]="log">
-                                                        <mat-option *ngIf="logs.length == 0">No Logs Found</mat-option>
-                                                        <mat-option *ngFor="let l of logs" [value]="l">
-                                                            {{ prettyLogName(l) }}
-                                                        </mat-option>
+                                                        @if (logs.length == 0) {
+                                                            <mat-option>No Logs Found</mat-option>
+                                                        }
+                                                        @for (l of logs; track l) {
+                                                            <mat-option [value]="l">
+                                                                {{ prettyLogName(l) }}
+                                                            </mat-option>
+                                                        }
                                                     </mat-select>
                                                 </mat-form-field>
                                             </li>
@@ -77,10 +81,12 @@
                                 <mat-row *matRowDef="let row; columns: displayedColumns" matRipple></mat-row>
                             </mat-table>
 
-                            <div class="no-results" *ngIf="dataSource.data.length == 0" style="text-align: center">
+                            @if (dataSource.data.length == 0) {
+                            <div class="no-results" style="text-align: center">
                                 <br /><br />
                                 <em>empty</em>
                             </div>
+                            }
                             <mat-paginator
                                 [pageSize]="10"
                                 [pageSizeOptions]="[5, 10, 25, 100]"

@@ -8,6 +8,9 @@ import { RoleService, CurrentUserService, UserService, SnackbarService } from '.
 import { first } from 'rxjs/operators';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-user-form-dialog',
     templateUrl: './user-form-dialog.component.html',
     styleUrls: ['./user-form-dialog.component.sass'],

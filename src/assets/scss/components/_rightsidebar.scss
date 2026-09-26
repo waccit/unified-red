@@ -7,16 +7,31 @@
         font-size: 12px;
         text-align: left;
     }
-    .mat-button-toggle-checked {
-        background-color: #6e68c1;
-        color: #ffffff !important;
+
+    /* Full-width group; a fixed 60px segment was too narrow for “Light” after Material’s selection indicator + padding. */
+    .mat-button-toggle-group {
+        width: 100%;
+        --mat-button-toggle-height: 32px;
     }
+
     .mat-button-toggle {
-        width: 60px;
-        height: 30px;
+        flex: 1 1 auto;
         font-size: 14px;
     }
+
+    /* Material 15+ uses standard appearance + CSS variables; need matching specificity and background !important. */
+    .mat-button-toggle.mat-button-toggle-appearance-standard.mat-button-toggle-checked,
+    .mat-button-toggle.mat-button-toggle-checked {
+        background-color: #6e68c1 !important;
+        color: #ffffff !important;
+        --mat-pseudo-checkbox-minimal-selected-checkmark-color: #ffffff;
+    }
+
+    .mat-button-toggle-button {
+        color: inherit;
+    }
+
     .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
-        line-height: 30px !important;
+        line-height: 32px !important;
     }
 }

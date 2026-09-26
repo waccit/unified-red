@@ -1,6 +1,7 @@
 import {
     Component,
     AfterViewInit,
+    AfterContentChecked,
     ElementRef,
     Renderer2,
     ViewChild,
@@ -12,16 +13,17 @@ import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { WebSocketService, SnackbarService, CurrentUserService, RoleService } from '../../services';
 import { StyleService } from '../../services/style.service';
-import { render } from '@fullcalendar/common';
-import { __classPrivateFieldSet } from 'tslib';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-ur-text-input',
     templateUrl: './ur-text-input.component.html',
     styleUrls: ['./ur-text-input.component.sass'],
 })
-export class UrTextInputComponent extends BaseNode implements AfterViewInit {
-    label: string;
+export class UrTextInputComponent extends BaseNode implements AfterViewInit, AfterContentChecked {
+    label: string = '';
     valueIn = '';
     valueSubject = new BehaviorSubject(this.valueIn);
     delay: number;
@@ -55,7 +57,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
                 });
         }
     }
-    ngAfterContentCheck(): void {
+    ngAfterContentChecked(): void {
         this.cdRef.detectChanges();
     }
 
@@ -64,21 +66,21 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit {
         if (data && data.msg && typeof data.msg.payload !== 'undefined') {
             this.label = this.formatFromData(data, this.data.label);
             this.valueIn = this.formatFromData(data);
-        }
 
-        const inputarea = this.myInputarea.nativeElement;
-        if (data.msg.payload.health === 'down') {
-            this.styleService.applyHealthDown(inputarea, this.renderer, this.cdRef);
-        } else if (data.msg.payload['class']) {
-            this.styleService.applyClass(inputarea, data.msg.payload['class'], this.renderer, this.cdRef);
-        } else {
-            this.styleService.applyStyles(inputarea, data, this.renderer, this.cdRef);
-        }
+            const inputarea = this.myInputarea.nativeElement;
+            if (data.msg.payload.health === 'down') {
+                this.styleService.applyHealthDown(inputarea, this.renderer, this.cdRef);
+            } else if (data.msg.payload['class']) {
+                this.styleService.applyClass(inputarea, data.msg.payload['class'], this.renderer, this.cdRef);
+            } else {
+                this.styleService.applyStyles(inputarea, data, this.renderer, this.cdRef);
+            }
 
-        if (data.msg.payload.health !== 'down') {
-            this.styleService.setStyle(data);
+            if (data.msg.payload.health !== 'down') {
+                this.styleService.setStyle(data);
+            }
+            this.styleService.setClass(data);
         }
-        this.styleService.setClass(data);
     }
 
     keyup(value: string) {

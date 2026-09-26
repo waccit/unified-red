@@ -4,6 +4,9 @@ import { RightSidebarService } from '../../services/rightsidebar.service';
 import { Role } from '../../data/';
 import { AuthenticationService } from '../../services/';
 @Component({
+
+    standalone: false,
+
     selector: 'app-right-sidebar',
     templateUrl: './right-sidebar.component.html',
     styleUrls: ['./right-sidebar.component.sass'],
@@ -111,8 +114,6 @@ export class RightSidebarComponent implements OnInit {
     }
 
     toggleRightSidebar(): void {
-        this.dataService.changeMsg(
-            (this.dataService.currentStatus._isScalar = !this.dataService.currentStatus._isScalar)
-        );
+        this.dataService.toggle();
     }
 }

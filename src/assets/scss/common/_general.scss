@@ -1,28 +1,20 @@
-﻿/*
+/*
  *  Document   : _general.scss
  *  Author     : RedStar Template
  *  Description: This scss file for all common style classes
  */
 
-@font-face {
-    font-family: 'Poppins';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/poppins/poppins-v5-latin-regular.eot'); /* IE9 Compat Modes */
-    src: local('Poppins Regular'), local('Poppins-Regular'),
-        url('../fonts/poppins/poppins-v5-latin-regular.eot?#iefix') format('embedded-opentype'),
-        /* IE6-IE8 */ url('../fonts/poppins/poppins-v5-latin-regular.woff2') format('woff2'),
-        /* Super Modern Browsers */ url('../fonts/poppins/poppins-v5-latin-regular.woff') format('woff'),
-        /* Modern Browsers */ url('../fonts/poppins/poppins-v5-latin-regular.ttf') format('truetype'),
-        /* Safari, Android, iOS */ url('../fonts/poppins/poppins-v5-latin-regular.svg#Poppins') format('svg'); /* Legacy iOS */
-}
-
 body,
 html {
     background-color: #f1f2f7;
     @include transition(all 0.5s);
-    font-family: 'Roboto', "Helvetica Neue", 'Poppins', sans-serif;
-    font-size: 13px;
+    font-family: $app-font-family;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+    line-height: 26px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 html {
@@ -42,7 +34,26 @@ h3,
 h4,
 h5,
 h6 {
-    font-weight: bold;
+    font-weight: 700;
+    color: #555;
+}
+
+// Prebuilt Material theme; align tabs, tables, forms, and dialogs with app stack (not Material text buttons — see ui/_buttons)
+.mat-mdc-tab .mdc-tab__text-label,
+.mat-mdc-icon-button,
+.mat-mdc-form-field,
+.mat-mdc-table,
+.mat-mdc-select,
+.mat-mdc-option,
+.mat-mdc-list-item,
+.mat-mdc-dialog-container,
+.mat-mdc-snack-bar-container,
+.mat-datepicker-content {
+    font-family: $app-font-family;
+}
+
+.mat-mdc-tab .mdc-tab__text-label {
+    font-weight: 500;
 }
 
 button,
@@ -225,7 +236,7 @@ table {
 .border-apply {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2) !important;
 }
-@media screen and(max-width: 1169px) {
+@media screen and (max-width: 1169px) {
     .horizontal-layout {
         .sidebar {
             display: block;
@@ -255,7 +266,7 @@ table {
 .echart-height {
     height: 250px;
 }
-@media screen and(min-width: 1400px) {
+@media screen and (min-width: 1400px) {
     .boxed-layout .container {
         width: 1370px;
         max-width: 100%;

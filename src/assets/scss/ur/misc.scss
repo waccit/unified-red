@@ -7,6 +7,16 @@ app-ur-form {
     }
 }
 
+.mat-mdc-checkbox {
+    .mdc-form-field {
+        align-items: center;
+    }
+    label {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+}
+
 app-ur-form:not(:last-child) {
     padding-bottom:30px;
 }

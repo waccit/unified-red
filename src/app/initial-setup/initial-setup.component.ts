@@ -7,6 +7,9 @@ import { SnackbarService } from '../services';
 import { InitialSetupConfirmation } from './initial-setup-confirmation.component';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-initial-setup',
     templateUrl: './initial-setup.component.html',
     styleUrls: ['./initial-setup.component.scss'],
@@ -140,6 +143,11 @@ export class InitialSetupComponent implements OnInit {
             user: this.smtpForm.controls.user.value,
             password: this.smtpForm.controls.password.value,
         };
+    }
+
+    applyDbConnection(connectionString: string) {
+        this.dbForm.get('dbConnection')?.setValue(connectionString);
+        this.dbConnectionOk = false;
     }
 
     openConfirmationDialog() {

@@ -11,6 +11,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { NgbTimepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTableModule } from '@angular/material/table';
@@ -18,7 +19,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatTableExporterModule } from 'mat-table-exporter';
 
@@ -69,6 +69,7 @@ import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autoco
         MatDialogModule,
         MatSelectModule,
         MatDatepickerModule,
+        NgbTimepickerModule,
         MatRadioModule,
         MatSlideToggleModule,
         MatSidenavModule,
@@ -78,7 +79,6 @@ import { MatAutocomplete, MatAutocompleteModule } from '@angular/material/autoco
         MatTabsModule,
         MatAutocompleteModule,
         FullCalendarModule,
-        PerfectScrollbarModule,
         DragDropModule,
         BrowserModule,
         FormsModule,

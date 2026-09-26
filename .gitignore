@@ -3,6 +3,7 @@
 dist
 *.log
 node_modules
+.angular
 .vscode
 static/img
 api/config.json

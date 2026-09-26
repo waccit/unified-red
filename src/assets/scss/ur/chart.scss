@@ -1,7 +1,16 @@
+@import '../common/variables';
+
 app-ur-chart {
-    .mat-tab-label {
-        padding: 0;
+    font-family: $app-font-family;
+
+    .mat-mdc-tab {
         min-width: 48px;
+        padding: 0 12px;
+    }
+
+    .mat-mdc-tab .mdc-tab__text-label {
+        font-family: $app-font-family;
+        font-weight: 500;
     }
 
     .chart-legend .legend-label {

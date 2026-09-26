@@ -8,6 +8,9 @@ import { AlarmDialogDataSource } from '../../data';
 import { Subscription } from 'rxjs';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-alarm-dialog',
     templateUrl: './alarm-dialog.component.html',
     styleUrls: ['./alarm-dialog.component.sass'],

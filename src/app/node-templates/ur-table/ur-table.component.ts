@@ -4,6 +4,9 @@ import { BaseNode } from '../ur-base-node';
 import { StyleService } from '../../services/style.service';
 
 @Component({
+
+	standalone: false,
+
 	selector: 'app-ur-table',
 	templateUrl: './ur-table.component.html',
 	styleUrls: ['./ur-table.component.sass']

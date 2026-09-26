@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { MenuService } from '../../services';
 
 @Component({
+
+  standalone: false,
+
   selector: 'app-node-red-router',
   templateUrl: './node-red-router.component.html',
   styleUrls: ['./node-red-router.component.sass']

@@ -9,6 +9,9 @@ import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 import { Observable } from 'rxjs';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-profile',
     templateUrl: './profile.component.html',
     styleUrls: ['./profile.component.scss'],
@@ -173,9 +176,10 @@ export class ProfileComponent implements OnInit {
     }
 
     private getPagePaths(page: RouteInfo) {
+        if (!page) return;
         if (page.isPage) {
             this.pages.push(page.path);
-        } else {
+        } else if (page.submenu && Array.isArray(page.submenu)) {
             for (let sub of page.submenu) {
                 this.getPagePaths(sub);
             }

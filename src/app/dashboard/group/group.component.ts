@@ -3,7 +3,6 @@ import {
     OnInit,
     OnDestroy,
     ViewChild,
-    ComponentFactoryResolver,
     ViewContainerRef,
     Renderer2,
 } from '@angular/core';
@@ -14,6 +13,9 @@ import { CurrentUserService } from '../../services';
 import { TabComponent } from '../tab/tab.component';
 
 @Component({
+
+    standalone: false,
+
     selector: 'app-group',
     templateUrl: './group.component.html',
     styleUrls: ['./group.component.sass'],
@@ -29,7 +31,6 @@ export class GroupComponent implements OnInit, OnDestroy {
     selectedTab: number;
 
     constructor(
-        private componentFactoryResolver: ComponentFactoryResolver,
         private viewContainerRef: ViewContainerRef,
         private renderer2: Renderer2,
         private currentUserService: CurrentUserService
@@ -39,9 +40,7 @@ export class GroupComponent implements OnInit, OnDestroy {
         this.viewContainerRef = this.groupHost.viewContainerRef;
 
         this.currentUserService.currentUser.subscribe((user: User) => {
-            if (user) {
-                this.userRole = user.role;
-            }
+            this.userRole = user ? user.role : undefined;
         });
 
         // do not render hidden tabs
@@ -55,7 +54,6 @@ export class GroupComponent implements OnInit, OnDestroy {
                 tab.disabled || (tab.accessBehavior === 'disable' && !this.hasAccess(tab.access)) ? true : false;
         });
 
-        // this.loadTabs(); => this is being handled in html
         if (this.tabs && this.tabs.length < 2) {
             this.loadTab();
         }
@@ -69,7 +67,9 @@ export class GroupComponent implements OnInit, OnDestroy {
 
     hasAccess(access): boolean {
         if (!access) access = 0;
-
+        if (this.userRole == null || this.userRole === undefined) {
+            return access === 0;
+        }
         return this.userRole >= access;
     }
 
@@ -78,9 +78,7 @@ export class GroupComponent implements OnInit, OnDestroy {
 
         if (this.tabs[0].widgets) {
             this.tabs[0].widgets.forEach((widget) => {
-                const componentFactory = this.componentFactoryResolver.resolveComponentFactory(widget.component);
-
-                const componentRef = this.viewContainerRef.createComponent(componentFactory);
+                const componentRef = this.viewContainerRef.createComponent(widget.component);
                 componentRef.instance.data = widget.data;
                 const colWidth = +widget.data.width || 12;
                 const colClass = 'col-' + colWidth;
