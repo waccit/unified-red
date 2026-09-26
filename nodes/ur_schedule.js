@@ -67,9 +67,21 @@ var dispatch = function () {
     }
 };
 
+// Identity of a cron job: the pattern actually handed to node-cron, plus which
+// handler it dispatches to. Jobs were previously keyed by the schedule's nominal
+// `sch.pattern`, which is neither. That conflated jobs that genuinely differ (a
+// recovery job fires at a one-off time, but carried the key of the annual job it
+// was recovering) and merged jobs that are genuinely distinct (the occupied and
+// unoccupied entries on one date both flatten to 00:00:01 and 23:59:59 markers).
+// Either way the loser was dropped from the map without destroy(), leaving a
+// node-cron task that ran forever -- two per date, on every rebuild.
+var cronJobKey = function (pattern, fn, type) {
+    return pattern + '|' + fn + '|' + type;
+};
+
 var destroyRuntimeJobs = function (rt, origin) {
-    for (let pattern in rt.cronJobs) {
-        let entry = rt.cronJobs[pattern];
+    for (let key in rt.cronJobs) {
+        let entry = rt.cronJobs[key];
         if (origin && entry.origin !== origin) {
             continue;
         }
@@ -80,37 +92,7 @@ var destroyRuntimeJobs = function (rt, origin) {
         } catch (e) {
             /* task already gone */
         }
-        delete rt.cronJobs[pattern];
-    }
-};
-
-// aggregate timing of "Building schedules..." across every ur_schedule node
-var buildTiming = { built: 0, reused: 0, partial: 0, totalMs: 0, startedAt: 0n, endedAt: 0n, flushTimer: null };
-
-var flushBuildTiming = function () {
-    if (!buildTiming.built && !buildTiming.reused && !buildTiming.partial) {
-        return;
-    }
-    let wallMs = Number(buildTiming.endedAt - buildTiming.startedAt) / 1e6;
-    let touched = buildTiming.built + buildTiming.partial;
-    console.log(
-        `[ur_schedule] ${buildTiming.built} rebuilt, ${buildTiming.partial} holidays-only, ` +
-            `${buildTiming.reused} reused in ${wallMs.toFixed(1)} ms wall clock ` +
-            `(${buildTiming.totalMs.toFixed(1)} ms build time` +
-            (touched ? `, ${(buildTiming.totalMs / touched).toFixed(1)} ms avg per rebuild` : '') +
-            ')'
-    );
-    buildTiming = { built: 0, reused: 0, partial: 0, totalMs: 0, startedAt: 0n, endedAt: 0n, flushTimer: null };
-};
-
-var recordBuildTiming = function (kind, elapsedMs) {
-    buildTiming[kind]++;
-    buildTiming.totalMs += elapsedMs;
-    buildTiming.endedAt = process.hrtime.bigint();
-    clearTimeout(buildTiming.flushTimer);
-    buildTiming.flushTimer = setTimeout(flushBuildTiming, 2000);
-    if (buildTiming.flushTimer.unref) {
-        buildTiming.flushTimer.unref();
+        delete rt.cronJobs[key];
     }
 };
 
@@ -564,6 +546,57 @@ module.exports = function (RED) {
             return schPattern;
         };
 
+        // Create a cron job and take ownership of it. Re-registering the same
+        // identity destroys the job it replaces, so a collision can no longer
+        // abandon a live node-cron task.
+        // `dispatchEvent` is what the callback receives and is not always the entry's
+        // own event: the date and weekday jobs hand their callback a copy carrying
+        // the pattern actually scheduled, while the entry keeps the original.
+        let trackCronJob = function (pattern, fn, dispatchType, dispatchEvent, entry) {
+            let key = cronJobKey(pattern, fn, dispatchType);
+            let previous = rt.cronJobs[key];
+            if (previous) {
+                try {
+                    previous.job.destroy();
+                } catch (e) {
+                    /* task already gone */
+                }
+            }
+            entry.job = cron.schedule(
+                pattern,
+                dispatch.bind({ rt: rt, fn: fn, event: dispatchEvent, type: dispatchType })
+            );
+            entry.pattern = pattern;
+            rt.cronJobs[key] = entry;
+            return entry;
+        };
+
+        // A rebuild destroys and recreates the priority markers. When the rebuild
+        // lands after a marker's fire time -- the midnight sweep starts at 00:00:00
+        // and the start marker is due at 00:00:01, a gap a large site cannot always
+        // make -- node-cron schedules the recreated job for its *next* occurrence
+        // and today's mark is simply never set. Re-derive it rather than depending
+        // on a timer that may already have passed.
+        // setCronTime only rewrites the second/minute/hour fields, so the start and end
+        // markers always cover the same set of days. One parse settles both: if the
+        // start marker has not already fired today then neither has the end marker,
+        // and the second parse is only paid on the days a schedule is actually live.
+        let applyMissedMarkers = function (startPattern, endPattern, type) {
+            try {
+                let now = new Date();
+                if (!isSameDay(parser.parseExpression(startPattern).prev().toDate(), now)) {
+                    return;
+                }
+                setPrioritySchedule.call({ type: type });
+                if (isSameDay(parser.parseExpression(endPattern).prev().toDate(), now)) {
+                    // the day is already over; end last so it stays clear
+                    clearPrioritySchedule.call({ type: type });
+                }
+            } catch (e) {
+                /* unparseable pattern: leave the cron jobs to do the work */
+            }
+        };
+
         let scheduleHolidayJob = function (sch, time) {
             // check nth and last rules that node-cron currently does not support
             let correctedPattern = correctForNthAndLastRules(sch.pattern);
@@ -578,14 +611,11 @@ module.exports = function (RED) {
             if (time) {
                 sch.pattern = setCronTime(correctedPattern, time.getHours(), time.getMinutes(), time.getSeconds());
             }
-            let job = cron.schedule(
-                sch.pattern,
-                dispatch.bind({ rt: rt, fn: 'fireEvent', event: sch, type: 'holiday' }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            rt.cronJobs[sch.pattern] = { job: job, event: sch, type: 'holiday', origin: 'holiday' };
+            trackCronJob(sch.pattern, 'fireEvent', 'holiday', sch, {
+                event: sch,
+                type: 'holiday',
+                origin: 'holiday',
+            });
         };
 
         let scheduleDateJob = function (sch, time) {
@@ -602,14 +632,11 @@ module.exports = function (RED) {
                     time.getSeconds()
                 );
             }
-            let job = cron.schedule(
-                temporary_pattern,
-                dispatch.bind({ rt: rt, fn: 'fireEvent', event: { ...sch, pattern: temporary_pattern }, type: 'date' }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            rt.cronJobs[sch.pattern] = { job: job, event: sch, type: 'date', origin: 'date' };
+            trackCronJob(temporary_pattern, 'fireEvent', 'date', { ...sch, pattern: temporary_pattern }, {
+                event: sch,
+                type: 'date',
+                origin: 'date',
+            });
         };
 
         let scheduleWeekdayJob = function (sch, time) {
@@ -626,19 +653,11 @@ module.exports = function (RED) {
                     time.getSeconds()
                 );
             }
-            let job = cron.schedule(
-                temporary_pattern,
-                dispatch.bind({
-                    rt: rt,
-                    fn: 'fireEvent',
-                    event: { ...sch, pattern: temporary_pattern },
-                    type: 'weekday',
-                }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            rt.cronJobs[sch.pattern] = { job: job, event: sch, type: 'weekday', origin: 'weekday' };
+            trackCronJob(temporary_pattern, 'fireEvent', 'weekday', { ...sch, pattern: temporary_pattern }, {
+                event: sch,
+                type: 'weekday',
+                origin: 'weekday',
+            });
         };
 
         let schedulePriorityScheduleJobs = function (sch, type, time) {
@@ -656,29 +675,22 @@ module.exports = function (RED) {
                 time ? time.getMinutes() : 0,
                 time ? time.getSeconds() : 1
             );
-            let startJob = cron.schedule(
-                startPattern,
-                dispatch.bind({
-                    rt: rt,
-                    fn: 'setPrioritySchedule',
-                    event: { ...sch, pattern: correctedPattern },
-                    type: type,
-                }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            rt.cronJobs[startPattern] = { job: startJob, event: sch, type: 'background', origin: type };
+            trackCronJob(startPattern, 'setPrioritySchedule', type, { ...sch, pattern: correctedPattern }, {
+                event: sch,
+                type: 'background',
+                origin: type,
+            });
             // deactivate date or holiday schedule at end of day
             let endPattern = setCronTime(sch.pattern, 23, 59, 59);
-            let endJob = cron.schedule(
-                endPattern,
-                dispatch.bind({ rt: rt, fn: 'clearPrioritySchedule', event: sch, type: type }),
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
-            rt.cronJobs[endPattern] = { job: endJob, event: sch, type: 'background', origin: type };
+            trackCronJob(endPattern, 'clearPrioritySchedule', type, sch, {
+                event: sch,
+                type: 'background',
+                origin: type,
+            });
+            // Both markers may already be due by the time this rebuild runs; whichever
+            // has passed today is applied here rather than waiting on a timer that has
+            // gone by.
+            applyMissedMarkers(startPattern, endPattern, type);
         };
 
         // `origin` limits the teardown to jobs derived from one source
@@ -707,6 +719,12 @@ module.exports = function (RED) {
                 node.status({ text: '' });
                 return;
             }
+            // The remembered msg carries the topic that was live when it was built.
+            // topic is deliberately outside the reuse signature (it is read through
+            // the live config at fire time), so a topic-only change reuses these cron
+            // jobs -- and replaying the msg verbatim would emit the previous topic
+            // until the next scheduled event, which can be hours away.
+            rt.lastEmit.msg = { ...rt.lastEmit.msg, topic: config.topic };
             rt.node.send(rt.lastEmit.msg);
             if (soonestEvent && rt.lastEmit.nowText) {
                 // The current value is unchanged, but the upcoming one may not be.
@@ -726,6 +744,21 @@ module.exports = function (RED) {
 
             // stop and delete the cron jobs being replaced
             destroyCronJobs(holidaysOnly ? 'holiday' : undefined);
+
+            // Drop the priority marks belonging to those jobs. The marks are set by
+            // the 00:00:01 background job and cleared by its 23:59:59 twin, so a
+            // schedule deleted while it was in effect would otherwise leave its mark
+            // set with no job left alive to clear it -- and fireEvent's priority
+            // chain would then suppress every lower-priority event indefinitely.
+            // Whatever is genuinely still in effect is re-marked by the recovery
+            // jobs at the end of this rebuild.
+            if (holidaysOnly) {
+                rt.valuePriority.holiday = null;
+            } else {
+                rt.valuePriority.holiday = null;
+                rt.valuePriority.date = null;
+                rt.valuePriority.weekday = null;
+            }
 
             // build map of all holiday events and index by cron pattern
             if (rt.holidays && rt.holidays.length) {
@@ -874,24 +907,12 @@ module.exports = function (RED) {
         };
 
         let buildSchedules = function (scope) {
-            let label = `ur_schedule build [${config.name || node.id}]`;
-            let start = process.hrtime.bigint();
-            if (!buildTiming.startedAt) {
-                buildTiming.startedAt = start;
-            }
-            if (RED.settings.verbose) {
-                console.time(label);
-            }
             try {
                 buildSchedulesInternal(scope);
             } finally {
-                if (RED.settings.verbose) {
-                    console.timeEnd(label);
-                }
                 rt.signature = newSignature;
                 rt.holidaySignature = newHolidaySignature;
                 rt.builtOn = todayKey();
-                recordBuildTiming(scope === 'holiday' ? 'partial' : 'built', Number(process.hrtime.bigint() - start) / 1e6);
             }
         };
 
@@ -918,29 +939,34 @@ module.exports = function (RED) {
                 node.log('Schedules unchanged, reusing existing cron jobs');
             }
             refreshStatus();
-            recordBuildTiming('reused', 0);
         }
 
         // rebuild every node's schedules at midnight. One shared job drives all of
         // them; the previous per-node guard only ever armed the first node created.
         if (!midnightJob) {
-            midnightJob = cron.schedule(
-                '0 0 0 * * *',
-                () => {
-                    for (let runtime of runtimes.values()) {
-                        if (runtime.node && typeof runtime.rebuild === 'function') {
-                            try {
-                                runtime.rebuild();
-                            } catch (e) {
-                                runtime.node.error(e);
-                            }
+            midnightJob = cron.schedule('0 0 0 * * *', () => {
+                // One rebuild per tick. Rebuilding every node in a single turn blocks
+                // the Node-RED event loop for the whole sweep -- measured at ~3.1 s
+                // for 20 nodes, during which nothing else in the runtime can run, cron
+                // callbacks included. Yielding keeps each pause to one node's work.
+                // The markers this destroys and recreates are re-derived by
+                // applyMissedMarker, so a sweep that outruns them is no longer a gap.
+                let pending = Array.from(runtimes.values());
+                let step = function () {
+                    let runtime = pending.shift();
+                    if (runtime && runtime.node && typeof runtime.rebuild === 'function') {
+                        try {
+                            runtime.rebuild();
+                        } catch (e) {
+                            runtime.node.error(e);
                         }
                     }
-                },
-                {
-                    recoverMissedExecutions: true,
-                }
-            );
+                    if (pending.length) {
+                        setImmediate(step);
+                    }
+                };
+                step();
+            });
         }
 
         this.config = {
