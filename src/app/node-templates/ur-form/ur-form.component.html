@@ -27,6 +27,7 @@
                         <input
                             matInput
                             #defaultElement
+                            [attr.data-topic]="field.topic"
                             [type]="field.type"
                             class="colorIndicator"
                             [attr.aria-label]="field.label ? null : (field.topic || 'Field')"
@@ -56,6 +57,7 @@
                         <textarea
                             matInput
                             #defaultElement
+                            [attr.data-topic]="field.topic"
                             [rows]="field.options.rows"
                             class="colorIndicator"
                             [attr.aria-label]="field.label ? null : (field.topic || 'Field')"
@@ -78,6 +80,7 @@
                         <select
                             matNativeControl
                             #defaultElement
+                            [attr.data-topic]="field.topic"
                             class="colorIndicator"
                             [attr.aria-label]="field.label ? null : (field.topic || 'Field')"
                             [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"

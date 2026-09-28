@@ -1,12 +1,12 @@
 import { Injectable, Renderer2 } from '@angular/core';
-import { ChangeDetectorRef } from '@angular/core';
 
 @Injectable({
     providedIn: 'root',
 })
 export class StyleService {
     private style: object = {};
-    private classestoRemove = ['health-down', 'warning', 'info', 'disabled', 'success', 'danger'];
+    private appliedFieldClasses = new WeakMap<HTMLElement, string[]>();
+    private appliedFieldStyles = new WeakMap<HTMLElement, string[]>();
     constructor() {}
 
     resetStyles() {
@@ -47,117 +47,45 @@ export class StyleService {
         this.style[data.id].default.class = className;
     }
 
-    applyStyles(element: HTMLElement, data: any, renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        const styles = this.getStyle(data);
-        const backgroundColor = styles?.['background-color'] || null;
-        const color = styles?.['color'] || null;
+    // Styles a Material form field (ur-text-input, ur-form) from msg.payload.health / class / css.
+    // Material 15+ (MDC) renders the visible box as .mat-mdc-text-field-wrapper, so styles and
+    // classes go on that wrapper; `color` is also pushed down to the control and label, which
+    // set their own colors and would otherwise ignore it.
+    applyFieldStyle(element: HTMLElement, payload: any, renderer: Renderer2) {
+        if (!element) return;
+        const wrapper = (element.closest('.mat-mdc-text-field-wrapper') as HTMLElement) || element;
 
-        let currentElement = element;
-        let matFormFieldFlex: HTMLElement | null = null;
+        // Clear whatever the previous message applied
+        for (const className of this.appliedFieldClasses.get(wrapper) || []) {
+            renderer.removeClass(wrapper, className);
+        }
+        for (const prop of this.appliedFieldStyles.get(wrapper) || []) {
+            renderer.removeStyle(wrapper, prop);
+        }
+        this.appliedFieldClasses.delete(wrapper);
+        this.appliedFieldStyles.delete(wrapper);
 
-        // Traverse up the tree to find the nearest div with the class "mat-form-field-flex"
-        while (currentElement.parentElement) {
-            currentElement = currentElement.parentElement;
-            if (currentElement.classList.contains('mat-form-field-flex')) {
-                matFormFieldFlex = currentElement;
-                break;
+        const classes: string[] = [];
+        if (payload?.health === 'down') {
+            classes.push('health-down');
+        } else if (payload?.class) {
+            classes.push(...String(payload.class).split(/\s+/).filter(Boolean));
+        } else if (payload?.css && typeof payload.css === 'object') {
+            const props = Object.keys(payload.css);
+            for (const prop of props) {
+                renderer.setStyle(wrapper, prop, payload.css[prop]);
+            }
+            this.appliedFieldStyles.set(wrapper, props);
+            if (payload.css['color']) {
+                classes.push('ur-field-color');
             }
         }
 
-        if (matFormFieldFlex) {
-            const outlineElements = matFormFieldFlex.querySelectorAll(
-                '.mat-form-field-outline, .mat-form-field-outline-thick'
-            );
-
-            outlineElements.forEach((outlineElement) => {
-                const classList = Array.from(outlineElement.classList);
-                classList.forEach((className) => {
-                    if (this.classestoRemove.includes(className)) {
-                        renderer.removeClass(outlineElement, className);
-                        renderer.removeClass(element, className);
-                    }
-                });
-
-                renderer.removeStyle(outlineElement, 'background-color');
-                renderer.removeStyle(element, 'background-color');
-                renderer.removeStyle(element, 'color');
-
-                renderer.setStyle(element, 'color', color);
-                renderer.setStyle(element, 'background-color', backgroundColor);
-                renderer.setStyle(outlineElement, 'background-color', backgroundColor);
-
-                cdRef.detectChanges();
-            });
+        for (const className of classes) {
+            renderer.addClass(wrapper, className);
         }
-    }
-
-    applyClass(element: HTMLElement, className: string, renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        let currentElement = element;
-        let matFormFieldFlex: HTMLElement | null = null;
-
-        while (currentElement.parentElement) {
-            currentElement = currentElement.parentElement;
-            if (currentElement.classList.contains('mat-form-field-flex')) {
-                matFormFieldFlex = currentElement;
-                break;
-            }
-        }
-
-        if (matFormFieldFlex) {
-            const outlineElements = matFormFieldFlex.querySelectorAll(
-                '.mat-form-field-outline, .mat-form-field-outline-thick'
-            );
-            outlineElements.forEach((outlineElement) => {
-                const classList = Array.from(outlineElement.classList);
-
-                classList.forEach((className) => {
-                    if (this.classestoRemove.includes(className)) {
-                        renderer.removeClass(outlineElement, className);
-                        renderer.removeClass(element, className);
-                    }
-                });
-                renderer.setStyle(element, 'color', 'white');
-                renderer.addClass(element, className);
-                renderer.addClass(outlineElement, className);
-                cdRef.detectChanges();
-            });
-        }
-    }
-
-    applyHealthDown(element: HTMLElement, renderer: Renderer2, cdRef: ChangeDetectorRef) {
-        let currentElement = element;
-        let matFormFieldFlex: HTMLElement | null = null;
-
-        while (currentElement.parentElement) {
-            currentElement = currentElement.parentElement;
-            if (currentElement.classList.contains('mat-form-field-flex')) {
-                matFormFieldFlex = currentElement;
-                break;
-            }
-        }
-
-        if (matFormFieldFlex) {
-            const outlineElements = matFormFieldFlex.querySelectorAll(
-                '.mat-form-field-outline, .mat-form-field-outline-thick'
-            );
-
-            outlineElements.forEach((outlineElement) => {
-                const classList = Array.from(outlineElement.classList);
-                classList.forEach((className) => {
-                    if (this.classestoRemove.includes(className)) {
-                        renderer.removeClass(outlineElement, className);
-                        renderer.removeClass(element, className);
-                    }
-                });
-
-                renderer.removeStyle(element, 'background-color');
-                renderer.removeStyle(outlineElement, 'background-color');
-                renderer.removeStyle(element, 'color');
-
-                renderer.addClass(element, 'health-down');
-                renderer.addClass(outlineElement, 'health-down');
-                cdRef.detectChanges();
-            });
+        if (classes.length) {
+            this.appliedFieldClasses.set(wrapper, classes);
         }
     }
 }

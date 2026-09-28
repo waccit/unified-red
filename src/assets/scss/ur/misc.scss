@@ -77,3 +77,24 @@ app-ur-button {
     color: #616161 !important;
   }
 }
+
+// Payload styling on Material form fields (ur-text-input, ur-form). StyleService.applyFieldStyle
+// puts css/class on the MDC wrapper; round it to match the outline so a background fills the box.
+.mat-mdc-text-field-wrapper.mdc-text-field--outlined {
+    border-radius: var(--mat-form-field-outlined-container-shape, 4px);
+}
+
+// Material sets the control and label colors directly, so a css `color` on the wrapper needs pushing down
+.mat-mdc-text-field-wrapper.ur-field-color {
+    input,
+    textarea,
+    select,
+    .mdc-floating-label,
+    .mat-mdc-form-field-text-prefix,
+    .mat-mdc-form-field-text-suffix,
+    .mat-mdc-form-field-icon-prefix,
+    .mat-mdc-form-field-icon-suffix,
+    .mat-icon {
+        color: inherit !important;
+    }
+}
