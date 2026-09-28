@@ -67,14 +67,7 @@ export class UrTextInputComponent extends BaseNode implements AfterViewInit, Aft
             this.label = this.formatFromData(data, this.data.label);
             this.valueIn = this.formatFromData(data);
 
-            const inputarea = this.myInputarea.nativeElement;
-            if (data.msg.payload.health === 'down') {
-                this.styleService.applyHealthDown(inputarea, this.renderer, this.cdRef);
-            } else if (data.msg.payload['class']) {
-                this.styleService.applyClass(inputarea, data.msg.payload['class'], this.renderer, this.cdRef);
-            } else {
-                this.styleService.applyStyles(inputarea, data, this.renderer, this.cdRef);
-            }
+            this.styleService.applyFieldStyle(this.myInputarea?.nativeElement, data.msg.payload, this.renderer);
 
             if (data.msg.payload.health !== 'down') {
                 this.styleService.setStyle(data);
