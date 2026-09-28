@@ -41,6 +41,7 @@
                     matInput
                     placeholder="EX: (435) 345-3454"
                     mask="(000) 000-0000"
+                    #myInputarea
                     [attr.aria-label]="label ? null : (data.topic || 'Phone number')"
                     [value]="access.read ? stripHTML(valueIn) : ''"
                     [disabled]="disabled || (access.write === false && data.accessBehavior === 'disable')"

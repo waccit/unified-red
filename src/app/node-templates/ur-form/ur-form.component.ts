@@ -75,24 +75,20 @@ export class UrFormComponent extends BaseNode implements AfterViewInit {
     }
 
     updateStylesAndClasses(data: any) {
-        this.defaultElements.forEach((elementRef, index) => {
-            if (this.data.options[index].topic === data.msg.topic) {
-                const targetElement = elementRef.nativeElement;
-
-                if (data.msg.payload.health === 'down') {
-                    this.styleService.applyHealthDown(targetElement, this.renderer, this.cdRef);
-                } else if (data.msg.payload['class']) {
-                    this.styleService.applyClass(targetElement, data.msg.payload['class'], this.renderer, this.cdRef);
-                } else {
-                    this.styleService.applyStyles(targetElement, data, this.renderer, this.cdRef);
-                }
-
-                if (data.msg.payload.health !== 'down') {
-                    this.styleService.setStyle(data);
-                }
-                this.styleService.setClass(data);
+        if (!data?.msg?.topic || !data.msg.payload) return;
+        // Match controls by topic, not index: checkbox/switch fields have no #defaultElement,
+        // so defaultElements and data.options don't line up
+        this.defaultElements.forEach((elementRef) => {
+            const targetElement: HTMLElement = elementRef.nativeElement;
+            const topic = targetElement.getAttribute('data-topic');
+            if (topic && data.msg.topic.includes(topic)) {
+                this.styleService.applyFieldStyle(targetElement, data.msg.payload, this.renderer);
             }
         });
+        if (data.msg.payload.health !== 'down') {
+            this.styleService.setStyle(data);
+        }
+        this.styleService.setClass(data);
     }
 
     valueChange(field: string, value: any, fieldType: string) {
