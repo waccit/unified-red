@@ -37,7 +37,14 @@ export class BaseNode implements AfterViewInit, OnDestroy {
         this.webSocketService.join(this.nodeId);
         this._wsSubscription = this.webSocketService.listen('update-value').subscribe((msg: any) => {
             if (msg && msg.id && this.nodeId === msg.id) {
-                this.updateValue(msg);
+                // ui.js turns msg.enabled into a top-level `disabled` flag; it sticks until the next msg.enabled
+                if (typeof msg.disabled === 'boolean') {
+                    this.disabled = msg.disabled;
+                }
+                // An enable/disable-only msg carries no payload, and updateValue assumes one
+                if (msg.msg && typeof msg.msg.payload !== 'undefined') {
+                    this.updateValue(msg);
+                }
             }
         });
         this.webSocketService.emit('ui-replay-state', {
