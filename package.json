@@ -148,7 +148,7 @@
     "multer": "^2.1.0",
     "ngx-mask": "^21.0.1",
     "node-cron": "^4.2.1",
-    "nodemailer": "^8.0.1",
+    "nodemailer": "^10.0.2",
     "perfect-scrollbar": "^1.5.2",
     "rxjs": "^7.8.2",
     "sequelize": "^6.37.7",
