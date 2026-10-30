@@ -126,6 +126,14 @@ function enforceWebSocketsSchema(msg) {
     return toEmit;
 }
 
+// Copy a control for the menu tree without internal routing data
+// (_inhPageInstances can hold every inherited instance and bloat ui-controls).
+function menuCopy(control, extra) {
+    var c = Object.assign({}, control, extra);
+    delete c._inhPageInstances;
+    return c;
+}
+
 function setCurrentValue(id, topic, value) {
     if (!currentValues[id]) {
         currentValues[id] = {};
@@ -161,10 +169,10 @@ options:
       If true, any message received from front-end is stored as state
   [persistentFrontEndValue] - boolean (default true).
       If true, last received message is send again when front end reconnect.
-
+ 
   [convert] - callback to convert the value before sending it to the front-end
   [beforeEmit] - callback to prepare the message that is emitted to the front-end
-
+ 
   [convertBack] - callback to convert the message from front-end before sending it to the next connected node
   [beforeSend] - callback to prepare the message that is sent to the output
 */
@@ -666,7 +674,7 @@ function init(server, app, log, redSettings) {
             ) {
                 name =
                     menu[folderIndex].items[pageIndex].hasOwnProperty('header') &&
-                    typeof menu[folderIndex].items[pageIndex].header !== 'undefined'
+                        typeof menu[folderIndex].items[pageIndex].header !== 'undefined'
                         ? menu[folderIndex].items[pageIndex].header
                         : menu[folderIndex].items[pageIndex].name;
                 ev.emit('changetab', index, name, socket.id, socket.handshake.address, params);
@@ -704,13 +712,75 @@ function updateUi(to) {
         to = io;
     }
     process.nextTick(function () {
-        to.emit('ui-controls', {
-            site: baseConfiguration.site,
-            // theme: baseConfiguration.theme,
-            menu: menu,
-            globals: globals,
+        try {
+            if (to !== io) {
+                // Diagnostics: a browser just connected - log how big the menu payload is
+                var t0 = Date.now();
+                var total = sz({ site: baseConfiguration.site, menu: menu, globals: globals });
+                console.log('[Unified-RED] ui-controls payload: ' + (total / 1048576).toFixed(1) + ' MB (stringify ' + (Date.now() - t0) + ' ms)');
+                reportMenuSizes();
+            }
+            to.emit('ui-controls', {
+                site: baseConfiguration.site,
+                // theme: baseConfiguration.theme,
+                menu: menu,
+                globals: globals,
+            });
+        } catch (err) {
+            console.error('[Unified-RED] ui-controls too large to send: ' + err.message);
+            reportMenuSizes();
+        } finally {
+            updateUiPending = false;
+        }
+    });
+}
+
+// Diagnostics: JSON size of an object (-1 = too large to stringify)
+function sz(o) {
+    try {
+        return JSON.stringify(o).length;
+    } catch (e) {
+        return -1;
+    }
+}
+
+function reportMenuSizes() {
+    var pages = [];
+    var widgets = [];
+    (function walk(items, path) {
+        (items || []).forEach(function (it) {
+            var name = path + '/' + (it.title || it.header || it.name || it.id);
+            if (it.type && !it.items) {
+                var keys = {};
+                Object.keys(it).forEach(function (k) {
+                    keys[k] = sz(it[k]);
+                });
+                widgets.push({ size: sz(it), name: name, keys: keys });
+            } else {
+                if (it.isPage) {
+                    pages.push({ size: sz(it), name: name, children: (it.items || []).length });
+                }
+                walk(it.items, name);
+            }
         });
-        updateUiPending = false;
+    })(menu, '');
+    var big = function (x) {
+        return x < 0 ? Infinity : x;
+    };
+    console.log('[Unified-RED] globals=' + sz(globals) + ' site=' + sz(baseConfiguration.site));
+    pages.sort(function (a, b) {
+        return big(b.size) - big(a.size);
+    });
+    console.log('[Unified-RED] page count=' + pages.length + ', largest pages:');
+    pages.slice(0, 10).forEach(function (p) {
+        console.log('  ' + p.size + '  ' + p.name);
+    });
+    widgets.sort(function (a, b) {
+        return big(b.size) - big(a.size);
+    });
+    console.log('[Unified-RED] widget copies=' + widgets.length + ', largest:');
+    widgets.slice(0, 5).forEach(function (w) {
+        console.log('  ' + w.size + '  ' + w.name + '  ' + JSON.stringify(w.keys));
     });
 }
 
@@ -789,7 +859,7 @@ var multiTabs = {};
 
 function addControl(folders, page, group, tab, control) {
     if (typeof control.type !== 'string' || !folders.length || !page || !group || !tab) {
-        return function () {};
+        return function () { };
     }
 
     // global template?
@@ -1071,11 +1141,7 @@ function addControl(folders, page, group, tab, control) {
                                                 } else {
                                                     // else add new widget
                                                     let newCtrlId = control.id + p.instance._id;
-                                                    t.items.push({
-                                                        ...control,
-                                                        'id': newCtrlId,
-                                                        'instance': p.instance,
-                                                    });
+                                                    t.items.push(menuCopy(control, { id: newCtrlId, instance: p.instance }));
                                                     t.items.sort(itemSorter);
                                                 }
                                             }
@@ -1093,7 +1159,7 @@ function addControl(folders, page, group, tab, control) {
                                         };
 
                                         let newCtrlId = control.id + p.instance._id;
-                                        instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': p.instance });
+                                        instanceTab.items.push(menuCopy(control, { id: newCtrlId, instance: p.instance }));
 
                                         g.items.push(instanceTab);
                                         g.items.sort(itemSorter);
@@ -1128,7 +1194,7 @@ function addControl(folders, page, group, tab, control) {
                             };
 
                             let newCtrlId = control.id + p.instance._id;
-                            instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': p.instance });
+                            instanceTab.items.push(menuCopy(control, { id: newCtrlId, instance: p.instance }));
 
                             instanceGroup.items.push(instanceTab);
 
@@ -1205,7 +1271,7 @@ function addControl(folders, page, group, tab, control) {
 
                     let newCtrlId = control.id + instanceIds[i];
 
-                    instanceTab.items.push({ ...control, 'id': newCtrlId, 'instance': instancePage.instance });
+                    instanceTab.items.push(menuCopy(control, { id: newCtrlId, instance: instancePage.instance }));
                     instanceTab.items.sort(itemSorter);
 
                     instanceGroup.items.push(instanceTab);
@@ -1413,7 +1479,7 @@ function addControl(folders, page, group, tab, control) {
                 foundGroup.items.push(foundTab);
             }
 
-            foundTab.items.push({ ...control, 'pageTitle': foundPage.title });
+            foundTab.items.push(menuCopy(control, { pageTitle: foundPage.title }));
             foundTab.items.sort(itemSorter);
 
             foundTab.order = tab.config.order;
@@ -1487,7 +1553,7 @@ function addControl(folders, page, group, tab, control) {
 
 function addInheritedPage(RED, page) {
     // let control handle remove (returns a stub)
-    let remove = function () {};
+    let remove = function () { };
 
     if (page.config.refPage === 'none' || page.config.pageType !== 'inherited') {
         return remove;
@@ -1556,7 +1622,7 @@ function addInheritedPage(RED, page) {
 function addLink(folders, config) {
     // Do not add dead links
     if (!config.link || !config.link.length) {
-        return () => {};
+        return () => { };
     }
 
     let newLink = {
@@ -1638,27 +1704,27 @@ function addLink(folders, config) {
 
     let removeLink = foundFolder
         ? function () {
-              foundFolder.items = foundFolder.items.filter((item) => {
-                  return item.id !== newLink.id;
-              });
+            foundFolder.items = foundFolder.items.filter((item) => {
+                return item.id !== newLink.id;
+            });
 
-              foundFolder.submenu = foundFolder.submenu.filter((item) => {
-                  return item.id !== newLink.id;
-              });
+            foundFolder.submenu = foundFolder.submenu.filter((item) => {
+                return item.id !== newLink.id;
+            });
 
-              if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
-                  cleanupChildlessFolders(foundFolder, folders);
-              }
-              updateUi();
-          }
+            if (foundFolder.items.length === 0 && foundFolder.submenu.length === 0) {
+                cleanupChildlessFolders(foundFolder, folders);
+            }
+            updateUi();
+        }
         : function () {
-              let index = menu.indexOf(newLink);
-              if (index < 0) {
-                  return;
-              }
-              menu.splice(index, 1);
-              updateUi();
-          };
+            let index = menu.indexOf(newLink);
+            if (index < 0) {
+                return;
+            }
+            menu.splice(index, 1);
+            updateUi();
+        };
 
     return removeLink;
 }
