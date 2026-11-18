@@ -1164,6 +1164,34 @@ window.createMenuNode = createMenuNode;
         return false;
     }
 
+    /**
+     * Attach a Node-RED style delayed tooltip (RED.popover.tooltip) to an element,
+     * falling back to a native title attribute if the editor API is unavailable.
+     */
+    function addTooltip($el, text) {
+        if (window.RED && RED.popover && typeof RED.popover.tooltip === 'function') {
+            $el.data('urTooltip', RED.popover.tooltip($el, text));
+        } else {
+            $el.attr('title', text);
+        }
+        return $el;
+    }
+
+    /**
+     * Remove hover buttons, closing any open tooltips first. The tooltip only
+     * closes on mouseleave, which never fires if its target is removed from the DOM.
+     */
+    function removeHoverButtons() {
+        $('.jstree-hover-button')
+            .each(function () {
+                var tip = $(this).data('urTooltip');
+                if (tip && typeof tip.close === 'function') {
+                    tip.close(true);
+                }
+            })
+            .remove();
+    }
+
     function shakeButtons() {
         $('.jstree-hover-button').each(function (i) {
             $(this)
@@ -1506,11 +1534,11 @@ window.createMenuNode = createMenuNode;
         const actionButtonHTML = (icon) => {
             return `<a href="#" class="jstree-hover-button editor-button editor-button-small nr-db-sb-list-header-button" style="position: relative; float: right; z-index: 1000; margin-top: 2px; background: rgba(255,255,255, 1); border-radius: 3px; padding: 2px 4px;"><i class="fa fa-${icon}"></i> </a>`;
         };
-        $('.jstree-hover-button').remove();
+        removeHoverButtons();
 
         if (!cutNodes.has(node.id)) {
             const addButton = (icon, type) => {
-                let btn = $(addButtonHTML(icon));
+                let btn = addTooltip($(addButtonHTML(icon)), 'Add ' + type);
                 btn.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1522,13 +1550,13 @@ window.createMenuNode = createMenuNode;
                 return btn;
             };
 
-            let editButton = $(actionButtonHTML('pencil'));
+            let editButton = addTooltip($(actionButtonHTML('pencil')), 'Edit');
             editButton.on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (node.type === 'root') return; // root is virtual, not editable
                 if (treeSelector === '#jstree') {
-                    $('.jstree-hover-button').remove();
+                    removeHoverButtons();
                 }
                 let nodeData = RED.nodes.node(node.id);
                 if (nodeData) {
@@ -1552,7 +1580,7 @@ window.createMenuNode = createMenuNode;
                 (nodeEditJSTreeOptions.mode === 'parent' || nodeEditJSTreeOptions.mode === 'tablePage');
             if (!isParentMode && ['folder', 'page', 'group', 'tab', 'link'].includes(node.type)) {
                 if (['folder', 'page', 'group', 'link'].includes(node.type)) {
-                    let pasteButton = $(actionButtonHTML('paste'));
+                    let pasteButton = addTooltip($(actionButtonHTML('paste')), 'Paste');
                     pasteButton.on('click', function (e) {
                         e.preventDefault();
                         e.stopPropagation();
@@ -1561,7 +1589,7 @@ window.createMenuNode = createMenuNode;
                     buttons.push(pasteButton);
                 }
 
-                let copyButton = $(actionButtonHTML('copy'));
+                let copyButton = addTooltip($(actionButtonHTML('copy')), 'Copy');
                 copyButton.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1573,7 +1601,7 @@ window.createMenuNode = createMenuNode;
                 });
                 buttons.push(copyButton);
 
-                let cutButton = $(actionButtonHTML('cut'));
+                let cutButton = addTooltip($(actionButtonHTML('cut')), 'Cut');
                 cutButton.on('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1602,7 +1630,7 @@ window.createMenuNode = createMenuNode;
             if (clipboard && clipboard.id !== node.id) {
                 return;
             }
-            let undoButton = $(actionButtonHTML('undo'));
+            let undoButton = addTooltip($(actionButtonHTML('undo')), 'Cancel cut');
             undoButton.on('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1964,7 +1992,7 @@ window.createMenuNode = createMenuNode;
 
         $('#nodeeditjstree').on('dehover_node.jstree', function (e, data) {
             if (!$('.jstree-hover-button:hover').length) {
-                $('.jstree-hover-button').remove();
+                removeHoverButtons();
             }
         });
 
@@ -2238,7 +2266,7 @@ window.createMenuNode = createMenuNode;
 
         $('#jstree').on('dehover_node.jstree', function (e, data) {
             if (!$('.jstree-hover-button:hover').length) {
-                $('.jstree-hover-button').remove();
+                removeHoverButtons();
             }
         });
 

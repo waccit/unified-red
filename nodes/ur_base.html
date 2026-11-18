@@ -237,19 +237,50 @@
         cursor: pointer;
     }
 
+    /* Spacing between the sidebar tab strip and the tab content */
+    .nr-db-sb > .dialog-form > .red-ui-tabs {
+        margin-bottom: 10px;
+    }
+
+    /* The anchor stays a full-height hit target; only the icon chip is styled */
     #dash-link-button {
         background: none;
         border: none;
-        margin-top: 3px;
         display: inline-block;
         margin: 3px 0px 0px 3px;
         height: 32px;
-        line-height: 29px;
-        max-width: 200px;
-        overflow: hidden;
-        white-space: nowrap;
+        line-height: 32px;
         position: relative;
-        padding: 0px 7px 0px 7px;
+        padding: 0px 4px;
+        cursor: pointer;
+    }
+
+    #dash-link-button i {
+        display: inline-block;
+        padding: 4px 5px;
+        line-height: 1;
+        border-radius: 3px;
+        color: var(--red-ui-secondary-text-color, inherit);
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+
+    #dash-link-button:hover i {
+        background: var(--red-ui-secondary-background-hover, rgba(0, 0, 0, 0.08));
+        color: var(--red-ui-primary-text-color, inherit);
+        transform: translate(1px, -1px);
+    }
+
+    #dash-link-button:active i {
+        background: var(--red-ui-secondary-background-selected, rgba(0, 0, 0, 0.14));
+        transform: none;
+    }
+
+    #dash-link-button:focus {
+        outline: none;
+    }
+
+    #dash-link-button:focus-visible i {
+        outline: 1px solid var(--red-ui-form-input-focus-color, #1f5fd6);
     }
 
     ul.red-ui-dashboard-theme-styles {
@@ -606,18 +637,20 @@
                             window.open(document.location.protocol + '//' + lnk, 'nr-dashboard');
                         });
                     }
-                    $(
-                        '<span id="dash-link-button" class="editor-button" style="position:absolute; right:0px;"><i class="fa fa-external-link"></i></span>'
+                    var dashLinkButton = $(
+                        '<a href="#" id="dash-link-button" role="button" aria-label="Open dashboard" style="position:absolute; right:0px;"><i class="fa fa-external-link"></i></a>'
                     )
                         .click(function (evt) {
                             window.open(document.location.protocol + '//' + lnk);
                             evt.preventDefault();
                         })
                         .appendTo(ulDashboardTabs);
+                    // Passing the action makes the tooltip also show its keyboard shortcut
+                    RED.popover.tooltip(dashLinkButton, 'Open dashboard', RED.actions ? 'dashboard:show-dashboard' : undefined);
                 });
 
                 // Dashboard Tab containers
-                var layoutTab = $('<div id="dashboard-layout" style="height:calc(100% - 48px); display:flex; flex-direction:column;">').appendTo(form);
+                var layoutTab = $('<div id="dashboard-layout" style="height:calc(100% - 58px); display:flex; flex-direction:column;">').appendTo(form);
                 var siteTab = $('<div id="dashboard-site" style="display:none;">').appendTo(form);
                 var filesTab = $('<div id="dashboard-files" style="display:none;">').appendTo(form);
                 // var themeTab = $('<div id="dashboard-theme" style="display:none;">').appendTo(form);
@@ -873,7 +906,10 @@
                         }
                         evt.preventDefault();
                     })
-                    .appendTo(buttonGroup);
+                    .appendTo(buttonGroup)
+                    .each(function () {
+                        RED.popover.tooltip($(this), 'Collapse all');
+                    });
                 $(
                     '<a href="#" class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-angle-double-down"></i></a>'
                 )
@@ -884,7 +920,10 @@
                         }
                         evt.preventDefault();
                     })
-                    .appendTo(buttonGroup);
+                    .appendTo(buttonGroup)
+                    .each(function () {
+                        RED.popover.tooltip($(this), 'Expand all');
+                    });
 
                 // Add Folder button
                 $(
